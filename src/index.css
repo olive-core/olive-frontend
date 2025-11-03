@@ -1,9 +1,14 @@
+@import url('https://fonts.googleapis.com/css2?family=Momo+Trust+Display&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Momo+Trust+Display&family=Momo+Trust+Sans:wght@200..800&display=swap');
+
 @import "tailwindcss";
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  --font-display: "Momo Trust Display", sans-serif;
+  --font-sans: "Momo Trust Sans", sans-serif;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -41,6 +46,12 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
+/* rgb(87, 87, 92) */
+/* rgb(7, 6, 8) */
+/* rgb(45, 149, 96) */
+/* rgb(237, 245, 251) */
+/* rgb(240, 238, 226) */
+
 :root {
   --radius: 0.625rem;
   --background: oklch(1 0 0);
@@ -49,14 +60,18 @@
   --card-foreground: oklch(0.129 0.042 264.695);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.129 0.042 264.695);
-  --primary: oklch(0.208 0.042 265.755);
-  --primary-foreground: oklch(0.984 0.003 247.858);
+  --primary: oklch(59.723% 0.12459 156.666);
+  /* customized */
+  --primary-foreground: oklch(97.9% 0.021 166.113);
+  /* customized */
   --secondary: oklch(0.968 0.007 247.896);
   --secondary-foreground: oklch(0.208 0.042 265.755);
   --muted: oklch(0.968 0.007 247.896);
   --muted-foreground: oklch(0.554 0.046 257.417);
-  --accent: oklch(0.968 0.007 247.896);
-  --accent-foreground: oklch(0.208 0.042 265.755);
+  --accent: oklch(96.587% 0.01183 240.187);
+  /* customized */
+  --accent-foreground: oklch(25.7% 0.09 281.288);
+  /* customized */
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.929 0.013 255.508);
   --input: oklch(0.929 0.013 255.508);
@@ -114,6 +129,7 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
