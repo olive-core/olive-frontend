@@ -13,7 +13,7 @@ export default function HomeNavbar() {
             </Link>
 
             {/* MIDDLE CONTENT */}
-            <div className="flex items-center gap-12">
+            <div className="flex items-center gap-8">
                 <a href="#how-it-works" className="hover:text-primary transition duration-300">
                     How it works
                 </a>
@@ -25,13 +25,10 @@ export default function HomeNavbar() {
 
             {/* RIGHT CONTENT */}
             <div className="flex items-center gap-2">
-                <Link to="/sign-up" className="hover:text-primary transition duration-300">
-                    Create Account
-                </Link>
 
                 <Button asChild>
                     <Link to="/sign-in">
-                        Sign In
+                        Get Started
                     </Link>
                 </Button>
             </div>

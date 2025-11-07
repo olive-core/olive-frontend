@@ -15,8 +15,8 @@ export default function HeroSection() {
                     <p className="text-xl mt-8 mb-12">Record patient visits, let AI draft the prescription, and finalize it in minutes.</p>
 
                     <Button className="w-48 text-lg py-6 capitalize" size="lg" asChild>
-                        <Link to="/signup">
-                            Try it now
+                        <Link to="/sign-up">
+                            Get Started
                         </Link>
                     </Button>
                 </div>
