@@ -4,6 +4,31 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+html {
+  scroll-behavior: smooth;
+}
+
+.container {
+  width: 100%;
+  margin: 0 auto;
+
+  @media (width >=40rem) {
+    max-width: 40rem;
+  }
+
+  @media (width >=48rem) {
+    max-width: 48rem;
+  }
+
+  @media (width >=64rem) {
+    max-width: 64rem;
+  }
+
+  @media (width >=80rem) {
+    max-width: 80rem;
+  }
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {

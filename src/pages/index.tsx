@@ -1,19 +1,18 @@
-import { useAuthStore } from "@/stores/auth-store"
-import { useEffect } from "react";
-import { useNavigate } from "react-router";
+import FeaturesSection from "@/components/homepage/features";
+import HomeFooter from "@/components/homepage/footer";
+import HeroSection from "@/components/homepage/hero";
+import HomeNavbar from "@/components/homepage/navbar";
+import StepsSection from "@/components/homepage/steps";
 
 export default function HomePage() {
 
-    const { isLoggedIn } = useAuthStore();
-    const navigate = useNavigate();
-
-    useEffect(() => {
-        if (isLoggedIn) {
-            navigate("/dashboard");
-        } else {
-            navigate("/sign-in");
-        }
-    }, [isLoggedIn, navigate])
-
-    return <></>
+    return (
+        <>
+            <HomeNavbar />
+            <HeroSection />
+            <StepsSection />
+            <FeaturesSection />
+            <HomeFooter />
+        </>
+    )
 }
