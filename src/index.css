@@ -11,6 +11,7 @@ html {
 .container {
   width: 100%;
   margin: 0 auto;
+  padding: 0 1rem;
 
   @media (width >=40rem) {
     max-width: 40rem;
@@ -85,7 +86,7 @@ html {
   --card-foreground: oklch(0.129 0.042 264.695);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.129 0.042 264.695);
-  --primary: oklch(59.723% 0.12459 156.666);
+  --primary: #10b981;
   /* customized */
   --primary-foreground: oklch(97.9% 0.021 166.113);
   /* customized */
@@ -93,7 +94,7 @@ html {
   --secondary-foreground: oklch(0.208 0.042 265.755);
   --muted: oklch(0.968 0.007 247.896);
   --muted-foreground: oklch(0.554 0.046 257.417);
-  --accent: oklch(96.587% 0.01183 240.187);
+  --accent: #38bdf8;
   /* customized */
   --accent-foreground: oklch(25.7% 0.09 281.288);
   /* customized */

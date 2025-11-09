@@ -11,8 +11,20 @@ import HistoryPage from "./pages/dashboard/history";
 import SettingsPage from "./pages/dashboard/settings";
 import NotFoundPage from "./pages/not-found";
 import SingleHistoryPage from "./pages/dashboard/history/single-history";
+import ComingSoonPage from "./pages/coming-soon";
 
 export default function App() {
+
+  if (import.meta.env.VITE_ENV !== 'development') {
+    return (
+      <Routes>
+        <Route element={<RootLayout />}>
+          <Route index element={<HomePage />} />
+          <Route path="*" element={<ComingSoonPage />} />
+        </Route>
+      </Routes>
+    )
+  }
 
   return (
     <Routes>
@@ -32,6 +44,8 @@ export default function App() {
           <Route path="history/:id" element={<SingleHistoryPage />} />
           <Route path="settings" element={<SettingsPage />} />
         </Route>
+
+        <Route path="coming-soon" element={<ComingSoonPage />} />
 
         <Route path="*" element={<NotFoundPage />} />
       </Route>

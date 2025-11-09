@@ -50,11 +50,11 @@ export default function FeaturesSection() {
         <section id="features" className="py-24 container">
             <h3 className="font-display text-center text-2xl">Powerful Features for Modern Healthcare</h3>
 
-            <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8 mb-24">
                 {features.map((feature, index) => (
                     <div
                         key={index}
-                        className="flex flex-col items-center gap-4 p-6 border rounded-xl"
+                        className="flex flex-col items-center gap-4 p-6 border rounded-xl hover:border-primary transition-colors duration-300"
                         onMouseEnter={() => setIsHovered(index)}
                         onMouseLeave={() => setIsHovered(null)}
                     >

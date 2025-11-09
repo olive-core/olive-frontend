@@ -34,22 +34,22 @@ export default function StepsSection() {
         iconSrc: string;
     }) {
         return (
-            <div className="flex flex-col items-center gap-4 p-6">
+            <div className="flex flex-col items-center gap-2 md:gap-4 p-4 md:p-6">
                 <img src={iconSrc} alt={`${title} icon`} className="h-20 w-20" />
-                <h4 className="font-display text-lg text-sky-950/90">{title}</h4>
-                <p className="text-center text-sky-950/50">{description}</p>
+                <h4 className="font-display text-lg text-emerald-950/90">{title}</h4>
+                <p className="text-center text-emerald-950/60">{description}</p>
             </div>
         )
     }
 
     return (
         <section id="how-it-works" className="container">
-            <div className="w-full px-12 py-16 rounded-2xl bg-sky-200/40">
-                <h3 className="font-display text-center text-2xl font-medium text-sky-950">
+            <div className="w-full px-6 md:px-12 py-12 md:py-16 rounded-2xl bg-primary/15 mb-24">
+                <h3 className="font-display text-center text-2xl font-medium text-emerald-950">
                     3 Steps to Effortless Prescriptions
                 </h3>
 
-                <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div className="mt-6 md:mt-12 grid grid-cols-1 md:grid-cols-3 gap-x-8">
                     {steps.map((step, index) => (
                         <div key={index} className="flex justify-center">
                             {renderFeatureCard(step)}
