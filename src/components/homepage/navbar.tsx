@@ -9,7 +9,7 @@ export default function HomeNavbar() {
             {/* LEFT LOGO */}
             <Link to="/" className="flex items-center gap-2">
                 <div className="w-4 h-6 rounded-full bg-primary"></div>
-                <div className="text-primary font-display">Olive</div>
+                <div className="text-primary font-display">Olive AI</div>
             </Link>
 
             {/* MIDDLE CONTENT */}
