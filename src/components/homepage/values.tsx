@@ -8,13 +8,13 @@ type ValueType = {
 
 const values: ValueType[] = [
     {
-        title: "No More Handwritten Prescriptions",
-        description: "Generate clean, digital prescriptions that patients can easily read and share.",
+        title: "No Handwriting, No Typing",
+        description: "Forget manual prescriptions. Olive listens, understands, and auto-generates clean, editable drafts ready for your review.",
         iconSrc: "/homepage/prescription.png"
     },
     {
-        title: "Time-Saving Smart Automation",
-        description: "Cut down documentation time and focus more on patient interaction.",
+        title: "Reclaim Your Time",
+        description: "Skip repetitive documentation and prescription writing. Focus on patient care while Olive handles the rest.",
         iconSrc: "/homepage/on-time.png"
     },
     {
@@ -23,11 +23,12 @@ const values: ValueType[] = [
         iconSrc: "/homepage/network.png"
     },
     {
-        title: "Comprehensive Digital Health Records",
-        description: "Build a structured patient record with every consultation — no files lost or misplaced.",
+        title: "Serve More Patients",
+        description: "By automating paperwork and recordkeeping, Olive lets you serve more patients in less time without burnout.",
         iconSrc: "/homepage/patient.png"
     },
 ];
+
 
 
 export default function ValuesSection() {

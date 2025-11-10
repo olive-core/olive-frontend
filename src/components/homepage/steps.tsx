@@ -7,20 +7,21 @@ type StepType = {
 const steps: StepType[] = [
     {
         title: "Record the Consultation",
-        description: "Record your session — everything is transcribed instantly and securely.",
+        description: "Leverage ambient speech technology to capture the entire conversation and transcribe instantly.",
         iconSrc: "/homepage/voice-message.png"
     },
     {
         title: "AI Drafts the Prescription",
-        description: "AI analyzes the dialogue and prepares a structured draft.",
+        description: "Olive’s AI analyzes the dialogue, extracts key clinical details, and generates a structured prescription draft in seconds.",
         iconSrc: "/homepage/robot.png"
     },
     {
         title: "Review and Finalize",
-        description: "Edit, approve, and share the final prescription effortlessly.",
+        description: "Skip manual typing; simply review, edit if needed, and share the finalized prescription instantly.",
         iconSrc: "/homepage/review.png"
     }
 ];
+
 
 export default function StepsSection() {
 
