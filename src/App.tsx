@@ -6,12 +6,12 @@ import SignInPage from "./pages/auth/sign-in";
 import SignUpPage from "./pages/auth/sign-up";
 import DashboardLayout from "./layouts/dashboard-layout";
 import DashboardPage from "./pages/dashboard";
-import NewConsultationPage from "./pages/dashboard/new-consultation";
 import HistoryPage from "./pages/dashboard/history";
 import SettingsPage from "./pages/dashboard/settings";
 import NotFoundPage from "./pages/not-found";
 import SingleHistoryPage from "./pages/dashboard/history/single-history";
 import ComingSoonPage from "./pages/coming-soon";
+import SessionPage from "./pages/dashboard/session";
 
 export default function App() {
 
@@ -39,7 +39,7 @@ export default function App() {
 
         <Route path="dashboard/*" element={<DashboardLayout />}>
           <Route index element={<DashboardPage />} />
-          <Route path="new-consultation" element={<NewConsultationPage />} />
+          <Route path="session/:id" element={<SessionPage />} />
           <Route path="history" element={<HistoryPage />} />
           <Route path="history/:id" element={<SingleHistoryPage />} />
           <Route path="settings" element={<SettingsPage />} />

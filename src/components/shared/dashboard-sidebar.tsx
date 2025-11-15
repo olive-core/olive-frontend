@@ -70,7 +70,7 @@ export function DashboardSidebar() {
 
             <SidebarFooter>
                 <div className="px-4 py-2">
-                    <Button variant={"outline"} className="flex items-center space-x-2 w-full text-left" onClick={logout}>
+                    <Button variant={"ghost"} className="flex items-center justify-start space-x-2 w-full text-left" onClick={logout}>
                         <LogOut className="h-5 w-5" />
                         <span>Sign Out</span>
                     </Button>
