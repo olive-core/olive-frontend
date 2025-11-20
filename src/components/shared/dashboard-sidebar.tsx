@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "../ui/sidebar";
-import { HistoryIcon, HomeIcon, LogOut, PlusCircleIcon, Settings2Icon } from "lucide-react";
+import { HistoryIcon, HomeIcon, LogOut, Settings2Icon } from "lucide-react";
 import { Button } from "../ui/button";
 import { useAuthStore } from "@/stores/auth-store";
 import { cn } from "@/lib/utils";
@@ -11,12 +11,11 @@ const SIDEBAR_CONTENTS = [
         icon: <HomeIcon className="h-5 w-5" />,
         link: "/dashboard",
     },
-    {
-        name: "New Consultation",
-        icon: <PlusCircleIcon className="h-5 w-5" />,
-        link: "/dashboard/new-consultation"
-    }
-    ,
+    // {
+    //     name: "New Consultation",
+    //     icon: <PlusCircleIcon className="h-5 w-5" />,
+    //     link: "/dashboard/new-consultation"
+    // },
     {
         name: "Consultation History",
         icon: <HistoryIcon className="h-5 w-5" />,

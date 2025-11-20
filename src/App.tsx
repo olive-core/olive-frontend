@@ -12,6 +12,7 @@ import NotFoundPage from "./pages/not-found";
 import SingleHistoryPage from "./pages/dashboard/history/single-history";
 import ComingSoonPage from "./pages/coming-soon";
 import SessionPage from "./pages/dashboard/session";
+import PrescribePage from "./pages/dashboard/prescribe";
 
 export default function App() {
 
@@ -40,6 +41,7 @@ export default function App() {
         <Route path="dashboard/*" element={<DashboardLayout />}>
           <Route index element={<DashboardPage />} />
           <Route path="session/:id" element={<SessionPage />} />
+          <Route path="prescribe/:id" element={<PrescribePage />} />
           <Route path="history" element={<HistoryPage />} />
           <Route path="history/:id" element={<SingleHistoryPage />} />
           <Route path="settings" element={<SettingsPage />} />

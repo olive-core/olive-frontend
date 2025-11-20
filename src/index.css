@@ -94,7 +94,7 @@ html {
   --secondary-foreground: oklch(0.208 0.042 265.755);
   --muted: oklch(0.968 0.007 247.896);
   --muted-foreground: oklch(0.554 0.046 257.417);
-  --accent: #a7f3d0;
+  --accent: oklch(92.9% 0.013 255.508);
   /* customized */
   --accent-foreground: oklch(25.7% 0.09 281.288);
   /* customized */
