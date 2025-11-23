@@ -44,12 +44,21 @@ export default function StepsSection() {
 
     return (
         <section id="how-it-works" className="container">
-            <div className="w-full px-6 md:px-12 py-12 md:py-16 rounded-2xl bg-primary/15 mb-24">
+            <div className="w-full px-6 md:px-12 py-12 md:py-16 rounded-2xl bg-emerald-100/70 mb-24 relative overflow-hidden">
+
+                <div className="absolute rounded-full bg-emerald-200/70 -top-24 -left-24 w-64 h-64"></div>
+                <div className="absolute rounded-full bg-emerald-200/50 -top-32 -left-32 w-80 h-80"></div>
+                <div className="absolute rounded-full bg-emerald-200/20 -top-40 -left-40 w-96 h-96"></div>
+
+                <div className="absolute rounded-full bg-emerald-200/70 -bottom-32 -right-32 w-64 h-64"></div>
+                <div className="absolute rounded-full bg-emerald-200/50 -bottom-40 -right-40 w-80 h-80"></div>
+                <div className="absolute rounded-full bg-emerald-200/20 -bottom-48 -right-48 w-96 h-96" />
+
                 <h3 className="font-display text-center text-2xl font-medium text-emerald-950">
                     3 Steps to Effortless Prescriptions
                 </h3>
 
-                <div className="mt-6 md:mt-12 grid grid-cols-1 md:grid-cols-3 gap-x-8">
+                <div className="mt-6 md:mt-12 grid grid-cols-1 md:grid-cols-3 gap-x-8 z-10 relative">
                     {steps.map((step, index) => (
                         <div key={index} className="flex justify-center">
                             {renderFeatureCard(step)}

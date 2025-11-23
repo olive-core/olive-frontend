@@ -9,20 +9,20 @@ export default function HomeNavbar() {
             {/* LEFT LOGO */}
             <Link to="/" className="flex items-center gap-2">
                 <div className="w-4 h-6 rounded-full bg-primary"></div>
-                <div className="text-primary font-display">Olive</div>
+                <div className="text-primary font-display text-lg">Olive</div>
             </Link>
 
             {/* MIDDLE CONTENT */}
             <div className="md:flex items-center hidden gap-8">
-                <a href="#how-it-works" className="hover:text-primary transition duration-300">
+                <a href="#how-it-works" className="text-slate-600 hover:text-emerald-600 transition duration-300">
                     How it works
                 </a>
 
-                <a href="#features" className="hover:text-primary transition duration-300">
+                <a href="#features" className="text-slate-600 hover:text-emerald-600 transition duration-300">
                     Features
                 </a>
 
-                <a href="#values" className="hover:text-primary transition duration-300">
+                <a href="#values" className="text-slate-600 hover:text-emerald-600 transition duration-300">
                     Values we bring
                 </a>
             </div>
@@ -32,7 +32,7 @@ export default function HomeNavbar() {
 
                 <Button asChild>
                     <Link to="/sign-in">
-                        Get Started
+                        Sign In
                     </Link>
                 </Button>
             </div>

@@ -45,11 +45,11 @@ export default function Recorder() {
                                     className="absolute inline-flex h-full w-full items-center justify-center"
                                 >
                                     {/* The ping circle (expanding, low-opacity) */}
-                                    <span className="absolute inline-flex h-3/4 w-3/4 rounded-full bg-red-400 opacity-60 animate-ping" />
+                                    <span className="absolute inline-flex h-3/4 w-3/4 rounded-full bg-rose-400 opacity-60 animate-ping" />
 
 
                                     {/* The steady glow behind the mic */}
-                                    <span className="absolute inline-flex h-1/3 w-1/3 rounded-full bg-red-600 opacity-90" />
+                                    <span className="absolute inline-flex h-1/3 w-1/3 rounded-full bg-rose-600 opacity-90" />
                                 </span>
                             )}
 
@@ -57,7 +57,7 @@ export default function Recorder() {
 
                         </div>
 
-                        {/* {isRecording ? <Mic className="w-8 h-8 text-red-600 ml-2" /> : <MicOff className="w-8 h-8 text-gray-400 ml-2" />} */}
+                        {/* {isRecording ? <Mic className="w-8 h-8 text-rose-600 ml-2" /> : <MicOff className="w-8 h-8 text-gray-400 ml-2" />} */}
                     </div>
 
                     <div className="mt-4 text-2xl">
