@@ -1,6 +1,4 @@
-import DashboardNavbar from "@/components/shared/dashboard-navbar";
-import { DashboardSidebar } from "@/components/shared/dashboard-sidebar";
-import { SidebarProvider } from "@/components/ui/sidebar";
+import DashboardNavbar from "@/components/dashboard/navbar";
 import { useAuthStore } from "@/stores/auth-store";
 import { useEffect } from "react";
 import { Outlet, useNavigate } from "react-router";
@@ -18,13 +16,13 @@ export default function DashboardLayout() {
 
     return (
         <div className="">
-            <SidebarProvider>
-                <DashboardSidebar />
-                <main className="w-full min-h-screen">
-                    <DashboardNavbar />
+
+            <main className="w-full min-h-screen pt-18 flex flex-col">
+                <DashboardNavbar />
+                <div className="w-full h-full flex-1 flex flex-col">
                     <Outlet />
-                </main>
-            </SidebarProvider>
+                </div>
+            </main>
         </div>
     )
 

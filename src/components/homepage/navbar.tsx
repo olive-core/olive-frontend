@@ -1,41 +1,37 @@
 import { Link } from "react-router";
 import { Button } from "../ui/button";
+import NavbarContainer from "../shared/navbar-container";
 
 export default function HomeNavbar() {
 
-    return <nav className="py-4 border-b-2 border-primary/10 fixed top-0 left-0 w-full z-50 flex items-center justify-center backdrop-blur-lg bg-white/15">
-        <div className="container mx-auto flex justify-between items-center">
+    return (
+        <NavbarContainer>
+            <>
+                {/* MID CONTENT */}
+                <div className="md:flex items-center hidden gap-8">
+                    <a href="#how-it-works" className="text-slate-600 hover:text-emerald-600 transition duration-300">
+                        How it works
+                    </a>
 
-            {/* LEFT LOGO */}
-            <Link to="/" className="flex items-center gap-2">
-                <div className="w-4 h-6 rounded-full bg-primary"></div>
-                <div className="text-primary font-display text-lg">Olive</div>
-            </Link>
+                    <a href="#features" className="text-slate-600 hover:text-emerald-600 transition duration-300">
+                        Features
+                    </a>
 
-            {/* MIDDLE CONTENT */}
-            <div className="md:flex items-center hidden gap-8">
-                <a href="#how-it-works" className="text-slate-600 hover:text-emerald-600 transition duration-300">
-                    How it works
-                </a>
+                    <a href="#values" className="text-slate-600 hover:text-emerald-600 transition duration-300">
+                        Values we bring
+                    </a>
+                </div>
 
-                <a href="#features" className="text-slate-600 hover:text-emerald-600 transition duration-300">
-                    Features
-                </a>
+                {/* RIGHT CONTENT */}
+                <div className="flex items-center gap-2">
 
-                <a href="#values" className="text-slate-600 hover:text-emerald-600 transition duration-300">
-                    Values we bring
-                </a>
-            </div>
-
-            {/* RIGHT CONTENT */}
-            <div className="flex items-center gap-2">
-
-                <Button asChild>
-                    <Link to="/sign-in">
-                        Sign In
-                    </Link>
-                </Button>
-            </div>
-        </div>
-    </nav>
+                    <Button asChild>
+                        <Link to="/sign-in">
+                            Sign In
+                        </Link>
+                    </Button>
+                </div>
+            </>
+        </NavbarContainer>
+    )
 }

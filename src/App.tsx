@@ -3,7 +3,6 @@ import HomePage from "./pages";
 import RootLayout from "./layouts/root-layout";
 import AuthLayout from "./layouts/auth-layout";
 import SignInPage from "./pages/auth/sign-in";
-import SignUpPage from "./pages/auth/sign-up";
 import DashboardLayout from "./layouts/dashboard-layout";
 import DashboardPage from "./pages/dashboard";
 import HistoryPage from "./pages/dashboard/history";
@@ -13,6 +12,7 @@ import SingleHistoryPage from "./pages/dashboard/history/single-history";
 import ComingSoonPage from "./pages/coming-soon";
 import SessionPage from "./pages/dashboard/session";
 import PrescribePage from "./pages/dashboard/prescribe";
+import EnterOtpPage from "./pages/auth/enter-otp";
 
 export default function App() {
 
@@ -35,7 +35,7 @@ export default function App() {
 
         <Route element={<AuthLayout />}>
           <Route path="sign-in" element={<SignInPage />} />
-          <Route path="sign-up" element={<SignUpPage />} />
+          <Route path="enter-otp" element={<EnterOtpPage />} />
         </Route>
 
         <Route path="dashboard/*" element={<DashboardLayout />}>
