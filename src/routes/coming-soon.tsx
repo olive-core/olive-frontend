@@ -1,7 +1,11 @@
+import { createFileRoute } from '@tanstack/react-router'
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router";
+import { Link } from "@tanstack/react-router";
 
-export default function ComingSoonPage() {
+export const Route = createFileRoute('/coming-soon')({
+    component: ComingSoonPage,
+})
+function ComingSoonPage() {
     return (
         <div className="h-screen w-full flex items-center justify-center bg-primary/5">
             <div className="max-w-md px-12 py-10 text-center bg-linear-to-br from-primary/20 via-primary/15 to-accent/10 rounded-lg">

@@ -1,26 +1,54 @@
 
 import { PhoneIcon } from "lucide-react";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { TextAnimate } from "../ui/text-animate";
 import { AnimatePresence, motion } from "motion/react";
 import PatientInfo from "./patient/patient-info";
-import NumberGroupInput from "./number-group-input";
+import api from "@/lib/axios";
+import axios from "axios";
+import { handleError } from "@/lib/utils";
+import NumberGroupInputMemo from "./number-group-input";
+import PatientSkeleton from "./patient/skeleton";
+import NewPatient from "./patient/new-patient";
 
 export default function WelcomeScreen() {
 
-    const [showContent, setShowContent] = useState(false);
+    const [showContent, setShowContent] = useState<"NOTHING" | "PATIENT_INFO" | "PATIENT_CREATE" | "LOADING" | { status: "ERROR", message: string }>("NOTHING");
     const [phoneNumber, setPhoneNumber] = useState<string[]>(["0", "1"].concat(Array(9).fill(" ")));
 
-    const handlePhoneComplete = (isComplete: boolean) => {
-        setShowContent(isComplete);
-    }
+    const handlePhoneComplete = useCallback(
+        async (isComplete: boolean) => {
+
+            if (isComplete) {
+                try {
+                    setShowContent("LOADING");
+                    const response = await api.post("/patient/by-phone", { phone: phoneNumber.join("").trim() });
+                    console.log(response.data);
+                    setShowContent("PATIENT_INFO");
+                } catch (error) {
+                    if (axios.isAxiosError(error)) {
+                        if (error.response) {
+                            if (error.response.status === 404) {
+                                setShowContent("PATIENT_CREATE");
+                                return;
+                            }
+                        }
+                    }
+
+                    setShowContent({ status: "ERROR", message: "An error occurred while fetching patient data." });
+                    handleError(error, "An error occurred while fetching patient data.");
+                    return;
+                }
+            }
+            setShowContent("NOTHING");
+        }, [phoneNumber])
 
 
     return (
         <div className="">
             <motion.div
                 initial={{ marginTop: "30%" }}
-                animate={{ marginTop: showContent ? "0%" : "15%" }}
+                animate={{ marginTop: showContent !== "NOTHING" ? "0%" : "15%" }}
                 key="phone-input"
             />
 
@@ -32,7 +60,7 @@ export default function WelcomeScreen() {
                     <PhoneIcon className="inline-block mr-1 size-4" />
                     Enter patient's phone number to get started:
                 </p>
-                <NumberGroupInput
+                <NumberGroupInputMemo
                     onComplete={handlePhoneComplete}
                     numberInput={phoneNumber}
                     setNumberInput={setPhoneNumber}
@@ -40,14 +68,19 @@ export default function WelcomeScreen() {
             </motion.div>
 
             <AnimatePresence initial={false}>
-                {showContent ? (
+                {showContent !== "NOTHING" ? (
                     <motion.div
                         initial={{ opacity: 0, }}
                         animate={{ opacity: 1, }}
                         key="content"
                         className="container mt-10"
                     >
-                        <PatientInfo phone={phoneNumber.join("").trim()} />
+                        {showContent === "PATIENT_INFO" && <PatientInfo phone={phoneNumber.join("").trim()} />}
+                        {showContent === "PATIENT_CREATE" && <NewPatient phone={phoneNumber.join("").trim()} />}
+                        {showContent === "LOADING" && <PatientSkeleton />}
+                        {typeof showContent === "object" && showContent.status === "ERROR" && (
+                            <div className="text-rose-500 text-center">{showContent.message}</div>
+                        )}
                     </motion.div>
                 ) : null}
             </AnimatePresence>

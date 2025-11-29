@@ -1,11 +1,11 @@
 import { useAuthStore } from "@/stores/auth-store";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
-import { useNavigate, useSearchParams } from "react-router";
-import NumberGroupInput from "../dashboard/number-group-input";
 import { Button } from "../ui/button";
 import { RefreshCwIcon } from "lucide-react";
 import { handleError } from "@/lib/utils";
+import { useNavigate, useSearch } from "@tanstack/react-router";
+import NumberGroupInputMemo from "../dashboard/number-group-input";
 
 const OTP_LENGTH = 6;
 const RESEND_OTP_TIME = 30; // seconds
@@ -14,8 +14,8 @@ export default function EnterOtpForm() {
 
     const navigate = useNavigate();
     const { verifyOtp, phoneNumber, sendOtp } = useAuthStore();
-    const [searchParams] = useSearchParams();
 
+    const { exists } = useSearch({ from: '/(auth)/enter-otp' });
 
     const [isLoading, setIsLoading] = useState(false);
 
@@ -42,12 +42,12 @@ export default function EnterOtpForm() {
         };
     }, [])
 
-    const handleOtpComplete = (isComplete: boolean) => {
+    const handleOtpComplete = useCallback((isComplete: boolean) => {
         setIsValidOtp(isComplete);
         if (isComplete) {
             submitButtonRef.current?.focus();
         }
-    }
+    }, [])
 
     async function onSubmit(e: React.FormEvent) {
         e.preventDefault();
@@ -55,10 +55,10 @@ export default function EnterOtpForm() {
         try {
             await verifyOtp(phoneNumber, otp.join("").trim());
             toast.success("OTP verified successfully!");
-            if (searchParams.get("exists") === "true") {
-                navigate("/dashboard");
+            if (exists === 1) {
+                navigate({ to: "/dashboard" });
             } else {
-                navigate("/auth/setup-profile");
+                navigate({ to: "/dashboard/profile/edit" });
             }
         } catch (error) {
             handleError(error, "Failed to verify OTP. Please try again.");
@@ -86,7 +86,7 @@ export default function EnterOtpForm() {
 
     return (
         <form onSubmit={onSubmit} className="space-y-4">
-            <NumberGroupInput
+            <NumberGroupInputMemo
                 numberInput={otp}
                 setNumberInput={setOtp}
                 onComplete={handleOtpComplete}

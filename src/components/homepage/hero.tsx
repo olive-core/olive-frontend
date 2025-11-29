@@ -1,4 +1,4 @@
-import { Link } from "react-router";
+import { Link } from "@tanstack/react-router";
 import { Button } from "../ui/button";
 import { TextAnimate } from "../ui/text-animate";
 
@@ -16,7 +16,7 @@ export default function HeroSection() {
                     <p className="text-xl mt-8 mb-12 opacity-80">Record patient visits, let AI draft the prescription, and finalize it in minutes.</p>
 
                     <Button className="w-48 text-lg py-6 capitalize" size="lg" asChild>
-                        <Link to="/sign-up">
+                        <Link to="/sign-in">
                             Get Started
                         </Link>
                     </Button>

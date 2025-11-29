@@ -1,7 +1,6 @@
 import { ChartNoAxesColumnIcon, EllipsisIcon, HandCoinsIcon, HistoryIcon, LogOutIcon, SettingsIcon, UserIcon } from "lucide-react";
 import NavbarContainer from "../shared/navbar-container";
 import { Button } from "../ui/button";
-import { Link } from "react-router";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -14,6 +13,7 @@ import {
     TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { useAuthStore } from "@/stores/auth-store";
+import { Link } from "@tanstack/react-router";
 
 type MenuItemType = {
     label: string;
@@ -78,11 +78,13 @@ export default function DashboardNavbar() {
         return (
             <Tooltip>
                 <TooltipTrigger>
-                    {menu.href && (<Link to={menu.href}>
-                        <Button variant="nav-icon">
-                            {menu.icon}
-                        </Button>
-                    </Link>)}
+                    {menu.href && (
+                        <Link to={menu.href}>
+                            <Button variant="nav-icon">
+                                {menu.icon}
+                            </Button>
+                        </Link>
+                    )}
 
                     {menu.buttonType && (
                         <Button variant="nav-icon" onClick={() => handleMenuClick(menu)}>

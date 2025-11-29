@@ -1,17 +1,16 @@
 import { cn } from "@/lib/utils";
-import { createRef, Fragment, useEffect } from "react"
+import { createRef, Fragment, memo, useEffect } from "react"
 
 interface PhoneInputProps {
     numberInput: string[];
     setNumberInput: React.Dispatch<React.SetStateAction<string[]>>;
-    onComplete?: (isComplete: boolean) => void;
+    onComplete?: (isComplete: boolean) => void; // make sure to make it useCallback when passing from parent
     inputLength?: number;
     secondGroupStartIndex?: number;
     dynamicValuesStartIndex?: number;
 }
 
-
-export default function NumberGroupInput({
+function NumberGroupInput({
     numberInput,
     setNumberInput,
     onComplete = () => { },
@@ -24,9 +23,7 @@ export default function NumberGroupInput({
 
     useEffect(() => {
         const isComplete = numberInput.every(char => char >= "0" && char <= "9");
-
         onComplete(isComplete);
-
     }, [numberInput, onComplete, inputRefs]);
 
     const handleFocusPrev = (index: number) => {
@@ -125,3 +122,6 @@ export default function NumberGroupInput({
         </div>
     )
 }
+
+const NumberGroupInputMemo = memo(NumberGroupInput);
+export default NumberGroupInputMemo;

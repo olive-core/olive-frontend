@@ -1,6 +1,6 @@
-import { Link } from "react-router";
 import { Button } from "../ui/button";
 import NavbarContainer from "../shared/navbar-container";
+import { Link } from "@tanstack/react-router";
 
 export default function HomeNavbar() {
 
@@ -27,7 +27,7 @@ export default function HomeNavbar() {
 
                     <Button asChild>
                         <Link to="/sign-in">
-                            Sign In
+                            Get Started
                         </Link>
                     </Button>
                 </div>

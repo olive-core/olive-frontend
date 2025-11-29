@@ -1,5 +1,5 @@
 import { useAuthStore } from "@/stores/auth-store";
-import { Link } from "react-router";
+import { Link } from "@tanstack/react-router";
 
 export default function NavbarLogo() {
 
