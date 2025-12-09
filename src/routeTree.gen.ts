@@ -19,6 +19,8 @@ import { Route as authSignInRouteImport } from './routes/(auth)/sign-in'
 import { Route as authEnterOtpRouteImport } from './routes/(auth)/enter-otp'
 import { Route as DashboardProfileEditRouteImport } from './routes/dashboard/profile/edit'
 import { Route as DashboardProfileUserIdRouteImport } from './routes/dashboard/profile/$userId'
+import { Route as DashboardPrescribeConsultationIdRouteImport } from './routes/dashboard/prescribe.$consultationId'
+import { Route as DashboardConsultationUserIdConsultationIdRouteImport } from './routes/dashboard/consultation.$userId.$consultationId'
 
 const NotFoundRoute = NotFoundRouteImport.update({
   id: '/not-found',
@@ -69,6 +71,18 @@ const DashboardProfileUserIdRoute = DashboardProfileUserIdRouteImport.update({
   path: '/profile/$userId',
   getParentRoute: () => DashboardRouteRoute,
 } as any)
+const DashboardPrescribeConsultationIdRoute =
+  DashboardPrescribeConsultationIdRouteImport.update({
+    id: '/prescribe/$consultationId',
+    path: '/prescribe/$consultationId',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any)
+const DashboardConsultationUserIdConsultationIdRoute =
+  DashboardConsultationUserIdConsultationIdRouteImport.update({
+    id: '/consultation/$userId/$consultationId',
+    path: '/consultation/$userId/$consultationId',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -78,8 +92,10 @@ export interface FileRoutesByFullPath {
   '/enter-otp': typeof authEnterOtpRoute
   '/sign-in': typeof authSignInRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/dashboard/prescribe/$consultationId': typeof DashboardPrescribeConsultationIdRoute
   '/dashboard/profile/$userId': typeof DashboardProfileUserIdRoute
   '/dashboard/profile/edit': typeof DashboardProfileEditRoute
+  '/dashboard/consultation/$userId/$consultationId': typeof DashboardConsultationUserIdConsultationIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -88,8 +104,10 @@ export interface FileRoutesByTo {
   '/enter-otp': typeof authEnterOtpRoute
   '/sign-in': typeof authSignInRoute
   '/dashboard': typeof DashboardIndexRoute
+  '/dashboard/prescribe/$consultationId': typeof DashboardPrescribeConsultationIdRoute
   '/dashboard/profile/$userId': typeof DashboardProfileUserIdRoute
   '/dashboard/profile/edit': typeof DashboardProfileEditRoute
+  '/dashboard/consultation/$userId/$consultationId': typeof DashboardConsultationUserIdConsultationIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -101,8 +119,10 @@ export interface FileRoutesById {
   '/(auth)/enter-otp': typeof authEnterOtpRoute
   '/(auth)/sign-in': typeof authSignInRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/dashboard/prescribe/$consultationId': typeof DashboardPrescribeConsultationIdRoute
   '/dashboard/profile/$userId': typeof DashboardProfileUserIdRoute
   '/dashboard/profile/edit': typeof DashboardProfileEditRoute
+  '/dashboard/consultation/$userId/$consultationId': typeof DashboardConsultationUserIdConsultationIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -114,8 +134,10 @@ export interface FileRouteTypes {
     | '/enter-otp'
     | '/sign-in'
     | '/dashboard/'
+    | '/dashboard/prescribe/$consultationId'
     | '/dashboard/profile/$userId'
     | '/dashboard/profile/edit'
+    | '/dashboard/consultation/$userId/$consultationId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -124,8 +146,10 @@ export interface FileRouteTypes {
     | '/enter-otp'
     | '/sign-in'
     | '/dashboard'
+    | '/dashboard/prescribe/$consultationId'
     | '/dashboard/profile/$userId'
     | '/dashboard/profile/edit'
+    | '/dashboard/consultation/$userId/$consultationId'
   id:
     | '__root__'
     | '/'
@@ -136,8 +160,10 @@ export interface FileRouteTypes {
     | '/(auth)/enter-otp'
     | '/(auth)/sign-in'
     | '/dashboard/'
+    | '/dashboard/prescribe/$consultationId'
     | '/dashboard/profile/$userId'
     | '/dashboard/profile/edit'
+    | '/dashboard/consultation/$userId/$consultationId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -220,6 +246,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardProfileUserIdRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
+    '/dashboard/prescribe/$consultationId': {
+      id: '/dashboard/prescribe/$consultationId'
+      path: '/prescribe/$consultationId'
+      fullPath: '/dashboard/prescribe/$consultationId'
+      preLoaderRoute: typeof DashboardPrescribeConsultationIdRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/consultation/$userId/$consultationId': {
+      id: '/dashboard/consultation/$userId/$consultationId'
+      path: '/consultation/$userId/$consultationId'
+      fullPath: '/dashboard/consultation/$userId/$consultationId'
+      preLoaderRoute: typeof DashboardConsultationUserIdConsultationIdRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
   }
 }
 
@@ -239,14 +279,19 @@ const authRouteRouteWithChildren = authRouteRoute._addFileChildren(
 
 interface DashboardRouteRouteChildren {
   DashboardIndexRoute: typeof DashboardIndexRoute
+  DashboardPrescribeConsultationIdRoute: typeof DashboardPrescribeConsultationIdRoute
   DashboardProfileUserIdRoute: typeof DashboardProfileUserIdRoute
   DashboardProfileEditRoute: typeof DashboardProfileEditRoute
+  DashboardConsultationUserIdConsultationIdRoute: typeof DashboardConsultationUserIdConsultationIdRoute
 }
 
 const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
   DashboardIndexRoute: DashboardIndexRoute,
+  DashboardPrescribeConsultationIdRoute: DashboardPrescribeConsultationIdRoute,
   DashboardProfileUserIdRoute: DashboardProfileUserIdRoute,
   DashboardProfileEditRoute: DashboardProfileEditRoute,
+  DashboardConsultationUserIdConsultationIdRoute:
+    DashboardConsultationUserIdConsultationIdRoute,
 }
 
 const DashboardRouteRouteWithChildren = DashboardRouteRoute._addFileChildren(

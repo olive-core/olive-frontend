@@ -52,9 +52,9 @@ export const useAuthStore = create<AuthStoreType>()(
 
                     set({
                         isLoggedIn: true,
-                        accessToken: response.data.accessToken,
-                        refreshToken: response.data.refreshToken,
-                        userId: response.data.userId,
+                        accessToken: response.data.access_token,
+                        refreshToken: response.data.refresh_token,
+                        userId: response.data.user.id,
                     });
                 },
 

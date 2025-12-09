@@ -8,6 +8,7 @@ export default api;
 
 api.interceptors.request.use(
     (config) => {
+
         const token = useAuthStore.getState().accessToken;
 
         if (token) {

@@ -9,6 +9,7 @@ interface UseSessionRecorderReturn {
     duration: number;
     stopRecording: () => void;
     discardRecording: () => void;
+    stream: MediaStream | null;
 }
 
 export default function useSessionRecorder({
@@ -182,6 +183,7 @@ export default function useSessionRecorder({
         isRecording,
         duration,
         stopRecording,
-        discardRecording
+        discardRecording,
+        stream: streamRef.current
     };
 }

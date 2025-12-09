@@ -108,7 +108,7 @@ export default function MultiStepForm<T extends FieldValues>({ title, className,
 
     return (
         <form id="form-rhf-demo" onSubmit={handleSubmitWrapper} onKeyDown={handleKeyDown}>
-            <Card className={cn("w-xl mx-auto py-10 flex flex-col justify-between items-center h-[400px]", className)}>
+            <Card className={cn("max-w-xl mx-auto py-10 flex flex-col justify-between items-center h-[400px]", className)}>
                 {title && <CardHeader className='w-full'>
                     <CardTitle className="text-center">{title}</CardTitle>
                 </CardHeader>}

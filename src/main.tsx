@@ -33,6 +33,5 @@ createRoot(document.getElementById('root')!).render(
     <ReactQueryDevtools initialIsOpen={false} />
     <RouterProvider router={router} />
     <TanStackRouterDevtools router={router} />
-
   </QueryClientProvider>
 )

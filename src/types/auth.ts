@@ -8,7 +8,10 @@ export type SendOtpResponse = {
 };
 
 export type VerifyOtpResponse = {
-    accessToken: string;
-    refreshToken: string;
-    userId: string;
+    access_token: string;
+    refresh_token: string;
+    expires_in: number;
+    user: {
+        id: string;
+    }
 };

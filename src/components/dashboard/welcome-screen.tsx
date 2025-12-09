@@ -16,32 +16,34 @@ export default function WelcomeScreen() {
     const [showContent, setShowContent] = useState<"NOTHING" | "PATIENT_INFO" | "PATIENT_CREATE" | "LOADING" | { status: "ERROR", message: string }>("NOTHING");
     const [phoneNumber, setPhoneNumber] = useState<string[]>(["0", "1"].concat(Array(9).fill(" ")));
 
-    const handlePhoneComplete = useCallback(
-        async (isComplete: boolean) => {
+    const handlePhoneComplete = useCallback(async (isComplete: boolean) => {
 
-            if (isComplete) {
-                try {
-                    setShowContent("LOADING");
-                    const response = await api.post("/patient/by-phone", { phone: phoneNumber.join("").trim() });
-                    console.log(response.data);
-                    setShowContent("PATIENT_INFO");
-                } catch (error) {
-                    if (axios.isAxiosError(error)) {
-                        if (error.response) {
-                            if (error.response.status === 404) {
-                                setShowContent("PATIENT_CREATE");
-                                return;
-                            }
-                        }
+        if (!isComplete) {
+            setShowContent("NOTHING");
+            return;
+        }
+
+        try {
+            setShowContent("LOADING");
+            const response = await api.post("/patient/by-phone", { phone: phoneNumber.join("").trim() });
+            console.log(response.data);
+            setShowContent("PATIENT_INFO");
+        } catch (error) {
+            if (axios.isAxiosError(error)) {
+                if (error.response) {
+                    if (error.response.status === 404) {
+                        setShowContent("PATIENT_CREATE");
+                        return;
                     }
-
-                    setShowContent({ status: "ERROR", message: "An error occurred while fetching patient data." });
-                    handleError(error, "An error occurred while fetching patient data.");
-                    return;
                 }
             }
-            setShowContent("NOTHING");
-        }, [phoneNumber])
+
+            setShowContent({ status: "ERROR", message: "An error occurred while fetching patient data." });
+            handleError(error, "An error occurred while fetching patient data.");
+            return;
+        }
+
+    }, [phoneNumber])
 
 
     return (
@@ -67,19 +69,20 @@ export default function WelcomeScreen() {
                 />
             </motion.div>
 
+
             <AnimatePresence initial={false}>
                 {showContent !== "NOTHING" ? (
                     <motion.div
                         initial={{ opacity: 0, }}
                         animate={{ opacity: 1, }}
                         key="content"
-                        className="container mt-10"
+                        className="mt-10 max-w-xl mx-auto"
                     >
                         {showContent === "PATIENT_INFO" && <PatientInfo phone={phoneNumber.join("").trim()} />}
                         {showContent === "PATIENT_CREATE" && <NewPatient phone={phoneNumber.join("").trim()} />}
                         {showContent === "LOADING" && <PatientSkeleton />}
                         {typeof showContent === "object" && showContent.status === "ERROR" && (
-                            <div className="text-rose-500 text-center">{showContent.message}</div>
+                            <div className="text-rose-500 text-center bg-rose-100 p-4 rounded">{showContent.message}</div>
                         )}
                     </motion.div>
                 ) : null}

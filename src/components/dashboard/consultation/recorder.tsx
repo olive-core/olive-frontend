@@ -5,35 +5,33 @@ import {
     CardContent,
     CardFooter,
 } from "@/components/ui/card"
-import { useNavigate, useParams } from "react-router";
+import { useNavigate } from "@tanstack/react-router";
+import { AudioVisualizerMemo } from "./visualizer";
+// import { Mic, MicOff } from "lucide-react";
 
 export default function Recorder() {
-
     const navigate = useNavigate();
-    const { id } = useParams();
 
-
-
-    const { duration, isRecording, stopRecording, discardRecording } = useSessionRecorder({ chunkSizeInMs: 60 * 1000 });
-    const durationMinutes = Math.floor(duration / 60);
+    const { duration, isRecording, stopRecording, discardRecording, stream } = useSessionRecorder({ chunkSizeInMs: 60 * 1000 });
+    const durationMinutes = Math.floor(duration / 60).toString().padStart(2, '0');
     const durationSeconds = (Math.floor(duration) % 60).toString().padStart(2, '0');
+
 
     const handleStopAndProceed = () => {
         stopRecording();
-        navigate(`/dashboard/prescribe/${id}`);
+        navigate({ to: "/dashboard/prescribe/$consultationId", params: { consultationId: "1" } });
     }
 
     const handleDiscard = () => {
         discardRecording();
-        navigate('/dashboard');
+        navigate({ to: "/dashboard" });
     }
 
     return (
-        <Card className="w-96">
-
+        <Card className="w-full">
             <CardContent>
-                <div className="flex flex-col items-center">
-                    <div className="flex items-center justify-center">
+                <div className="flex justify-between items-center">
+                    <div className="flex items-center justify-center mb-4">
                         <div
                             aria-label={isRecording ? 'Microphone on' : 'Microphone off'}
                             className={`relative inline-flex items-center justify-center rounded-full`}
@@ -60,18 +58,23 @@ export default function Recorder() {
                         {/* {isRecording ? <Mic className="w-8 h-8 text-rose-600 ml-2" /> : <MicOff className="w-8 h-8 text-gray-400 ml-2" />} */}
                     </div>
 
-                    <div className="mt-4 text-2xl">
+
+                    <pre className="text-xl">
                         {durationMinutes}:{durationSeconds}
-                    </div>
+                    </pre>
+
                 </div>
+
+                <AudioVisualizerMemo stream={stream} />
             </CardContent>
-            <CardFooter className="flex-col gap-2">
-                <Button className="w-full" onClick={handleStopAndProceed}>
-                    Proceed to Prescribe
-                </Button>
-                <Button variant="outline" className="w-full" onClick={handleDiscard}>
+            <CardFooter className="flex gap-2 items-center justify-center">
+                <Button variant="outline" className="" onClick={handleDiscard}>
                     Discard Session
                 </Button>
+                <Button className="" onClick={handleStopAndProceed}>
+                    Proceed to Prescribe
+                </Button>
+
             </CardFooter>
         </Card>
     )
