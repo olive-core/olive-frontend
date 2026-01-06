@@ -144,7 +144,7 @@ export default function MultiStepForm<T extends FieldValues>({ title, className,
                 </CardContent >
 
                 <CardFooter className="flex justify-between mt-6 w-full">
-                    <Button variant="outline" onClick={prev} disabled={step === 0} shortCutKey='⌘ P'>
+                    <Button type={"button"} variant="outline" onClick={prev} disabled={step === 0} shortCutKey='⌘ P'>
                         Previous
                     </Button>
 

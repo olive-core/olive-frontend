@@ -10,29 +10,29 @@ import { handleError } from "@/lib/utils";
 import NumberGroupInputMemo from "./number-group-input";
 import PatientSkeleton from "./patient/skeleton";
 import NewPatient from "./patient/new-patient";
+import type { ShowContentStatus } from "@/types/patient";
 
 export default function WelcomeScreen() {
 
-    const [showContent, setShowContent] = useState<"NOTHING" | "PATIENT_INFO" | "PATIENT_CREATE" | "LOADING" | { status: "ERROR", message: string }>("NOTHING");
+    const [showContent, setShowContent] = useState<ShowContentStatus>({ status: "NOTHING" });
     const [phoneNumber, setPhoneNumber] = useState<string[]>(["0", "1"].concat(Array(9).fill(" ")));
 
     const handlePhoneComplete = useCallback(async (isComplete: boolean) => {
 
         if (!isComplete) {
-            setShowContent("NOTHING");
+            setShowContent({ status: "NOTHING" });
             return;
         }
 
         try {
-            setShowContent("LOADING");
-            const response = await api.post("/patient/by-phone", { phone: phoneNumber.join("").trim() });
-            console.log(response.data);
-            setShowContent("PATIENT_INFO");
+            setShowContent({ status: "LOADING" });
+            const response = await api.post("/patient/by-phone", { phone: "+88" + phoneNumber.join("").trim() });
+            setShowContent({ status: "PATIENT_INFO", userId: response.data.user_id });
         } catch (error) {
             if (axios.isAxiosError(error)) {
                 if (error.response) {
                     if (error.response.status === 404) {
-                        setShowContent("PATIENT_CREATE");
+                        setShowContent({ status: "PATIENT_CREATE", initialValues: { name: "", age: "", sex: "male" } });
                         return;
                     }
                 }
@@ -50,7 +50,7 @@ export default function WelcomeScreen() {
         <div className="">
             <motion.div
                 initial={{ marginTop: "30%" }}
-                animate={{ marginTop: showContent !== "NOTHING" ? "0%" : "15%" }}
+                animate={{ marginTop: showContent.status !== "NOTHING" ? "0%" : "15%" }}
                 key="phone-input"
             />
 
@@ -71,22 +71,53 @@ export default function WelcomeScreen() {
 
 
             <AnimatePresence initial={false}>
-                {showContent !== "NOTHING" ? (
+                {showContent.status !== "NOTHING" && (
                     <motion.div
-                        initial={{ opacity: 0, }}
-                        animate={{ opacity: 1, }}
-                        key="content"
+                        key={showContent.status}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
                         className="mt-10 max-w-xl mx-auto"
                     >
-                        {showContent === "PATIENT_INFO" && <PatientInfo phone={phoneNumber.join("").trim()} />}
-                        {showContent === "PATIENT_CREATE" && <NewPatient phone={phoneNumber.join("").trim()} />}
-                        {showContent === "LOADING" && <PatientSkeleton />}
-                        {typeof showContent === "object" && showContent.status === "ERROR" && (
-                            <div className="text-rose-500 text-center bg-rose-100 p-4 rounded">{showContent.message}</div>
-                        )}
+                        {(() => {
+                            switch (showContent.status) {
+                                case "PATIENT_INFO":
+                                    return (
+                                        <PatientInfo
+                                            userId={showContent.userId}
+                                            setShowContent={setShowContent}
+                                        />
+                                    );
+
+                                case "PATIENT_CREATE":
+                                    return (
+                                        <NewPatient
+                                            phone={phoneNumber.join("").trim()}
+                                            name={showContent.initialValues?.name}
+                                            age={showContent.initialValues?.age}
+                                            sex={showContent.initialValues?.sex}
+                                            userId={showContent.userId}
+                                        />
+                                    );
+
+                                case "LOADING":
+                                    return <PatientSkeleton />;
+
+                                case "ERROR":
+                                    return (
+                                        <div className="text-rose-500 text-center bg-rose-100 p-4 rounded">
+                                            {showContent.message}
+                                        </div>
+                                    );
+
+                                default:
+                                    return null;
+                            }
+                        })()}
                     </motion.div>
-                ) : null}
+                )}
             </AnimatePresence>
+
         </div>
     )
 }

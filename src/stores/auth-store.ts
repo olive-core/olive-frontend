@@ -6,7 +6,6 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 
-
 interface AuthStoreType {
     isLoggedIn: boolean;
     phoneNumber: string;

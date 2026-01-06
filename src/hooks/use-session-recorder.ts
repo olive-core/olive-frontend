@@ -13,7 +13,7 @@ interface UseSessionRecorderReturn {
 }
 
 export default function useSessionRecorder({
-    chunkSizeInMs = 1 * 60 * 1000, // 1 minute default
+    chunkSizeInMs = 1 * 30 * 1000, // 30 second default
 }: UseSessionRecorderProps): UseSessionRecorderReturn {
     const [duration, setDuration] = useState<number>(0);
     const [isRecording, setIsRecording] = useState<boolean>(false);

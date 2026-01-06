@@ -14,3 +14,11 @@ export function handleError(error: unknown, defaultMessage: string) {
   }
   toast.error(defaultMessage);
 }
+
+export function getAgeFromDOB(dob: string): number {
+  const birthDate = new Date(dob);
+  const today = new Date();
+  const age = today.getFullYear() - birthDate.getFullYear();
+
+  return age;
+}

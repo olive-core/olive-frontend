@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
-import { CalendarIcon, MarsIcon, PenIcon } from "lucide-react";
+import { CalendarIcon, MarsIcon, MicIcon, PenIcon } from "lucide-react";
 import {
     Item,
     ItemActions,
@@ -10,54 +10,76 @@ import {
 } from "@/components/ui/item"
 import { format } from "date-fns";
 import api from "@/lib/axios";
-import type { PatientByPhoneResponse } from "@/types/patient";
+import type { PatientInfoType, ShowContentStatus } from "@/types/patient";
+import { getAgeFromDOB } from "@/lib/utils";
+import PatientSkeleton from "./skeleton";
 
 
 interface PatientInfoProps {
-    phone: string;
+    userId: string;
+    setShowContent: React.Dispatch<React.SetStateAction<ShowContentStatus>>;
 }
 
-export default function PatientInfo({ phone }: PatientInfoProps) {
+export default function PatientInfo({ userId, setShowContent }: PatientInfoProps) {
 
-    // const { data: patientData, isLoading, isError } = useQuery({
-    //     queryKey: ['patient-info', phone],
-    //     queryFn: async () => {
-    //         const response = await api.post<PatientByPhoneResponse>("/patient/by-phone", { phone });
-    //         return response.data;
-    //     }
-    // });
+    const { data: patientData, isLoading, isError } = useQuery({
+        queryKey: ['patient-info', userId],
+        queryFn: async () => {
+            const response = await api.get<PatientInfoType>(`/patient/${userId}`);
+            return response.data;
+        }
+    });
 
-    // if (isLoading) {
-    //     return <div>Loading patient info...</div>;
-    // }
+    if (isLoading) {
+        return <PatientSkeleton />;
+    }
 
-    // if (isError || !patientData) {
-    //     return <div>Error loading patient info.</div>;
-    // }
+    if (isError || !patientData) {
+        return <div className="py-4 px-6 bg-rose-100 text-rose-500 rounded-lg border-rose-300 border-2">Error loading patient info.</div>;
+    }
+
+    const handleEdit = () => {
+        setShowContent({
+            status: "PATIENT_CREATE",
+            initialValues: {
+                name: "Patient Name", // TODO: replace with real data
+                age: getAgeFromDOB(patientData.date_of_birth).toString(),
+                sex: 'male' // TODO: replace with real data
+            },
+            userId: userId
+        });
+    };
 
     return (
         <div className="flex w-full max-w-md flex-col gap-6 mx-auto">
             <Item variant="outline">
                 <ItemContent>
-                    {/* <ItemTitle className="text-lg">{patientData.firstName} {patientData.lastName}</ItemTitle> */}
+                    {/* TODO: fetch and display real data */}
+                    <ItemTitle className="text-lg">Patient Name</ItemTitle>
                     <ItemDescription>
-                        {/* <div className="flex space-x-4 text-slate-600 text-sm">
-                            <div className="flex items-center">
+                        <div className="flex flex-col space-y-1 text-slate-600 text-sm">
+                            <div className="flex">
                                 <CalendarIcon className="inline-block mr-1 size-4" />
-                                <span>{format(new Date(patientData.dateOfBirth), "MMM d, yyyy")}</span>
+                                <span>{format(new Date(patientData.date_of_birth), "MMM d, yyyy")}</span>
                             </div>
                             <div className="flex items-center">
+                                {/* TODO: fetch and display real data */}
                                 <MarsIcon className="inline-block mr-1 size-4 text-blue-500" />
-                                <span>{patientData.sex}</span>
+                                <span>Male</span>
                             </div>
-                        </div> */}
+                        </div>
                     </ItemDescription>
                 </ItemContent>
                 <ItemActions>
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" onClick={handleEdit}>
                         <PenIcon className="inline-block mr-1 size-3" /> Edit
                     </Button>
                 </ItemActions>
+
+                <Button className="w-full">
+                    <MicIcon className="inline-block size-4" />
+                    Start Consultation
+                </Button>
             </Item>
         </div>
     )

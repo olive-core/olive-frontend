@@ -7,6 +7,8 @@ import { MarsIcon, TransgenderIcon, VenusIcon } from 'lucide-react'
 import { handleError } from '@/lib/utils'
 import { useNavigate } from '@tanstack/react-router'
 import api from '@/lib/axios'
+import { useAuthStore } from '@/stores/auth-store'
+import { useMutation } from '@tanstack/react-query'
 
 const patientSchema = z.object({
     name: z.string(),
@@ -26,44 +28,78 @@ type PatientFormValues = z.infer<typeof patientSchema>
 
 interface NewPatientProps {
     phone: string;
+    name?: string;
+    age?: string;
+    sex?: 'male' | 'female' | 'non_binary';
+    userId?: string;
 }
 
-export default function NewPatient({ phone }: NewPatientProps) {
+export default function NewPatient({ phone, name, age, sex, userId }: NewPatientProps) {
 
     const navigate = useNavigate();
+    const { userId: clinicianId } = useAuthStore();
+    // const queryClient = useQueryClient();
 
     const form = useForm<PatientFormValues>({
         resolver: zodResolver(patientSchema),
         defaultValues: {
-            name: '',
+            name: name || '',
             // birthYear: '',
-            age: '',
-            sex: 'male',
+            age: age || '',
+            sex: sex || 'male',
         },
+    })
+
+    const createOrUpdatePatient = async (values: PatientFormValues): Promise<string> => {
+
+
+
+        const apiEndPoint = userId ? `/patient/${userId}` : "/patient/by-clinician";
+
+        const [firstName, ...lastNames] = values.name.split(" ");
+        const lastName = lastNames.join(" ");
+
+        const payload = {
+            first_name: firstName,
+            last_name: lastName,
+            // birthYear: parseInt(values.birthYear, 10),
+            age: parseInt(values.age, 10),
+            phone: `+88${phone}`,
+        }
+
+        // TODO: update payload of age or dob (?)
+
+        const response = await api.post(apiEndPoint, payload);
+        return response.data.user_id;
+
+    }
+
+    const mutation = useMutation({
+        mutationFn: createOrUpdatePatient,
+        onSuccess: (data, variables) => {
+            console.log("Patient created/updated with ID:", data, variables);
+            // TODO: Invalidate or update relevant queries if needed
+        }
     })
 
     async function onSubmit(values: PatientFormValues) {
         try {
 
-            const [firstName, ...lastNames] = values.name.split(" ");
-            const lastName = lastNames.join(" ");
+            // create | edit patient -> create consultation -> navigate to consultation page
 
-            const payload = {
-                first_name: firstName,
-                last_name: lastName,
-                // birthYear: parseInt(values.birthYear, 10),
-                age: parseInt(values.age, 10),
-                phone,
-            }
+            // TODO: need testing for edit
+            const patientId = await mutation.mutateAsync(values);
 
-            const response = await api.post("/patient/by-clinician", payload);
-            console.log("Patient created:", response.data);
+            const sessionCreateResponse = await api.post("/session", {
+                patient_id: patientId,
+                clinician_id: clinicianId,
+            });
 
-            // create patient -> create consultation -> navigate to consultation page
+            const sessionId = sessionCreateResponse.data.session_id;
 
             form.reset();
 
-            navigate({ to: "/dashboard/consultation/$userId/$consultationId", params: { userId: "1", consultationId: "1" } });
+            navigate({ to: "/dashboard/consultation/$userId/$consultationId", params: { userId: patientId, consultationId: sessionId } });
 
         } catch (error) {
             handleError(error, "An error occurred while creating the patient.");

@@ -1,3 +1,4 @@
+import Prescription from '@/components/prescription'
 import { createFileRoute } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/dashboard/prescribe/$consultationId')({
@@ -5,5 +6,9 @@ export const Route = createFileRoute('/dashboard/prescribe/$consultationId')({
 })
 
 function RouteComponent() {
-  return <div>Hello "/dashboard/prescribe/$consultationId"!</div>
+  return (
+    <div>
+      <Prescription />
+    </div>
+  )
 }
