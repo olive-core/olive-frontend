@@ -19,14 +19,13 @@ interface AuthStoreType {
     sendOtp: (phone: string) => Promise<void>;
     verifyOtp: (phone: string, otp: string) => Promise<void>;
 
-    createClinicianProfile: (data: ClinicianType) => Promise<void>;
+    storeClinicianInfo: (data: ClinicianType) => void;
+    createClinicianProfile: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthStoreType>()(
     persist(
         (set) => {
-
-
 
             return ({
                 isLoggedIn: false,
@@ -57,18 +56,33 @@ export const useAuthStore = create<AuthStoreType>()(
                     });
                 },
 
-                createClinicianProfile: async (data: ClinicianType) => {
+                storeClinicianInfo: (data: ClinicianType) => {
+                    set({
+                        clinician: {
+                            bmdcNo: data.bmdcNo,
+                            firstName: data.firstName,
+                            lastName: data.lastName
+                        }
+                    })
+                },
+
+                createClinicianProfile: async () => {
                     const userId = useAuthStore.getState().userId;
                     if (!userId) throw new Error("User ID is missing");
 
+                    const clinician = useAuthStore.getState().clinician;
+
                     const response = await api.post(`/clinician`, {
-                        bmdc_no: data.bmdcNo,
-                        qualification: data.qualification,
-                        specializations: data.specializations,
-                        user_id: userId
+                        bmdc_no: clinician?.bmdcNo,
+                        medicine_company_ids: [],
+                        qualification: "",
+                        specializations: [],
+                        user_id: userId,
+                        first_name: clinician?.firstName || "",
+                        last_name: clinician?.lastName || ""
                     });
                     console.log(response.data)
-                    set({ clinician: data });
+                    set({ clinician: response.data });
                 },
 
 

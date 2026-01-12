@@ -1,7 +1,9 @@
+import api from "@/lib/axios";
 import { useCallback, useEffect, useEffectEvent, useRef, useState } from "react";
 
 interface UseSessionRecorderProps {
     chunkSizeInMs?: number;
+    consultationId: string
 }
 
 interface UseSessionRecorderReturn {
@@ -13,6 +15,7 @@ interface UseSessionRecorderReturn {
 }
 
 export default function useSessionRecorder({
+    consultationId,
     chunkSizeInMs = 1 * 30 * 1000, // 30 second default
 }: UseSessionRecorderProps): UseSessionRecorderReturn {
     const [duration, setDuration] = useState<number>(0);
@@ -28,25 +31,19 @@ export default function useSessionRecorder({
 
     const sendAudioChunk = useCallback(async (chunk: Blob, isLastChunk: boolean = false) => {
         try {
-            console.log("Sending audio chunk of size:", chunk.size, "isLastChunk:", isLastChunk);
-
-            // Create FormData instead of raw blob for better compatibility
             const formData = new FormData();
-            formData.append('audio', chunk, `chunk-${Date.now()}.webm`);
-            formData.append('duration', duration.toString());
-            formData.append('isLastChunk', isLastChunk.toString());
-            formData.append('timestamp', new Date().toISOString());
+            formData.append('file', chunk, `chunk-${Date.now()}.webm`);
+            formData.append("session_id", consultationId);
+            formData.append('chunk_index', chunkIndexRef.current.toString());
+            formData.append('is_last_chunk', isLastChunk.toString());
 
-            await fetch('/api/upload-audio-chunk?index=' + chunkIndexRef.current, {
-                method: 'POST',
-                body: formData, // Use FormData instead of raw blob
-            });
-
-            chunkIndexRef.current += 1;
+            await api.post('/conversation/chunk', formData);
         } catch (error) {
             console.error("Error sending audio chunk:", error);
+        } finally {
+            chunkIndexRef.current += 1;
         }
-    }, [duration]);
+    }, [consultationId]);
 
     const cleanup = useEffectEvent(() => {
         // Clear intervals first

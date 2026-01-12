@@ -1,6 +1,6 @@
 import { CheckIcon, SoupIcon, XIcon } from "lucide-react";
 import MedicineSelect from "./medicine-select";
-import DosageSelect from "./dosge-select";
+import DosageSelect from "./dosage-select";
 
 export default function Medicine() {
 

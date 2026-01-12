@@ -1,5 +1,7 @@
 import { cn } from "@/lib/utils";
+import { RotateCcwIcon } from "lucide-react";
 import { createRef, Fragment, memo, useEffect } from "react"
+import { Button } from "../ui/button";
 
 interface PhoneInputProps {
     numberInput: string[];
@@ -20,6 +22,16 @@ function NumberGroupInput({
 }: PhoneInputProps) {
 
     const inputRefs = Array.from({ length: inputLength }, () => createRef<HTMLInputElement>());
+
+    const handleReset = () => {
+        const newNumber = [...numberInput];
+        for (let i = dynamicValuesStartIndex; i < numberInput.length; i++) {
+            newNumber[i] = " "
+        }
+        setNumberInput(newNumber);
+
+        inputRefs[dynamicValuesStartIndex].current?.focus();
+    }
 
     useEffect(() => {
         const isComplete = numberInput.every(char => char >= "0" && char <= "9");
@@ -95,7 +107,7 @@ function NumberGroupInput({
 
 
     return (
-        <div className="mx-auto">
+        <div className="mx-auto flex items-center">
             {Array.from({ length: inputLength }).map((_, index) => (
                 <Fragment key={index}>
                     <input
@@ -117,6 +129,13 @@ function NumberGroupInput({
                     />
 
                     {index === secondGroupStartIndex ? <span className="mx-2">-</span> : null}
+
+                    {index === inputLength - 1 && (
+                        <Button size="icon" className="ml-3 w-10 h-10 rounded-lg border flex items-center justify-center bg-rose-100 text-rose-500 border-rose-200 hover:bg-rose-200 p-0" onClick={handleReset}>
+                            <RotateCcwIcon className="size-5.5" />
+                        </Button>
+                    )}
+
                 </Fragment>
             ))}
         </div>

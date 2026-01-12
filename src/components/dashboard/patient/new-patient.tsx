@@ -52,8 +52,6 @@ export default function NewPatient({ phone, name, age, sex, userId }: NewPatient
 
     const createOrUpdatePatient = async (values: PatientFormValues): Promise<string> => {
 
-
-
         const apiEndPoint = userId ? `/patient/${userId}` : "/patient/by-clinician";
 
         const [firstName, ...lastNames] = values.name.split(" ");

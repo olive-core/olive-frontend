@@ -13,7 +13,7 @@ const RESEND_OTP_TIME = 30; // seconds
 export default function EnterOtpForm() {
 
     const navigate = useNavigate();
-    const { verifyOtp, phoneNumber, sendOtp } = useAuthStore();
+    const { verifyOtp, phoneNumber, sendOtp, createClinicianProfile } = useAuthStore();
 
     const { exists } = useSearch({ from: '/(auth)/enter-otp' });
 
@@ -55,10 +55,12 @@ export default function EnterOtpForm() {
         try {
             await verifyOtp(phoneNumber, otp.join("").trim());
             toast.success("OTP verified successfully!");
-            if (exists === 1) {
-                navigate({ to: "/dashboard" });
+
+            if (exists === 0) {
+                await createClinicianProfile();
+                navigate({ to: "/dashboard/profile/voiceprint" })
             } else {
-                navigate({ to: "/dashboard/profile/edit" });
+                navigate({ to: "/dashboard" });
             }
         } catch (error) {
             handleError(error, "Failed to verify OTP. Please try again.");

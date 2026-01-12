@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/stores/auth-store";
+import { Outlet, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { Outlet, useNavigate } from "react-router";
 
 export default function AuthLayout() {
 
@@ -10,14 +10,14 @@ export default function AuthLayout() {
 
     useEffect(() => {
         if (isLoggedIn) {
-            navigate("/dashboard");
+            navigate({ to: "/dashboard" });
         }
     }, [isLoggedIn, navigate]);
 
     return (
         <div className="flex flex-col items-center justify-center w-full min-h-screen">
             <Outlet />
-            <Button variant="link" className="mt-8" onClick={() => navigate("/")}>
+            <Button variant="link" className="mt-8" onClick={() => navigate({ to: "/" })}>
                 Back to Home
             </Button>
         </div>

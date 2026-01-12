@@ -5,21 +5,24 @@ import {
     CardContent,
     CardFooter,
 } from "@/components/ui/card"
-import { useNavigate } from "@tanstack/react-router";
+import { useNavigate, useParams } from "@tanstack/react-router";
 import { AudioVisualizerMemo } from "./visualizer";
 // import { Mic, MicOff } from "lucide-react";
 
 export default function Recorder() {
+
+    const { consultationId } = useParams({ from: "/dashboard/consultation/$userId/$consultationId" });
+
     const navigate = useNavigate();
 
-    const { duration, isRecording, stopRecording, discardRecording, stream } = useSessionRecorder({ chunkSizeInMs: 60 * 1000 });
+    const { duration, isRecording, stopRecording, discardRecording, stream } = useSessionRecorder({ chunkSizeInMs: 5 * 1000, consultationId });
     const durationMinutes = Math.floor(duration / 60).toString().padStart(2, '0');
     const durationSeconds = (Math.floor(duration) % 60).toString().padStart(2, '0');
 
 
     const handleStopAndProceed = () => {
         stopRecording();
-        navigate({ to: "/dashboard/prescribe/$consultationId", params: { consultationId: "1" } });
+        navigate({ to: "/dashboard/prescribe/$consultationId", params: { consultationId } });
     }
 
     const handleDiscard = () => {

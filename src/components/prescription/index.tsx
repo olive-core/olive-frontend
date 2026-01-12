@@ -1,9 +1,14 @@
+import { usePrescriptionStore } from "@/stores/prescription-store";
 import DoctorInfo from "./doctor-info";
 import ListInfo from "./list-info";
 import Medicine from "./medicine";
 import PatientInfo from "./patient-info";
 
 export default function Prescription() {
+
+    const { chiefComplaint } = usePrescriptionStore();
+
+
     return (
         <div className="container rounded-xl border">
             <div className="m-4">
@@ -15,16 +20,16 @@ export default function Prescription() {
                     <div className="h-full border-r col-span-1 py-4 flex flex-col gap-2">
                         <ListInfo
                             title="Chief Complaints"
-                            info={[
-                                { name: "Headache", duration: "2 days", notes: "Severe pain in the morning" },
-                                { name: "Fever", duration: "3 days", notes: "Mild fever, up to 100°F" },
-                            ]} />
+                            info={chiefComplaint}
+                            fieldName="chief-complaint"
+                        />
                         <ListInfo
                             title="History"
                             info={[
                                 { name: "Diabetes", duration: "5 years", notes: "On medication" },
                                 { name: "Hypertension", duration: "3 years", notes: "Regular check-ups" },
                             ]}
+                            fieldName="history"
                         />
 
                         <ListInfo
@@ -33,6 +38,7 @@ export default function Prescription() {
                                 { name: "Migraine" },
                                 { name: "Viral Fever" },
                             ]}
+                            fieldName="diagnosis"
                         />
 
                         <ListInfo
@@ -41,6 +47,7 @@ export default function Prescription() {
                                 { name: "Blood Test", notes: "CBC, Blood Sugar" },
                                 { name: "MRI Brain", notes: "To rule out other causes" },
                             ]}
+                            fieldName="investigation"
                         />
                     </div>
 

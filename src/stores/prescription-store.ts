@@ -1,11 +1,10 @@
-import api from "@/lib/axios";
 import type { ChiefComplaintType, DiagnosisType, InvestigationType, MeedicineType, HistoryType } from "@/types/prescription";
 import { create } from "zustand";
 
 
 interface PrescriptionStoreType {
-    patientId: string;
-    sessionId: string;
+    patientId: string | null;
+    sessionId: string | null;
     // patient TODO
 
     chiefComplaint: ChiefComplaintType[];
@@ -18,16 +17,16 @@ interface PrescriptionStoreType {
 
     // methods
     initiatePrescription: (patientId: string, sessionId: string) => void;
-    getInitialPrescription: () => Promise<void>;
+    getInitialPrescription: (prescriptionId: string) => Promise<void>;
 }
 
 export const usePrescriptionStore = create<PrescriptionStoreType>(
-    (set, get) => {
+    (set) => {
         return ({
             patientId: null,
             sessionId: null,
 
-            chiefComplaints: [],
+            chiefComplaint: [],
             history: [],
             diagnosis: [],
             investigation: [],
@@ -38,8 +37,9 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
                 set({ patientId, sessionId });
             },
 
-            getInitialPrescription: async () => {
+            getInitialPrescription: async (prescriptionId) => {
                 // const response = await api.get('get-prescription');
+                console.log(prescriptionId)
 
                 set({
                     chiefComplaint: [
@@ -73,7 +73,19 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
                         {
                             name: "Paracetamol",
                             dosage: "40mg",
-
+                            notes: "ব্যথা হলে খাবেন",
+                            routine: {
+                                afterBreakfast: true,
+                                afterDinner: true,
+                            }
+                        },
+                        {
+                            name: "Fexo",
+                            dosage: "20mg",
+                            notes: "ব্যথা হলে খাবেন",
+                            routine: {
+                                gapHours: 6,
+                            }
                         }
                     ]
                 })

@@ -1,4 +1,6 @@
+// import { useQuery } from "@tanstack/react-query";
 import SearchableSelect from "../shared/searchable-select";
+// import api from "@/lib/axios";
 
 const MEDICINES_DUMMY = [
     { value: "paracetamol", label: "Paracetamol" },
@@ -13,9 +15,15 @@ const MEDICINES_DUMMY = [
     { value: "atorvastatin", label: "Atorvastatin" },
 ]
 
-
 export default function MedicineSelect() {
 
+    // const { data: medicineList, isLoading, isError } = useQuery({
+    //     queryKey: ["medicine-list"],
+    //     queryFn: async () => {
+    //         const response = await api.get("/medicine");
+    //         return response.data;
+    //     }
+    // })
 
     return (
         <SearchableSelect

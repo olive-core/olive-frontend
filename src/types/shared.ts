@@ -2,10 +2,12 @@ import type React from "react";
 import type { Path, FieldValues } from "react-hook-form";
 
 export type ClinicianType = {
-    id: string;
+    id?: string;
     bmdcNo: string;
-    qualification: string;
-    specializations: string;
+    qualification?: string;
+    specializations?: string[];
+    firstName?: string;
+    lastName?: string;
 }
 
 type StepDefTypes = 'input' | 'radio';

@@ -17,6 +17,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
 import { Route as authSignInRouteImport } from './routes/(auth)/sign-in'
 import { Route as authEnterOtpRouteImport } from './routes/(auth)/enter-otp'
+import { Route as DashboardProfileVoiceprintRouteImport } from './routes/dashboard/profile/voiceprint'
 import { Route as DashboardProfileEditRouteImport } from './routes/dashboard/profile/edit'
 import { Route as DashboardProfileUserIdRouteImport } from './routes/dashboard/profile/$userId'
 import { Route as DashboardPrescribeConsultationIdRouteImport } from './routes/dashboard/prescribe.$consultationId'
@@ -61,6 +62,12 @@ const authEnterOtpRoute = authEnterOtpRouteImport.update({
   path: '/enter-otp',
   getParentRoute: () => authRouteRoute,
 } as any)
+const DashboardProfileVoiceprintRoute =
+  DashboardProfileVoiceprintRouteImport.update({
+    id: '/profile/voiceprint',
+    path: '/profile/voiceprint',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any)
 const DashboardProfileEditRoute = DashboardProfileEditRouteImport.update({
   id: '/profile/edit',
   path: '/profile/edit',
@@ -95,6 +102,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/prescribe/$consultationId': typeof DashboardPrescribeConsultationIdRoute
   '/dashboard/profile/$userId': typeof DashboardProfileUserIdRoute
   '/dashboard/profile/edit': typeof DashboardProfileEditRoute
+  '/dashboard/profile/voiceprint': typeof DashboardProfileVoiceprintRoute
   '/dashboard/consultation/$userId/$consultationId': typeof DashboardConsultationUserIdConsultationIdRoute
 }
 export interface FileRoutesByTo {
@@ -107,6 +115,7 @@ export interface FileRoutesByTo {
   '/dashboard/prescribe/$consultationId': typeof DashboardPrescribeConsultationIdRoute
   '/dashboard/profile/$userId': typeof DashboardProfileUserIdRoute
   '/dashboard/profile/edit': typeof DashboardProfileEditRoute
+  '/dashboard/profile/voiceprint': typeof DashboardProfileVoiceprintRoute
   '/dashboard/consultation/$userId/$consultationId': typeof DashboardConsultationUserIdConsultationIdRoute
 }
 export interface FileRoutesById {
@@ -122,6 +131,7 @@ export interface FileRoutesById {
   '/dashboard/prescribe/$consultationId': typeof DashboardPrescribeConsultationIdRoute
   '/dashboard/profile/$userId': typeof DashboardProfileUserIdRoute
   '/dashboard/profile/edit': typeof DashboardProfileEditRoute
+  '/dashboard/profile/voiceprint': typeof DashboardProfileVoiceprintRoute
   '/dashboard/consultation/$userId/$consultationId': typeof DashboardConsultationUserIdConsultationIdRoute
 }
 export interface FileRouteTypes {
@@ -137,6 +147,7 @@ export interface FileRouteTypes {
     | '/dashboard/prescribe/$consultationId'
     | '/dashboard/profile/$userId'
     | '/dashboard/profile/edit'
+    | '/dashboard/profile/voiceprint'
     | '/dashboard/consultation/$userId/$consultationId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -149,6 +160,7 @@ export interface FileRouteTypes {
     | '/dashboard/prescribe/$consultationId'
     | '/dashboard/profile/$userId'
     | '/dashboard/profile/edit'
+    | '/dashboard/profile/voiceprint'
     | '/dashboard/consultation/$userId/$consultationId'
   id:
     | '__root__'
@@ -163,6 +175,7 @@ export interface FileRouteTypes {
     | '/dashboard/prescribe/$consultationId'
     | '/dashboard/profile/$userId'
     | '/dashboard/profile/edit'
+    | '/dashboard/profile/voiceprint'
     | '/dashboard/consultation/$userId/$consultationId'
   fileRoutesById: FileRoutesById
 }
@@ -232,6 +245,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof authEnterOtpRouteImport
       parentRoute: typeof authRouteRoute
     }
+    '/dashboard/profile/voiceprint': {
+      id: '/dashboard/profile/voiceprint'
+      path: '/profile/voiceprint'
+      fullPath: '/dashboard/profile/voiceprint'
+      preLoaderRoute: typeof DashboardProfileVoiceprintRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
     '/dashboard/profile/edit': {
       id: '/dashboard/profile/edit'
       path: '/profile/edit'
@@ -282,6 +302,7 @@ interface DashboardRouteRouteChildren {
   DashboardPrescribeConsultationIdRoute: typeof DashboardPrescribeConsultationIdRoute
   DashboardProfileUserIdRoute: typeof DashboardProfileUserIdRoute
   DashboardProfileEditRoute: typeof DashboardProfileEditRoute
+  DashboardProfileVoiceprintRoute: typeof DashboardProfileVoiceprintRoute
   DashboardConsultationUserIdConsultationIdRoute: typeof DashboardConsultationUserIdConsultationIdRoute
 }
 
@@ -290,6 +311,7 @@ const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
   DashboardPrescribeConsultationIdRoute: DashboardPrescribeConsultationIdRoute,
   DashboardProfileUserIdRoute: DashboardProfileUserIdRoute,
   DashboardProfileEditRoute: DashboardProfileEditRoute,
+  DashboardProfileVoiceprintRoute: DashboardProfileVoiceprintRoute,
   DashboardConsultationUserIdConsultationIdRoute:
     DashboardConsultationUserIdConsultationIdRoute,
 }

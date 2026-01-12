@@ -22,6 +22,10 @@
 - `/api/v1/patient/{user_id}`: should receive name, age or dob (decide?), sex (similar payload as by-clinician) to edit patient.
 - need an API to get medicine list based on query (or, if there is less medicines, can be handled in frontend)
 
+### TODOs
+- doctor create (if not exist)
+- 
+
 
 ### Notes
 **Chief Complaint**
