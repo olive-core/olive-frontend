@@ -36,3 +36,4 @@ export type MeedicineType = {
     }
 }
 
+export type ListInfoFieldName = "chief-complaint" | "history" | "diagnosis" | "investigation"

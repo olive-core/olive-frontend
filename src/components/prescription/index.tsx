@@ -3,6 +3,7 @@ import DoctorInfo from "./doctor-info";
 import ListInfo from "./list-info";
 import Medicine from "./medicine";
 import PatientInfo from "./patient-info";
+import { PlusCircleIcon } from "lucide-react";
 
 export default function Prescription() {
 
@@ -54,6 +55,9 @@ export default function Prescription() {
                     {/* right */}
                     <div className="col-span-2 py-4 px-8">
                         <Medicine />
+                        <div className="flex items-center gap-2 mt-4 cursor-pointer text-emerald-600 hover:text-emerald-700">
+                            <PlusCircleIcon /> Add Medicine
+                        </div>
                     </div>
                 </div>
             </div>
