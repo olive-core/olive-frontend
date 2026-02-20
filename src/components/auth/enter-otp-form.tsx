@@ -29,7 +29,6 @@ export default function EnterOtpForm() {
     const timerRef = useRef<number | null>(null);
 
     useEffect(() => {
-
         timerRef.current = setInterval(() => {
             setResendTimer(prev => prev >= 1 ? prev - 1 : 0);
         }, 1000);
@@ -53,11 +52,14 @@ export default function EnterOtpForm() {
         e.preventDefault();
         setIsLoading(true);
         try {
+            if (exists === 0) {
+                await createClinicianProfile();
+            }
+
             await verifyOtp(phoneNumber, otp.join("").trim());
             toast.success("OTP verified successfully!");
 
             if (exists === 0) {
-                await createClinicianProfile();
                 navigate({ to: "/dashboard/profile/voiceprint" })
             } else {
                 navigate({ to: "/dashboard" });
