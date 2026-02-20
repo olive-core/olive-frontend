@@ -72,9 +72,9 @@ export const useAuthStore = create<AuthStoreType>()(
 
                     const response = await api.post(`/clinician`, {
                         bmdc_no: clinician?.bmdcNo,
-                        medicine_company_ids: [],
+                        // medicine_company_ids: [],
                         qualification: "",
-                        specializations: [],
+                        // specializations: [],
                         first_name: clinician?.firstName || "",
                         last_name: clinician?.lastName || "",
                         phone: phone,
@@ -87,7 +87,7 @@ export const useAuthStore = create<AuthStoreType>()(
                         isLoggedIn: true,
                         accessToken: response.data.access_token,
                         refreshToken: response.data.refresh_token,
-                        userId: response.data.user.id,
+                        userId: response.data.user_id,
                     });
                 },
 
