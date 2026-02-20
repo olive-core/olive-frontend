@@ -5,6 +5,7 @@ export type DoesUserExistResponse = {
 
 export type SendOtpResponse = {
     message: string;
+    user_id: string;
 };
 
 export type VerifyOtpResponse = {

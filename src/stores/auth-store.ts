@@ -41,8 +41,8 @@ export const useAuthStore = create<AuthStoreType>()(
                 },
 
                 sendOtp: async (phone: string) => {
-                    await api.post<SendOtpResponse>(`/auth/send-otp`, { phone });
-                    set({ phoneNumber: phone });
+                    const res = await api.post<SendOtpResponse>(`/auth/send-otp`, { phone });
+                    set({ phoneNumber: phone, userId: res.data?.user_id });
                 },
 
                 verifyOtp: async (phone: string, otp: string) => {
@@ -78,7 +78,8 @@ export const useAuthStore = create<AuthStoreType>()(
                         first_name: clinician?.firstName || "",
                         last_name: clinician?.lastName || "",
                         phone: phone,
-                        otp: otp
+                        otp: otp,
+                        userId: useAuthStore.getState().userId,
                     });
                     console.log(response.data)
                     // set({ clinician: response.data });
