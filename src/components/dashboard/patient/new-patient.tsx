@@ -67,8 +67,13 @@ export default function NewPatient({ phone, name, age, sex, userId }: NewPatient
 
         // TODO: update payload of age or dob (?)
 
-        const response = await api.post(apiEndPoint, payload);
-        return response.data.user_id;
+        if (userId) {
+            await api.put(apiEndPoint, payload);
+            return userId;
+        } else {
+            const response = await api.post(apiEndPoint, payload);
+            return response.data.user_id;
+        }
 
     }
 

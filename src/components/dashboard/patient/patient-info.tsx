@@ -11,8 +11,11 @@ import {
 import { format } from "date-fns";
 import api from "@/lib/axios";
 import type { PatientInfoType, ShowContentStatus } from "@/types/patient";
-import { getAgeFromDOB } from "@/lib/utils";
+import { getAgeFromDOB, handleError } from "@/lib/utils";
 import PatientSkeleton from "./skeleton";
+import { useAuthStore } from "@/stores/auth-store";
+import { useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
 
 
 interface PatientInfoProps {
@@ -20,18 +23,46 @@ interface PatientInfoProps {
     setShowContent: React.Dispatch<React.SetStateAction<ShowContentStatus>>;
 }
 
-export default function PatientInfo({ userId, setShowContent }: PatientInfoProps) {
+export default function PatientInfo({ userId: patientId, setShowContent }: PatientInfoProps) {
+
+    const [isCreatingConsultation, setIsCreatingConsultation] = useState(false);
+    const navigate = useNavigate();
+
 
     const { data: patientData, isLoading, isError } = useQuery({
-        queryKey: ['patient-info', userId],
+        queryKey: ['patient-info', patientId],
         queryFn: async () => {
-            const response = await api.get<PatientInfoType>(`/patient/${userId}`);
+            const response = await api.get<PatientInfoType>(`/patient/${patientId}`);
             return response.data;
         }
     });
 
+    const { userId: clinicianId } = useAuthStore();
+
+
     if (isLoading) {
         return <PatientSkeleton />;
+    }
+
+    const handleStartConsultation = async () => {
+        try {
+            //  create consultation -> navigate to consultation page
+            setIsCreatingConsultation(true);
+
+            const sessionCreateResponse = await api.post("/session", {
+                patient_id: patientId,
+                clinician_id: clinicianId,
+            });
+
+            const sessionId = sessionCreateResponse.data.session_id;
+
+            navigate({ to: "/dashboard/consultation/$userId/$consultationId", params: { userId: patientId, consultationId: sessionId } });
+
+        } catch (error) {
+            handleError(error, "An error occurred while creating the patient.");
+        } finally {
+            setIsCreatingConsultation(false);
+        }
     }
 
     if (isError || !patientData) {
@@ -46,7 +77,7 @@ export default function PatientInfo({ userId, setShowContent }: PatientInfoProps
                 age: getAgeFromDOB(patientData.date_of_birth).toString(),
                 sex: 'male' // TODO: replace with real data
             },
-            userId: userId
+            userId: patientId
         });
     };
 
@@ -76,7 +107,7 @@ export default function PatientInfo({ userId, setShowContent }: PatientInfoProps
                     </Button>
                 </ItemActions>
 
-                <Button className="w-full">
+                <Button className="w-full" onClick={handleStartConsultation} isLoading={isCreatingConsultation} disabled={isCreatingConsultation}>
                     <MicIcon className="inline-block size-4" />
                     Start Consultation
                 </Button>

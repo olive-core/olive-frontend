@@ -15,20 +15,21 @@ const MEDICINES_DUMMY = [
     { value: "atorvastatin", label: "Atorvastatin" },
 ]
 
-export default function MedicineSelect() {
+interface MedicineSelectProps {
+    value?: string,
+    setValue: (value: string) => void,
+}
 
-    // const { data: medicineList, isLoading, isError } = useQuery({
-    //     queryKey: ["medicine-list"],
-    //     queryFn: async () => {
-    //         const response = await api.get("/medicine");
-    //         return response.data;
-    //     }
-    // })
+export default function MedicineSelect({ value, setValue }: MedicineSelectProps) {
+
+
 
     return (
         <SearchableSelect
             options={MEDICINES_DUMMY}
             type="medicine"
+            value={value}
+            setValue={setValue}
         />
     )
 }

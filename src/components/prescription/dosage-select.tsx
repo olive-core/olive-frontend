@@ -8,11 +8,18 @@ const DOSAGE_DUMMY = [
 
 ]
 
-export default function DosageSelect() {
+interface DosageSelectProps {
+    value?: string,
+    setValue: (value: string) => void,
+}
+
+export default function DosageSelect({ value, setValue }: DosageSelectProps) {
     return (
         <SearchableSelect
             options={DOSAGE_DUMMY}
             type="Dosage"
+            value={value}
+            setValue={setValue}
         />
     )
 }

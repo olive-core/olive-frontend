@@ -1,13 +1,37 @@
 import { usePrescriptionStore } from "@/stores/prescription-store";
 import DoctorInfo from "./doctor-info";
 import ListInfo from "./list-info";
-import Medicine from "./medicine";
 import PatientInfo from "./patient-info";
-import { PlusCircleIcon } from "lucide-react";
+import { MedicineContainer } from "./medicine-container";
 
 export default function Prescription() {
 
-    const { chiefComplaint } = usePrescriptionStore();
+    const {
+        // chiefComplaint
+        chiefComplaint,
+        addEmptyChiefComplaint,
+        updateChiefComplaint,
+        removeChiefComplaint,
+
+        // history
+        history,
+        addEmptyHistory,
+        updateHistory,
+        removeHistory,
+
+        // diagnosis
+        diagnosis,
+        addEmptyDiagnosis,
+        updateDiagnosis,
+        removeDiagnosis,
+
+        // investigation
+        investigation,
+        addEmptyInvestigation,
+        updateInvestigation,
+        removeInvestigation,
+
+    } = usePrescriptionStore();
 
 
     return (
@@ -23,42 +47,40 @@ export default function Prescription() {
                             title="Chief Complaints"
                             info={chiefComplaint}
                             fieldName="chief-complaint"
+                            addEmptyItem={addEmptyChiefComplaint}
+                            updateItem={updateChiefComplaint}
+                            removeItem={removeChiefComplaint}
                         />
                         <ListInfo
                             title="History"
-                            info={[
-                                { name: "Diabetes", duration: "5 years", notes: "On medication" },
-                                { name: "Hypertension", duration: "3 years", notes: "Regular check-ups" },
-                            ]}
+                            info={history}
                             fieldName="history"
+                            addEmptyItem={addEmptyHistory}
+                            updateItem={updateHistory}
+                            removeItem={removeHistory}
                         />
 
                         <ListInfo
                             title="Diagnosis"
-                            info={[
-                                { name: "Migraine" },
-                                { name: "Viral Fever" },
-                            ]}
+                            info={diagnosis}
                             fieldName="diagnosis"
+                            addEmptyItem={addEmptyDiagnosis}
+                            updateItem={updateDiagnosis}
+                            removeItem={removeDiagnosis}
                         />
 
                         <ListInfo
                             title="Investigation"
-                            info={[
-                                { name: "Blood Test", notes: "CBC, Blood Sugar" },
-                                { name: "MRI Brain", notes: "To rule out other causes" },
-                            ]}
+                            info={investigation}
                             fieldName="investigation"
+                            addEmptyItem={addEmptyInvestigation}
+                            updateItem={updateInvestigation}
+                            removeItem={removeInvestigation}
                         />
                     </div>
 
                     {/* right */}
-                    <div className="col-span-2 py-4 px-8">
-                        <Medicine />
-                        <div className="flex items-center gap-2 mt-4 cursor-pointer text-emerald-600 hover:text-emerald-700">
-                            <PlusCircleIcon /> Add Medicine
-                        </div>
-                    </div>
+                    <MedicineContainer />
                 </div>
             </div>
         </div>

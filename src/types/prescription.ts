@@ -23,6 +23,7 @@ export type ListInfoType = ChiefComplaintType | HistoryType | DiagnosisType | In
 
 export type MeedicineType = {
     name: string;
+    value: string;
     dosage?: string;
     notes?: string;
     routine: {

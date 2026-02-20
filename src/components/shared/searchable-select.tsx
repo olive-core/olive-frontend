@@ -23,15 +23,18 @@ interface SearchableSelectProps {
         label: string
     }[],
     type: string,
+    value?: string,
+    setValue: (value: string) => void,
 }
 
 
 export default function SearchableSelect({
     options,
     type,
+    value,
+    setValue,
 }: SearchableSelectProps) {
     const [open, setOpen] = React.useState(false)
-    const [value, setValue] = React.useState<string>("")
 
     return (
         <Popover open={open} onOpenChange={setOpen}>

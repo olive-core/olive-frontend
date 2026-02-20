@@ -14,26 +14,30 @@ interface ListInfoProps {
     title: string;
     info: ListInfoType[];
     fieldName: ListInfoFieldName;
+    addEmptyItem: () => void;
+    updateItem: (index: number, data: Partial<ListInfoType>) => void;
+    removeItem: (index: number) => void;
 }
 
-export default function ListInfo({ title, info, fieldName }: ListInfoProps) {
+export default function ListInfo({ title, info, fieldName, addEmptyItem, updateItem, removeItem }: ListInfoProps) {
+    const [editingItemStatus, setEditingItemStatus] = useState<{ index: number, status: "add" | "update" } | null>(null);
+
+    const editingItemIndex = editingItemStatus ? editingItemStatus.index : null;
+    const setEditingItemIndex = (index: number | null) => {
+        if (index === null) {
+            setEditingItemStatus(null);
+        } else {
+            const status = index >= info.length ? "add" : "update";
+            setEditingItemStatus({ index, status });
+        }
+    }
+
     const isDiagnosis = fieldName === "diagnosis";
 
-    // --- DUMMY FUNCTIONALITIES ---
     const handleAdd = () => {
-        console.log(`[Dummy] Add new item to ${fieldName}`);
-        // When you implement the store, you will likely create a blank item here based on the fieldName
-        // e.g., if diagnosis -> { name: "" }, if history -> { name: "", duration: "", notes: "" }
-    };
-
-    const handleUpdate = (index: number, updatedItem: ListInfoType) => {
-        console.log(`[Dummy] Update item at index ${index} in ${fieldName}:`, updatedItem);
-    };
-
-    const handleRemove = (index: number) => {
-        console.log(`[Dummy] Remove item at index ${index} from ${fieldName}`);
-    };
-    // -----------------------------
+        addEmptyItem();
+        setEditingItemIndex(info.length); // Set to the new item's index
+    }
 
     return (
         <div
@@ -41,7 +45,7 @@ export default function ListInfo({ title, info, fieldName }: ListInfoProps) {
             ${isDiagnosis ? "bg-emerald-50/40 border-l-4 border-l-emerald-500 pl-3" : ""}`}
         >
             {/* Header */}
-            <div className="flex items-center justify-between mb-1 px-1">
+            <div className="flex items-center justify-between px-1">
                 <h3 className={`font-bold text-xs uppercase tracking-widest ${isDiagnosis ? "text-emerald-700" : "text-slate-500"}`}>
                     {title} {isDiagnosis && "• Priority"}
                 </h3>
@@ -63,8 +67,11 @@ export default function ListInfo({ title, info, fieldName }: ListInfoProps) {
                         index={index}
                         item={item}
                         isDiagnosis={isDiagnosis}
-                        onUpdate={handleUpdate}
-                        onRemove={handleRemove}
+                        onUpdate={updateItem}
+                        onRemove={removeItem}
+                        editingItemIndex={editingItemIndex}
+                        setEditingItemIndex={setEditingItemIndex}
+                        editingItemStatus={editingItemStatus?.status || null}
                     />
                 ))}
             </div>
@@ -82,31 +89,41 @@ interface InfoItemProps {
     isDiagnosis: boolean;
     onUpdate: (index: number, item: ListInfoType) => void;
     onRemove: (index: number) => void;
+    editingItemIndex: number | null;
+    setEditingItemIndex: (index: number | null) => void;
+    editingItemStatus: "add" | "update" | null;
 }
 
-const InfoItem = ({ item, index, isDiagnosis, onUpdate, onRemove }: InfoItemProps) => {
-    // If name is empty, assume it's a new item being added -> enter edit mode immediately
-    const [isEditing, setIsEditing] = useState(item.name === "");
+const InfoItem = ({ item, index, isDiagnosis, onUpdate, onRemove, editingItemIndex, setEditingItemIndex, editingItemStatus }: InfoItemProps) => {
+
+    const setIsEditing = (value: boolean) => {
+        if (value) {
+            setEditingItemIndex(index);
+        } else {
+            setEditingItemIndex(null);
+        }
+    }
 
     return (
         <div
             className={`group relative transition-all duration-200 rounded-lg border 
-                ${isEditing
+                ${editingItemIndex === index
                     ? "border-emerald-500 bg-white shadow-lg p-4 z-10"
-                    : `p-3 cursor-pointer ${isDiagnosis
+                    : `py-1 px-2 cursor-pointer ${isDiagnosis
                         ? "bg-white/80 border-emerald-100 hover:border-emerald-300"
-                        : "bg-slate-50 hover:bg-white border-transparent hover:border-slate-200"
+                        : "bg-muted hover:bg-accent border-border"
                     }`
                 }`}
-            onClick={() => !isEditing && setIsEditing(true)}
+            onClick={() => setIsEditing(true)}
         >
-            {isEditing ? (
+            {editingItemIndex === index ? (
                 <EditingItem
                     item={item}
                     index={index}
                     setIsEditing={setIsEditing}
                     onUpdate={onUpdate}
                     onRemove={onRemove}
+                    editingItemStatus={editingItemStatus}
                 />
             ) : (
                 <NonEditingItem
@@ -125,9 +142,10 @@ interface EditingItemProps {
     setIsEditing: (value: boolean) => void;
     onUpdate: (index: number, item: ListInfoType) => void;
     onRemove: (index: number) => void;
+    editingItemStatus: "add" | "update" | null;
 }
 
-const EditingItem = ({ item, index, setIsEditing, onUpdate, onRemove }: EditingItemProps) => {
+const EditingItem = ({ item, index, setIsEditing, onUpdate, onRemove, editingItemStatus }: EditingItemProps) => {
     // Local state for the form inputs
     const [localItem, setLocalItem] = useState<ListInfoType>(item);
 
@@ -139,6 +157,14 @@ const EditingItem = ({ item, index, setIsEditing, onUpdate, onRemove }: EditingI
         }
         setIsEditing(false);
     };
+
+    const handleCancel = () => {
+        // If adding a new item and canceling, remove it
+        if (editingItemStatus === "add") {
+            onRemove(index);
+        }
+        setIsEditing(false);
+    }
 
     // Type Guards: Determine what fields are available to edit based on the item type
     const hasDuration = "duration" in localItem;
@@ -215,7 +241,7 @@ const EditingItem = ({ item, index, setIsEditing, onUpdate, onRemove }: EditingI
                         variant="ghost"
                         size="sm"
                         className="h-8 text-xs font-bold text-slate-500"
-                        onClick={() => setIsEditing(false)}
+                        onClick={handleCancel}
                     >
                         CANCEL
                     </Button>
@@ -224,7 +250,7 @@ const EditingItem = ({ item, index, setIsEditing, onUpdate, onRemove }: EditingI
                         className="h-8 text-xs font-bold bg-slate-900 hover:bg-slate-800 px-4 text-white"
                         onClick={handleSave}
                     >
-                        UPDATE ITEM
+                        DONE
                     </Button>
                 </div>
             </div>
@@ -238,14 +264,14 @@ const NonEditingItem = ({ item, index, onRemove }: { item: ListInfoType; index: 
     const notes = "notes" in item ? item.notes : null;
 
     return (
-        <div className="flex justify-between items-start pr-6">
+        <div className="flex justify-between items-center">
             <div className="flex flex-col gap-0.5">
                 <div className="flex items-baseline gap-2">
-                    <span className="font-medium text-slate-800 text-[14px] leading-tight">
+                    <span className="text-slate-800 text-[14px] leading-tight">
                         {item.name || <span className="text-slate-300 italic">Untitled</span>}
                     </span>
                     {duration && (
-                        <span className="text-[11px] font-light text-emerald-600 uppercase tracking-tight">
+                        <span className="text-[11px] text-emerald-600 uppercase tracking-tight">
                             — {duration}
                         </span>
                     )}
@@ -260,7 +286,7 @@ const NonEditingItem = ({ item, index, onRemove }: { item: ListInfoType; index: 
             <Button
                 size="icon"
                 variant="ghost"
-                className="absolute top-2 right-2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity text-slate-300 hover:text-rose-500"
+                className="opacity-0 group-hover:opacity-100 transition-opacity text-slate-500 hover:text-slate-700"
                 onClick={(e) => {
                     e.stopPropagation();
                     onRemove(index);
