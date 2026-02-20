@@ -53,17 +53,14 @@ export default function EnterOtpForm() {
         setIsLoading(true);
         try {
             if (exists === 0) {
-                await createClinicianProfile();
-            }
-
-            await verifyOtp(phoneNumber, otp.join("").trim());
-            toast.success("OTP verified successfully!");
-
-            if (exists === 0) {
+                await createClinicianProfile(phoneNumber, otp.join("").trim());
                 navigate({ to: "/dashboard/profile/voiceprint" })
             } else {
+                await verifyOtp(phoneNumber, otp.join("").trim());
+                toast.success("OTP verified successfully!");
                 navigate({ to: "/dashboard" });
             }
+
         } catch (error) {
             handleError(error, "Failed to verify OTP. Please try again.");
         } finally {

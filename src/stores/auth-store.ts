@@ -20,7 +20,7 @@ interface AuthStoreType {
     verifyOtp: (phone: string, otp: string) => Promise<void>;
 
     storeClinicianInfo: (data: ClinicianType) => void;
-    createClinicianProfile: () => Promise<void>;
+    createClinicianProfile: (phone: string, otp: string) => Promise<void>;
 }
 
 export const useAuthStore = create<AuthStoreType>()(
@@ -66,9 +66,7 @@ export const useAuthStore = create<AuthStoreType>()(
                     })
                 },
 
-                createClinicianProfile: async () => {
-                    const userId = useAuthStore.getState().userId;
-                    if (!userId) throw new Error("User ID is missing");
+                createClinicianProfile: async (phone: string, otp: string) => {
 
                     const clinician = useAuthStore.getState().clinician;
 
@@ -77,12 +75,19 @@ export const useAuthStore = create<AuthStoreType>()(
                         medicine_company_ids: [],
                         qualification: "",
                         specializations: [],
-                        user_id: userId,
                         first_name: clinician?.firstName || "",
-                        last_name: clinician?.lastName || ""
+                        last_name: clinician?.lastName || "",
+                        phone: phone,
+                        otp: otp
                     });
                     console.log(response.data)
-                    set({ clinician: response.data });
+                    // set({ clinician: response.data });
+                    set({
+                        isLoggedIn: true,
+                        accessToken: response.data.access_token,
+                        refreshToken: response.data.refresh_token,
+                        userId: response.data.user.id,
+                    });
                 },
 
 
