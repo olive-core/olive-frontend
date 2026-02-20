@@ -79,7 +79,7 @@ export const useAuthStore = create<AuthStoreType>()(
                         last_name: clinician?.lastName || "",
                         phone: phone,
                         otp: otp,
-                        userId: useAuthStore.getState().userId,
+                        // userId: useAuthStore.getState().userId,
                     });
                     console.log(response.data)
                     // set({ clinician: response.data });
