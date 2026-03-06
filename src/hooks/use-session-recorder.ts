@@ -21,7 +21,7 @@ export default function useSessionRecorder({
     const [duration, setDuration] = useState<number>(0);
     const [isRecording, setIsRecording] = useState<boolean>(false);
 
-    const audioChunksRef = useRef<Blob[]>([]);
+    const audioChunksRef = useRef<Blob[]>([]); // Used for collecting chunks within a single recording
     const streamRef = useRef<MediaStream | null>(null);
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const startTimeRef = useRef<number>(0);
@@ -36,7 +36,6 @@ export default function useSessionRecorder({
             formData.append("session_id", consultationId);
             formData.append('chunk_index', chunkIndexRef.current.toString());
             formData.append('is_last_chunk', isLastChunk.toString());
-
             await api.post('/conversation/chunk', formData);
         } catch (error) {
             console.error("Error sending audio chunk:", error);
@@ -78,27 +77,30 @@ export default function useSessionRecorder({
 
     const stopRecording = useCallback(() => {
         if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+            mediaRecorderRef.current.onstop = () => {
+                if (audioChunksRef.current.length > 0) {
+                    const finalChunk = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+                    sendAudioChunk(finalChunk, true);
+                }
+                cleanup();
+            };
             mediaRecorderRef.current.stop();
+        } else {
+            cleanup();
         }
         setIsRecording(false);
-
-        // Send final chunk
-        if (audioChunksRef.current.length > 0) {
-            const finalChunk = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-            sendAudioChunk(finalChunk, true);
-        }
-
-        cleanup();
     }, [sendAudioChunk, cleanup]);
 
     const discardRecording = useCallback(() => {
         if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+            mediaRecorderRef.current.onstop = () => {
+                cleanup();
+            };
             mediaRecorderRef.current.stop();
+        } else {
+            cleanup();
         }
-
-        // send an api call to notify discard if needed
         setIsRecording(false);
-        cleanup();
     }, [cleanup]);
 
     const handleDataAvailable = useCallback((event: BlobEvent) => {
@@ -126,31 +128,41 @@ export default function useSessionRecorder({
 
             streamRef.current = stream;
 
-            const mediaRecorder = new MediaRecorder(stream, {
-                mimeType: 'audio/webm;codecs=opus'
-            });
-
-            mediaRecorderRef.current = mediaRecorder;
-
-            // Set up event handlers
-            mediaRecorder.ondataavailable = handleDataAvailable;
-
-            mediaRecorder.onstop = () => {
-                // This gets called when mediaRecorder.stop() is called
-                console.log("MediaRecorder stopped");
+            // Helper to start a new MediaRecorder
+            const startNewRecorder = () => {
+                const mediaRecorder = new MediaRecorder(stream, {
+                    mimeType: 'audio/webm;codecs=opus'
+                });
+                mediaRecorderRef.current = mediaRecorder;
+                audioChunksRef.current = [];
+                mediaRecorder.ondataavailable = handleDataAvailable;
+                mediaRecorder.onstop = () => {
+                    // Send chunk when stopped
+                    if (audioChunksRef.current.length > 0) {
+                        const chunk = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+                        sendAudioChunk(chunk, false);
+                        audioChunksRef.current = [];
+                    }
+                };
+                mediaRecorder.start();
             };
 
-            // Start recording
-            mediaRecorder.start(1000); // Collect data every second
             setIsRecording(true);
             startTimeRef.current = Date.now();
 
-            // Set up chunk sending interval
+            // Start first recorder
+            startNewRecorder();
+
+            // Set up chunk interval: stop and restart recorder every chunkSizeInMs
             intervalRef.current = setInterval(() => {
-                if (mediaRecorder.state === "recording" && audioChunksRef.current.length > 0) {
-                    const chunk = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-                    sendAudioChunk(chunk, false);
-                    audioChunksRef.current = []; // Clear after sending
+                if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
+                    mediaRecorderRef.current.stop();
+                    // After stop, onstop handler will send chunk and startNewRecorder will be called
+                    setTimeout(() => {
+                        if (streamRef.current) {
+                            startNewRecorder();
+                        }
+                    }, 100); // Small delay to ensure onstop completes
                 }
             }, chunkSizeInMs);
 

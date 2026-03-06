@@ -15,7 +15,7 @@ export default function Recorder() {
 
     const navigate = useNavigate();
 
-    const { duration, isRecording, stopRecording, discardRecording, stream } = useSessionRecorder({ chunkSizeInMs: 5 * 1000, consultationId });
+    const { duration, isRecording, stopRecording, discardRecording, stream } = useSessionRecorder({ chunkSizeInMs: 30 * 1000, consultationId });
     const durationMinutes = Math.floor(duration / 60).toString().padStart(2, '0');
     const durationSeconds = (Math.floor(duration) % 60).toString().padStart(2, '0');
 

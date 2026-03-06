@@ -3,7 +3,7 @@ import { memo, useEffect, useRef } from "react";
 
 function AudioVisualizer({ stream }: { stream: MediaStream | null }) {
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
-    const { historyRef } = useAudioVisualizer(stream, { durationSec: 25, fps: 20 });
+    const { historyRef } = useAudioVisualizer(stream, { durationSec: 30, fps: 20 });
 
     useEffect(() => {
         const canvas = canvasRef.current;
