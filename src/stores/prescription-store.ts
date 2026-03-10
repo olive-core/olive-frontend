@@ -1,4 +1,4 @@
-import type { ChiefComplaintType, DiagnosisType, InvestigationType, MeedicineType, HistoryType } from "@/types/prescription";
+import type { ChiefComplaintType, DiagnosisType, InvestigationType, MeedicineType, HistoryType, PrescriptionResponseType } from "@/types/prescription";
 import { create } from "zustand";
 
 
@@ -17,7 +17,7 @@ interface PrescriptionStoreType {
 
     // methods
     initiatePrescription: (patientId: string, sessionId: string) => void;
-    getInitialPrescription: (prescriptionId: string) => Promise<void>;
+    getInitialPrescription: (data: PrescriptionResponseType) => Promise<void>;
 
     // chief complaint methods
     addChiefComplaint: (data: ChiefComplaintType) => void;
@@ -67,58 +67,43 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
                 set({ patientId, sessionId });
             },
 
-            getInitialPrescription: async (prescriptionId) => {
-                // const response = await api.get('get-prescription');
-                console.log(prescriptionId)
-                // DUMMY
+            getInitialPrescription: async (data: PrescriptionResponseType) => {
+                const chiefComplaint = data.chief_complaints?.map(item => ({
+                    name: item.complaint_name,
+                    notes: item.clinical_note,
+                }))
+
+                const history = data.history?.map(item => ({
+                    name: item.history_name,
+                    notes: item.clinical_note,
+                }))
+
+                const diagnosis = data.diagnoses?.map(item => ({
+                    name: item.diagnosis_name,
+                    ...item
+                }))
+
+                const medicine = data.medicines?.map(item => ({
+                    name: item.trade_name,
+                    value: item.generic_name,
+                    dosage: item.dosage,
+                    notes: item.duration,
+                    routine: {
+                        afterBreakfast: true,
+                        afterDinner: true,
+                    }
+                }))
+
+                const investigation = data.investigations?.map(item => ({
+                    name: item.investigation_name,
+                }))
+
                 set({
-                    chiefComplaint: [
-                        {
-                            name: "Headache",
-                            duration: "2 days",
-                            notes: "Severe pain in the morning",
-                        },
-                        {
-                            name: "Fever",
-                            duration: "3 days",
-                            notes: "Mild fever"
-                        }
-                    ],
-                    history: [
-                        {
-                            name: "Diabetes",
-                            duration: "5 years",
-                            notes: "On medication"
-                        },
-                        {
-                            name: "Hypertension",
-                            duration: "3 years",
-                        },
-                    ],
-                    diagnosis: [
-                        { name: "Migraine" },
-                        { name: "Viral Fever" }
-                    ],
-                    medicine: [
-                        {
-                            name: "Paracetamol",
-                            value: "paracetamol",
-                            dosage: "40_mg",
-                            notes: "ব্যথা হলে খাবেন",
-                            routine: {
-                                afterBreakfast: true,
-                                afterDinner: true,
-                            }
-                        },
-                        {
-                            name: "Ibuprofen",
-                            value: "ibuprofen",
-                            notes: "ব্যথা হলে খাবেন",
-                            routine: {
-                                gapHours: 6,
-                            }
-                        }
-                    ]
+                    chiefComplaint,
+                    history,
+                    diagnosis,
+                    medicine,
+                    investigation
                 })
             },
 
