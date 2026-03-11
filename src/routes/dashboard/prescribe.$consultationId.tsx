@@ -17,9 +17,7 @@ function RouteComponent() {
     queryKey: ['prescription', consultationId],
     queryFn: async (): Promise<PrescriptionResponseType> => {
       const res = await api.post('/aris/generate', {
-        "session_id": "string",
-        "dialogue": "Doctor: কী সমস্যা বলুন। Patient: বুকের মধ্যে চাপ লাগে ডাক্তার। Doctor: কোন পাশে? Patient: বাম দিকে, কাজ করলে বেশি হয়। Doctor: কতদিন ধরে হচ্ছে? Patient: দুই তিন দিন। Doctor: ব্যথা কি হাতে বা ঘাড়ে যায়? Patient: হ্যাঁ, বাম হাতে যায়। Doctor: তখন ঘাম বা শ্বাস কষ্ট হয়? Patient: হ্যাঁ, খুব ভয় লাগে তখন। Doctor: সুগার বা প্রেসার আছে? Patient: সুগার আছে আট বছর। Doctor: এটা সিরিয়াস হতে পারে, এখনই ইসিজি আর ট্রোপোনিন টেস্ট করাতে হবে।",
-        "force_variant": ""
+        session_id: consultationId,
       })
 
       return res.data
