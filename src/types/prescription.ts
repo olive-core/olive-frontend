@@ -20,6 +20,8 @@ export type DiagnosisType = {
 export type InvestigationType = {
     name: string;
     notes?: string;
+    reason?: string;
+    priority?: string;
 };
 
 export type ListInfoType = ChiefComplaintType | HistoryType | DiagnosisType | InvestigationType;

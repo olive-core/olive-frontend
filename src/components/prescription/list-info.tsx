@@ -1,4 +1,4 @@
-import { PlusCircle, Trash2, XIcon } from "lucide-react";
+import { InfoIcon, PlusCircle, Trash2, XIcon } from "lucide-react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { useState } from "react";
@@ -9,6 +9,7 @@ import type {
     ListInfoType,
     ChiefComplaintType,
 } from "@/types/prescription";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 
 interface ListInfoProps {
     title: string;
@@ -17,9 +18,10 @@ interface ListInfoProps {
     addEmptyItem: () => void;
     updateItem: (index: number, data: Partial<ListInfoType>) => void;
     removeItem: (index: number) => void;
+    suggestionList?: string[]; // Optional list of suggestions for autocomplete
 }
 
-export default function ListInfo({ title, info, fieldName, addEmptyItem, updateItem, removeItem }: ListInfoProps) {
+export default function ListInfo({ title, info, fieldName, addEmptyItem, updateItem, removeItem, suggestionList }: ListInfoProps) {
     const [editingItemStatus, setEditingItemStatus] = useState<{ index: number, status: "add" | "update" } | null>(null);
 
     const editingItemIndex = editingItemStatus ? editingItemStatus.index : null;
@@ -32,6 +34,8 @@ export default function ListInfo({ title, info, fieldName, addEmptyItem, updateI
         }
     }
 
+
+
     const isDiagnosis = fieldName === "diagnosis";
 
     const handleAdd = () => {
@@ -42,12 +46,12 @@ export default function ListInfo({ title, info, fieldName, addEmptyItem, updateI
     return (
         <div
             className={`flex flex-col gap-2 p-2 rounded-xl transition-colors duration-300 
-            ${isDiagnosis ? "bg-emerald-50/40 border-l-4 border-l-emerald-500 pl-3" : ""}`}
+            ${isDiagnosis ? "bg-emerald-50/40 border-2 border-emerald-500 pl-3" : ""}`}
         >
             {/* Header */}
             <div className="flex items-center justify-between px-1">
                 <h3 className={`font-bold text-xs uppercase tracking-widest ${isDiagnosis ? "text-emerald-700" : "text-slate-500"}`}>
-                    {title} {isDiagnosis && "• Priority"}
+                    {title}
                 </h3>
                 <Button
                     variant="ghost"
@@ -72,6 +76,7 @@ export default function ListInfo({ title, info, fieldName, addEmptyItem, updateI
                         editingItemIndex={editingItemIndex}
                         setEditingItemIndex={setEditingItemIndex}
                         editingItemStatus={editingItemStatus?.status || null}
+                        suggestionList={suggestionList}
                     />
                 ))}
             </div>
@@ -92,9 +97,10 @@ interface InfoItemProps {
     editingItemIndex: number | null;
     setEditingItemIndex: (index: number | null) => void;
     editingItemStatus: "add" | "update" | null;
+    suggestionList?: string[]; // Optional suggestions for autocomplete
 }
 
-const InfoItem = ({ item, index, isDiagnosis, onUpdate, onRemove, editingItemIndex, setEditingItemIndex, editingItemStatus }: InfoItemProps) => {
+const InfoItem = ({ item, index, isDiagnosis, onUpdate, onRemove, editingItemIndex, setEditingItemIndex, editingItemStatus, suggestionList }: InfoItemProps) => {
 
     const setIsEditing = (value: boolean) => {
         if (value) {
@@ -124,6 +130,7 @@ const InfoItem = ({ item, index, isDiagnosis, onUpdate, onRemove, editingItemInd
                     onUpdate={onUpdate}
                     onRemove={onRemove}
                     editingItemStatus={editingItemStatus}
+                    suggestionList={suggestionList}
                 />
             ) : (
                 <NonEditingItem
@@ -143,11 +150,19 @@ interface EditingItemProps {
     onUpdate: (index: number, item: ListInfoType) => void;
     onRemove: (index: number) => void;
     editingItemStatus: "add" | "update" | null;
+    suggestionList?: string[]; // Optional suggestions for autocomplete
 }
 
-const EditingItem = ({ item, index, setIsEditing, onUpdate, onRemove, editingItemStatus }: EditingItemProps) => {
+const EditingItem = ({ item, index, setIsEditing, onUpdate, onRemove, editingItemStatus, suggestionList }: EditingItemProps) => {
     // Local state for the form inputs
     const [localItem, setLocalItem] = useState<ListInfoType>(item);
+    const [isFocused, setIsFocused] = useState(false);
+
+    const filteredSuggestions = suggestionList?.filter(
+        (name) =>
+            name.toLowerCase().includes(localItem.name.toLowerCase()) &&
+            name.toLowerCase() !== localItem.name.toLowerCase()
+    ) || [];
 
     const handleSave = () => {
         if (!localItem.name.trim()) {
@@ -177,7 +192,7 @@ const EditingItem = ({ item, index, setIsEditing, onUpdate, onRemove, editingIte
                 {/* Name Input - Always present */}
                 <div className="flex-1 space-y-1">
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">
-                        Condition Name
+                        Name
                     </p>
                     <Input
                         autoFocus
@@ -185,7 +200,27 @@ const EditingItem = ({ item, index, setIsEditing, onUpdate, onRemove, editingIte
                         value={localItem.name}
                         onChange={(e) => setLocalItem({ ...localItem, name: e.target.value })}
                         onKeyDown={(e) => e.key === "Enter" && handleSave()}
+                        onFocus={() => setIsFocused(true)}
+                        onBlur={() => setTimeout(() => setIsFocused(false), 150)} // Delay blur so click registers on suggestions
                     />
+
+                    {/* Custom Dropdown Menu */}
+                    {isFocused && filteredSuggestions.length > 0 && (
+                        <ul className="absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded-md shadow-lg max-h-48 overflow-auto">
+                            {filteredSuggestions.map((name) => (
+                                <li
+                                    key={name}
+                                    className="px-3 py-2 text-sm cursor-pointer hover:bg-slate-100 text-slate-700"
+                                    onMouseDown={() => {
+                                        setLocalItem({ ...localItem, name: name });
+                                        setIsFocused(false);
+                                    }}
+                                >
+                                    {name}
+                                </li>
+                            ))}
+                        </ul>
+                    )}
                 </div>
 
                 {/* Duration Input - Conditional */}
@@ -262,6 +297,38 @@ const NonEditingItem = ({ item, index, onRemove }: { item: ListInfoType; index: 
     // Safely access properties using checking
     const duration = "duration" in item ? item.duration : null;
     const notes = "notes" in item ? item.notes : null;
+    const confidence = "confidence" in item ? item.confidence : null;
+    const icd_code = "icd_code" in item ? item.icd_code : null;
+    const clinical_reasoning = "clinical_reasoning" in item ? item.clinical_reasoning : null;
+    const investigation_reason = "reason" in item ? item.reason : null;
+    const investigation_priority = "priority" in item ? item.priority : null;
+
+    const getPriorityStyle = (priority: string | null | undefined) => {
+        switch (priority?.toLowerCase()) {
+            case "urgent":
+                return {
+                    label: "Urgent",
+                    badge: "bg-rose-50 text-rose-600",
+                    border: "border-rose-400"
+                };
+            case "routine":
+                return {
+                    label: "Routine",
+                    badge: "bg-amber-50 text-amber-600",
+                    border: "border-amber-400"
+                };
+            case "low":
+                return {
+                    label: "Low",
+                    badge: "bg-emerald-50 text-emerald-600",
+                    border: "border-emerald-400"
+                };
+            default:
+                return null;
+        }
+    };
+
+    const priorityStyle = getPriorityStyle(investigation_priority);
 
     return (
         <div className="flex justify-between items-center">
@@ -281,6 +348,69 @@ const NonEditingItem = ({ item, index, onRemove }: { item: ListInfoType; index: 
                         {notes}
                     </p>
                 )}
+
+                {(icd_code || confidence || clinical_reasoning || investigation_reason || investigation_priority) && (
+                    <div className="flex flex-col gap-1.5 mt-1.5 border-l-2 border-emerald-100 pl-2">
+
+                        {/* Meta Row: ICD, Confidence, & Reasoning Tooltip */}
+                        <div className="flex items-center gap-3">
+                            {icd_code && (
+                                <span className="text-[10px] font-mono font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">
+                                    {icd_code}
+                                </span>
+                            )}
+
+                            {confidence && (
+                                <div className="flex items-center gap-1.5" title={`Confidence: ${confidence}%`}>
+                                    {/* Visual Confidence Bar */}
+                                    <div className="w-16 h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                                        <div
+                                            className={`h-full rounded-full transition-all duration-500 ${confidence >= 85 ? 'bg-emerald-500' :
+                                                confidence >= 60 ? 'bg-amber-400' :
+                                                    'bg-rose-500'
+                                                }`}
+                                            style={{ width: `${Math.min(Math.max(confidence, 0), 100)}%` }}
+                                        />
+                                    </div>
+                                    <span className="text-[10px] font-bold text-slate-500">
+                                        {confidence}%
+                                    </span>
+                                </div>
+                            )}
+
+                            {/* Investigation Priority */}
+                            {priorityStyle && (
+                                <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${priorityStyle.badge}`}>
+                                    {priorityStyle.label}
+                                </span>
+                            )}
+
+                            {/* Reasoning Tooltip */}
+                            {(clinical_reasoning || investigation_reason) && (
+                                <TooltipProvider>
+                                    <Tooltip delayDuration={200}>
+                                        <TooltipTrigger asChild>
+                                            <button
+                                                type="button"
+                                                className="text-slate-400 hover:text-emerald-600 transition-colors flex items-center justify-center cursor-help"
+                                            >
+                                                {/* Assuming you are using lucide-react or similar for icons */}
+                                                <InfoIcon className="h-3.5 w-3.5" />
+                                            </button>
+                                        </TooltipTrigger>
+                                        <TooltipContent side="top" className="max-w-[250px] bg-slate-800 text-white p-2 rounded shadow-lg text-[12px] leading-relaxed">
+                                            <p>
+                                                <span className="text-emerald-400 font-semibold mr-1">Reasoning:</span>
+                                                {clinical_reasoning || investigation_reason}
+                                            </p>
+                                        </TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
+                            )}
+                        </div>
+                    </div>
+                )}
+
             </div>
 
             <Button

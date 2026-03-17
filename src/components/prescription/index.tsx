@@ -3,6 +3,7 @@ import DoctorInfo from "./doctor-info";
 import ListInfo from "./list-info";
 import PatientInfo from "./patient-info";
 import { MedicineContainer } from "./medicine-container";
+import { useSuggestionList } from "@/hooks/use-suggestion-list";
 
 export default function Prescription() {
 
@@ -33,6 +34,13 @@ export default function Prescription() {
 
     } = usePrescriptionStore();
 
+    const {
+        chiefComplaints: suggestionChiefComplaints,
+        history: suggestionHistory,
+        diagnosis: suggestionDiagnosis,
+        // medicines: suggestionMedicines,
+    } = useSuggestionList();
+
 
     return (
         <div className="container rounded-xl border">
@@ -50,6 +58,7 @@ export default function Prescription() {
                             addEmptyItem={addEmptyChiefComplaint}
                             updateItem={updateChiefComplaint}
                             removeItem={removeChiefComplaint}
+                            suggestionList={suggestionChiefComplaints}
                         />
                         <ListInfo
                             title="History"
@@ -58,6 +67,7 @@ export default function Prescription() {
                             addEmptyItem={addEmptyHistory}
                             updateItem={updateHistory}
                             removeItem={removeHistory}
+                            suggestionList={suggestionHistory}
                         />
 
                         <ListInfo
@@ -67,6 +77,7 @@ export default function Prescription() {
                             addEmptyItem={addEmptyDiagnosis}
                             updateItem={updateDiagnosis}
                             removeItem={removeDiagnosis}
+                            suggestionList={suggestionDiagnosis}
                         />
 
                         <ListInfo
@@ -76,6 +87,7 @@ export default function Prescription() {
                             addEmptyItem={addEmptyInvestigation}
                             updateItem={updateInvestigation}
                             removeItem={removeInvestigation}
+                            suggestionList={[]} // NOT AVAILABLE IN CURRENT API
                         />
                     </div>
 

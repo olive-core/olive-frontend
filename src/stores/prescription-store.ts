@@ -96,6 +96,8 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
 
                 const investigation = data.investigations?.map(item => ({
                     name: item.investigation_name,
+                    reason: item.reason,
+                    priority: item.priority,
                 }))
 
                 set({
