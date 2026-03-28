@@ -158,11 +158,12 @@ const EditingItem = ({ item, index, setIsEditing, onUpdate, onRemove, editingIte
     const [localItem, setLocalItem] = useState<ListInfoType>(item);
     const [isFocused, setIsFocused] = useState(false);
 
-    const filteredSuggestions = suggestionList?.filter(
-        (name) =>
-            name.toLowerCase().includes(localItem.name.toLowerCase()) &&
-            name.toLowerCase() !== localItem.name.toLowerCase()
-    ) || [];
+    const filteredSuggestions = suggestionList
+        ?.filter(
+            (name) =>
+                name.toLowerCase().includes(localItem.name.toLowerCase()) &&
+                name.toLowerCase() !== localItem.name.toLowerCase()
+        ) || [];
 
     const handleSave = () => {
         if (!localItem.name.trim()) {

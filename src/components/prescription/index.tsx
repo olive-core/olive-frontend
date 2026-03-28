@@ -8,6 +8,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { useReactToPrint } from 'react-to-print';
 import { useRef } from "react";
+import { usePrescriptionMetadata } from "@/hooks/use-prescription-metadata";
 
 export default function Prescription() {
 
@@ -41,8 +42,21 @@ export default function Prescription() {
         addEmptyInvestigation,
         updateInvestigation,
         removeInvestigation,
-
     } = store;
+
+    const {
+        medicineList,
+        chiefComplaintList,
+        historyList,
+        diagnosisList
+    } = usePrescriptionMetadata();
+
+    console.log(
+        "medicine: ", medicineList.data,
+        "chiefComplaint: ", chiefComplaintList.data,
+        "history: ", historyList.data,
+        "diagnosis: ", diagnosisList.data,
+    )
 
     const confirmMutation = useMutation({
         mutationFn: async () => {
@@ -80,7 +94,7 @@ export default function Prescription() {
                             addEmptyItem={addEmptyChiefComplaint}
                             updateItem={updateChiefComplaint}
                             removeItem={removeChiefComplaint}
-                            suggestionList={[]}
+                            suggestionList={chiefComplaintList?.data?.map((item: { name: string }) => item.name) || []}
                         />
                         <ListInfo
                             title="History"
@@ -89,7 +103,7 @@ export default function Prescription() {
                             addEmptyItem={addEmptyHistory}
                             updateItem={updateHistory}
                             removeItem={removeHistory}
-                            suggestionList={[]}
+                            suggestionList={historyList?.data?.map((item: { name: string }) => item.name) || []}
                         />
 
                         <ListInfo
@@ -99,7 +113,7 @@ export default function Prescription() {
                             addEmptyItem={addEmptyDiagnosis}
                             updateItem={updateDiagnosis}
                             removeItem={removeDiagnosis}
-                            suggestionList={[]}
+                            suggestionList={diagnosisList?.data?.map((item: { name: string }) => item.name) || []}
                         />
 
                         <ListInfo
