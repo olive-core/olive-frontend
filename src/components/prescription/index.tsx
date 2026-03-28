@@ -50,6 +50,7 @@ export default function Prescription() {
             await api.post('/prescription/complete', payload);
         },
         onSuccess: () => {
+            // TODO: remove editing details
             // print the prescription
             handlePrint();
             navigate({ to: '/dashboard' });
@@ -69,9 +70,9 @@ export default function Prescription() {
                 <DoctorInfo />
                 <PatientInfo />
 
-                <div className="grid grid-cols-3">
+                <div className="grid grid-cols-1 md:grid-cols-3">
                     {/* left */}
-                    <div className="h-full border-r col-span-1 py-4 flex flex-col gap-2">
+                    <div className="h-full md:border-r md:col-span-1 border-b md:border-b-0 py-4 flex flex-col gap-2">
                         <ListInfo
                             title="Chief Complaints"
                             info={chiefComplaint}

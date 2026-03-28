@@ -2,7 +2,7 @@ import { format } from "date-fns";
 
 export default function PatientInfo() {
     return (
-        <div className="border-y py-2 flex items-center justify-between text-sm mt-5">
+        <div className="border-y py-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 text-sm mt-5">
             <div className="flex gap-4">
                 <p className="text-slate-500">
                     Name: <span className="font-semibold">Patient Name</span>

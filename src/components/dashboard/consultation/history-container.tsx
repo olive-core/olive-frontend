@@ -11,7 +11,7 @@ interface HistoryContainerProps {
 export default function HistoryContainer({ histories, activeHistoryId, setActiveHistoryId }: HistoryContainerProps) {
 
     return (
-        <Card className="flex flex-col max-h-[calc(60%-32px)]">
+        <Card className="flex flex-col md:max-h-[calc(60vh-32px)]">
             <CardHeader className="font-display text-xl">History</CardHeader>
 
             <CardContent className="flex-1 overflow-auto">

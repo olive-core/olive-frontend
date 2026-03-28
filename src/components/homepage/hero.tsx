@@ -7,9 +7,9 @@ export default function HeroSection() {
     return (
         <section className="bg-radial from-primary/13 to-transparent">
             <div className="flex items-center justify-center container mx-auto">
-                <div className="flex flex-col items-center max-w-4xl text-center py-32 lg:py-48">
+                <div className="flex flex-col items-center max-w-4xl text-center py-24 sm:py-32 lg:py-48">
 
-                    <TextAnimate animation="blurInUp" by="line" once className="font-display text-4xl md:text-5xl leading-16 font-light" as="h2">
+                    <TextAnimate animation="blurInUp" by="line" once className="font-display text-3xl sm:text-4xl md:text-5xl leading-tight md:leading-16 font-light" as="h2">
                         {"Turn Every Consultation Into a \n\n Ready-to-Edit Prescription"}
                     </TextAnimate>
 

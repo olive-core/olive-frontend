@@ -78,11 +78,11 @@ function RouteComponent() {
   };
 
   return (
-    <div className="container mt-10">
-      <div className="grid grid-cols-2 max-h-[calc(100vh-100px)] w-full gap-8">
+    <div className="container mt-10 pb-10">
+      <div className="grid grid-cols-1 md:grid-cols-2 md:max-h-[calc(100vh-100px)] w-full gap-8">
 
-        <div className="flex flex-col max-h-[calc(100vh-100px)] gap-8">
-          <div className="h-[40%]">
+        <div className="flex flex-col md:max-h-[calc(100vh-100px)] gap-8">
+          <div className="md:h-[40%]">
             <Recorder />
           </div>
 

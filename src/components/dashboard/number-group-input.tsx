@@ -107,37 +107,39 @@ function NumberGroupInput({
 
 
     return (
-        <div className="mx-auto flex items-center">
-            {Array.from({ length: inputLength }).map((_, index) => (
-                <Fragment key={index}>
-                    <input
-                        ref={inputRefs[index]}
-                        type="text"
-                        value={numberInput[index]}
-                        maxLength={1}
-                        className={cn(
-                            "w-10 h-10 text-center border border-gray-300 focus:outline-primary disabled:bg-slate-200",
-                            (index === secondGroupStartIndex || index === inputLength - 1) ? "border-r" : "border-r-0",
-                            index === inputLength - 1 ? "rounded-r-lg" : "rounded-r-none",
-                            index === 0 ? "rounded-l-lg" : "rounded-l-none"
+        <div className="mx-auto overflow-x-auto max-w-full pb-1">
+            <div className="flex items-center w-max mx-auto">
+                {Array.from({ length: inputLength }).map((_, index) => (
+                    <Fragment key={index}>
+                        <input
+                            ref={inputRefs[index]}
+                            type="text"
+                            value={numberInput[index]}
+                            maxLength={1}
+                            className={cn(
+                                "w-8 h-8 sm:w-10 sm:h-10 text-center text-sm sm:text-base border border-gray-300 focus:outline-primary disabled:bg-slate-200",
+                                (index === secondGroupStartIndex || index === inputLength - 1) ? "border-r" : "border-r-0",
+                                index === inputLength - 1 ? "rounded-r-lg" : "rounded-r-none",
+                                index === 0 ? "rounded-l-lg" : "rounded-l-none"
+                            )}
+                            disabled={index < dynamicValuesStartIndex}
+                            autoFocus={index === dynamicValuesStartIndex}
+                            onKeyDown={(e) => handleKeyDown(e, index)}
+                            onChange={() => { }}
+                            onPaste={(e) => handlePaste(e, index)}
+                        />
+
+                        {index === secondGroupStartIndex ? <span className="mx-1 sm:mx-2">-</span> : null}
+
+                        {index === inputLength - 1 && (
+                            <Button size="icon" className="ml-2 sm:ml-3 w-8 h-8 sm:w-10 sm:h-10 rounded-lg border flex items-center justify-center bg-rose-100 text-rose-500 border-rose-200 hover:bg-rose-200 p-0" onClick={handleReset}>
+                                <RotateCcwIcon className="size-4 sm:size-5" />
+                            </Button>
                         )}
-                        disabled={index < dynamicValuesStartIndex}
-                        autoFocus={index === dynamicValuesStartIndex}
-                        onKeyDown={(e) => handleKeyDown(e, index)}
-                        onChange={() => { }}
-                        onPaste={(e) => handlePaste(e, index)}
-                    />
 
-                    {index === secondGroupStartIndex ? <span className="mx-2">-</span> : null}
-
-                    {index === inputLength - 1 && (
-                        <Button size="icon" className="ml-3 w-10 h-10 rounded-lg border flex items-center justify-center bg-rose-100 text-rose-500 border-rose-200 hover:bg-rose-200 p-0" onClick={handleReset}>
-                            <RotateCcwIcon className="size-5.5" />
-                        </Button>
-                    )}
-
-                </Fragment>
-            ))}
+                    </Fragment>
+                ))}
+            </div>
         </div>
     )
 }

@@ -39,7 +39,7 @@ export default function ValuesSection() {
 
             <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-x-24 gap-y-16 mb-24">
                 {values.map((value, index) => (
-                    <div key={index} className="flex gap-12 items-end group">
+                    <div key={index} className="flex gap-6 sm:gap-12 items-end group">
                         <div className="relative bg-emerald-200/50 rounded-tl-lg rounded-br-4xl outline-2 outline-offset-4 outline-dashed outline-emerald-200 p-8 flex items-center justify-center">
                             {value.icon}
                         </div>
