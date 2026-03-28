@@ -23,36 +23,7 @@
 - need an API to get medicine list based on query (or, if there is less medicines, can be handled in frontend)
 
 ### TODOs
-- doctor create (if not exist)
-- 
-
-
-### Notes
-**Chief Complaint**
-- duration
-- note
-- name
-
-**history**
-- duration
-- notes
-- name
-
-**diagnosis**
-- diagnosis name
-
-**investigation**
-- name
-- status
-- result link
-
-**medicine**
-- name (company)
-- dosage
-- routine
-    - before_breakfast, after_breakfast, before_lunch, after_lunch, before_dinner, after_dinner, gap_hour
-
-**advice**
-- body text
-
-**follow up**
+- medicines
+- add update/delete func in presc
+- add oe tab
+- show summary

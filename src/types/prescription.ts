@@ -1,16 +1,19 @@
 export type ChiefComplaintType = {
+    // id: string;
     name: string;
     duration?: string;
     notes?: string;
 };
 
 export type HistoryType = {
+    // id: string;
     name: string;
     duration?: string;
     notes?: string;
 };
 
 export type DiagnosisType = {
+    // id: string;
     name: string;
     icd_code?: string;
     confidence?: number;
@@ -18,6 +21,7 @@ export type DiagnosisType = {
 };
 
 export type InvestigationType = {
+    // id: string;
     name: string;
     notes?: string;
     reason?: string;
