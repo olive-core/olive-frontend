@@ -6,12 +6,16 @@ import { MedicineContainer } from "./medicine-container";
 import api from "@/lib/axios";
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate, useParams } from "@tanstack/react-router";
+import { useReactToPrint } from 'react-to-print';
+import { useRef } from "react";
 
 export default function Prescription() {
 
     const store = usePrescriptionStore();
     const navigate = useNavigate();
     const { consultationId } = useParams({ from: '/dashboard/prescribe/$consultationId' });
+
+    const prescriptionRef = useRef(null);
 
     const {
         // chiefComplaint
@@ -46,13 +50,22 @@ export default function Prescription() {
             await api.post('/prescription/complete', payload);
         },
         onSuccess: () => {
+            // print the prescription
+            handlePrint();
             navigate({ to: '/dashboard' });
         }
     });
 
+    const handlePrint = useReactToPrint({
+        contentRef: prescriptionRef,
+        documentTitle: "Prescription_Report",
+        // Optional: logic to run after print
+        onAfterPrint: () => console.log("Print completed"),
+    });
+
     return (
         <div className="container rounded-xl border flex flex-col mt-4 mb-12">
-            <div className="m-4">
+            <div className="m-4" ref={prescriptionRef}>
                 <DoctorInfo />
                 <PatientInfo />
 
@@ -102,8 +115,8 @@ export default function Prescription() {
 
             {/* Master Confirm Button */}
             <div className="p-4 border-t flex justify-end bg-slate-50 rounded-b-xl">
-                <button 
-                    onClick={() => confirmMutation.mutate()} 
+                <button
+                    onClick={() => confirmMutation.mutate()}
                     disabled={confirmMutation.isPending}
                     className="h-9 px-8 font-bold bg-slate-900 text-white hover:bg-slate-800 rounded-lg shadow-md transition-colors disabled:opacity-50"
                 >
