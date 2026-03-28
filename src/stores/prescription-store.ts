@@ -18,6 +18,7 @@ interface PrescriptionStoreType {
     // methods
     initiatePrescription: (patientId: string, sessionId: string) => void;
     getInitialPrescription: (data: PrescriptionResponseType) => Promise<void>;
+    getSubmitPayload: (sessionId: string) => Record<string, any>;
 
     // chief complaint methods
     addChiefComplaint: (data: ChiefComplaintType) => void;
@@ -51,7 +52,7 @@ interface PrescriptionStoreType {
 }
 
 export const usePrescriptionStore = create<PrescriptionStoreType>(
-    (set) => {
+    (set, get) => {
         return ({
             patientId: null,
             sessionId: null,
@@ -70,18 +71,22 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
             getInitialPrescription: async (data: PrescriptionResponseType) => {
                 const chiefComplaint = data.chief_complaints?.map(item => ({
                     name: item.complaint_name,
-                    notes: item.clinical_note,
-                }))
+                    duration: "", // duration not present in type
+                    notes: item.clinical_note || "",
+                })) || []
 
                 const history = data.history?.map(item => ({
                     name: item.history_name,
-                    notes: item.clinical_note,
-                }))
+                    duration: "", // duration not present in type
+                    notes: item.clinical_note || "",
+                })) || []
 
                 const diagnosis = data.diagnoses?.map(item => ({
                     name: item.diagnosis_name,
-                    ...item
-                }))
+                    icd_code: item.icd_code,
+                    confidence: item.confidence,
+                    clinical_reasoning: item.clinical_reasoning
+                })) || []
 
                 const medicine = data.medicines?.map(item => ({
                     name: item.trade_name,
@@ -89,14 +94,19 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
                     dosage: item.dosage,
                     notes: item.duration,
                     routine: {
-                        afterBreakfast: true,
-                        afterDinner: true,
+                        beforeBreakfast: item.routine?.meal_times?.includes('before_breakfast'),
+                        afterBreakfast: item.routine?.meal_times?.includes('after_breakfast'),
+                        beforeLunch: item.routine?.meal_times?.includes('before_lunch'),
+                        afterLunch: item.routine?.meal_times?.includes('after_lunch'),
+                        beforeDinner: item.routine?.meal_times?.includes('before_dinner'),
+                        afterDinner: item.routine?.meal_times?.includes('after_dinner'),
                     }
-                }))
+                })) || []
 
                 const investigation = data.investigations?.map(item => ({
                     name: item.investigation_name,
-                }))
+                    notes: item.reason || ""
+                })) || []
 
                 set({
                     chiefComplaint,
@@ -105,6 +115,52 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
                     medicine,
                     investigation
                 })
+            },
+
+            getSubmitPayload: (sessionId: string) => {
+                const state = get()
+                return {
+                    session_id: sessionId,
+                    chief_complaints: state.chiefComplaint.map(item => ({
+                        ccn_id: null,
+                        name_text: item.name,
+                        duration: item.duration,
+                        notes: item.notes
+                    })),
+                    histories: state.history.map(item => ({
+                        hn_id: null,
+                        name_text: item.name,
+                        duration: item.duration,
+                        notes: item.notes
+                    })),
+                    diagnoses: state.diagnosis.map(item => ({
+                        dn_id: null,
+                        name_text: item.name
+                    })),
+                    investigations: state.investigation.map(item => ({
+                        investigation_name_id: null,
+                        name_text: item.name,
+                        reason: item.notes,
+                        priority: "routine"
+                    })),
+                    rx_list: state.medicine.map(item => ({
+                        medicine_id: null,
+                        trade_name: item.name,
+                        generic_name: item.value,
+                        dosage: item.dosage,
+                        duration: item.notes,
+                        routine: {
+                            before_breakfast: item.routine?.beforeBreakfast || false,
+                            after_breakfast: item.routine?.afterBreakfast || false,
+                            before_lunch: item.routine?.beforeLunch || false,
+                            after_lunch: item.routine?.afterLunch || false,
+                            before_dinner: item.routine?.beforeDinner || false,
+                            after_dinner: item.routine?.afterDinner || false,
+                            gap_hour: 0
+                        }
+                    })),
+                    advice_list: []
+                }
             },
 
             // chief complaint methods
