@@ -77,6 +77,7 @@ export default function ListInfo({ title, info, fieldName, addEmptyItem, updateI
                         setEditingItemIndex={setEditingItemIndex}
                         editingItemStatus={editingItemStatus?.status || null}
                         suggestionList={suggestionList}
+                        fieldName={fieldName}
                     />
                 ))}
             </div>
@@ -98,9 +99,10 @@ interface InfoItemProps {
     setEditingItemIndex: (index: number | null) => void;
     editingItemStatus: "add" | "update" | null;
     suggestionList?: string[]; // Optional suggestions for autocomplete
+    fieldName: ListInfoFieldName;
 }
 
-const InfoItem = ({ item, index, isDiagnosis, onUpdate, onRemove, editingItemIndex, setEditingItemIndex, editingItemStatus, suggestionList }: InfoItemProps) => {
+const InfoItem = ({ item, index, isDiagnosis, onUpdate, onRemove, editingItemIndex, setEditingItemIndex, editingItemStatus, suggestionList, fieldName }: InfoItemProps) => {
 
     const setIsEditing = (value: boolean) => {
         if (value) {
@@ -137,6 +139,7 @@ const InfoItem = ({ item, index, isDiagnosis, onUpdate, onRemove, editingItemInd
                     item={item}
                     index={index}
                     onRemove={onRemove}
+                    fieldName={fieldName}
                 />
             )}
         </div>
@@ -294,14 +297,14 @@ const EditingItem = ({ item, index, setIsEditing, onUpdate, onRemove, editingIte
     );
 };
 
-const NonEditingItem = ({ item, index, onRemove }: { item: ListInfoType; index: number; onRemove: (i: number) => void }) => {
+const NonEditingItem = ({ item, index, onRemove, fieldName }: { item: ListInfoType; index: number; onRemove: (i: number) => void, fieldName: ListInfoFieldName }) => {
     // Safely access properties using checking
     const duration = "duration" in item ? item.duration : null;
     const notes = "notes" in item ? item.notes : null;
     const confidence = "confidence" in item ? item.confidence : null;
     const icd_code = "icd_code" in item ? item.icd_code : null;
     const clinical_reasoning = "clinical_reasoning" in item ? item.clinical_reasoning : null;
-    const investigation_reason = "reason" in item ? item.reason : null;
+    const investigation_reason = "notes" in item && fieldName === "investigation" ? item.notes : null;
     const investigation_priority = "priority" in item ? item.priority : null;
 
     const getPriorityStyle = (priority: string | null | undefined) => {
@@ -344,14 +347,14 @@ const NonEditingItem = ({ item, index, onRemove }: { item: ListInfoType; index: 
                         </span>
                     )}
                 </div>
-                {notes && (
+                {notes && !investigation_reason && (
                     <p className="text-[12px] text-slate-500 font-medium leading-relaxed italic">
                         {notes}
                     </p>
                 )}
 
                 {(icd_code || confidence || clinical_reasoning || investigation_reason || investigation_priority) && (
-                    <div className="flex flex-col gap-1.5 mt-1.5 border-l-2 border-emerald-100 pl-2">
+                    <div className="flex flex-col gap-1.5 mt-1.5 border-l-2 border-emerald-400 pl-2">
 
                         {/* Meta Row: ICD, Confidence, & Reasoning Tooltip */}
                         <div className="flex items-center gap-3">

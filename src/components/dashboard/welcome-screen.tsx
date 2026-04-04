@@ -11,8 +11,11 @@ import NumberGroupInputMemo from "./number-group-input";
 import PatientSkeleton from "./patient/skeleton";
 import NewPatient from "./patient/new-patient";
 import type { ShowContentStatus } from "@/types/patient";
+import { useAuthStore } from "@/stores/auth-store";
 
 export default function WelcomeScreen() {
+
+    const clinician = useAuthStore(state => state.clinician);
 
     const [showContent, setShowContent] = useState<ShowContentStatus>({ status: "NOTHING" });
     const [phoneNumber, setPhoneNumber] = useState<string[]>(["0", "1"].concat(Array(9).fill(" ")));
@@ -56,7 +59,7 @@ export default function WelcomeScreen() {
 
             <motion.div className="flex flex-col items-center justify-center mb-10">
                 <TextAnimate animation="blurInUp" by="character" once as="h3" className="font-display text-3xl md:text-xl leading-10 font-light text-center">
-                    Welcome, Dr. Smith!
+                    {`Welcome, Dr. ${clinician?.firstName ?? ""} ${clinician?.lastName ?? ""!}`}
                 </TextAnimate>
                 <p className="my-4 text-center text-gray-600">
                     <PhoneIcon className="inline-block mr-1 size-4" />

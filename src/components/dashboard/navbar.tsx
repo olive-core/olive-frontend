@@ -23,31 +23,31 @@ type MenuItemType = {
 }
 
 const MENU_ITEMS: MenuItemType[] = [
-    {
-        label: "Statistics",
-        icon: <ChartNoAxesColumnIcon />,
-        href: "/dashboard/statistics",
-    },
-    {
-        label: "Session History",
-        icon: <HistoryIcon />,
-        href: "/dashboard/history",
-    },
+    // {
+    //     label: "Statistics",
+    //     icon: <ChartNoAxesColumnIcon />,
+    //     href: "/dashboard/statistics",
+    // },
+    // {
+    //     label: "Session History",
+    //     icon: <HistoryIcon />,
+    //     href: "/dashboard/history",
+    // },
     {
         label: "Profile",
         icon: <UserIcon />,
         href: "/dashboard/profile",
     },
-    {
-        label: "Settings",
-        icon: <SettingsIcon />,
-        href: "/dashboard/settings",
-    },
-    {
-        label: "Billing",
-        icon: <HandCoinsIcon />,
-        href: "/dashboard/billing",
-    },
+    // {
+    //     label: "Settings",
+    //     icon: <SettingsIcon />,
+    //     href: "/dashboard/settings",
+    // },
+    // {
+    //     label: "Billing",
+    //     icon: <HandCoinsIcon />,
+    //     href: "/dashboard/billing",
+    // },
     {
         label: "Logout",
         icon: <LogOutIcon />,

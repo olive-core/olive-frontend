@@ -4,15 +4,16 @@ import {
 
     Trash2,
     Info,
+    PillIcon,
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Tabs, TabsList, TabsTrigger } from "../ui/tabs";
-import MedicineSelect from "./medicine-select";
-import DosageSelect from "./dosage-select";
 import type { MeedicineType } from "@/types/prescription";
 import { cn } from "@/lib/utils";
+import api from "@/lib/axios";
+import DebouncedSearchSelect, { type Option } from "./debounced-search-select";
 
 interface MedicineProps {
     medicine: MeedicineType,
@@ -25,9 +26,14 @@ interface MedicineProps {
 
 export default function MedicineEdit({ medicine, onRemove, onUpdate, index, setIsEditing, editingItemStatus }: MedicineProps) {
     const [routineMode, setRoutineMode] = useState<string>(medicine?.routine?.gapHours ? "interval" : "meal");
-    const [medicineValue, setMedicineValue] = useState<string>(medicine.value || "");
-    const [dosageValue, setDosageValue] = useState<string>(medicine.dosage || "");
+    const [medicineValue, setMedicineValue] = useState<Option>({
+        label: medicine.name,
+        value: medicine.name
+    });
     const [gapHour, setGapHour] = useState<string>(medicine.routine?.gapHours ? medicine.routine.gapHours.toString() : "");
+
+    const [notes, setNotes] = useState<string>(medicine.notes || "");
+    const [dosage, setDosage] = useState<string>(medicine.dosage ?? "");
 
     const [breakfastTiming, setBreakfastTiming] = useState<"none" | "before" | "after">(medicine.routine?.beforeBreakfast ? "before" : medicine.routine?.afterBreakfast ? "after" : "none");
     const [lunchTiming, setLunchTiming] = useState<"none" | "before" | "after">(medicine.routine?.beforeLunch ? "before" : medicine.routine?.afterLunch ? "after" : "none");
@@ -47,8 +53,9 @@ export default function MedicineEdit({ medicine, onRemove, onUpdate, index, setI
         } else {
             onUpdate(index, {
                 ...medicine,
-                value: medicineValue,
-                dosage: dosageValue,
+                value: medicineValue.label,
+                notes,
+                dosage,
                 routine: routineMode === "interval" ? {
                     gapHours: gapHour ? parseInt(gapHour) : undefined,
                 } : {
@@ -71,6 +78,20 @@ export default function MedicineEdit({ medicine, onRemove, onUpdate, index, setI
         setIsEditing(false, index);
     }
 
+    const fetchMedicine = async (query: string) => {
+        const res = await api.post<{
+            generic_name_strength: string;
+        }[]>("/medicine/search", {
+            query,
+            search_in: "both",
+        })
+
+        return res.data.map(item => ({
+            label: item.generic_name_strength ?? "",
+            value: item.generic_name_strength ?? "",
+        }));
+    }
+
     return (
         <div className="bg-white border border-primary shadow-xl rounded-2xl overflow-hidden transition-all  duration-200">
 
@@ -79,12 +100,15 @@ export default function MedicineEdit({ medicine, onRemove, onUpdate, index, setI
                 {/* Section 1: Identity */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="sm:col-span-1 space-y-1.5 flex flex-col">
-                        <label className="text-[11px] font-semibold text-slate-500 ml-1">Medicine Name</label>
-                        <MedicineSelect value={medicineValue} setValue={setMedicineValue} />
-                    </div>
-                    <div className="sm:col-span-1 space-y-1.5 flex flex-col">
-                        <label className="text-[11px] font-semibold text-slate-500 ml-1">Dosage</label>
-                        <DosageSelect value={dosageValue} setValue={setDosageValue} />
+                        <label className="text-[11px] font-semibold text-slate-500 ml-1">Medicine</label>
+                        <DebouncedSearchSelect
+                            value={medicineValue}
+                            onChange={option => {
+                                setMedicineValue(option || { label: "", value: "" })
+                            }}
+                            fetchOptions={fetchMedicine}
+                            queryKeyBase={"medicine-search"}
+                        />
                     </div>
                 </div>
 
@@ -127,6 +151,20 @@ export default function MedicineEdit({ medicine, onRemove, onUpdate, index, setI
                     </div>
                 </div>
 
+                {/* DOSAGE */}
+                <div className="space-y-1.5">
+                    <div className="flex items-center gap-1.5 ml-1 text-amber-600">
+                        <PillIcon size={12} />
+                        <label className="text-[11px] font-semibold uppercase">Dosage</label>
+                    </div>
+                    <Input
+                        placeholder="e.g. 1 tablet"
+                        className="h-10 text-sm border-slate-200 bg-white placeholder:text-slate-400 focus-visible:ring-slate-200 shadow-sm"
+                        value={dosage}
+                        onChange={e => setDosage(e.target.value)}
+                    />
+                </div>
+
                 {/* Section 3: Notes */}
                 <div className="space-y-1.5">
                     <div className="flex items-center gap-1.5 ml-1 text-amber-600">
@@ -136,6 +174,8 @@ export default function MedicineEdit({ medicine, onRemove, onUpdate, index, setI
                     <Input
                         placeholder="e.g. If pain persists, only after dinner..."
                         className="h-10 text-sm border-slate-200 bg-white placeholder:text-slate-400 focus-visible:ring-slate-200 shadow-sm"
+                        value={notes}
+                        onChange={e => setNotes(e.target.value)}
                     />
                 </div>
             </div>

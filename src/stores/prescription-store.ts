@@ -89,7 +89,7 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
                 })) || []
 
                 const medicine = data.medicines?.map(item => ({
-                    name: item.trade_name,
+                    name: item.generic_name,
                     value: item.generic_name,
                     dosage: item.dosage,
                     notes: item.duration,
@@ -105,7 +105,8 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
 
                 const investigation = data.investigations?.map(item => ({
                     name: item.investigation_name,
-                    notes: item.reason || ""
+                    notes: item.reason || "",
+                    priority: item.priority || "routine"
                 })) || []
 
                 set({
@@ -145,7 +146,7 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
                     })),
                     rx_list: state.medicine.map(item => ({
                         medicine_id: null,
-                        trade_name: item.name,
+                        trade_name: item.value,
                         generic_name: item.value,
                         dosage: item.dosage,
                         duration: item.notes,

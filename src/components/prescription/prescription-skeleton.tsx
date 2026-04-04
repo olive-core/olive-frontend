@@ -1,0 +1,190 @@
+import { useEffect, useState } from "react";
+import { SparklesIcon } from "lucide-react";
+import DoctorInfo from "./doctor-info";
+import PatientInfo from "./patient-info";
+
+// ─── Sliding AI text phrases ───────────────────────────────────────────────────
+const AI_PHRASES = [
+  "Analyzing conversation...",
+  "Identifying chief complaints...",
+  "Cross-referencing symptoms...",
+  "Evaluating diagnosis criteria...",
+  "Consulting clinical knowledge base...",
+  "Scoring differential diagnoses...",
+  "Reviewing drug interactions...",
+  "Calculating dosage parameters...",
+  "Drafting prescription...",
+  "Finalizing recommendations...",
+];
+
+// ─── Cycling AI status text ────────────────────────────────────────────────────
+function AiStatusText() {
+  const [phraseIndex, setPhraseIndex] = useState(0);
+  const [visible, setVisible] = useState(true);
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setVisible(false);
+      setTimeout(() => {
+        setPhraseIndex((prev) => (prev + 1) % AI_PHRASES.length);
+        setVisible(true);
+      }, 400);
+    }, 2200);
+
+    return () => clearInterval(intervalId);
+  }, []);
+
+  return (
+    <span
+      className="text-emerald-600 text-sm font-semibold tracking-wide transition-all duration-400"
+      style={{ opacity: visible ? 1 : 0, transform: visible ? "translateY(0)" : "translateY(6px)" }}
+    >
+      {AI_PHRASES[phraseIndex]}
+    </span>
+  );
+}
+
+// ─── Shimmer line ──────────────────────────────────────────────────────────────
+function ShimmerLine({ width = "100%", thin = false }: { width?: string; thin?: boolean }) {
+  return (
+    <div
+      className={`relative overflow-hidden rounded-full bg-slate-100 ${thin ? "h-2" : "h-3"}`}
+      style={{ width }}
+    >
+      <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.6s_infinite] bg-gradient-to-r from-transparent via-white/70 to-transparent" />
+    </div>
+  );
+}
+
+// ─── Section header ────────────────────────────────────────────────────────────
+function SectionHeader({ label, highlight = false }: { label: string; highlight?: boolean }) {
+  return (
+    <div className="flex items-center justify-between px-1 mb-2">
+      <h3
+        className={`font-bold text-xs uppercase tracking-widest ${
+          highlight ? "text-emerald-400" : "text-slate-300"
+        }`}
+      >
+        {label}
+      </h3>
+      <SparklesIcon className="w-3 h-3 text-emerald-300 animate-pulse" />
+    </div>
+  );
+}
+
+// ─── Skeleton list section ─────────────────────────────────────────────────────
+function SkeletonListSection({
+  label,
+  itemCount = 2,
+  highlight = false,
+}: {
+  label: string;
+  itemCount?: number;
+  highlight?: boolean;
+}) {
+  return (
+    <div
+      className={`flex flex-col gap-2 p-2 rounded-xl ${
+        highlight ? "bg-emerald-50/30 border-2 border-emerald-200/60" : ""
+      }`}
+    >
+      <SectionHeader label={label} highlight={highlight} />
+      <div className="flex flex-col gap-1.5">
+        {Array.from({ length: itemCount }).map((_, i) => (
+          <div
+            key={i}
+            className="py-1 px-2 rounded-lg border border-slate-100 bg-slate-50 flex flex-col gap-1"
+          >
+            <ShimmerLine width={i % 2 === 0 ? "70%" : "55%"} />
+            {highlight && <ShimmerLine width="80%" thin />}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─── Skeleton medicine card ────────────────────────────────────────────────────
+function SkeletonMedicineCard({ index }: { index: number }) {
+  const widths = ["65%", "80%", "50%", "72%"];
+  return (
+    <div className="border border-slate-100 rounded-xl p-3 flex flex-col gap-2 bg-white/60">
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex flex-col gap-1.5 flex-1">
+          <ShimmerLine width={widths[index % widths.length]} />
+          <ShimmerLine width="40%" thin />
+        </div>
+        <div className="h-5 w-16 rounded-full bg-emerald-50 border border-emerald-100 animate-pulse" />
+      </div>
+      <div className="flex gap-2 pt-1 border-t border-slate-50">
+        <ShimmerLine width="45%" thin />
+        <ShimmerLine width="30%" thin />
+      </div>
+    </div>
+  );
+}
+
+// ─── Main PrescriptionSkeleton ─────────────────────────────────────────────────
+export default function PrescriptionSkeleton() {
+  return (
+    <div className="container rounded-xl border flex flex-col mt-4 mb-12 overflow-hidden">
+      <div className="m-4">
+        {/* ── Real Doctor & Patient info ─────────────────────────── */}
+        <DoctorInfo />
+        <PatientInfo />
+
+        {/* ── AI Status block ────────────────────────────────────── */}
+        <div className="flex items-center gap-3 py-3 px-4 my-3 rounded-xl bg-gradient-to-r from-emerald-50 to-slate-50 border border-emerald-100">
+          <SparklesIcon className="w-4 h-4 text-emerald-500 animate-pulse shrink-0" />
+          <AiStatusText />
+          <span className="flex gap-1 ml-auto">
+            {[0, 1, 2].map((i) => (
+              <span
+                key={i}
+                className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-bounce"
+                style={{ animationDelay: `${i * 0.18}s` }}
+              />
+            ))}
+          </span>
+        </div>
+
+        {/* ── Skeleton clinical content ──────────────────────────── */}
+        <div className="grid grid-cols-1 md:grid-cols-3">
+          {/* Left panel */}
+          <div className="h-full md:border-r md:col-span-1 border-b md:border-b-0 py-4 flex flex-col gap-2">
+            <SkeletonListSection label="Chief Complaints" itemCount={2} />
+            <SkeletonListSection label="History" itemCount={1} />
+            <SkeletonListSection label="Diagnosis" itemCount={2} highlight />
+            <SkeletonListSection label="Investigation" itemCount={2} />
+          </div>
+
+          {/* Right panel – Medicines */}
+          <div className="md:col-span-2 py-4 px-4 md:px-8">
+            <div className="pt-2">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-semibold text-md text-emerald-300">Medicine (Rx)</h3>
+                <SparklesIcon className="w-3.5 h-3.5 text-emerald-300 animate-pulse" />
+              </div>
+              <div className="flex flex-col gap-2">
+                {[0, 1, 2, 3].map((i) => (
+                  <SkeletonMedicineCard key={i} index={i} />
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Footer skeleton */}
+      <div className="p-4 border-t flex justify-end bg-slate-50 rounded-b-xl">
+        <div className="h-9 w-28 rounded-lg bg-slate-200 animate-pulse" />
+      </div>
+
+      <style>{`
+        @keyframes shimmer {
+          100% { transform: translateX(200%); }
+        }
+      `}</style>
+    </div>
+  );
+}

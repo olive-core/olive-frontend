@@ -79,8 +79,7 @@ export default function NewPatient({ phone, name, age, sex, userId }: NewPatient
 
     const mutation = useMutation({
         mutationFn: createOrUpdatePatient,
-        onSuccess: (data, variables) => {
-            console.log("Patient created/updated with ID:", data, variables);
+        onSuccess: () => {
             // TODO: Invalidate or update relevant queries if needed
         }
     })

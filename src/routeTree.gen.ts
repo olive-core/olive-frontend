@@ -17,9 +17,9 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
 import { Route as authSignInRouteImport } from './routes/(auth)/sign-in'
 import { Route as authEnterOtpRouteImport } from './routes/(auth)/enter-otp'
+import { Route as DashboardProfileIndexRouteImport } from './routes/dashboard/profile/index'
 import { Route as DashboardProfileVoiceprintRouteImport } from './routes/dashboard/profile/voiceprint'
 import { Route as DashboardProfileEditRouteImport } from './routes/dashboard/profile/edit'
-import { Route as DashboardProfileUserIdRouteImport } from './routes/dashboard/profile/$userId'
 import { Route as DashboardPrescribeConsultationIdRouteImport } from './routes/dashboard/prescribe.$consultationId'
 import { Route as DashboardConsultationUserIdConsultationIdRouteImport } from './routes/dashboard/consultation.$userId.$consultationId'
 
@@ -62,6 +62,11 @@ const authEnterOtpRoute = authEnterOtpRouteImport.update({
   path: '/enter-otp',
   getParentRoute: () => authRouteRoute,
 } as any)
+const DashboardProfileIndexRoute = DashboardProfileIndexRouteImport.update({
+  id: '/profile/',
+  path: '/profile/',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
 const DashboardProfileVoiceprintRoute =
   DashboardProfileVoiceprintRouteImport.update({
     id: '/profile/voiceprint',
@@ -71,11 +76,6 @@ const DashboardProfileVoiceprintRoute =
 const DashboardProfileEditRoute = DashboardProfileEditRouteImport.update({
   id: '/profile/edit',
   path: '/profile/edit',
-  getParentRoute: () => DashboardRouteRoute,
-} as any)
-const DashboardProfileUserIdRoute = DashboardProfileUserIdRouteImport.update({
-  id: '/profile/$userId',
-  path: '/profile/$userId',
   getParentRoute: () => DashboardRouteRoute,
 } as any)
 const DashboardPrescribeConsultationIdRoute =
@@ -100,9 +100,9 @@ export interface FileRoutesByFullPath {
   '/sign-in': typeof authSignInRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/dashboard/prescribe/$consultationId': typeof DashboardPrescribeConsultationIdRoute
-  '/dashboard/profile/$userId': typeof DashboardProfileUserIdRoute
   '/dashboard/profile/edit': typeof DashboardProfileEditRoute
   '/dashboard/profile/voiceprint': typeof DashboardProfileVoiceprintRoute
+  '/dashboard/profile': typeof DashboardProfileIndexRoute
   '/dashboard/consultation/$userId/$consultationId': typeof DashboardConsultationUserIdConsultationIdRoute
 }
 export interface FileRoutesByTo {
@@ -113,9 +113,9 @@ export interface FileRoutesByTo {
   '/sign-in': typeof authSignInRoute
   '/dashboard': typeof DashboardIndexRoute
   '/dashboard/prescribe/$consultationId': typeof DashboardPrescribeConsultationIdRoute
-  '/dashboard/profile/$userId': typeof DashboardProfileUserIdRoute
   '/dashboard/profile/edit': typeof DashboardProfileEditRoute
   '/dashboard/profile/voiceprint': typeof DashboardProfileVoiceprintRoute
+  '/dashboard/profile': typeof DashboardProfileIndexRoute
   '/dashboard/consultation/$userId/$consultationId': typeof DashboardConsultationUserIdConsultationIdRoute
 }
 export interface FileRoutesById {
@@ -129,9 +129,9 @@ export interface FileRoutesById {
   '/(auth)/sign-in': typeof authSignInRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/dashboard/prescribe/$consultationId': typeof DashboardPrescribeConsultationIdRoute
-  '/dashboard/profile/$userId': typeof DashboardProfileUserIdRoute
   '/dashboard/profile/edit': typeof DashboardProfileEditRoute
   '/dashboard/profile/voiceprint': typeof DashboardProfileVoiceprintRoute
+  '/dashboard/profile/': typeof DashboardProfileIndexRoute
   '/dashboard/consultation/$userId/$consultationId': typeof DashboardConsultationUserIdConsultationIdRoute
 }
 export interface FileRouteTypes {
@@ -145,9 +145,9 @@ export interface FileRouteTypes {
     | '/sign-in'
     | '/dashboard/'
     | '/dashboard/prescribe/$consultationId'
-    | '/dashboard/profile/$userId'
     | '/dashboard/profile/edit'
     | '/dashboard/profile/voiceprint'
+    | '/dashboard/profile'
     | '/dashboard/consultation/$userId/$consultationId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -158,9 +158,9 @@ export interface FileRouteTypes {
     | '/sign-in'
     | '/dashboard'
     | '/dashboard/prescribe/$consultationId'
-    | '/dashboard/profile/$userId'
     | '/dashboard/profile/edit'
     | '/dashboard/profile/voiceprint'
+    | '/dashboard/profile'
     | '/dashboard/consultation/$userId/$consultationId'
   id:
     | '__root__'
@@ -173,9 +173,9 @@ export interface FileRouteTypes {
     | '/(auth)/sign-in'
     | '/dashboard/'
     | '/dashboard/prescribe/$consultationId'
-    | '/dashboard/profile/$userId'
     | '/dashboard/profile/edit'
     | '/dashboard/profile/voiceprint'
+    | '/dashboard/profile/'
     | '/dashboard/consultation/$userId/$consultationId'
   fileRoutesById: FileRoutesById
 }
@@ -245,6 +245,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof authEnterOtpRouteImport
       parentRoute: typeof authRouteRoute
     }
+    '/dashboard/profile/': {
+      id: '/dashboard/profile/'
+      path: '/profile'
+      fullPath: '/dashboard/profile'
+      preLoaderRoute: typeof DashboardProfileIndexRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
     '/dashboard/profile/voiceprint': {
       id: '/dashboard/profile/voiceprint'
       path: '/profile/voiceprint'
@@ -257,13 +264,6 @@ declare module '@tanstack/react-router' {
       path: '/profile/edit'
       fullPath: '/dashboard/profile/edit'
       preLoaderRoute: typeof DashboardProfileEditRouteImport
-      parentRoute: typeof DashboardRouteRoute
-    }
-    '/dashboard/profile/$userId': {
-      id: '/dashboard/profile/$userId'
-      path: '/profile/$userId'
-      fullPath: '/dashboard/profile/$userId'
-      preLoaderRoute: typeof DashboardProfileUserIdRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
     '/dashboard/prescribe/$consultationId': {
@@ -300,18 +300,18 @@ const authRouteRouteWithChildren = authRouteRoute._addFileChildren(
 interface DashboardRouteRouteChildren {
   DashboardIndexRoute: typeof DashboardIndexRoute
   DashboardPrescribeConsultationIdRoute: typeof DashboardPrescribeConsultationIdRoute
-  DashboardProfileUserIdRoute: typeof DashboardProfileUserIdRoute
   DashboardProfileEditRoute: typeof DashboardProfileEditRoute
   DashboardProfileVoiceprintRoute: typeof DashboardProfileVoiceprintRoute
+  DashboardProfileIndexRoute: typeof DashboardProfileIndexRoute
   DashboardConsultationUserIdConsultationIdRoute: typeof DashboardConsultationUserIdConsultationIdRoute
 }
 
 const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
   DashboardIndexRoute: DashboardIndexRoute,
   DashboardPrescribeConsultationIdRoute: DashboardPrescribeConsultationIdRoute,
-  DashboardProfileUserIdRoute: DashboardProfileUserIdRoute,
   DashboardProfileEditRoute: DashboardProfileEditRoute,
   DashboardProfileVoiceprintRoute: DashboardProfileVoiceprintRoute,
+  DashboardProfileIndexRoute: DashboardProfileIndexRoute,
   DashboardConsultationUserIdConsultationIdRoute:
     DashboardConsultationUserIdConsultationIdRoute,
 }

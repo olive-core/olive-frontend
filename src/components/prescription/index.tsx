@@ -9,6 +9,7 @@ import { useNavigate, useParams } from "@tanstack/react-router";
 import { useReactToPrint } from 'react-to-print';
 import { useRef } from "react";
 import { usePrescriptionMetadata } from "@/hooks/use-prescription-metadata";
+import toast from "react-hot-toast";
 
 export default function Prescription() {
 
@@ -45,18 +46,10 @@ export default function Prescription() {
     } = store;
 
     const {
-        medicineList,
         chiefComplaintList,
         historyList,
         diagnosisList
     } = usePrescriptionMetadata();
-
-    console.log(
-        "medicine: ", medicineList.data,
-        "chiefComplaint: ", chiefComplaintList.data,
-        "history: ", historyList.data,
-        "diagnosis: ", diagnosisList.data,
-    )
 
     const confirmMutation = useMutation({
         mutationFn: async () => {
@@ -65,7 +58,6 @@ export default function Prescription() {
         },
         onSuccess: () => {
             // TODO: remove editing details
-            // print the prescription
             handlePrint();
             navigate({ to: '/dashboard' });
         }
@@ -75,7 +67,7 @@ export default function Prescription() {
         contentRef: prescriptionRef,
         documentTitle: "Prescription_Report",
         // Optional: logic to run after print
-        onAfterPrint: () => console.log("Print completed"),
+        onAfterPrint: () => toast.success("Print completed"),
     });
 
     return (

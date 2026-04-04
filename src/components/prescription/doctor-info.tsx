@@ -1,10 +1,17 @@
+import { useAuthStore } from "@/stores/auth-store";
 import { HospitalIcon, MailIcon, PhoneIcon } from "lucide-react";
 
 export default function DoctorInfo() {
+
+    const clinician = useAuthStore(state => state.clinician)
+
+    const fullName = (clinician?.firstName ?? "") + " " + (clinician?.lastName ?? "")
+
+
     return (
         <div className="pt-2">
-            <h3 className="text-xl text-emerald-600 font-display">Doctor Name</h3>
-            <p className="text-sm text-slate-500">MBBS, FCPS, Specialist</p>
+            <h3 className="text-xl text-emerald-600 font-display">{fullName}</h3>
+            {/* <p className="text-sm text-slate-500">MBBS, FCPS, Specialist</p>
 
             <p className="mt-2 text-md font-bold text-slate-700">
                 Assistant Professor, Department of Cardiology
@@ -22,10 +29,10 @@ export default function DoctorInfo() {
             <p className="text-slate-600">
                 <PhoneIcon className="inline-block w-4 h-4 mr-2" />
                 01xxxxxxxxx
-            </p>
+            </p> */}
 
             <p className="mt-2 text-slate-600">
-                BMDC: <span className="font-semibold">123456</span>
+                BMDC: <span className="font-semibold">{clinician?.bmdcNo}</span>
             </p>
         </div>
     )

@@ -29,11 +29,11 @@ export const usePrescriptionMetadata = () => {
 
     // Parallel fetching using multiple useQuery hooks
     // React Query handles the optimization automatically
-    const medicineQuery = useQuery({
-        queryKey: [METADATA_KEY.ALL, METADATA_KEY.MEDICINE],
-        queryFn: () => fetchList("/medicine"),
-        ...queryConfig
-    });
+    // const medicineQuery = useQuery({
+    //     queryKey: [METADATA_KEY.ALL, METADATA_KEY.MEDICINE],
+    //     queryFn: () => fetchList("/medicine"),
+    //     ...queryConfig
+    // });
 
     const chiefComplaintQuery = useQuery({
         queryKey: [METADATA_KEY.ALL, METADATA_KEY.CHIEF_COMPLAINT],
@@ -70,11 +70,11 @@ export const usePrescriptionMetadata = () => {
 
     return {
         // medicine
-        medicineList: {
-            data: medicineQuery.data ?? [],
-            isLoading: medicineQuery.isLoading,
-            isError: medicineQuery.isError,
-        },
+        // medicineList: {
+        //     data: medicineQuery.data ?? [],
+        //     isLoading: medicineQuery.isLoading,
+        //     isError: medicineQuery.isError,
+        // },
 
         // chief complaint
         chiefComplaintList: {

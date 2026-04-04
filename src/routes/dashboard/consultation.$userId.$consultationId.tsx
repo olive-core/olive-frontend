@@ -86,15 +86,15 @@ function RouteComponent() {
             <Recorder />
           </div>
 
-          <HistoryContainer
+          {/* <HistoryContainer
             histories={histories}
             activeHistoryId={activeHistoryId}
             setActiveHistoryId={setActiveHistoryId}
-          />
+          /> */}
 
         </div>
 
-        <ConsultationCardMemo
+        {/* <ConsultationCardMemo
           history={histories.find(history => history.id === activeHistoryId) as HistoryType}
           totalHistories={histories.length}
           currentHistoryIndex={histories.findIndex(history => history.id === activeHistoryId) + 1}
@@ -104,7 +104,7 @@ function RouteComponent() {
           handlePrevious={handlePrevious}
           isFirst={histories.findIndex(history => history.id === activeHistoryId) === 0}
           isLast={histories.findIndex(history => history.id === activeHistoryId) === histories.length - 1}
-        />
+        /> */}
 
       </div>
     </div>
