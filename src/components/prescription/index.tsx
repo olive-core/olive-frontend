@@ -54,7 +54,7 @@ export default function Prescription() {
     const confirmMutation = useMutation({
         mutationFn: async () => {
             const payload = store.getSubmitPayload(consultationId);
-            await api.post('/prescription/complete', payload);
+            await api.post('/prescription', payload);
         },
         onSuccess: () => {
             // TODO: remove editing details
