@@ -1,7 +1,7 @@
 import Prescription from '@/components/prescription'
 import PrescriptionSkeleton from '@/components/prescription/prescription-skeleton'
 import api from '@/lib/axios';
-import { DUMMY_PRESCRIPTION } from '@/lib/dummy-data';
+
 import { usePrescriptionStore } from '@/stores/prescription-store'
 import type { PrescriptionResponseType } from '@/types/prescription';
 import { useQuery, useMutation } from '@tanstack/react-query';

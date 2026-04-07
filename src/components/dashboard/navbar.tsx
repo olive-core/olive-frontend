@@ -1,4 +1,4 @@
-import { ChartNoAxesColumnIcon, EllipsisIcon, HandCoinsIcon, HistoryIcon, LogOutIcon, SettingsIcon, UserIcon } from "lucide-react";
+import { EllipsisIcon, LogOutIcon, UserIcon } from "lucide-react";
 import NavbarContainer from "../shared/navbar-container";
 import { Button } from "../ui/button";
 import {

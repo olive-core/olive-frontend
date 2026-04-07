@@ -1,5 +1,5 @@
 import { useAuthStore } from "@/stores/auth-store";
-import { HospitalIcon, MailIcon, PhoneIcon } from "lucide-react";
+
 
 export default function DoctorInfo() {
 

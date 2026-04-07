@@ -1,15 +1,12 @@
-import ConsultationCardMemo from '@/components/dashboard/consultation/consultation-card'
-import HistoryContainer from '@/components/dashboard/consultation/history-container'
 import Recorder from '@/components/dashboard/consultation/recorder'
-import type { HistoryType } from '@/types/patient'
 import { createFileRoute } from '@tanstack/react-router'
-import { useState } from 'react'
+// import { useState } from 'react'
 
 export const Route = createFileRoute('/dashboard/consultation/$userId/$consultationId')({
   component: RouteComponent,
 })
 
-const histories = [
+/* const histories = [
   {
     id: "1",
     timestamp: "Dec 12, 2024",
@@ -46,36 +43,13 @@ const histories = [
     relativeTime: "2 months ago",
     description: "Discussion on stress management techniques.",
   }
-]
+] */
 
 function RouteComponent() {
 
-  const [activeHistoryId, setActiveHistoryId] = useState<string | undefined>("1");
-  const [followUpHistoryId, setFollowUpHistoryId] = useState<string | undefined>(undefined);
+// const [activeHistoryId, setActiveHistoryId] = useState<string | undefined>("1");
+// const [followUpHistoryId, setFollowUpHistoryId] = useState<string | undefined>(undefined);
 
-  const toggleFollowUpHistory = (id: string) => {
-    if (followUpHistoryId === id) {
-      setFollowUpHistoryId(undefined);
-    } else {
-      setFollowUpHistoryId(id);
-    }
-  };
-
-  const handlePrevious = () => {
-    if (!activeHistoryId) return;
-    const currentIndex = histories.findIndex(history => history.id === activeHistoryId);
-    if (currentIndex > 0) {
-      setActiveHistoryId(histories[currentIndex - 1].id);
-    }
-  };
-
-  const handleNext = () => {
-    if (!activeHistoryId) return;
-    const currentIndex = histories.findIndex(history => history.id === activeHistoryId);
-    if (currentIndex < histories.length - 1) {
-      setActiveHistoryId(histories[currentIndex + 1].id);
-    }
-  };
 
   return (
     <div className="container mt-10 pb-10">
