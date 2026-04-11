@@ -1,6 +1,6 @@
 import api from "@/lib/axios";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
+
 
 // Define a constant for the query keys to ensure consistency
 export const METADATA_KEY = {
