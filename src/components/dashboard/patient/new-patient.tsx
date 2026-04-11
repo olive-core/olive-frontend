@@ -54,18 +54,24 @@ export default function NewPatient({ phone, name, age, sex, userId }: NewPatient
 
         const apiEndPoint = userId ? `/patient/${userId}` : "/patient/by-clinician";
 
+
+
         const [firstName, ...lastNames] = values.name.split(" ");
         const lastName = lastNames.join(" ");
+
+        const dob = new Date(
+            new Date().getFullYear() - parseInt(values.age, 10),
+            0,
+            1
+        );
 
         const payload = {
             first_name: firstName,
             last_name: lastName,
-            // birthYear: parseInt(values.birthYear, 10),
-            age: parseInt(values.age, 10),
-            phone: `+88${phone}`,
+            date_of_birth: dob.toISOString().split("T")[0],
+            sex: values.sex,
+            phone: `+88${phone}`
         }
-
-        // TODO: update payload of age or dob (?)
 
         if (userId) {
             await api.put(apiEndPoint, payload);

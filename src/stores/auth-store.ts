@@ -61,7 +61,10 @@ export const useAuthStore = create<AuthStoreType>()(
                         clinician: {
                             bmdcNo: data.bmdcNo,
                             firstName: data.firstName,
-                            lastName: data.lastName
+                            lastName: data.lastName,
+                            generate_ai_draft: data.generate_ai_draft,
+                            specializations: data.specializations,
+                            qualification: data.qualification,
                         }
                     })
                 },

@@ -79,16 +79,14 @@ export default function MedicineEdit({ medicine, onRemove, onUpdate, index, setI
     }
 
     const fetchMedicine = async (query: string) => {
-        const res = await api.post<{
+        const res = await api.get<{
             generic_name_strength: string;
-        }[]>("/medicine/search", {
-            query,
-            search_in: "both",
-        })
+            trade_name: string;
+        }[]>(`/medicine/search?q=${query}&search_in=both`)
 
         return res.data.map(item => ({
-            label: item.generic_name_strength ?? "",
-            value: item.generic_name_strength ?? "",
+            label: item.trade_name ?? item.generic_name_strength ?? "",
+            value: item.trade_name ?? item.generic_name_strength ?? "",
         }));
     }
 

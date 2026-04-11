@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import { SparklesIcon } from "lucide-react";
 import DoctorInfo from "./doctor-info";
 import PatientInfo from "./patient-info";
+import { usePrescriptionStore } from "@/stores/prescription-store";
+import ListInfo from "./list-info";
+import { AccordionContent, AccordionItem, AccordionTrigger, Accordion } from "../ui/accordion";
 
 // ─── Sliding AI text phrases ───────────────────────────────────────────────────
 const AI_PHRASES = [
@@ -61,9 +64,8 @@ function SectionHeader({ label, highlight = false }: { label: string; highlight?
   return (
     <div className="flex items-center justify-between px-1 mb-2">
       <h3
-        className={`font-bold text-xs uppercase tracking-widest ${
-          highlight ? "text-emerald-400" : "text-slate-300"
-        }`}
+        className={`font-bold text-xs uppercase tracking-widest ${highlight ? "text-emerald-400" : "text-slate-300"
+          }`}
       >
         {label}
       </h3>
@@ -84,9 +86,8 @@ function SkeletonListSection({
 }) {
   return (
     <div
-      className={`flex flex-col gap-2 p-2 rounded-xl ${
-        highlight ? "bg-emerald-50/30 border-2 border-emerald-200/60" : ""
-      }`}
+      className={`flex flex-col gap-2 p-2 rounded-xl ${highlight ? "bg-emerald-50/30 border-2 border-emerald-200/60" : ""
+        }`}
     >
       <SectionHeader label={label} highlight={highlight} />
       <div className="flex flex-col gap-1.5">
@@ -126,6 +127,37 @@ function SkeletonMedicineCard({ index }: { index: number }) {
 
 // ─── Main PrescriptionSkeleton ─────────────────────────────────────────────────
 export default function PrescriptionSkeleton() {
+
+  const store = usePrescriptionStore();
+  const {
+    // chiefComplaint
+    chiefComplaint,
+    addEmptyChiefComplaint,
+    updateChiefComplaint,
+    removeChiefComplaint,
+
+    // history
+    history,
+    addEmptyHistory,
+    updateHistory,
+    removeHistory,
+
+    // diagnosis
+    diagnosis,
+    addEmptyDiagnosis,
+    updateDiagnosis,
+    removeDiagnosis,
+
+    // investigation
+    investigation,
+    addEmptyInvestigation,
+    updateInvestigation,
+    removeInvestigation,
+
+    // summary
+    summary
+  } = store;
+
   return (
     <div className="container rounded-xl border flex flex-col mt-4 mb-12 overflow-hidden">
       <div className="m-4">
@@ -152,10 +184,84 @@ export default function PrescriptionSkeleton() {
         <div className="grid grid-cols-1 md:grid-cols-3">
           {/* Left panel */}
           <div className="h-full md:border-r md:col-span-1 border-b md:border-b-0 py-4 flex flex-col gap-2">
-            <SkeletonListSection label="Chief Complaints" itemCount={2} />
-            <SkeletonListSection label="History" itemCount={1} />
-            <SkeletonListSection label="Diagnosis" itemCount={2} highlight />
-            <SkeletonListSection label="Investigation" itemCount={2} />
+
+            {summary.length > 0
+              ? (
+                <div className="px-4">
+                  <Accordion type="single" collapsible defaultValue="item-1">
+                    <AccordionItem value="item-1">
+                      <AccordionTrigger>
+                        <h3 className={`font-bold text-xs uppercase tracking-widest  text-slate-500`}>
+                          Summary
+                        </h3>
+                      </AccordionTrigger>
+                      <AccordionContent>
+                        {summary}
+                      </AccordionContent>
+                    </AccordionItem>
+                  </Accordion>
+                </div>
+              )
+              : (
+                <SkeletonListSection label="Summary" itemCount={3} />
+              )}
+
+            {chiefComplaint.length > 0
+              ? (
+                <ListInfo
+                  title="Chief Complaints"
+                  info={chiefComplaint}
+                  fieldName="chief-complaint"
+                  addEmptyItem={addEmptyChiefComplaint}
+                  updateItem={updateChiefComplaint}
+                  removeItem={removeChiefComplaint}
+                />
+              )
+              : (
+                <SkeletonListSection label="Chief Complaints" itemCount={2} />
+              )}
+            {history.length > 0
+              ? (
+                <ListInfo
+                  title="History"
+                  info={history}
+                  fieldName="history"
+                  addEmptyItem={addEmptyHistory}
+                  updateItem={updateHistory}
+                  removeItem={removeHistory}
+                />
+              )
+              : (
+                <SkeletonListSection label="History" itemCount={1} />
+              )}
+            {diagnosis.length > 0
+              ? (
+                <ListInfo
+                  title="Diagnosis"
+                  info={diagnosis}
+                  fieldName="diagnosis"
+                  addEmptyItem={addEmptyDiagnosis}
+                  updateItem={updateDiagnosis}
+                  removeItem={removeDiagnosis}
+                />
+              )
+              : (
+                <SkeletonListSection label="Diagnosis" itemCount={2} highlight />
+              )}
+            {investigation.length > 0
+              ? (
+                <ListInfo
+                  title="Investigation"
+                  info={investigation}
+                  fieldName="investigation"
+                  addEmptyItem={addEmptyInvestigation}
+                  updateItem={updateInvestigation}
+                  removeItem={removeInvestigation}
+                />
+              )
+              : (
+                <SkeletonListSection label="Investigation" itemCount={2} />
+              )}
           </div>
 
           {/* Right panel – Medicines */}

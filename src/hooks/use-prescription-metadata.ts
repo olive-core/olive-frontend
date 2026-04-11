@@ -13,6 +13,7 @@ export const METADATA_KEY = {
 }
 
 const fetchList = async (endpoint: string) => {
+    return [];
     const res = await api.get(endpoint);
     return res.data;
 }

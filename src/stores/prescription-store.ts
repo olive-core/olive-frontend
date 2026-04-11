@@ -7,16 +7,21 @@ interface PrescriptionStoreType {
     sessionId: string | null;
     // patient TODO
 
+    isGenerating: boolean;
+
     chiefComplaint: ChiefComplaintType[];
     history: HistoryType[];
     diagnosis: DiagnosisType[];
     investigation: InvestigationType[];
 
-    medicine: MeedicineType[]
-    // advice
+    medicine: MeedicineType[];
+    advice: string[];
+    summary: string;
 
     // methods
     initiatePrescription: (patientId: string, sessionId: string) => void;
+    setGenerating: (value: boolean) => void;
+    setPartialData: (data: Pick<PrescriptionResponseType, 'chief_complaints' | 'history' | 'summary'>) => void;
     getInitialPrescription: (data: PrescriptionResponseType) => Promise<void>;
     getSubmitPayload: (sessionId: string) => Record<string, any>;
 
@@ -44,6 +49,9 @@ interface PrescriptionStoreType {
     updateInvestigation: (index: number, data: Partial<InvestigationType>) => void;
     removeInvestigation: (index: number) => void;
 
+    // advice methods
+    setAdvice: (data: string[]) => void;
+
     // medicine methods
     addMedicine: (data: MeedicineType) => void;
     addEmptyMedicine: () => void;
@@ -57,15 +65,40 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
             patientId: null,
             sessionId: null,
 
+            isGenerating: false,
+
             chiefComplaint: [],
             history: [],
             diagnosis: [],
             investigation: [],
 
+            summary: "",
+
             medicine: [],
+            advice: [],
 
             initiatePrescription: (patientId, sessionId) => {
                 set({ patientId, sessionId });
+            },
+
+            setGenerating: (value) => set({ isGenerating: value }),
+
+            setPartialData: (data) => {
+                const chiefComplaint = data.chief_complaints?.map(item => ({
+                    name: item.complaint_name,
+                    duration: "",
+                    notes: item.clinical_note || "",
+                })) || []
+
+                const history = data.history?.map(item => ({
+                    name: item.history_name,
+                    duration: "",
+                    notes: item.clinical_note || "",
+                })) || []
+
+                const summary = data.summary;
+
+                set({ chiefComplaint, history, diagnosis: [], medicine: [], investigation: [], summary });
             },
 
             getInitialPrescription: async (data: PrescriptionResponseType) => {
@@ -109,12 +142,17 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
                     priority: item.priority || "routine"
                 })) || []
 
+                const advice = data.advice;
+                const summary = data.summary;
+
                 set({
                     chiefComplaint,
                     history,
                     diagnosis,
                     medicine,
-                    investigation
+                    investigation,
+                    advice,
+                    summary,
                 })
             },
 
@@ -160,7 +198,7 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
                             gap_hour: 0
                         }
                     })),
-                    advice_list: []
+                    advice_list: state.advice
                 }
             },
 
@@ -219,6 +257,9 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
                 updated.splice(index, 1);
                 return { investigation: updated };
             }),
+
+            // advice methods
+            setAdvice: (data) => set({ advice: data }),
 
             // medicine methods
             addMedicine: (data) => set((state) => ({ medicine: [...state.medicine, data] })),

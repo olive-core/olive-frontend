@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
-import { CalendarIcon, MarsIcon, MicIcon, PenIcon } from "lucide-react";
+import { CalendarIcon, MarsIcon, MicIcon, PenIcon, TransgenderIcon, VenusIcon } from "lucide-react";
 import {
     Item,
     ItemActions,
@@ -73,30 +73,47 @@ export default function PatientInfo({ userId: patientId, setShowContent }: Patie
         setShowContent({
             status: "PATIENT_CREATE",
             initialValues: {
-                name: "Patient Name", // TODO: replace with real data
-                age: getAgeFromDOB(patientData.date_of_birth).toString(),
-                sex: 'male' // TODO: replace with real data
+                name: patientData.first_name + " " + patientData.last_name,
+                age: getAgeFromDOB(patientData.date_of_birth).years.toString(),
+                sex: patientData.sex
             },
             userId: patientId
         });
     };
+
+    const renderSexIcon = () => {
+        if (!patientData.sex) return null;
+
+        if (patientData.sex === "male") {
+            return <MarsIcon className="inline-block mr-1 size-4 text-blue-500" />;
+        }
+
+        if (patientData.sex === "female") {
+            return <VenusIcon className="inline-block mr-1 size-4 text-pink-500" />;
+        }
+
+        if (patientData.sex === "non_binary") {
+            return <TransgenderIcon className="inline-block mr-1 size-4 text-purple-500" />;
+        }
+
+        return null;
+    }
 
     return (
         <div className="flex w-full max-w-md flex-col gap-6 mx-auto">
             <Item variant="outline">
                 <ItemContent>
                     {/* TODO: fetch and display real data */}
-                    <ItemTitle className="text-lg">Patient Name</ItemTitle>
+                    <ItemTitle className="text-lg">{patientData.first_name + " " + patientData.last_name}</ItemTitle>
                     <ItemDescription>
                         <div className="flex flex-col space-y-1 text-slate-600 text-sm">
                             <div className="flex">
                                 <CalendarIcon className="inline-block mr-1 size-4" />
-                                <span>{format(new Date(patientData.date_of_birth), "MMM d, yyyy")}</span>
+                                <span>{format(new Date(patientData.date_of_birth), "MMM d, yyyy")} ({getAgeFromDOB(patientData.date_of_birth).years}y {getAgeFromDOB(patientData.date_of_birth).months}m)</span>
                             </div>
                             <div className="flex items-center">
-                                {/* TODO: fetch and display real data */}
-                                <MarsIcon className="inline-block mr-1 size-4 text-blue-500" />
-                                <span>Male</span>
+                                {renderSexIcon()}
+                                <span className="capitalize">{patientData.sex}</span>
                             </div>
                         </div>
                     </ItemDescription>

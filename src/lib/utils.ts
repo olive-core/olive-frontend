@@ -15,10 +15,26 @@ export function handleError(error: unknown, defaultMessage: string) {
   toast.error(defaultMessage);
 }
 
-export function getAgeFromDOB(dob: string): number {
+export function getAgeFromDOB(dob: string | Date) {
   const birthDate = new Date(dob);
   const today = new Date();
-  const age = today.getFullYear() - birthDate.getFullYear();
 
-  return age;
+  let years = today.getFullYear() - birthDate.getFullYear();
+  let months = today.getMonth() - birthDate.getMonth();
+
+  if (months < 0) {
+    years--;
+    months += 12;
+  }
+
+  // Adjust if current day is before birth day
+  if (today.getDate() < birthDate.getDate()) {
+    months--;
+    if (months < 0) {
+      years--;
+      months += 12;
+    }
+  }
+
+  return { years, months };
 }

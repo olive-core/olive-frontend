@@ -8,6 +8,7 @@ export type ClinicianType = {
     specializations?: string[];
     firstName?: string;
     lastName?: string;
+    generate_ai_draft?: boolean;
 }
 
 type StepDefTypes = 'input' | 'radio';

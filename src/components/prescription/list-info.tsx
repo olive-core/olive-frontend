@@ -10,6 +10,8 @@ import type {
     ChiefComplaintType,
 } from "@/types/prescription";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
+import DebouncedSearchSelect from "./debounced-search-select";
+import api from "@/lib/axios";
 
 interface ListInfoProps {
     title: string;
@@ -18,10 +20,9 @@ interface ListInfoProps {
     addEmptyItem: () => void;
     updateItem: (index: number, data: Partial<ListInfoType>) => void;
     removeItem: (index: number) => void;
-    suggestionList?: string[]; // Optional list of suggestions for autocomplete
 }
 
-export default function ListInfo({ title, info, fieldName, addEmptyItem, updateItem, removeItem, suggestionList }: ListInfoProps) {
+export default function ListInfo({ title, info, fieldName, addEmptyItem, updateItem, removeItem }: ListInfoProps) {
     const [editingItemStatus, setEditingItemStatus] = useState<{ index: number, status: "add" | "update" } | null>(null);
 
     const editingItemIndex = editingItemStatus ? editingItemStatus.index : null;
@@ -76,7 +77,6 @@ export default function ListInfo({ title, info, fieldName, addEmptyItem, updateI
                         editingItemIndex={editingItemIndex}
                         setEditingItemIndex={setEditingItemIndex}
                         editingItemStatus={editingItemStatus?.status || null}
-                        suggestionList={suggestionList}
                         fieldName={fieldName}
                     />
                 ))}
@@ -98,11 +98,10 @@ interface InfoItemProps {
     editingItemIndex: number | null;
     setEditingItemIndex: (index: number | null) => void;
     editingItemStatus: "add" | "update" | null;
-    suggestionList?: string[]; // Optional suggestions for autocomplete
     fieldName: ListInfoFieldName;
 }
 
-const InfoItem = ({ item, index, isDiagnosis, onUpdate, onRemove, editingItemIndex, setEditingItemIndex, editingItemStatus, suggestionList, fieldName }: InfoItemProps) => {
+const InfoItem = ({ item, index, isDiagnosis, onUpdate, onRemove, editingItemIndex, setEditingItemIndex, editingItemStatus, fieldName }: InfoItemProps) => {
 
     const setIsEditing = (value: boolean) => {
         if (value) {
@@ -132,7 +131,7 @@ const InfoItem = ({ item, index, isDiagnosis, onUpdate, onRemove, editingItemInd
                     onUpdate={onUpdate}
                     onRemove={onRemove}
                     editingItemStatus={editingItemStatus}
-                    suggestionList={suggestionList}
+                    fieldName={fieldName}
                 />
             ) : (
                 <NonEditingItem
@@ -153,21 +152,20 @@ interface EditingItemProps {
     onUpdate: (index: number, item: ListInfoType) => void;
     onRemove: (index: number) => void;
     editingItemStatus: "add" | "update" | null;
-    suggestionList?: string[]; // Optional suggestions for autocomplete
+    fieldName: ListInfoFieldName;
 }
 
-const EditingItem = ({ item, index, setIsEditing, onUpdate, onRemove, editingItemStatus, suggestionList }: EditingItemProps) => {
+const FETCH_OPTION_ENDPOINTS: Record<ListInfoFieldName, string> = {
+    "chief-complaint": "/chief-complaint-name/search",
+    "history": "/history-name/search",
+    "diagnosis": "/diagnosis-name/search",
+    "investigation": "/investigation-name/search",
+}
+
+
+const EditingItem = ({ item, index, setIsEditing, onUpdate, onRemove, editingItemStatus, fieldName }: EditingItemProps) => {
     // Local state for the form inputs
     const [localItem, setLocalItem] = useState<ListInfoType>(item);
-    const [isFocused, setIsFocused] = useState(false);
-
-    const filteredSuggestions = suggestionList
-        ?.filter(
-            (name) =>
-                name.toLowerCase().includes(localItem.name.toLowerCase()) &&
-                name.toLowerCase() !== localItem.name.toLowerCase()
-        ) || [];
-
     const handleSave = () => {
         if (!localItem.name.trim()) {
             onRemove(index); // If empty name, delete it
@@ -190,6 +188,17 @@ const EditingItem = ({ item, index, setIsEditing, onUpdate, onRemove, editingIte
     // DiagnosisType strictly has no notes in your definition
     const hasNotes = "notes" in localItem;
 
+    const fetchOptions = async (query: string) => {
+        const res = await api.get<{ name: string }[]>(
+            `${FETCH_OPTION_ENDPOINTS[fieldName]}?q=${query}`
+        )
+
+        return res.data.map(item => ({
+            label: item.name,
+            value: item.name,
+        }))
+    }
+
     return (
         <div className="w-full space-y-4" onClick={(e) => e.stopPropagation()}>
             <div className="flex gap-3">
@@ -198,7 +207,22 @@ const EditingItem = ({ item, index, setIsEditing, onUpdate, onRemove, editingIte
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">
                         Name
                     </p>
-                    <Input
+
+                    <DebouncedSearchSelect
+                        value={{
+                            label: localItem.name,
+                            value: localItem.name,
+                        }}
+                        onChange={option => {
+                            setLocalItem({
+                                ...localItem, name: option?.value || ""
+                            })
+                        }}
+                        fetchOptions={fetchOptions}
+                        queryKeyBase={`${fieldName}-search`}
+                    />
+
+                    {/* <Input
                         autoFocus
                         className="h-9 text-sm"
                         value={localItem.name}
@@ -206,10 +230,10 @@ const EditingItem = ({ item, index, setIsEditing, onUpdate, onRemove, editingIte
                         onKeyDown={(e) => e.key === "Enter" && handleSave()}
                         onFocus={() => setIsFocused(true)}
                         onBlur={() => setTimeout(() => setIsFocused(false), 150)} // Delay blur so click registers on suggestions
-                    />
+                    /> */}
 
                     {/* Custom Dropdown Menu */}
-                    {isFocused && filteredSuggestions.length > 0 && (
+                    {/* {isFocused && filteredSuggestions.length > 0 && (
                         <ul className="absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded-md shadow-lg max-h-48 overflow-auto">
                             {filteredSuggestions.map((name) => (
                                 <li
@@ -224,7 +248,7 @@ const EditingItem = ({ item, index, setIsEditing, onUpdate, onRemove, editingIte
                                 </li>
                             ))}
                         </ul>
-                    )}
+                    )} */}
                 </div>
 
                 {/* Duration Input - Conditional */}

@@ -1,101 +1,260 @@
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeftIcon, CalendarDays, MicroscopeIcon, PillIcon, StethoscopeIcon } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import type { PrescriptionType, RxItem } from "@/types/patient";
+import { cn } from "@/lib/utils";
+import {
+    AlertCircle,
+    ArrowLeftIcon,
+    CalendarDays,
+    ClipboardList,
+    MicroscopeIcon,
+    PillIcon,
+    StethoscopeIcon,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { memo } from "react";
-import type { HistoryType } from "@/types/patient";
-import { cn } from "@/lib/utils";
 
 interface ConsultationCardProps {
-    history: HistoryType,
-    totalHistories: number,
-    currentHistoryIndex: number,
-    toggleFollowUpHistory: (id: string) => void,
-    isFollowUpOfCurrent?: boolean,
-    handleNext: () => void,
-    handlePrevious: () => void,
-    isFirst: boolean,
-    isLast: boolean,
+    prescription?: PrescriptionType;
+    totalHistories: number;
+    currentHistoryIndex: number;
+    onFollowUp: () => void;
+    isFollowUp?: boolean;
+    isFollowingUp?: boolean;
+    handleNext: () => void;
+    handlePrevious: () => void;
+    isFirst: boolean;
+    isLast: boolean;
+    isLoading?: boolean;
+    isError?: boolean;
+    hasSelection?: boolean;
+}
+
+function formatRoutine(item: RxItem): string {
+    const { routine, dosage, duration } = item;
+    const times: string[] = [];
+    if (routine.before_breakfast) times.push("before breakfast");
+    if (routine.after_breakfast) times.push("after breakfast");
+    if (routine.before_lunch) times.push("before lunch");
+    if (routine.after_lunch) times.push("after lunch");
+    if (routine.before_dinner) times.push("before dinner");
+    if (routine.after_dinner) times.push("after dinner");
+    const timingStr = times.length > 0 ? times.join(", ") : "as directed";
+    return `${dosage} · ${timingStr} · ${duration}`;
+}
+
+function CardSkeleton() {
+    return (
+        <Card className="w-full h-full rounded-2xl shadow-md">
+            <CardHeader>
+                <Skeleton className="h-5 w-32" />
+            </CardHeader>
+            <CardContent className="space-y-5">
+                <Skeleton className="h-4 w-48" />
+                <Separator />
+                <div className="space-y-2">
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-3 w-full" />
+                    <Skeleton className="h-3 w-3/4" />
+                </div>
+                <Separator />
+                <div className="space-y-2">
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-3 w-full" />
+                    <Skeleton className="h-3 w-2/3" />
+                </div>
+                <Separator />
+                <div className="space-y-2">
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-3 w-full" />
+                    <Skeleton className="h-3 w-3/4" />
+                    <Skeleton className="h-3 w-1/2" />
+                </div>
+            </CardContent>
+            <CardFooter>
+                <div className="flex items-center justify-between w-full">
+                    <Skeleton className="h-9 w-9 rounded-md" />
+                    <Skeleton className="h-4 w-12" />
+                    <Skeleton className="h-9 w-9 rounded-md" />
+                </div>
+            </CardFooter>
+        </Card>
+    );
 }
 
 function ConsultationCard({
-    history, totalHistories,
+    prescription,
+    totalHistories,
     currentHistoryIndex,
-    toggleFollowUpHistory,
-    isFollowUpOfCurrent = false,
+    onFollowUp,
+    isFollowUp = false,
+    isFollowingUp = false,
     handleNext,
     handlePrevious,
     isFirst,
     isLast,
-}: ConsultationCardProps
-) {
+    isLoading,
+    isError,
+    hasSelection,
+}: ConsultationCardProps) {
+
+    if (isLoading) {
+        return <CardSkeleton />;
+    }
+
+    if (isError) {
+        return (
+            <Card className="w-full h-full rounded-2xl shadow-md flex flex-col items-center justify-center min-h-[300px] gap-3 text-center p-8">
+                <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center">
+                    <AlertCircle className="w-6 h-6 text-red-400" />
+                </div>
+                <div>
+                    <p className="text-sm font-medium text-slate-700">Failed to load prescription</p>
+                    <p className="text-xs text-slate-400 mt-1">Please try selecting the consultation again.</p>
+                </div>
+            </Card>
+        );
+    }
+
+    if (!hasSelection || !prescription) {
+        return (
+            <Card className="w-full h-full rounded-2xl shadow-md flex flex-col items-center justify-center min-h-[300px] gap-3 text-center p-8">
+                <div className="w-12 h-12 rounded-full bg-emerald-50 flex items-center justify-center">
+                    <ClipboardList className="w-6 h-6 text-emerald-400" />
+                </div>
+                <div>
+                    <p className="text-sm font-medium text-slate-700">Select a consultation</p>
+                    <p className="text-xs text-slate-400 mt-1">Choose a past session from the history to view its details.</p>
+                </div>
+            </Card>
+        );
+    }
+
+    const { prescription_data, created_at, clinician_first_name, clinician_last_name } = prescription;
+    const chief_complaints = prescription_data?.chief_complaints ?? [];
+    const diagnoses = prescription_data?.diagnoses ?? [];
+    const rx_list = prescription_data?.rx_list ?? [];
+    const formattedDate = new Date(created_at).toLocaleDateString("en-US", {
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+    });
+    const formattedTime = new Date(created_at).toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+    });
 
     return (
-        <Card className="w-full h-full max-w-xl mx-auto rounded-2xl shadow-md">
-            <CardContent className="space-y-4">
+        <Card className="w-full h-full rounded-2xl shadow-md flex flex-col">
+            <CardContent className="space-y-4 flex-1 overflow-auto pt-6">
                 {/* Header */}
-                <div className="flex items-center justify-between">
-                    <h2 className="text-xl font-semibold">{history.relativeTime}</h2>
+                <div className="flex items-start justify-between gap-2">
+                    <div>
+                        <h2 className="text-lg font-semibold text-slate-800">
+                            Dr. {clinician_first_name} {clinician_last_name}
+                        </h2>
+                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-0.5">
+                            <CalendarDays className="w-3.5 h-3.5" />
+                            <span>{formattedDate} · {formattedTime}</span>
+                        </div>
+                    </div>
                     <Button
                         size="sm"
-                        onClick={() => toggleFollowUpHistory(history.id)}
+                        disabled={isFollowingUp}
+                        onClick={onFollowUp}
                         className={cn(
-                            "border-2 border-emerald-500",
-                            isFollowUpOfCurrent ? "bg-emerald-600 text-white hover:bg-emerald-700" : "bg-white text-emerald-600 border border-emerald-600 hover:bg-emerald-50"
+                            "shrink-0 border-2 border-emerald-500",
+                            isFollowUp
+                                ? "bg-emerald-600 text-white hover:bg-emerald-700"
+                                : "bg-white text-emerald-600 border border-emerald-600 hover:bg-emerald-50"
                         )}
                     >
-                        Follow Up
+                        {isFollowingUp ? (
+                            <span className="flex items-center gap-1.5">
+                                <span className="w-3 h-3 rounded-full border-2 border-current border-t-transparent animate-spin" />
+                                Saving…
+                            </span>
+                        ) : isFollowUp ? "✓ Follow Up" : "Follow Up"}
                     </Button>
                 </div>
 
-                {/* Date */}
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <CalendarDays className="w-4 h-4" />
-                    <span>{history.timestamp} 03:40 PM</span>
-                </div>
-
                 <Separator />
 
-                {/* Summary */}
-                <div className="space-y-1">
-                    <h3 className="font-medium flex items-center gap-2"><StethoscopeIcon className="w-4 h-4" /> Summary</h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed">
-                        Patient reported mild chest discomfort and fatigue over the last 3 days. No severe symptoms observed. Initial assessment indicates low risk of cardiac issue.
-                    </p>
-                </div>
-
-                <Separator />
+                {/* Chief Complaints */}
+                {chief_complaints.length > 0 && (
+                    <>
+                        <div className="space-y-2">
+                            <h3 className="font-medium text-sm flex items-center gap-2 text-slate-700">
+                                <StethoscopeIcon className="w-4 h-4 text-emerald-500" />
+                                Chief Complaints
+                            </h3>
+                            <ul className="space-y-1.5">
+                                {chief_complaints.map((cc, i) => (
+                                    <li key={i} className="text-sm text-muted-foreground">
+                                        <span className="font-medium text-slate-600">{cc.name_text}</span>
+                                        {cc.notes && <span className="text-slate-400"> — {cc.notes}</span>}
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                        <Separator />
+                    </>
+                )}
 
                 {/* Diagnosis */}
-                <div className="space-y-1">
-                    <h3 className="font-medium flex items-center gap-2"><MicroscopeIcon className="w-4 h-4" /> Diagnosis</h3>
-                    <p className="text-sm text-muted-foreground">
-                        Suspected acid reflux and work-related stress.
-                    </p>
-                </div>
+                {diagnoses.length > 0 && (
+                    <>
+                        <div className="space-y-2">
+                            <h3 className="font-medium text-sm flex items-center gap-2 text-slate-700">
+                                <MicroscopeIcon className="w-4 h-4 text-emerald-500" />
+                                Diagnosis
+                            </h3>
+                            <ul className="space-y-1 list-disc list-inside">
+                                {diagnoses.map((d, i) => (
+                                    <li key={i} className="text-sm text-muted-foreground">{d.name_text}</li>
+                                ))}
+                            </ul>
+                        </div>
+                        <Separator />
+                    </>
+                )}
 
-                <Separator />
+                {/* Medicines */}
+                {rx_list.length > 0 && (
+                    <div className="space-y-2">
+                        <h3 className="font-medium text-sm flex items-center gap-2 text-slate-700">
+                            <PillIcon className="w-4 h-4 text-emerald-500" />
+                            Medicines
+                        </h3>
+                        <ul className="space-y-2">
+                            {rx_list.map((rx, i) => (
+                                <li key={i} className="text-sm">
+                                    <p className="font-medium text-slate-700">{rx.trade_name}</p>
+                                    <p className="text-xs text-muted-foreground mt-0.5">{formatRoutine(rx)}</p>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                )}
 
-                {/* Medicine History */}
-                <div className="space-y-2">
-                    <h3 className="font-medium flex items-center gap-2"><PillIcon className="w-4 h-4" /> Medicine History</h3>
-                    <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
-                        <li>Omeprazole 20mg — Once daily before breakfast</li>
-                        <li>Vitamin B Complex — Daily after lunch</li>
-                        <li>ORS — As needed for dehydration</li>
-                    </ul>
-                </div>
+                {/* Empty prescription */}
+                {chief_complaints.length === 0 &&
+                    diagnoses.length === 0 &&
+                    rx_list.length === 0 && (
+                        <p className="text-sm text-slate-400 text-center py-4">
+                            No prescription details available.
+                        </p>
+                    )}
             </CardContent>
 
-            <CardFooter className="mt-auto">
+            <CardFooter className="mt-auto border-t pt-4">
                 <div className="flex items-center justify-between w-full">
-                    <Button variant={"outline"} size="icon" disabled={isFirst} onClick={handlePrevious}>
+                    <Button variant="outline" size="icon" disabled={isFirst} onClick={handlePrevious}>
                         <ArrowLeftIcon className="w-4 h-4" />
                     </Button>
-
-                    <pre>{currentHistoryIndex}/{totalHistories}</pre>
-
-                    <Button variant={"outline"} size="icon" disabled={isLast} onClick={handleNext}>
+                    <span className="text-sm text-slate-500">{currentHistoryIndex} / {totalHistories}</span>
+                    <Button variant="outline" size="icon" disabled={isLast} onClick={handleNext}>
                         <ArrowLeftIcon className="w-4 h-4 rotate-180" />
                     </Button>
                 </div>

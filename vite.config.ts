@@ -26,9 +26,17 @@ export default defineConfig({
   server: {
     proxy: {
       "/api/v1": {
-        target: "https://34.124.243.141/",
+        target: "https://35.247.146.173/",
         changeOrigin: true,
         secure: false,
+        // Disable proxy buffering so SSE events flush immediately
+        configure: (proxy) => {
+          proxy.on('proxyRes', (proxyRes) => {
+            // Tell Vite's http-proxy (and any upstream nginx) not to buffer
+            proxyRes.headers['x-accel-buffering'] = 'no';
+            proxyRes.headers['cache-control'] = 'no-cache';
+          });
+        },
       },
     },
   },

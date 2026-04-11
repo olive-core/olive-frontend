@@ -33,22 +33,36 @@ const formSchema = z.object({
     bmdcNo: z.string().regex(/^\d+$/, "BMDC number must contain only numbers"),
     qualification: z.string(),
     specializations: z.array(z.string()).optional(),
+    defaultGeneration: z.boolean().optional(),
 })
 
-export function ProfileForm() {
+interface ProfileFormProps {
+    clinicianData: {
+        "user_id": string;
+        "first_name": string;
+        "last_name": string;
+        "bmdc_no": string;
+        "qualification": string;
+        "specializations": string[];
+        "medicine_company_ids"?: string[] | null;
+        "generate_ai_draft"?: boolean;
+    };
+}
+
+export function ProfileForm({ clinicianData }: ProfileFormProps) {
 
     const [isLoading, setIsLoading] = useState(false)
-    const clinician = useAuthStore((state) => state.clinician)
     const userId = useAuthStore((state) => state.userId)
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            firstName: clinician?.firstName || "",
-            lastName: clinician?.lastName || "",
-            bmdcNo: clinician?.bmdcNo || "",
-            qualification: clinician?.qualification || "",
-            specializations: clinician?.specializations || [],
+            firstName: clinicianData?.first_name || "",
+            lastName: clinicianData?.last_name || "",
+            bmdcNo: clinicianData?.bmdc_no || "",
+            qualification: clinicianData?.qualification || "",
+            specializations: clinicianData?.specializations || [],
+            defaultGeneration: clinicianData?.generate_ai_draft || false,
         },
     })
 
@@ -57,10 +71,16 @@ export function ProfileForm() {
         try {
             setIsLoading(true)
 
+            console.log(data);
+
+
             await api.put(`/clinician/${userId}`, {
+                first_name: data.firstName,
+                last_name: data.lastName,
                 bmdc_no: data.bmdcNo,
                 qualification: data.qualification,
                 specializations: data.specializations,
+                generate_ai_draft: data.defaultGeneration,
             })
         } catch (error) {
             console.error(error)
@@ -220,6 +240,32 @@ export function ProfileForm() {
                             }}
                         />
                     </FieldGroup>
+
+                    {/* generate ai draft */}
+                    <Controller
+                        name="defaultGeneration"
+                        control={form.control}
+                        render={({ field }) => (
+                            <Field>
+                                <div className="flex items-center justify-between mt-2">
+                                    <FieldLabel>Default Generation</FieldLabel>
+
+                                    <button
+                                        type="button"
+                                        onClick={() => field.onChange(!field.value)}
+                                        className={`w-11 h-6 flex items-center rounded-full p-1 transition ${field.value ? "bg-emerald-500" : "bg-gray-300"
+                                            }`}
+                                    >
+                                        <div
+                                            className={`bg-white w-4 h-4 rounded-full shadow-md transform transition ${field.value ? "translate-x-5" : "translate-x-0"
+                                                }`}
+                                        />
+                                    </button>
+                                </div>
+                            </Field>
+                        )}
+                    />
+
                 </form>
             </CardContent>
 
