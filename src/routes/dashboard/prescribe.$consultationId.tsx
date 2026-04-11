@@ -13,6 +13,7 @@ function RouteComponent() {
   const { consultationId } = Route.useParams();
   const { getInitialPrescription, setPartialData, setGenerating } = usePrescriptionStore();
   const accessToken = useAuthStore((s) => s.accessToken);
+  const { clinician } = useAuthStore();
 
   const [isReady, setIsReady] = useState(false);
   const [isError, setIsError] = useState(false);
@@ -37,10 +38,10 @@ function RouteComponent() {
       method: 'POST',
       headers,
       body: JSON.stringify({
-        session_id: "dummy", // consultationId,
-        dialogue: "Doctor: কী সমস্যা বলুন। Patient: বুকের মধ্যে চাপ লাগে ডাক্তার। Doctor: কোন পাশে? Patient: বাম দিকে, কাজ করলে বেশি হয়। Doctor: কতদিন ধরে হচ্ছে? Patient: দুই তিন দিন। Doctor: ব্যথা কি হাতে বা ঘাড়ে যায়? Patient: হ্যাঁ, বাম হাতে যায়। Doctor: তখন ঘাম বা শ্বাস কষ্ট হয়? Patient: হ্যাঁ, খুব ভয় লাগে তখন। Doctor: সুগার বা প্রেসার আছে? Patient: সুগার আছে আট বছর। Doctor: এটা সিরিয়াস হতে পারে, এখনই ইসিজি আর ট্রোপোনিন টেস্ট করাতে হবে।",
+        session_id: consultationId,
+        dialogue: "",
         force_variant: '',
-        persist_draft: false, // true,
+        persist_draft: true,
       }),
       signal: controller.signal,
     })
@@ -118,7 +119,11 @@ function RouteComponent() {
   }
 
   useEffect(() => {
-    startSSE();
+    if (clinician?.generate_ai_draft) {
+      startSSE();
+    } else {
+      setIsReady(true)
+    }
     return () => {
       abortRef.current?.abort();
     };

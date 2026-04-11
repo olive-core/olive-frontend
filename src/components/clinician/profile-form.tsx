@@ -53,6 +53,7 @@ export function ProfileForm({ clinicianData }: ProfileFormProps) {
 
     const [isLoading, setIsLoading] = useState(false)
     const userId = useAuthStore((state) => state.userId)
+    const { storeClinicianInfo } = useAuthStore();
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -69,18 +70,25 @@ export function ProfileForm({ clinicianData }: ProfileFormProps) {
     async function onSubmit(data: z.infer<typeof formSchema>) {
 
         try {
-            setIsLoading(true)
 
-            console.log(data);
-
-
-            await api.put(`/clinician/${userId}`, {
+            const payload = {
                 first_name: data.firstName,
                 last_name: data.lastName,
                 bmdc_no: data.bmdcNo,
                 qualification: data.qualification,
                 specializations: data.specializations,
                 generate_ai_draft: data.defaultGeneration,
+            }
+
+            setIsLoading(true)
+            await api.put(`/clinician/${userId}`, payload)
+            storeClinicianInfo({
+                bmdcNo: payload.bmdc_no,
+                firstName: payload.first_name,
+                lastName: payload.last_name,
+                qualification: payload.qualification,
+                specializations: payload.specializations,
+                generate_ai_draft: payload.generate_ai_draft,
             })
         } catch (error) {
             console.error(error)

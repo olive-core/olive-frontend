@@ -87,7 +87,7 @@ export default function Prescription() {
             <div className="container rounded-xl border flex flex-col mt-4 mb-12">
                 <div className="m-4">
                     <DoctorInfo />
-                    <PatientInfo />
+                    <PatientInfo sessionId={consultationId} />
 
                     <div className="grid grid-cols-1 md:grid-cols-3">
                         {/* left */}

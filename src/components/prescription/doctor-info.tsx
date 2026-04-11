@@ -1,39 +1,57 @@
+import api from "@/lib/axios";
 import { useAuthStore } from "@/stores/auth-store";
+import { useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
+import { Button } from "../ui/button";
 
 
 export default function DoctorInfo() {
 
-    const clinician = useAuthStore(state => state.clinician)
+    const { userId, storeClinicianInfo } = useAuthStore();
 
-    const fullName = (clinician?.firstName ?? "") + " " + (clinician?.lastName ?? "")
+    const { data: clinician, isLoading } = useQuery({
+        queryKey: ["clinician", userId],
+        queryFn: async () => {
+            const response = await api.get(`/clinician/${userId}`);
+            return response.data
+        }
+    })
 
+
+    useEffect(() => {
+        storeClinicianInfo({
+            firstName: clinician?.first_name ?? "",
+            lastName: clinician?.last_name ?? "",
+            bmdcNo: clinician?.bmdc_no ?? "",
+            qualification: clinician?.qualification ?? "",
+            generate_ai_draft: clinician?.generate_ai_draft ?? true
+        })
+    }, [clinician])
+
+    if (isLoading || !clinician) return null;
 
     return (
-        <div className="pt-2">
-            <h3 className="text-xl text-emerald-600 font-display">{fullName}</h3>
-            {/* <p className="text-sm text-slate-500">MBBS, FCPS, Specialist</p>
+        <div className="flex justify-between">
+            <div className="pt-2">
+                <h3 className="text-xl text-emerald-600 font-display">{(clinician.first_name ?? "") + " " + (clinician.last_name ?? "")}</h3>
+                <p className="text-sm text-slate-500">{clinician.qualification}</p>
 
-            <p className="mt-2 text-md font-bold text-slate-700">
-                Assistant Professor, Department of Cardiology
-            </p>
-            <p className="text-slate-600">
-                <HospitalIcon className="inline-block w-4 h-4 mr-2" />
-                XYZ Medical College and Hospital
-            </p>
+                <p className="mt-2 text-slate-600">
+                    BMDC: <span className="font-semibold">{clinician.bmdc_no}</span>
+                </p>
+            </div>
 
-            <p className="text-slate-600">
-                <MailIcon className="inline-block w-4 h-4 mr-2" />
-                doctor@example.com
-            </p>
-
-            <p className="text-slate-600">
-                <PhoneIcon className="inline-block w-4 h-4 mr-2" />
-                01xxxxxxxxx
-            </p> */}
-
-            <p className="mt-2 text-slate-600">
-                BMDC: <span className="font-semibold">{clinician?.bmdcNo}</span>
-            </p>
+            {!clinician.generate_ai_draft && (
+                <div className="flex flex-col gap-2">
+                    {/* 2 btns -> 1. generate, 2. select template */}
+                    <Button>
+                        Generate Draft
+                    </Button>
+                    <Button variant="outline">
+                        Select Template
+                    </Button>
+                </div>
+            )}
         </div>
     )
 }

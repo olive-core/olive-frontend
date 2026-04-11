@@ -65,7 +65,13 @@ export default function NewPatient({ phone, name, age, sex, userId }: NewPatient
             1
         );
 
-        const payload = {
+        const payload: {
+            first_name: string;
+            last_name: string;
+            date_of_birth: string;
+            sex: string;
+            phone?: string;
+        } = {
             first_name: firstName,
             last_name: lastName,
             date_of_birth: dob.toISOString().split("T")[0],
@@ -74,6 +80,7 @@ export default function NewPatient({ phone, name, age, sex, userId }: NewPatient
         }
 
         if (userId) {
+            delete payload.phone;
             await api.put(apiEndPoint, payload);
             return userId;
         } else {

@@ -1,9 +1,12 @@
+import ConsultationCardMemo from '@/components/dashboard/consultation/consultation-card'
+import HistoryContainer from '@/components/dashboard/consultation/history-container'
 import Recorder from '@/components/dashboard/consultation/recorder'
 import api from '@/lib/axios'
 import { useAuthStore } from '@/stores/auth-store'
 import type { HistoryType, PrescriptionType } from '@/types/patient'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
+import { useState } from 'react'
 // import { useState } from 'react'
 
 export const Route = createFileRoute('/dashboard/consultation/$userId/$consultationId')({
