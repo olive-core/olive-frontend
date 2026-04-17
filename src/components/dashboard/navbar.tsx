@@ -1,4 +1,4 @@
-import { EllipsisIcon, LogOutIcon, UserIcon } from "lucide-react";
+import { EllipsisIcon, LayoutTemplate, LogOutIcon, UserIcon } from "lucide-react";
 import NavbarContainer from "../shared/navbar-container";
 import { Button } from "../ui/button";
 import {
@@ -52,6 +52,11 @@ const MENU_ITEMS: MenuItemType[] = [
         label: "Logout",
         icon: <LogOutIcon />,
         buttonType: "logout",
+    },
+    {
+        label: "Templates",
+        icon: <LayoutTemplate />,
+        href: "/dashboard/templates",
     }
 
 ]

@@ -267,6 +267,7 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
             updateMedicine: (index, data) => set((state) => {
                 const updated = [...state.medicine];
                 updated[index] = { ...updated[index], ...data };
+
                 return { medicine: updated };
             }),
             removeMedicine: (index) => set((state) => {

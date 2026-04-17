@@ -53,7 +53,8 @@ export default function MedicineEdit({ medicine, onRemove, onUpdate, index, setI
         } else {
             onUpdate(index, {
                 ...medicine,
-                value: medicineValue.label,
+                value: medicineValue.value,
+                name: medicineValue.label,
                 notes,
                 dosage,
                 routine: routineMode === "interval" ? {

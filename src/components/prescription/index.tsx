@@ -17,7 +17,15 @@ import {
     AccordionTrigger,
 } from "@/components/ui/accordion"
 
-export default function Prescription() {
+export default function Prescription({ 
+    onGenerate, 
+    onCancel, 
+    hasBeenGenerated 
+}: { 
+    onGenerate: () => void, 
+    onCancel: () => void,
+    hasBeenGenerated: boolean
+}) {
 
     const store = usePrescriptionStore();
     const navigate = useNavigate();
@@ -64,9 +72,8 @@ export default function Prescription() {
             await api.post('/prescription', payload);
         },
         onSuccess: () => {
-            // TODO: remove editing details
             handlePrint();
-            // navigate({ to: '/dashboard' });
+            navigate({ to: '/dashboard' });
         }
     });
 
@@ -86,7 +93,11 @@ export default function Prescription() {
             {/* prescription editor */}
             <div className="container rounded-xl border flex flex-col mt-4 mb-12">
                 <div className="m-4">
-                    <DoctorInfo />
+                    <DoctorInfo 
+                        onGenerate={onGenerate} 
+                        onCancel={onCancel}
+                        hasBeenGenerated={hasBeenGenerated}
+                    />
                     <PatientInfo sessionId={consultationId} />
 
                     <div className="grid grid-cols-1 md:grid-cols-3">

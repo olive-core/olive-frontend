@@ -70,7 +70,7 @@ const MedicineView = ({ medicine, onRemove, index, setIsEditing }: MedicineViewP
             {/* Bottom Row: Dosage/Value and Timing Instruction */}
             <div className="flex justify-between items-center">
                 <div className="text-sm text-slate-500">
-                    {medicine.value} {medicine.dosage && <span>&middot; {medicine.dosage}</span>}
+                    {medicine.dosage}
                 </div>
 
                 {/* Timing Chip (Before/After) */}

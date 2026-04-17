@@ -17,7 +17,15 @@ function RouteComponent() {
 
   const [isReady, setIsReady] = useState(false);
   const [isError, setIsError] = useState(false);
+  const [hasBeenGenerated, setHasBeenGenerated] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
+
+  function handleCancelSSE() {
+    abortRef.current?.abort();
+    setIsReady(true);
+    setGenerating(false);
+    setHasBeenGenerated(true);
+  }
 
   function startSSE() {
     // Cancel any in-flight request
@@ -98,6 +106,7 @@ function RouteComponent() {
                     getInitialPrescription(payload);
                     setIsReady(true);
                     setGenerating(false);
+                    setHasBeenGenerated(true);
                   }
                   reader.cancel();
                   return;
@@ -146,12 +155,16 @@ function RouteComponent() {
   }
 
   if (!isReady) {
-    return <PrescriptionSkeleton />
+    return <PrescriptionSkeleton onCancel={handleCancelSSE} sessionId={consultationId} />
   }
 
   return (
     <>
-      <Prescription />
+      <Prescription 
+        onGenerate={startSSE} 
+        onCancel={handleCancelSSE}
+        hasBeenGenerated={hasBeenGenerated}
+      />
     </>
   )
 }

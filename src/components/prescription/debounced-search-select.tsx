@@ -46,6 +46,7 @@ export default function DebouncedSearchSelect({
     minLength = 2,
     queryKeyBase,
 }: Props) {
+
     const [inputValue, setInputValue] = useState(value?.label || "");
     const [isOpen, setIsOpen] = useState(false);
     const [highlightIndex, setHighlightIndex] = useState(-1);
@@ -83,6 +84,16 @@ export default function DebouncedSearchSelect({
         setIsOpen(false);
     };
 
+    const handleAdd = () => {
+
+        if (inputValue?.length === 0) return;
+
+        handleSelect({
+            label: inputValue,
+            value: inputValue,
+        })
+    }
+
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (!isOpen) return;
 
@@ -100,6 +111,8 @@ export default function DebouncedSearchSelect({
             e.preventDefault();
             if (highlightIndex >= 0) {
                 handleSelect(options[highlightIndex]);
+            } else if (inputValue.length > 0) {
+                handleAdd();
             }
         }
 
@@ -124,6 +137,17 @@ export default function DebouncedSearchSelect({
 
             {isOpen && (
                 <div className="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-auto">
+
+
+                    {inputValue?.length > 0 && (
+                        <div
+                            onMouseDown={() => handleAdd()}
+                            className={`px-3 py-2 text-sm cursor-pointer hover:bg-gray-100 italic text-blue-600`}
+                        >
+                            Add "{inputValue}"
+                        </div>
+                    )}
+
                     {isFetching && (
                         <div className="px-3 py-2 text-xs text-gray-500">Loading...</div>
                     )}
@@ -134,7 +158,7 @@ export default function DebouncedSearchSelect({
 
                     {options.map((option, index) => (
                         <div
-                            key={option.value}
+                            key={index}
                             onMouseDown={() => handleSelect(option)}
                             className={`px-3 py-2 text-sm cursor-pointer ${index === highlightIndex
                                 ? "bg-blue-100 text-blue-700"

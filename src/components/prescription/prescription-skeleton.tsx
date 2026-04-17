@@ -126,7 +126,13 @@ function SkeletonMedicineCard({ index }: { index: number }) {
 }
 
 // ─── Main PrescriptionSkeleton ─────────────────────────────────────────────────
-export default function PrescriptionSkeleton() {
+export default function PrescriptionSkeleton({ 
+  onCancel,
+  sessionId 
+}: { 
+  onCancel?: () => void,
+  sessionId: string 
+}) {
 
   const store = usePrescriptionStore();
   const {
@@ -162,8 +168,8 @@ export default function PrescriptionSkeleton() {
     <div className="container rounded-xl border flex flex-col mt-4 mb-12 overflow-hidden">
       <div className="m-4">
         {/* ── Real Doctor & Patient info ─────────────────────────── */}
-        <DoctorInfo />
-        <PatientInfo />
+        <DoctorInfo onCancel={onCancel} />
+        <PatientInfo sessionId={sessionId} />
 
         {/* ── AI Status block ────────────────────────────────────── */}
         <div className="flex items-center gap-3 py-3 px-4 my-3 rounded-xl bg-gradient-to-r from-emerald-50 to-slate-50 border border-emerald-100">

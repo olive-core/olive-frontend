@@ -1,13 +1,23 @@
 import api from "@/lib/axios";
 import { useAuthStore } from "@/stores/auth-store";
+import { usePrescriptionStore } from "@/stores/prescription-store";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { Button } from "../ui/button";
 
 
-export default function DoctorInfo() {
+export default function DoctorInfo({ 
+    onGenerate, 
+    onCancel,
+    hasBeenGenerated 
+}: { 
+    onGenerate?: () => void, 
+    onCancel?: () => void,
+    hasBeenGenerated?: boolean
+}) {
 
     const { userId, storeClinicianInfo } = useAuthStore();
+    const isGenerating = usePrescriptionStore(s => s.isGenerating);
 
     const { data: clinician, isLoading } = useQuery({
         queryKey: ["clinician", userId],
@@ -41,17 +51,20 @@ export default function DoctorInfo() {
                 </p>
             </div>
 
-            {!clinician.generate_ai_draft && (
-                <div className="flex flex-col gap-2">
-                    {/* 2 btns -> 1. generate, 2. select template */}
-                    <Button>
-                        Generate Draft
+            <div className="flex flex-col gap-2">
+                {isGenerating ? (
+                    <Button variant="destructive" onClick={onCancel}>
+                        Cancel
                     </Button>
-                    <Button variant="outline">
-                        Select Template
+                ) : (
+                    <Button onClick={onGenerate}>
+                        {hasBeenGenerated ? 'Re-generate' : 'Generate Draft'}
                     </Button>
-                </div>
-            )}
+                )}
+                <Button variant="outline">
+                    Select Template
+                </Button>
+            </div>
         </div>
     )
 }

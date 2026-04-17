@@ -71,7 +71,7 @@ export const MedicineContainer = () => {
 
 
     return (
-        <div className="">
+        <div className="mb-4">
             <div className="pt-2">
                 <div className="flex items-center justify-between mb-4">
                     <h3 className="font-semibold text-md text-emerald-600">Medicine (Rx)</h3>
