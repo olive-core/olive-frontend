@@ -23,6 +23,7 @@ interface PrescriptionStoreType {
     setGenerating: (value: boolean) => void;
     setPartialData: (data: Pick<PrescriptionResponseType, 'chief_complaints' | 'history' | 'summary'>) => void;
     getInitialPrescription: (data: PrescriptionResponseType) => Promise<void>;
+    setPrescriptionFromTemplate: (data: any) => void;
     getSubmitPayload: (sessionId: string) => Record<string, any>;
 
     // chief complaint methods
@@ -153,6 +154,59 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
                     investigation,
                     advice,
                     summary,
+                })
+            },
+
+            setPrescriptionFromTemplate: (data: any) => {
+                const chiefComplaint = data.chief_complaints?.map((item: any) => ({
+                    name: item.name_text,
+                    duration: item.duration || "",
+                    notes: item.notes || "",
+                })) || []
+
+                const history = data.histories?.map((item: any) => ({
+                    name: item.name_text,
+                    duration: item.duration || "",
+                    notes: item.notes || "",
+                })) || []
+
+                const diagnosis = data.diagnoses?.map((item: any) => ({
+                    name: item.name_text,
+                    icd_code: item.icd_code,
+                    confidence: item.confidence,
+                    clinical_reasoning: item.clinical_reasoning
+                })) || []
+
+                const medicine = data.rx_list?.map((item: any) => ({
+                    name: item.generic_name || item.trade_name,
+                    value: item.trade_name || item.generic_name,
+                    dosage: item.dosage,
+                    notes: item.duration,
+                    routine: {
+                        beforeBreakfast: item.routine?.before_breakfast || false,
+                        afterBreakfast: item.routine?.after_breakfast || false,
+                        beforeLunch: item.routine?.before_lunch || false,
+                        afterLunch: item.routine?.after_lunch || false,
+                        beforeDinner: item.routine?.before_dinner || false,
+                        afterDinner: item.routine?.after_dinner || false,
+                    }
+                })) || []
+
+                const investigation = data.investigations?.map((item: any) => ({
+                    name: item.name_text,
+                    notes: item.reason || "",
+                    priority: item.priority || "routine"
+                })) || []
+
+                const advice = data.advice_list || [];
+
+                set({
+                    chiefComplaint,
+                    history,
+                    diagnosis,
+                    medicine,
+                    investigation,
+                    advice,
                 })
             },
 

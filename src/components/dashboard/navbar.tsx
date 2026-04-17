@@ -23,6 +23,11 @@ type MenuItemType = {
 }
 
 const MENU_ITEMS: MenuItemType[] = [
+    {
+        label: "Templates",
+        icon: <LayoutTemplate />,
+        href: "/dashboard/templates",
+    },
     // {
     //     label: "Statistics",
     //     icon: <ChartNoAxesColumnIcon />,
@@ -53,11 +58,7 @@ const MENU_ITEMS: MenuItemType[] = [
         icon: <LogOutIcon />,
         buttonType: "logout",
     },
-    {
-        label: "Templates",
-        icon: <LayoutTemplate />,
-        href: "/dashboard/templates",
-    }
+
 
 ]
 

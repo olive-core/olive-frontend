@@ -2,8 +2,10 @@ import api from "@/lib/axios";
 import { useAuthStore } from "@/stores/auth-store";
 import { usePrescriptionStore } from "@/stores/prescription-store";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "../ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Loader2Icon } from "lucide-react";
 
 
 export default function DoctorInfo({ 
@@ -18,6 +20,9 @@ export default function DoctorInfo({
 
     const { userId, storeClinicianInfo } = useAuthStore();
     const isGenerating = usePrescriptionStore(s => s.isGenerating);
+    const setPrescriptionFromTemplate = usePrescriptionStore(s => s.setPrescriptionFromTemplate);
+
+    const [isApplyingTemplate, setIsApplyingTemplate] = useState(false);
 
     const { data: clinician, isLoading } = useQuery({
         queryKey: ["clinician", userId],
@@ -26,6 +31,27 @@ export default function DoctorInfo({
             return response.data
         }
     })
+
+    const { data: templates = [], isLoading: isLoadingTemplates } = useQuery<{template_id: string, template_name: string}[]>({
+        queryKey: ["prescription-templates", userId],
+        queryFn: async () => {
+            const response = await api.get(`/prescription-template/my?clinician_id=${userId}`);
+            return response.data;
+        },
+        enabled: !!userId,
+    })
+
+    const handleTemplateSelect = async (templateId: string) => {
+        setIsApplyingTemplate(true);
+        try {
+            const res = await api.get(`/prescription-template/${templateId}`);
+            setPrescriptionFromTemplate(res.data.prescription_data);
+        } catch (error) {
+            console.error("Failed to apply template", error);
+        } finally {
+            setIsApplyingTemplate(false);
+        }
+    }
 
 
     useEffect(() => {
@@ -61,9 +87,26 @@ export default function DoctorInfo({
                         {hasBeenGenerated ? 'Re-generate' : 'Generate Draft'}
                     </Button>
                 )}
-                <Button variant="outline">
-                    Select Template
-                </Button>
+                
+                <Select disabled={isLoadingTemplates || templates.length === 0 || isApplyingTemplate} onValueChange={handleTemplateSelect}>
+                    <SelectTrigger className="w-full">
+                        {isApplyingTemplate ? (
+                            <div className="flex items-center gap-2">
+                                <Loader2Icon className="h-4 w-4 animate-spin" />
+                                Applying...
+                            </div>
+                        ) : (
+                            <SelectValue placeholder="Select Template" />
+                        )}
+                    </SelectTrigger>
+                    <SelectContent>
+                        {templates.map(t => (
+                            <SelectItem key={t.template_id} value={t.template_id}>
+                                {t.template_name}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
             </div>
         </div>
     )
