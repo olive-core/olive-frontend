@@ -1,4 +1,4 @@
-import { EllipsisIcon, LayoutTemplate, LogOutIcon, UserIcon } from "lucide-react";
+import { EllipsisIcon, House, LayoutTemplate, LogOutIcon, UserIcon } from "lucide-react";
 import NavbarContainer from "../shared/navbar-container";
 import { Button } from "../ui/button";
 import {
@@ -23,6 +23,11 @@ type MenuItemType = {
 }
 
 const MENU_ITEMS: MenuItemType[] = [
+    {
+        label: "Home",
+        icon: <House />,
+        href: "/dashboard",
+    },
     {
         label: "Templates",
         icon: <LayoutTemplate />,
@@ -62,7 +67,7 @@ const MENU_ITEMS: MenuItemType[] = [
 
 ]
 
-const TOTAL_MENU_TO_SHOW = 3;
+const TOTAL_MENU_TO_SHOW = 4;
 
 export default function DashboardNavbar() {
 
