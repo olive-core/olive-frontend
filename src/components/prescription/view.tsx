@@ -28,7 +28,7 @@ export const PrescriptionView = () => {
             <div className="w-[210mm] mx-auto p-6 border print:border-none">
 
                 <DoctorInfo />
-                <PatientInfo />
+                <PatientInfo sessionId="" />
 
                 {/* dashed separator */}
                 <div className="border-t border-dashed my-3" />
