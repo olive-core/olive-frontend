@@ -99,21 +99,23 @@ function RouteComponent() {
   const hasSelection = !!activeHistoryId;
 
   return (
-    <div className="container mt-10 pb-10">
-      <div className="grid grid-cols-1 md:grid-cols-2 md:max-h-[calc(100vh-100px)] w-full gap-8">
+    <div className="container mt-10 pb-10 md:h-screen">
+      <div className="grid grid-cols-1 md:grid-cols-2 md:h-[calc(100vh-100px)] w-full gap-8">
 
-        <div className="flex flex-col md:max-h-[calc(100vh-100px)] gap-8">
-          <div className="md:h-[40%]">
+        <div className="flex flex-col md:h-full gap-8 min-h-0">
+          <div className="flex-none">
             <Recorder />
           </div>
 
-          <HistoryContainer
-            histories={historiesData}
-            activeHistoryId={activeHistoryId}
-            setActiveHistoryId={setActiveHistoryId}
-            isLoading={isLoadingHistories}
-            isError={isErrorHistories}
-          />
+          <div className="flex-1 min-h-0">
+            <HistoryContainer
+              histories={historiesData}
+              activeHistoryId={activeHistoryId}
+              setActiveHistoryId={setActiveHistoryId}
+              isLoading={isLoadingHistories}
+              isError={isErrorHistories}
+            />
+          </div>
         </div>
 
         <ConsultationCardMemo

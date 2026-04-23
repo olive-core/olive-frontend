@@ -26,7 +26,7 @@ export default defineConfig({
   server: {
     proxy: {
       "/api/v1": {
-        target: "https://34.87.165.191/",
+        target: "https://34.21.166.40/",
         changeOrigin: true,
         secure: false,
         // Disable proxy buffering so SSE events flush immediately

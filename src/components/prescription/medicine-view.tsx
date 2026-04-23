@@ -1,4 +1,4 @@
-import { AlertCircle, Clock, XIcon } from 'lucide-react';
+import { AlertCircle, Clock, Sparkles, XIcon } from 'lucide-react';
 import { Button } from '../ui/button';
 import type { MeedicineType } from '@/types/prescription';
 
@@ -11,13 +11,16 @@ interface MedicineViewProps {
 
 // Helper: Generates the "1+0+1" string
 const getFrequencyPattern = (r: MeedicineType['routine']) => {
-    if (r.gapHours) return null; // Gap hours override the pattern
-
     const morning = r.beforeBreakfast || r.afterBreakfast ? '1' : '0';
     const noon = r.beforeLunch || r.afterLunch ? '1' : '0';
     const night = r.beforeDinner || r.afterDinner ? '1' : '0';
+    const pattern = `${morning} + ${noon} + ${night}`;
 
-    return `${morning} + ${noon} + ${night}`;
+    if (pattern === '0 + 0 + 0' && r.gapHours) {
+        return null; // Gap hours override the pattern only if no meals selected
+    }
+
+    return pattern;
 };
 
 // Helper: Generates the "After Meal" / "Before Meal" text
@@ -46,10 +49,19 @@ const MedicineView = ({ medicine, onRemove, index, setIsEditing }: MedicineViewP
         >
 
             {/* Top Row: Name and Pattern */}
-            <div className="flex justify-between items-center mb-1">
-                <h3 className="text-slate-900 font-semibold text-base leading-tight">
-                    {medicine.name}
-                </h3>
+            <div className="flex justify-between items-start mb-1">
+                <div className="flex flex-col">
+                    <h3 className="text-slate-900 leading-tight">
+                        {medicine.trade_name ? (
+                            <span className="font-bold text-base">{medicine.trade_name}</span>
+                        ) : (
+                            <span className="font-semibold text-base">{medicine.name}</span>
+                        )}
+                    </h3>
+                    {medicine.generic_name && (
+                        <div className="text-xs text-slate-500 mt-0.5">{medicine.generic_name}</div>
+                    )}
+                </div>
 
                 {/* The 1+0+1 Pattern */}
                 {pattern ? (
@@ -83,6 +95,16 @@ const MedicineView = ({ medicine, onRemove, index, setIsEditing }: MedicineViewP
                     </span>
                 )}
             </div>
+
+            {/* Reasoning / Purpose */}
+            {medicine.reasoning && (
+                <div className="mt-2 p-2 rounded-lg bg-emerald-50/50 border border-emerald-100 flex items-start gap-1.5 transition-colors group-hover:bg-emerald-100/30">
+                    <Sparkles className="w-3.5 h-3.5 text-emerald-500 mt-0.5 shrink-0" />
+                    <p className="text-xs text-slate-600 italic leading-tight">
+                        {medicine.reasoning}
+                    </p>
+                </div>
+            )}
 
             {/* Optional: Compact Notes Footer */}
             <div className="flex items-center mt-2">

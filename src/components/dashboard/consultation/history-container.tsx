@@ -129,7 +129,7 @@ export default function HistoryContainer({
     };
 
     return (
-        <Card className="flex flex-col md:max-h-[calc(60vh-32px)]">
+        <Card className="flex flex-col h-full min-h-0">
             <CardHeader className="font-display text-xl">History</CardHeader>
             <CardContent className="flex-1 overflow-auto">
                 {renderContent()}

@@ -11,11 +11,13 @@ import { Loader2Icon } from "lucide-react";
 export default function DoctorInfo({ 
     onGenerate, 
     onCancel,
-    hasBeenGenerated 
+    hasBeenGenerated,
+    hideActions = false
 }: { 
     onGenerate?: () => void, 
     onCancel?: () => void,
-    hasBeenGenerated?: boolean
+    hasBeenGenerated?: boolean,
+    hideActions?: boolean
 }) {
 
     const { userId, storeClinicianInfo } = useAuthStore();
@@ -43,6 +45,11 @@ export default function DoctorInfo({
 
     const handleTemplateSelect = async (templateId: string) => {
         setIsApplyingTemplate(true);
+        
+        if (isGenerating && onCancel) {
+            onCancel();
+        }
+
         try {
             const res = await api.get(`/prescription-template/${templateId}`);
             setPrescriptionFromTemplate(res.data.prescription_data);
@@ -77,37 +84,39 @@ export default function DoctorInfo({
                 </p>
             </div>
 
-            <div className="flex flex-col gap-2">
-                {isGenerating ? (
-                    <Button variant="destructive" onClick={onCancel}>
-                        Cancel
-                    </Button>
-                ) : (
-                    <Button onClick={onGenerate}>
-                        {hasBeenGenerated ? 'Re-generate' : 'Generate Draft'}
-                    </Button>
-                )}
-                
-                <Select disabled={isLoadingTemplates || templates.length === 0 || isApplyingTemplate} onValueChange={handleTemplateSelect}>
-                    <SelectTrigger className="w-full">
-                        {isApplyingTemplate ? (
-                            <div className="flex items-center gap-2">
-                                <Loader2Icon className="h-4 w-4 animate-spin" />
-                                Applying...
-                            </div>
-                        ) : (
-                            <SelectValue placeholder="Select Template" />
-                        )}
-                    </SelectTrigger>
-                    <SelectContent>
-                        {templates.map(t => (
-                            <SelectItem key={t.template_id} value={t.template_id}>
-                                {t.template_name}
-                            </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-            </div>
+            {!hideActions && (
+                <div className="flex flex-col gap-2">
+                    {isGenerating ? (
+                        <Button variant="destructive" onClick={onCancel}>
+                            Cancel
+                        </Button>
+                    ) : (
+                        <Button onClick={onGenerate}>
+                            {hasBeenGenerated ? 'Re-generate' : 'Generate Draft'}
+                        </Button>
+                    )}
+                    
+                    <Select disabled={isLoadingTemplates || templates.length === 0 || isApplyingTemplate} onValueChange={handleTemplateSelect}>
+                        <SelectTrigger className="w-full">
+                            {isApplyingTemplate ? (
+                                <div className="flex items-center gap-2">
+                                    <Loader2Icon className="h-4 w-4 animate-spin" />
+                                    Applying...
+                                </div>
+                            ) : (
+                                <SelectValue placeholder="Select Template" />
+                            )}
+                        </SelectTrigger>
+                        <SelectContent>
+                            {templates.map(t => (
+                                <SelectItem key={t.template_id} value={t.template_id}>
+                                    {t.template_name}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+            )}
         </div>
     )
 }

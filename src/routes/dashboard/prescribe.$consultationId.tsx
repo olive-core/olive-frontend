@@ -28,6 +28,9 @@ function RouteComponent() {
   }
 
   function startSSE() {
+    const { resetStore } = usePrescriptionStore.getState();
+    resetStore();
+
     // Cancel any in-flight request
     abortRef.current?.abort();
     const controller = new AbortController();
@@ -131,6 +134,8 @@ function RouteComponent() {
     if (clinician?.generate_ai_draft) {
       startSSE();
     } else {
+      const { resetStore } = usePrescriptionStore.getState();
+      resetStore();
       setIsReady(true)
     }
     return () => {

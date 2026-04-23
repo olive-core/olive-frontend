@@ -22,6 +22,8 @@ function useDebounce<T>(value: T, delay: number = 400) {
 export type Option = {
     label: string;
     value: string;
+    trade_name?: string;
+    generic_name?: string;
 };
 
 interface Props {
@@ -165,7 +167,14 @@ export default function DebouncedSearchSelect({
                                 : "hover:bg-gray-100 text-gray-700"
                                 }`}
                         >
-                            {option.label}
+                            {option.trade_name ? (
+                                <div>
+                                    <span className="font-bold">{option.trade_name}</span>
+                                    {option.generic_name && <span className="text-gray-500 text-xs ml-1">({option.generic_name})</span>}
+                                </div>
+                            ) : (
+                                option.label
+                            )}
                         </div>
                     ))}
                 </div>

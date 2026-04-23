@@ -28,7 +28,9 @@ export default function MedicineEdit({ medicine, onRemove, onUpdate, index, setI
     const [routineMode, setRoutineMode] = useState<string>(medicine?.routine?.gapHours ? "interval" : "meal");
     const [medicineValue, setMedicineValue] = useState<Option>({
         label: medicine.name,
-        value: medicine.name
+        value: medicine.value || medicine.name,
+        trade_name: medicine.trade_name,
+        generic_name: medicine.generic_name
     });
     const [gapHour, setGapHour] = useState<string>(medicine.routine?.gapHours ? medicine.routine.gapHours.toString() : "");
 
@@ -55,6 +57,8 @@ export default function MedicineEdit({ medicine, onRemove, onUpdate, index, setI
                 ...medicine,
                 value: medicineValue.value,
                 name: medicineValue.label,
+                trade_name: medicineValue.trade_name,
+                generic_name: medicineValue.generic_name,
                 notes,
                 dosage,
                 routine: routineMode === "interval" ? {
@@ -88,6 +92,8 @@ export default function MedicineEdit({ medicine, onRemove, onUpdate, index, setI
         return res.data.map(item => ({
             label: item.trade_name ?? item.generic_name_strength ?? "",
             value: item.trade_name ?? item.generic_name_strength ?? "",
+            trade_name: item.trade_name,
+            generic_name: item.generic_name_strength,
         }));
     }
 

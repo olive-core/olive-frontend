@@ -1,34 +1,32 @@
-import { DUMMY_PRESCRIPTION } from "@/lib/dummy-data";
 import DoctorInfo from "./doctor-info";
 import PatientInfo from "./patient-info";
+import { usePrescriptionStore } from "@/stores/prescription-store";
+import { useParams } from "@tanstack/react-router";
 
 const getRoutineString = (routine: any) => {
-
-    if (routine.gap_hours) return `Every ${routine.gap_hours} hours`;
-
-    if (!routine?.meal_times?.length) return "";
+    if (routine.gap_hour) return `Every ${routine.gap_hour} hours`;
 
     let m = 0, n = 0, e = 0;
-
-    routine.meal_times.forEach((t: string) => {
-        if (t.includes("breakfast") || t.includes("morning")) m = 1;
-        if (t.includes("lunch") || t.includes("noon")) n = 1;
-        if (t.includes("dinner") || t.includes("night")) e = 1;
-    });
+    
+    if (routine.before_breakfast || routine.after_breakfast) m = 1;
+    if (routine.before_lunch || routine.after_lunch) n = 1;
+    if (routine.before_dinner || routine.after_dinner) e = 1;
 
     return `${m}+${n}+${e}`;
 };
 
 export const PrescriptionView = () => {
-    const data = DUMMY_PRESCRIPTION;
+    const { consultationId } = useParams({ from: '/dashboard/prescribe/$consultationId' });
+    const getSubmitPayload = usePrescriptionStore(s => s.getSubmitPayload);
+    const data = getSubmitPayload(consultationId);
 
     return (
         <div className="bg-white text-sm">
             {/* A4 Container (no fixed height → allows pagination) */}
             <div className="w-[210mm] mx-auto p-6 border print:border-none">
 
-                <DoctorInfo />
-                <PatientInfo sessionId="" />
+                <DoctorInfo hideActions={true} />
+                <PatientInfo sessionId={consultationId} />
 
                 {/* dashed separator */}
                 <div className="border-t border-dashed my-3" />
@@ -38,26 +36,26 @@ export const PrescriptionView = () => {
                     {/* LEFT */}
                     <div className="space-y-3">
                         <Section title="Chief Complaint">
-                            {data.chief_complaints.map((cc, i) => (
-                                <li key={i}>{cc.complaint_name}</li>
+                            {data.chief_complaints.map((cc: any, i: number) => (
+                                <li key={i}>{cc.name_text}</li>
                             ))}
                         </Section>
-
+                                    
                         <Section title="History">
-                            {data.history.map((h, i) => (
-                                <li key={i}>{h.history_name}</li>
+                            {data.histories.map((h: any, i: number) => (
+                                <li key={i}>{h.name_text}</li>
                             ))}
                         </Section>
-
+                                    
                         <Section title="Diagnosis">
-                            {data.diagnoses.map((d, i) => (
-                                <li key={i}>{d.diagnosis_name}</li>
+                            {data.diagnoses.map((d: any, i: number) => (
+                                <li key={i}>{d.name_text}</li>
                             ))}
                         </Section>
-
+                                    
                         <Section title="Investigation">
-                            {data.investigations.map((i, idx) => (
-                                <li key={idx}>{i.investigation_name}</li>
+                            {data.investigations.map((i: any, idx: number) => (
+                                <li key={idx}>{i.name_text}</li>
                             ))}
                         </Section>
                     </div>
@@ -67,7 +65,7 @@ export const PrescriptionView = () => {
                         <h3 className="font-semibold text-emerald-600 mb-2">Rx</h3>
 
                         <div className="space-y-2">
-                            {data.medicines.map((m, i) => (
+                            {data.rx_list.map((m: any, i: number) => (
                                 <div
                                     key={i}
                                     className="flex justify-between items-start border-b border-dashed pb-2 break-inside-avoid"
@@ -107,7 +105,7 @@ export const PrescriptionView = () => {
                 <div>
                     <h3 className="font-semibold text-emerald-600 mb-1">Advice</h3>
                     <ul className="list-disc pl-5 text-xs space-y-1">
-                        {data.advice.map((a, i) => (
+                        {data.advice_list.map((a: string, i: number) => (
                             <li key={i} className="break-inside-avoid">
                                 {a}
                             </li>

@@ -90,6 +90,7 @@ export function ProfileForm({ clinicianData }: ProfileFormProps) {
                 specializations: payload.specializations,
                 generate_ai_draft: payload.generate_ai_draft,
             })
+            toast.success("Profile updated successfully")
         } catch (error) {
             console.error(error)
             toast.error(error instanceof AxiosError ? error.message : "Something went wrong")

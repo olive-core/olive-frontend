@@ -58,6 +58,7 @@ interface PrescriptionStoreType {
     addEmptyMedicine: () => void;
     updateMedicine: (index: number, data: Partial<MeedicineType>) => void;
     removeMedicine: (index: number) => void;
+    resetStore: () => void;
 }
 
 export const usePrescriptionStore = create<PrescriptionStoreType>(
@@ -79,8 +80,20 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
             advice: [],
 
             initiatePrescription: (patientId, sessionId) => {
+                get().resetStore();
                 set({ patientId, sessionId });
             },
+
+            resetStore: () => set({
+                isGenerating: false,
+                chiefComplaint: [],
+                history: [],
+                diagnosis: [],
+                investigation: [],
+                summary: "",
+                medicine: [],
+                advice: [],
+            }),
 
             setGenerating: (value) => set({ isGenerating: value }),
 
@@ -120,11 +133,13 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
                     icd_code: item.icd_code,
                     confidence: item.confidence,
                     clinical_reasoning: item.clinical_reasoning
-                })) || []
+                })).sort((a, b) => (b.confidence || 0) - (a.confidence || 0)) || []
 
                 const medicine = data.medicines?.map(item => ({
-                    name: item.generic_name,
-                    value: item.generic_name,
+                    name: item.trade_name || item.generic_name,
+                    value: item.trade_name || item.generic_name,
+                    trade_name: item.trade_name,
+                    generic_name: item.generic_name,
                     dosage: item.dosage,
                     notes: item.duration,
                     routine: {
@@ -134,7 +149,9 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
                         afterLunch: item.routine?.meal_times?.includes('after_lunch'),
                         beforeDinner: item.routine?.meal_times?.includes('before_dinner'),
                         afterDinner: item.routine?.meal_times?.includes('after_dinner'),
-                    }
+                        gapHours: item.routine?.gap_hours || 0,
+                    },
+                    reasoning: item.purpose
                 })) || []
 
                 const investigation = data.investigations?.map(item => ({
@@ -175,11 +192,13 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
                     icd_code: item.icd_code,
                     confidence: item.confidence,
                     clinical_reasoning: item.clinical_reasoning
-                })) || []
+                })).sort((a: DiagnosisType, b: DiagnosisType) => (b.confidence || 0) - (a.confidence || 0)) || []
 
                 const medicine = data.rx_list?.map((item: any) => ({
-                    name: item.generic_name || item.trade_name,
+                    name: item.trade_name || item.generic_name,
                     value: item.trade_name || item.generic_name,
+                    trade_name: item.trade_name,
+                    generic_name: item.generic_name,
                     dosage: item.dosage,
                     notes: item.duration,
                     routine: {
@@ -189,6 +208,7 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
                         afterLunch: item.routine?.after_lunch || false,
                         beforeDinner: item.routine?.before_dinner || false,
                         afterDinner: item.routine?.after_dinner || false,
+                        gapHours: item.routine?.gap_hour || 0,
                     }
                 })) || []
 
@@ -238,8 +258,8 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
                     })),
                     rx_list: state.medicine.map(item => ({
                         medicine_id: null,
-                        trade_name: item.value,
-                        generic_name: item.value,
+                        trade_name: item.trade_name || item.value,
+                        generic_name: item.generic_name || item.value,
                         dosage: item.dosage,
                         duration: item.notes,
                         routine: {
@@ -249,7 +269,7 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
                             after_lunch: item.routine?.afterLunch || false,
                             before_dinner: item.routine?.beforeDinner || false,
                             after_dinner: item.routine?.afterDinner || false,
-                            gap_hour: 0
+                            gap_hour: item.routine?.gapHours || 0
                         }
                     })),
                     advice_list: state.advice

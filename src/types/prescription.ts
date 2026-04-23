@@ -33,8 +33,11 @@ export type ListInfoType = ChiefComplaintType | HistoryType | DiagnosisType | In
 export type MeedicineType = {
     name: string;
     value: string;
+    trade_name?: string;
+    generic_name?: string;
     dosage?: string;
     notes?: string;
+    reasoning?: string;
     routine: {
         beforeBreakfast?: boolean;
         afterBreakfast?: boolean;
