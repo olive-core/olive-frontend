@@ -1,4 +1,4 @@
-import { EllipsisIcon, House, LayoutTemplate, LogOutIcon, UserIcon } from "lucide-react";
+import { ClipboardListIcon, EllipsisIcon, House, LayoutTemplate, LogOutIcon, UserIcon } from "lucide-react";
 import NavbarContainer from "../shared/navbar-container";
 import { Button } from "../ui/button";
 import {
@@ -27,6 +27,11 @@ const MENU_ITEMS: MenuItemType[] = [
         label: "Home",
         icon: <House />,
         href: "/dashboard",
+    },
+    {
+        label: "Consultations",
+        icon: <ClipboardListIcon />,
+        href: "/dashboard/consultations",
     },
     {
         label: "Templates",
@@ -132,7 +137,7 @@ export default function DashboardNavbar() {
 
 
     return (
-        <NavbarContainer className="border-none">
+        <NavbarContainer className="border-none print:hidden">
 
             <div className="md:flex items-center hidden gap-4">
 

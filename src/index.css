@@ -173,3 +173,13 @@ html::-webkit-scrollbar {
   display: none;
   /* Chrome/Safari */
 }
+
+@media print {
+  body {
+    background: white;
+  }
+
+  main {
+    padding-top: 0 !important;
+  }
+}

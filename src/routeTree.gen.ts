@@ -19,8 +19,10 @@ import { Route as authSignInRouteImport } from './routes/(auth)/sign-in'
 import { Route as authEnterOtpRouteImport } from './routes/(auth)/enter-otp'
 import { Route as DashboardTemplatesIndexRouteImport } from './routes/dashboard/templates/index'
 import { Route as DashboardProfileIndexRouteImport } from './routes/dashboard/profile/index'
+import { Route as DashboardConsultationsIndexRouteImport } from './routes/dashboard/consultations/index'
 import { Route as DashboardProfileEditRouteImport } from './routes/dashboard/profile/edit'
 import { Route as DashboardPrescribeConsultationIdRouteImport } from './routes/dashboard/prescribe.$consultationId'
+import { Route as DashboardConsultationsPrescriptionIdRouteImport } from './routes/dashboard/consultations/$prescriptionId'
 import { Route as DashboardTemplatesManageIndexRouteImport } from './routes/dashboard/templates/manage.index'
 import { Route as DashboardTemplatesManageTemplateIdRouteImport } from './routes/dashboard/templates/manage.$templateId'
 import { Route as DashboardConsultationUserIdConsultationIdRouteImport } from './routes/dashboard/consultation.$userId.$consultationId'
@@ -74,6 +76,12 @@ const DashboardProfileIndexRoute = DashboardProfileIndexRouteImport.update({
   path: '/profile/',
   getParentRoute: () => DashboardRouteRoute,
 } as any)
+const DashboardConsultationsIndexRoute =
+  DashboardConsultationsIndexRouteImport.update({
+    id: '/consultations/',
+    path: '/consultations/',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any)
 const DashboardProfileEditRoute = DashboardProfileEditRouteImport.update({
   id: '/profile/edit',
   path: '/profile/edit',
@@ -83,6 +91,12 @@ const DashboardPrescribeConsultationIdRoute =
   DashboardPrescribeConsultationIdRouteImport.update({
     id: '/prescribe/$consultationId',
     path: '/prescribe/$consultationId',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any)
+const DashboardConsultationsPrescriptionIdRoute =
+  DashboardConsultationsPrescriptionIdRouteImport.update({
+    id: '/consultations/$prescriptionId',
+    path: '/consultations/$prescriptionId',
     getParentRoute: () => DashboardRouteRoute,
   } as any)
 const DashboardTemplatesManageIndexRoute =
@@ -112,8 +126,10 @@ export interface FileRoutesByFullPath {
   '/enter-otp': typeof authEnterOtpRoute
   '/sign-in': typeof authSignInRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/dashboard/consultations/$prescriptionId': typeof DashboardConsultationsPrescriptionIdRoute
   '/dashboard/prescribe/$consultationId': typeof DashboardPrescribeConsultationIdRoute
   '/dashboard/profile/edit': typeof DashboardProfileEditRoute
+  '/dashboard/consultations': typeof DashboardConsultationsIndexRoute
   '/dashboard/profile': typeof DashboardProfileIndexRoute
   '/dashboard/templates': typeof DashboardTemplatesIndexRoute
   '/dashboard/consultation/$userId/$consultationId': typeof DashboardConsultationUserIdConsultationIdRoute
@@ -127,8 +143,10 @@ export interface FileRoutesByTo {
   '/enter-otp': typeof authEnterOtpRoute
   '/sign-in': typeof authSignInRoute
   '/dashboard': typeof DashboardIndexRoute
+  '/dashboard/consultations/$prescriptionId': typeof DashboardConsultationsPrescriptionIdRoute
   '/dashboard/prescribe/$consultationId': typeof DashboardPrescribeConsultationIdRoute
   '/dashboard/profile/edit': typeof DashboardProfileEditRoute
+  '/dashboard/consultations': typeof DashboardConsultationsIndexRoute
   '/dashboard/profile': typeof DashboardProfileIndexRoute
   '/dashboard/templates': typeof DashboardTemplatesIndexRoute
   '/dashboard/consultation/$userId/$consultationId': typeof DashboardConsultationUserIdConsultationIdRoute
@@ -145,8 +163,10 @@ export interface FileRoutesById {
   '/(auth)/enter-otp': typeof authEnterOtpRoute
   '/(auth)/sign-in': typeof authSignInRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/dashboard/consultations/$prescriptionId': typeof DashboardConsultationsPrescriptionIdRoute
   '/dashboard/prescribe/$consultationId': typeof DashboardPrescribeConsultationIdRoute
   '/dashboard/profile/edit': typeof DashboardProfileEditRoute
+  '/dashboard/consultations/': typeof DashboardConsultationsIndexRoute
   '/dashboard/profile/': typeof DashboardProfileIndexRoute
   '/dashboard/templates/': typeof DashboardTemplatesIndexRoute
   '/dashboard/consultation/$userId/$consultationId': typeof DashboardConsultationUserIdConsultationIdRoute
@@ -163,8 +183,10 @@ export interface FileRouteTypes {
     | '/enter-otp'
     | '/sign-in'
     | '/dashboard/'
+    | '/dashboard/consultations/$prescriptionId'
     | '/dashboard/prescribe/$consultationId'
     | '/dashboard/profile/edit'
+    | '/dashboard/consultations'
     | '/dashboard/profile'
     | '/dashboard/templates'
     | '/dashboard/consultation/$userId/$consultationId'
@@ -178,8 +200,10 @@ export interface FileRouteTypes {
     | '/enter-otp'
     | '/sign-in'
     | '/dashboard'
+    | '/dashboard/consultations/$prescriptionId'
     | '/dashboard/prescribe/$consultationId'
     | '/dashboard/profile/edit'
+    | '/dashboard/consultations'
     | '/dashboard/profile'
     | '/dashboard/templates'
     | '/dashboard/consultation/$userId/$consultationId'
@@ -195,8 +219,10 @@ export interface FileRouteTypes {
     | '/(auth)/enter-otp'
     | '/(auth)/sign-in'
     | '/dashboard/'
+    | '/dashboard/consultations/$prescriptionId'
     | '/dashboard/prescribe/$consultationId'
     | '/dashboard/profile/edit'
+    | '/dashboard/consultations/'
     | '/dashboard/profile/'
     | '/dashboard/templates/'
     | '/dashboard/consultation/$userId/$consultationId'
@@ -284,6 +310,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardProfileIndexRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
+    '/dashboard/consultations/': {
+      id: '/dashboard/consultations/'
+      path: '/consultations'
+      fullPath: '/dashboard/consultations'
+      preLoaderRoute: typeof DashboardConsultationsIndexRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
     '/dashboard/profile/edit': {
       id: '/dashboard/profile/edit'
       path: '/profile/edit'
@@ -296,6 +329,13 @@ declare module '@tanstack/react-router' {
       path: '/prescribe/$consultationId'
       fullPath: '/dashboard/prescribe/$consultationId'
       preLoaderRoute: typeof DashboardPrescribeConsultationIdRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/consultations/$prescriptionId': {
+      id: '/dashboard/consultations/$prescriptionId'
+      path: '/consultations/$prescriptionId'
+      fullPath: '/dashboard/consultations/$prescriptionId'
+      preLoaderRoute: typeof DashboardConsultationsPrescriptionIdRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
     '/dashboard/templates/manage/': {
@@ -338,8 +378,10 @@ const authRouteRouteWithChildren = authRouteRoute._addFileChildren(
 
 interface DashboardRouteRouteChildren {
   DashboardIndexRoute: typeof DashboardIndexRoute
+  DashboardConsultationsPrescriptionIdRoute: typeof DashboardConsultationsPrescriptionIdRoute
   DashboardPrescribeConsultationIdRoute: typeof DashboardPrescribeConsultationIdRoute
   DashboardProfileEditRoute: typeof DashboardProfileEditRoute
+  DashboardConsultationsIndexRoute: typeof DashboardConsultationsIndexRoute
   DashboardProfileIndexRoute: typeof DashboardProfileIndexRoute
   DashboardTemplatesIndexRoute: typeof DashboardTemplatesIndexRoute
   DashboardConsultationUserIdConsultationIdRoute: typeof DashboardConsultationUserIdConsultationIdRoute
@@ -349,8 +391,11 @@ interface DashboardRouteRouteChildren {
 
 const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
   DashboardIndexRoute: DashboardIndexRoute,
+  DashboardConsultationsPrescriptionIdRoute:
+    DashboardConsultationsPrescriptionIdRoute,
   DashboardPrescribeConsultationIdRoute: DashboardPrescribeConsultationIdRoute,
   DashboardProfileEditRoute: DashboardProfileEditRoute,
+  DashboardConsultationsIndexRoute: DashboardConsultationsIndexRoute,
   DashboardProfileIndexRoute: DashboardProfileIndexRoute,
   DashboardTemplatesIndexRoute: DashboardTemplatesIndexRoute,
   DashboardConsultationUserIdConsultationIdRoute:
