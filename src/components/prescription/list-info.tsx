@@ -1,17 +1,19 @@
-import { InfoIcon, PlusCircle, Trash2, XIcon } from "lucide-react";
+import { PlusCircle, Trash2, XIcon } from "lucide-react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { useState } from "react";
 
-// Importing your specific types
 import type {
     ListInfoFieldName,
     ListInfoType,
     ChiefComplaintType,
+    DiagnosisType,
+    HistoryType,
+    InvestigationType,
 } from "@/types/prescription";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 import DebouncedSearchSelect from "./debounced-search-select";
 import api from "@/lib/axios";
+import SectionItem, { type SectionItemProps } from "./paper/section-item";
 
 interface ListInfoProps {
     title: string;
@@ -321,124 +323,39 @@ const EditingItem = ({ item, index, setIsEditing, onUpdate, onRemove, editingIte
     );
 };
 
-const NonEditingItem = ({ item, index, onRemove, fieldName }: { item: ListInfoType; index: number; onRemove: (i: number) => void, fieldName: ListInfoFieldName }) => {
-    // Safely access properties using checking
-    const duration = "duration" in item ? item.duration : null;
-    const notes = "notes" in item ? item.notes : null;
-    const confidence = "confidence" in item ? item.confidence : null;
-    const icd_code = "icd_code" in item ? item.icd_code : null;
-    const clinical_reasoning = "clinical_reasoning" in item ? item.clinical_reasoning : null;
-    const investigation_reason = "notes" in item && fieldName === "investigation" ? item.notes : null;
-    const investigation_priority = "priority" in item ? item.priority : null;
+function mapToSectionItemProps(item: ListInfoType, fieldName: ListInfoFieldName): SectionItemProps {
+    if (fieldName === "diagnosis") {
+        const diagnosis = item as DiagnosisType;
+        return {
+            name:       diagnosis.name,
+            icdCode:    diagnosis.icd_code ?? null,
+            confidence: diagnosis.confidence ?? null,
+            reasoning:  diagnosis.clinical_reasoning ?? null,
+        };
+    }
 
-    const getPriorityStyle = (priority: string | null | undefined) => {
-        switch (priority?.toLowerCase()) {
-            case "urgent":
-                return {
-                    label: "Urgent",
-                    badge: "bg-rose-50 text-rose-600",
-                    border: "border-rose-400"
-                };
-            case "routine":
-                return {
-                    label: "Routine",
-                    badge: "bg-amber-50 text-amber-600",
-                    border: "border-amber-400"
-                };
-            case "low":
-                return {
-                    label: "Low",
-                    badge: "bg-emerald-50 text-emerald-600",
-                    border: "border-emerald-400"
-                };
-            default:
-                return null;
-        }
+    if (fieldName === "investigation") {
+        const investigation = item as InvestigationType;
+        return {
+            name:      investigation.name,
+            reasoning: investigation.notes ?? null,
+            priority:  investigation.priority ?? null,
+        };
+    }
+
+    const standard = item as ChiefComplaintType | HistoryType;
+    return {
+        name:     standard.name,
+        duration: standard.duration ?? null,
+        notes:    standard.notes ?? null,
     };
+}
 
-    const priorityStyle = getPriorityStyle(investigation_priority);
-
+const NonEditingItem = ({ item, index, onRemove, fieldName }: { item: ListInfoType; index: number; onRemove: (i: number) => void, fieldName: ListInfoFieldName }) => {
     return (
         <div className="flex justify-between items-center">
-            <div className="flex flex-col gap-0.5">
-                <div className="flex items-baseline gap-2">
-                    <span className="text-slate-800 text-[14px] leading-tight">
-                        {item.name || <span className="text-slate-300 italic">Untitled</span>}
-                    </span>
-                    {duration && (
-                        <span className="text-[11px] text-emerald-600 uppercase tracking-tight">
-                            — {duration}
-                        </span>
-                    )}
-                </div>
-                {notes && !investigation_reason && (
-                    <p className="text-[12px] text-slate-500 font-medium leading-relaxed italic">
-                        {notes}
-                    </p>
-                )}
-
-                {(icd_code || confidence || clinical_reasoning || investigation_reason || investigation_priority) && (
-                    <div className="flex flex-col gap-1.5 mt-1.5 border-l-2 border-emerald-400 pl-2">
-
-                        {/* Meta Row: ICD, Confidence, & Reasoning Tooltip */}
-                        <div className="flex items-center gap-3">
-                            {icd_code && (
-                                <span className="text-[10px] font-mono font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">
-                                    {icd_code}
-                                </span>
-                            )}
-
-                            {confidence && (
-                                <div className="flex items-center gap-1.5" title={`Confidence: ${confidence}%`}>
-                                    {/* Visual Confidence Bar */}
-                                    <div className="w-16 h-1.5 bg-slate-200 rounded-full overflow-hidden">
-                                        <div
-                                            className={`h-full rounded-full transition-all duration-500 ${confidence >= 85 ? 'bg-emerald-500' :
-                                                confidence >= 60 ? 'bg-amber-400' :
-                                                    'bg-rose-500'
-                                                }`}
-                                            style={{ width: `${Math.min(Math.max(confidence, 0), 100)}%` }}
-                                        />
-                                    </div>
-                                    <span className="text-[10px] font-bold text-slate-500">
-                                        {confidence}%
-                                    </span>
-                                </div>
-                            )}
-
-                            {/* Investigation Priority */}
-                            {priorityStyle && (
-                                <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${priorityStyle.badge}`}>
-                                    {priorityStyle.label}
-                                </span>
-                            )}
-
-                            {/* Reasoning Tooltip */}
-                            {(clinical_reasoning || investigation_reason) && (
-                                <TooltipProvider>
-                                    <Tooltip delayDuration={200}>
-                                        <TooltipTrigger asChild>
-                                            <button
-                                                type="button"
-                                                className="text-slate-400 hover:text-emerald-600 transition-colors flex items-center justify-center cursor-help"
-                                            >
-                                                {/* Assuming you are using lucide-react or similar for icons */}
-                                                <InfoIcon className="h-3.5 w-3.5" />
-                                            </button>
-                                        </TooltipTrigger>
-                                        <TooltipContent side="top" className="max-w-[250px] bg-slate-800 text-white p-2 rounded shadow-lg text-[12px] leading-relaxed">
-                                            <p>
-                                                <span className="text-emerald-400 font-semibold mr-1">Reasoning:</span>
-                                                {clinical_reasoning || investigation_reason}
-                                            </p>
-                                        </TooltipContent>
-                                    </Tooltip>
-                                </TooltipProvider>
-                            )}
-                        </div>
-                    </div>
-                )}
-
+            <div className="flex-1 min-w-0">
+                <SectionItem {...mapToSectionItemProps(item, fieldName)} />
             </div>
 
             <Button

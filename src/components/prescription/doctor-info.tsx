@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { Button } from "../ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2Icon } from "lucide-react";
+import ClinicianHeader from "./paper/clinician-header";
 
 
 export default function DoctorInfo({ 
@@ -75,14 +76,12 @@ export default function DoctorInfo({
 
     return (
         <div className="flex justify-between">
-            <div className="pt-2">
-                <h3 className="text-xl text-emerald-600 font-display">{(clinician.first_name ?? "") + " " + (clinician.last_name ?? "")}</h3>
-                <p className="text-sm text-slate-500">{clinician.qualification}</p>
-
-                <p className="mt-2 text-slate-600">
-                    BMDC: <span className="font-semibold">{clinician.bmdc_no}</span>
-                </p>
-            </div>
+            <ClinicianHeader
+                firstName={clinician.first_name}
+                lastName={clinician.last_name}
+                qualification={clinician.qualification}
+                bmdcNo={clinician.bmdc_no}
+            />
 
             {!hideActions && (
                 <div className="flex flex-col gap-2">
