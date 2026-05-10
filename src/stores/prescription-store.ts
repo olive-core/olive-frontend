@@ -272,7 +272,8 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
                             gap_hour: item.routine?.gapHours || 0
                         }
                     })),
-                    advice_list: state.advice
+                    advice_list: state.advice,
+                    summary: state.summary || null,
                 }
             },
 
