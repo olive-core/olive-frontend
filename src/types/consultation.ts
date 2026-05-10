@@ -37,6 +37,7 @@ export type ConsultationPrescriptionData = {
     advice_list?:      string[];
     follow_up_days?:   number | null;
     follow_up_notes?:  string | null;
+    summary?:          string | null;
 }
 
 export type ConsultationDetail = {
