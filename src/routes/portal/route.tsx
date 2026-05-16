@@ -1,14 +1,13 @@
 import { createFileRoute, Outlet, useNavigate } from '@tanstack/react-router'
-import DashboardNavbar from "@/components/dashboard/navbar";
-import { useAuthStore } from "@/stores/auth-store";
 import { useEffect } from "react";
+import PortalNavbar from "@/components/portal/portal-navbar";
+import { useAuthStore } from "@/stores/auth-store";
 
-export const Route = createFileRoute('/dashboard')({
-  component: DashboardLayout,
+export const Route = createFileRoute('/portal')({
+  component: PortalLayout,
 })
 
-
-function DashboardLayout() {
+function PortalLayout() {
 
   const { isLoggedIn, role } = useAuthStore();
   const navigate = useNavigate()
@@ -16,21 +15,19 @@ function DashboardLayout() {
   useEffect(() => {
     if (!isLoggedIn) {
       navigate({ to: "/sign-in" });
-    } else if (role === "patient") {
-      navigate({ to: "/portal" });
+    } else if (role !== "patient") {
+      navigate({ to: "/dashboard" });
     }
   }, [isLoggedIn, role, navigate]);
 
   return (
     <div className="">
-
       <main className="w-full min-h-screen pt-18 flex flex-col">
-        <DashboardNavbar />
+        <PortalNavbar />
         <div className="w-full h-full flex-1 flex flex-col">
           <Outlet />
         </div>
       </main>
     </div>
   )
-
 }

@@ -10,6 +10,13 @@ export type PatientInfoType = {
     sex?: 'male' | 'female' | 'non_binary';
 }
 
+export type PatientUpdatePayload = {
+    first_name?: string;
+    last_name?: string;
+    date_of_birth?: string;
+    sex?: 'male' | 'female' | 'non_binary';
+}
+
 export type ShowContentStatus =
     | { status: "NOTHING" }
     | { status: "PATIENT_INFO", userId: string }
@@ -27,6 +34,8 @@ export type HistoryType = {
     clinician_first_name: string;
     clinician_last_name: string;
 }
+
+export type PatientPrescriptionListItem = HistoryType;
 
 export type RxRoutine = {
     gap_hour: number;

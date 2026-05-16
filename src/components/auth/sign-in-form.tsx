@@ -7,6 +7,10 @@ import { useNavigate } from "@tanstack/react-router";
 import NumberGroupInputMemo from "../dashboard/number-group-input";
 import PatientSkeleton from "../dashboard/patient/skeleton";
 import CreateDoctorForm from "./create-doctor-form";
+import CreatePatientForm from "./create-patient-form";
+import RoleSelector from "./role-selector";
+
+type ShowPanel = null | "role-select" | "doctor-form" | "patient-form" | "otp" | "error";
 
 export default function SignInForm() {
 
@@ -18,27 +22,25 @@ export default function SignInForm() {
     const [doesExist, setDoesExist] = useState<0 | 1>(1);
 
     const [phoneNumber, setPhoneNumber] = useState<string[]>(["0", "1"].concat(Array(9).fill(" ")));
-    // const [isValidPhone, setIsValidPhone] = useState(false);
 
-    const [showPanel, setShowPanel] = useState<null | "create" | "otp" | "error">(null);
+    const [showPanel, setShowPanel] = useState<ShowPanel>(null);
 
     const submitButtonRef = useRef<HTMLButtonElement>(null);
 
     const handlePhoneComplete = useCallback(async (isComplete: boolean) => {
-        // setIsValidPhone(isComplete);
         if (isComplete) {
             try {
                 setIsChecking(true);
                 setShowPanel(null);
-                const doesExistClinician = await doesUserExist("+88".concat(phoneNumber.join("").trim()));
+                const { exists } = await doesUserExist("+88".concat(phoneNumber.join("").trim()));
 
-                setDoesExist(doesExistClinician ? 1 : 0);
+                setDoesExist(exists ? 1 : 0);
 
-                if (doesExistClinician) {
+                if (exists) {
                     setShowPanel("otp");
                     submitButtonRef.current?.focus();
                 } else {
-                    setShowPanel("create");
+                    setShowPanel("role-select");
                 }
             } catch (error) {
                 console.error(error)
@@ -62,7 +64,6 @@ export default function SignInForm() {
         }
     }
 
-
     return (
         <div className="space-y-4">
             <NumberGroupInputMemo
@@ -71,32 +72,29 @@ export default function SignInForm() {
                 onComplete={handlePhoneComplete}
             />
 
-            {/* skeleton */}
-            {isChecking && (
-                <PatientSkeleton />
+            {isChecking && <PatientSkeleton />}
+
+            {showPanel === "role-select" && (
+                <RoleSelector onSelect={(role) => setShowPanel(role === 'patient' ? 'patient-form' : 'doctor-form')} />
             )}
 
-            {/* create doctor */}
-            {showPanel === "create" && (
-                <div className="">
-                    <CreateDoctorForm phoneNumber={phoneNumber} doesExist={doesExist} />
-                </div>
+            {showPanel === "doctor-form" && (
+                <CreateDoctorForm phoneNumber={phoneNumber} doesExist={doesExist} />
             )}
 
-            {/* send otp */}
+            {showPanel === "patient-form" && (
+                <CreatePatientForm phoneNumber={phoneNumber} />
+            )}
+
             {showPanel === "otp" && (
                 <Button ref={submitButtonRef} onClick={handleSubmit} isLoading={isLoading}>
                     Send OTP
                 </Button>
             )}
 
-            {/* error */}
             {showPanel === "error" && (
                 <div className="border-rose-300 rounded-md px-6 py-4 text-rose-600 bg-rose-100 mt-4">Something went wrong!</div>
             )}
-
-
-
         </div>
     )
 }

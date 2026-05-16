@@ -56,7 +56,7 @@ export default function CreateDoctorForm({ phoneNumber, doesExist }: CreateDocto
         try {
             await sendOtp("+88".concat(phoneNumber.join("").trim()));
             toast.success("OTP sent successfully!");
-            navigate({ to: "/enter-otp", search: { exists: doesExist } });
+            navigate({ to: "/enter-otp", search: { exists: doesExist, role_intent: 'clinician' } });
         } catch (error) {
             handleError(error, "Failed to send OTP. Please try again.");
         }

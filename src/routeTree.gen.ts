@@ -11,15 +11,20 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as NotFoundRouteImport } from './routes/not-found'
 import { Route as ComingSoonRouteImport } from './routes/coming-soon'
+import { Route as PortalRouteRouteImport } from './routes/portal/route'
 import { Route as DashboardRouteRouteImport } from './routes/dashboard/route'
 import { Route as authRouteRouteImport } from './routes/(auth)/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PortalIndexRouteImport } from './routes/portal/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
 import { Route as authSignInRouteImport } from './routes/(auth)/sign-in'
 import { Route as authEnterOtpRouteImport } from './routes/(auth)/enter-otp'
+import { Route as PortalProfileIndexRouteImport } from './routes/portal/profile/index'
 import { Route as DashboardTemplatesIndexRouteImport } from './routes/dashboard/templates/index'
 import { Route as DashboardProfileIndexRouteImport } from './routes/dashboard/profile/index'
 import { Route as DashboardConsultationsIndexRouteImport } from './routes/dashboard/consultations/index'
+import { Route as PortalProfileEditRouteImport } from './routes/portal/profile/edit'
+import { Route as PortalPrescriptionsPrescriptionIdRouteImport } from './routes/portal/prescriptions.$prescriptionId'
 import { Route as DashboardProfileEditRouteImport } from './routes/dashboard/profile/edit'
 import { Route as DashboardPrescribeConsultationIdRouteImport } from './routes/dashboard/prescribe.$consultationId'
 import { Route as DashboardConsultationsPrescriptionIdRouteImport } from './routes/dashboard/consultations/$prescriptionId'
@@ -37,6 +42,11 @@ const ComingSoonRoute = ComingSoonRouteImport.update({
   path: '/coming-soon',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PortalRouteRoute = PortalRouteRouteImport.update({
+  id: '/portal',
+  path: '/portal',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DashboardRouteRoute = DashboardRouteRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -50,6 +60,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const PortalIndexRoute = PortalIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => PortalRouteRoute,
 } as any)
 const DashboardIndexRoute = DashboardIndexRouteImport.update({
   id: '/',
@@ -66,6 +81,11 @@ const authEnterOtpRoute = authEnterOtpRouteImport.update({
   path: '/enter-otp',
   getParentRoute: () => authRouteRoute,
 } as any)
+const PortalProfileIndexRoute = PortalProfileIndexRouteImport.update({
+  id: '/profile/',
+  path: '/profile/',
+  getParentRoute: () => PortalRouteRoute,
+} as any)
 const DashboardTemplatesIndexRoute = DashboardTemplatesIndexRouteImport.update({
   id: '/templates/',
   path: '/templates/',
@@ -81,6 +101,17 @@ const DashboardConsultationsIndexRoute =
     id: '/consultations/',
     path: '/consultations/',
     getParentRoute: () => DashboardRouteRoute,
+  } as any)
+const PortalProfileEditRoute = PortalProfileEditRouteImport.update({
+  id: '/profile/edit',
+  path: '/profile/edit',
+  getParentRoute: () => PortalRouteRoute,
+} as any)
+const PortalPrescriptionsPrescriptionIdRoute =
+  PortalPrescriptionsPrescriptionIdRouteImport.update({
+    id: '/prescriptions/$prescriptionId',
+    path: '/prescriptions/$prescriptionId',
+    getParentRoute: () => PortalRouteRoute,
   } as any)
 const DashboardProfileEditRoute = DashboardProfileEditRouteImport.update({
   id: '/profile/edit',
@@ -121,17 +152,22 @@ const DashboardConsultationUserIdConsultationIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRouteRouteWithChildren
+  '/portal': typeof PortalRouteRouteWithChildren
   '/coming-soon': typeof ComingSoonRoute
   '/not-found': typeof NotFoundRoute
   '/enter-otp': typeof authEnterOtpRoute
   '/sign-in': typeof authSignInRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/portal/': typeof PortalIndexRoute
   '/dashboard/consultations/$prescriptionId': typeof DashboardConsultationsPrescriptionIdRoute
   '/dashboard/prescribe/$consultationId': typeof DashboardPrescribeConsultationIdRoute
   '/dashboard/profile/edit': typeof DashboardProfileEditRoute
+  '/portal/prescriptions/$prescriptionId': typeof PortalPrescriptionsPrescriptionIdRoute
+  '/portal/profile/edit': typeof PortalProfileEditRoute
   '/dashboard/consultations': typeof DashboardConsultationsIndexRoute
   '/dashboard/profile': typeof DashboardProfileIndexRoute
   '/dashboard/templates': typeof DashboardTemplatesIndexRoute
+  '/portal/profile': typeof PortalProfileIndexRoute
   '/dashboard/consultation/$userId/$consultationId': typeof DashboardConsultationUserIdConsultationIdRoute
   '/dashboard/templates/manage/$templateId': typeof DashboardTemplatesManageTemplateIdRoute
   '/dashboard/templates/manage': typeof DashboardTemplatesManageIndexRoute
@@ -143,12 +179,16 @@ export interface FileRoutesByTo {
   '/enter-otp': typeof authEnterOtpRoute
   '/sign-in': typeof authSignInRoute
   '/dashboard': typeof DashboardIndexRoute
+  '/portal': typeof PortalIndexRoute
   '/dashboard/consultations/$prescriptionId': typeof DashboardConsultationsPrescriptionIdRoute
   '/dashboard/prescribe/$consultationId': typeof DashboardPrescribeConsultationIdRoute
   '/dashboard/profile/edit': typeof DashboardProfileEditRoute
+  '/portal/prescriptions/$prescriptionId': typeof PortalPrescriptionsPrescriptionIdRoute
+  '/portal/profile/edit': typeof PortalProfileEditRoute
   '/dashboard/consultations': typeof DashboardConsultationsIndexRoute
   '/dashboard/profile': typeof DashboardProfileIndexRoute
   '/dashboard/templates': typeof DashboardTemplatesIndexRoute
+  '/portal/profile': typeof PortalProfileIndexRoute
   '/dashboard/consultation/$userId/$consultationId': typeof DashboardConsultationUserIdConsultationIdRoute
   '/dashboard/templates/manage/$templateId': typeof DashboardTemplatesManageTemplateIdRoute
   '/dashboard/templates/manage': typeof DashboardTemplatesManageIndexRoute
@@ -158,17 +198,22 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/(auth)': typeof authRouteRouteWithChildren
   '/dashboard': typeof DashboardRouteRouteWithChildren
+  '/portal': typeof PortalRouteRouteWithChildren
   '/coming-soon': typeof ComingSoonRoute
   '/not-found': typeof NotFoundRoute
   '/(auth)/enter-otp': typeof authEnterOtpRoute
   '/(auth)/sign-in': typeof authSignInRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/portal/': typeof PortalIndexRoute
   '/dashboard/consultations/$prescriptionId': typeof DashboardConsultationsPrescriptionIdRoute
   '/dashboard/prescribe/$consultationId': typeof DashboardPrescribeConsultationIdRoute
   '/dashboard/profile/edit': typeof DashboardProfileEditRoute
+  '/portal/prescriptions/$prescriptionId': typeof PortalPrescriptionsPrescriptionIdRoute
+  '/portal/profile/edit': typeof PortalProfileEditRoute
   '/dashboard/consultations/': typeof DashboardConsultationsIndexRoute
   '/dashboard/profile/': typeof DashboardProfileIndexRoute
   '/dashboard/templates/': typeof DashboardTemplatesIndexRoute
+  '/portal/profile/': typeof PortalProfileIndexRoute
   '/dashboard/consultation/$userId/$consultationId': typeof DashboardConsultationUserIdConsultationIdRoute
   '/dashboard/templates/manage/$templateId': typeof DashboardTemplatesManageTemplateIdRoute
   '/dashboard/templates/manage/': typeof DashboardTemplatesManageIndexRoute
@@ -178,17 +223,22 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/dashboard'
+    | '/portal'
     | '/coming-soon'
     | '/not-found'
     | '/enter-otp'
     | '/sign-in'
     | '/dashboard/'
+    | '/portal/'
     | '/dashboard/consultations/$prescriptionId'
     | '/dashboard/prescribe/$consultationId'
     | '/dashboard/profile/edit'
+    | '/portal/prescriptions/$prescriptionId'
+    | '/portal/profile/edit'
     | '/dashboard/consultations'
     | '/dashboard/profile'
     | '/dashboard/templates'
+    | '/portal/profile'
     | '/dashboard/consultation/$userId/$consultationId'
     | '/dashboard/templates/manage/$templateId'
     | '/dashboard/templates/manage'
@@ -200,12 +250,16 @@ export interface FileRouteTypes {
     | '/enter-otp'
     | '/sign-in'
     | '/dashboard'
+    | '/portal'
     | '/dashboard/consultations/$prescriptionId'
     | '/dashboard/prescribe/$consultationId'
     | '/dashboard/profile/edit'
+    | '/portal/prescriptions/$prescriptionId'
+    | '/portal/profile/edit'
     | '/dashboard/consultations'
     | '/dashboard/profile'
     | '/dashboard/templates'
+    | '/portal/profile'
     | '/dashboard/consultation/$userId/$consultationId'
     | '/dashboard/templates/manage/$templateId'
     | '/dashboard/templates/manage'
@@ -214,17 +268,22 @@ export interface FileRouteTypes {
     | '/'
     | '/(auth)'
     | '/dashboard'
+    | '/portal'
     | '/coming-soon'
     | '/not-found'
     | '/(auth)/enter-otp'
     | '/(auth)/sign-in'
     | '/dashboard/'
+    | '/portal/'
     | '/dashboard/consultations/$prescriptionId'
     | '/dashboard/prescribe/$consultationId'
     | '/dashboard/profile/edit'
+    | '/portal/prescriptions/$prescriptionId'
+    | '/portal/profile/edit'
     | '/dashboard/consultations/'
     | '/dashboard/profile/'
     | '/dashboard/templates/'
+    | '/portal/profile/'
     | '/dashboard/consultation/$userId/$consultationId'
     | '/dashboard/templates/manage/$templateId'
     | '/dashboard/templates/manage/'
@@ -234,6 +293,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   authRouteRoute: typeof authRouteRouteWithChildren
   DashboardRouteRoute: typeof DashboardRouteRouteWithChildren
+  PortalRouteRoute: typeof PortalRouteRouteWithChildren
   ComingSoonRoute: typeof ComingSoonRoute
   NotFoundRoute: typeof NotFoundRoute
 }
@@ -252,6 +312,13 @@ declare module '@tanstack/react-router' {
       path: '/coming-soon'
       fullPath: '/coming-soon'
       preLoaderRoute: typeof ComingSoonRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/portal': {
+      id: '/portal'
+      path: '/portal'
+      fullPath: '/portal'
+      preLoaderRoute: typeof PortalRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard': {
@@ -275,6 +342,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/portal/': {
+      id: '/portal/'
+      path: '/'
+      fullPath: '/portal/'
+      preLoaderRoute: typeof PortalIndexRouteImport
+      parentRoute: typeof PortalRouteRoute
+    }
     '/dashboard/': {
       id: '/dashboard/'
       path: '/'
@@ -296,6 +370,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof authEnterOtpRouteImport
       parentRoute: typeof authRouteRoute
     }
+    '/portal/profile/': {
+      id: '/portal/profile/'
+      path: '/profile'
+      fullPath: '/portal/profile'
+      preLoaderRoute: typeof PortalProfileIndexRouteImport
+      parentRoute: typeof PortalRouteRoute
+    }
     '/dashboard/templates/': {
       id: '/dashboard/templates/'
       path: '/templates'
@@ -316,6 +397,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/dashboard/consultations'
       preLoaderRoute: typeof DashboardConsultationsIndexRouteImport
       parentRoute: typeof DashboardRouteRoute
+    }
+    '/portal/profile/edit': {
+      id: '/portal/profile/edit'
+      path: '/profile/edit'
+      fullPath: '/portal/profile/edit'
+      preLoaderRoute: typeof PortalProfileEditRouteImport
+      parentRoute: typeof PortalRouteRoute
+    }
+    '/portal/prescriptions/$prescriptionId': {
+      id: '/portal/prescriptions/$prescriptionId'
+      path: '/prescriptions/$prescriptionId'
+      fullPath: '/portal/prescriptions/$prescriptionId'
+      preLoaderRoute: typeof PortalPrescriptionsPrescriptionIdRouteImport
+      parentRoute: typeof PortalRouteRoute
     }
     '/dashboard/profile/edit': {
       id: '/dashboard/profile/edit'
@@ -409,10 +504,30 @@ const DashboardRouteRouteWithChildren = DashboardRouteRoute._addFileChildren(
   DashboardRouteRouteChildren,
 )
 
+interface PortalRouteRouteChildren {
+  PortalIndexRoute: typeof PortalIndexRoute
+  PortalPrescriptionsPrescriptionIdRoute: typeof PortalPrescriptionsPrescriptionIdRoute
+  PortalProfileEditRoute: typeof PortalProfileEditRoute
+  PortalProfileIndexRoute: typeof PortalProfileIndexRoute
+}
+
+const PortalRouteRouteChildren: PortalRouteRouteChildren = {
+  PortalIndexRoute: PortalIndexRoute,
+  PortalPrescriptionsPrescriptionIdRoute:
+    PortalPrescriptionsPrescriptionIdRoute,
+  PortalProfileEditRoute: PortalProfileEditRoute,
+  PortalProfileIndexRoute: PortalProfileIndexRoute,
+}
+
+const PortalRouteRouteWithChildren = PortalRouteRoute._addFileChildren(
+  PortalRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   authRouteRoute: authRouteRouteWithChildren,
   DashboardRouteRoute: DashboardRouteRouteWithChildren,
+  PortalRouteRoute: PortalRouteRouteWithChildren,
   ComingSoonRoute: ComingSoonRoute,
   NotFoundRoute: NotFoundRoute,
 }

@@ -13,9 +13,9 @@ const RESEND_OTP_TIME = 30; // seconds
 export default function EnterOtpForm() {
 
     const navigate = useNavigate();
-    const { verifyOtp, phoneNumber, sendOtp, createClinicianProfile } = useAuthStore();
+    const { verifyOtp, phoneNumber, sendOtp, createClinicianProfile, createPatientProfile, role } = useAuthStore();
 
-    const { exists } = useSearch({ from: '/(auth)/enter-otp' });
+    const { exists, role_intent } = useSearch({ from: '/(auth)/enter-otp' });
 
     const [isLoading, setIsLoading] = useState(false);
 
@@ -53,12 +53,17 @@ export default function EnterOtpForm() {
         setIsLoading(true);
         try {
             if (exists === 0) {
-                await createClinicianProfile(phoneNumber, otp.join("").trim());
-                navigate({ to: "/dashboard/profile" })
+                if (role_intent === 'patient') {
+                    await createPatientProfile(phoneNumber, otp.join("").trim());
+                    navigate({ to: "/portal" });
+                } else {
+                    await createClinicianProfile(phoneNumber, otp.join("").trim());
+                    navigate({ to: "/dashboard/profile" });
+                }
             } else {
                 await verifyOtp(phoneNumber, otp.join("").trim());
                 toast.success("OTP verified successfully!");
-                navigate({ to: "/dashboard" });
+                navigate({ to: role === "patient" ? "/portal" : "/dashboard" });
             }
 
         } catch (error) {

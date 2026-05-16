@@ -1,10 +1,17 @@
 import api from "@/lib/axios";
 
 import type { ClinicianType } from "@/types/shared";
-import type { SendOtpResponse, DoesUserExistResponse, VerifyOtpResponse } from "@/types/auth";
+import type { SendOtpResponse, DoesUserExistResponse, VerifyOtpResponse, UserRole } from "@/types/auth";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
+
+type PendingPatient = {
+    firstName: string;
+    lastName: string;
+    dateOfBirth?: string;
+    sex?: string;
+};
 
 interface AuthStoreType {
     isLoggedIn: boolean;
@@ -12,15 +19,20 @@ interface AuthStoreType {
     accessToken?: string;
     refreshToken?: string;
     userId?: string;
+    role?: UserRole;
     clinician?: ClinicianType;
+    pendingPatient?: PendingPatient;
 
     logout: () => void;
-    doesUserExist: (phone: string) => Promise<boolean>;
+    doesUserExist: (phone: string) => Promise<{ exists: boolean; role?: UserRole }>;
     sendOtp: (phone: string) => Promise<void>;
     verifyOtp: (phone: string, otp: string) => Promise<void>;
 
     storeClinicianInfo: (data: ClinicianType) => void;
     createClinicianProfile: (phone: string, otp: string) => Promise<void>;
+
+    storePendingPatient: (data: PendingPatient) => void;
+    createPatientProfile: (phone: string, otp: string) => Promise<void>;
 }
 
 export const useAuthStore = create<AuthStoreType>()(
@@ -33,11 +45,15 @@ export const useAuthStore = create<AuthStoreType>()(
                 accessToken: undefined,
                 refreshToken: undefined,
                 userId: undefined,
+                role: undefined,
                 clinician: undefined,
+                pendingPatient: undefined,
 
                 doesUserExist: async (phone: string) => {
                     const response = await api.post<DoesUserExistResponse>(`/auth/check-user`, { phone });
-                    return response.data.exists;
+                    const role = response.data.role as UserRole | undefined;
+                    set({ role });
+                    return { exists: response.data.exists, role };
                 },
 
                 sendOtp: async (phone: string) => {
@@ -91,11 +107,42 @@ export const useAuthStore = create<AuthStoreType>()(
                         accessToken: response.data.access_token,
                         refreshToken: response.data.refresh_token,
                         userId: response.data.user_id,
+                        role: 'clinician',
                     });
                 },
 
 
-                logout: () => set({ isLoggedIn: false }),
+                storePendingPatient: (data: PendingPatient) => set({ pendingPatient: data }),
+
+                createPatientProfile: async (phone: string, otp: string) => {
+                    const pendingPatient = useAuthStore.getState().pendingPatient;
+                    const response = await api.post('/patient/register', {
+                        first_name: pendingPatient?.firstName,
+                        last_name: pendingPatient?.lastName,
+                        phone,
+                        otp,
+                        date_of_birth: pendingPatient?.dateOfBirth || undefined,
+                        sex: pendingPatient?.sex || undefined,
+                    });
+                    set({
+                        isLoggedIn: true,
+                        accessToken: response.data.access_token,
+                        refreshToken: response.data.refresh_token,
+                        userId: response.data.user_id,
+                        role: 'patient',
+                        pendingPatient: undefined,
+                    });
+                },
+
+                logout: () => set({
+                    isLoggedIn: false,
+                    accessToken: undefined,
+                    refreshToken: undefined,
+                    userId: undefined,
+                    role: undefined,
+                    clinician: undefined,
+                    pendingPatient: undefined,
+                }),
             })
         },
         { name: "auth-store" }

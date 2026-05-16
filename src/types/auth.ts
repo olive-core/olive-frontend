@@ -1,6 +1,8 @@
+export type UserRole = 'patient' | 'clinician';
+
 export type DoesUserExistResponse = {
     exists: boolean;
-    role?: string[];
+    role?: string;
 };
 
 export type SendOtpResponse = {

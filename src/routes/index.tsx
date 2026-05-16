@@ -16,14 +16,14 @@ export const Route = createFileRoute('/')({
 
 function HomePage() {
 
-    const { isLoggedIn } = useAuthStore();
+    const { isLoggedIn, role } = useAuthStore();
     const navigate = useNavigate({ from: '/' })
 
     useEffect(() => {
         if (isLoggedIn) {
-            navigate({ to: '/dashboard' });
+            navigate({ to: role === 'patient' ? '/portal' : '/dashboard' });
         }
-    }, [isLoggedIn, navigate]);
+    }, [isLoggedIn, role, navigate]);
 
     return (
         <>
