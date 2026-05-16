@@ -12,6 +12,7 @@ import AdviceList from "./advice-list";
 import { PrescriptionView } from "./view";
 import PrescriptionPaper from "./paper/prescription-paper";
 import SummaryBlock from "./paper/summary-block";
+import { cn } from "@/lib/utils";
 
 interface PrescriptionProps {
     onGenerate:       () => void;
@@ -21,6 +22,7 @@ interface PrescriptionProps {
 
 export default function Prescription({ onGenerate, onCancel, hasBeenGenerated }: PrescriptionProps) {
     const store = usePrescriptionStore();
+    const isRevertingTemplate = usePrescriptionStore(s => s.isRevertingTemplate);
     const navigate = useNavigate();
     const { consultationId } = useParams({ from: "/dashboard/prescribe/$consultationId" });
 
@@ -115,14 +117,16 @@ export default function Prescription({ onGenerate, onCancel, hasBeenGenerated }:
                             removeItem={removeDiagnosis}
                         />
 
-                        <ListInfo
-                            title="Investigation"
-                            info={investigation}
-                            fieldName="investigation"
-                            addEmptyItem={addEmptyInvestigation}
-                            updateItem={updateInvestigation}
-                            removeItem={removeInvestigation}
-                        />
+                        <div className={cn("transition-opacity duration-300", isRevertingTemplate ? "opacity-0" : "opacity-100")}>
+                            <ListInfo
+                                title="Investigation"
+                                info={investigation}
+                                fieldName="investigation"
+                                addEmptyItem={addEmptyInvestigation}
+                                updateItem={updateInvestigation}
+                                removeItem={removeInvestigation}
+                            />
+                        </div>
                     </>
                 }
                 rightColumn={

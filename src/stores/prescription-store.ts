@@ -18,12 +18,18 @@ interface PrescriptionStoreType {
     advice: string[];
     summary: string;
 
+    templateSelected: boolean;
+    generatedMedicine: MeedicineType[];
+    generatedInvestigation: InvestigationType[];
+    isRevertingTemplate: boolean;
+
     // methods
     initiatePrescription: (patientId: string, sessionId: string) => void;
     setGenerating: (value: boolean) => void;
     setPartialData: (data: Pick<PrescriptionResponseType, 'chief_complaints' | 'history' | 'summary' | 'diagnoses'>) => void;
     getInitialPrescription: (data: PrescriptionResponseType) => Promise<void>;
     setPrescriptionFromTemplate: (data: any) => void;
+    revertTemplateSelection: () => void;
     getSubmitPayload: (sessionId: string) => Record<string, any>;
 
     // chief complaint methods
@@ -79,6 +85,11 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
             medicine: [],
             advice: [],
 
+            templateSelected: false,
+            generatedMedicine: [],
+            generatedInvestigation: [],
+            isRevertingTemplate: false,
+
             initiatePrescription: (patientId, sessionId) => {
                 get().resetStore();
                 set({ patientId, sessionId });
@@ -93,6 +104,10 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
                 summary: "",
                 medicine: [],
                 advice: [],
+                templateSelected: false,
+                generatedMedicine: [],
+                generatedInvestigation: [],
+                isRevertingTemplate: false,
             }),
 
             setGenerating: (value) => set({ isGenerating: value }),
@@ -119,19 +134,23 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
 
                 const summary = data.summary;
 
-                set({ chiefComplaint, history, diagnosis, medicine: [], investigation: [], summary });
+                if (get().templateSelected) {
+                    set({ chiefComplaint, history, diagnosis, summary });
+                } else {
+                    set({ chiefComplaint, history, diagnosis, medicine: [], investigation: [], summary });
+                }
             },
 
             getInitialPrescription: async (data: PrescriptionResponseType) => {
                 const chiefComplaint = data.chief_complaints?.map(item => ({
                     name: item.complaint_name,
-                    duration: "", // duration not present in type
+                    duration: "",
                     notes: item.clinical_note || "",
                 })) || []
 
                 const history = data.history?.map(item => ({
                     name: item.history_name,
-                    duration: "", // duration not present in type
+                    duration: "",
                     notes: item.clinical_note || "",
                 })) || []
 
@@ -142,7 +161,7 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
                     clinical_reasoning: item.clinical_reasoning
                 })).sort((a, b) => (b.confidence || 0) - (a.confidence || 0)) || []
 
-                const medicine = data.medicines?.map(item => ({
+                const generatedMedicine = data.medicines?.map(item => ({
                     name: item.trade_name || item.generic_name,
                     value: item.trade_name || item.generic_name,
                     trade_name: item.trade_name,
@@ -161,7 +180,7 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
                     reasoning: item.purpose
                 })) || []
 
-                const investigation = data.investigations?.map(item => ({
+                const generatedInvestigation = data.investigations?.map(item => ({
                     name: item.investigation_name,
                     notes: item.reason || "",
                     priority: item.priority || "routine"
@@ -170,37 +189,23 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
                 const advice = data.advice;
                 const summary = data.summary;
 
+                const medicineAndInvestigationUpdate = get().templateSelected
+                    ? {}
+                    : { medicine: generatedMedicine, investigation: generatedInvestigation };
+
                 set({
                     chiefComplaint,
                     history,
                     diagnosis,
-                    medicine,
-                    investigation,
                     advice,
                     summary,
+                    generatedMedicine,
+                    generatedInvestigation,
+                    ...medicineAndInvestigationUpdate,
                 })
             },
 
             setPrescriptionFromTemplate: (data: any) => {
-                const chiefComplaint = data.chief_complaints?.map((item: any) => ({
-                    name: item.name_text,
-                    duration: item.duration || "",
-                    notes: item.notes || "",
-                })) || []
-
-                const history = data.histories?.map((item: any) => ({
-                    name: item.name_text,
-                    duration: item.duration || "",
-                    notes: item.notes || "",
-                })) || []
-
-                const diagnosis = data.diagnoses?.map((item: any) => ({
-                    name: item.name_text,
-                    icd_code: item.icd_code,
-                    confidence: item.confidence,
-                    clinical_reasoning: item.clinical_reasoning
-                })).sort((a: DiagnosisType, b: DiagnosisType) => (b.confidence || 0) - (a.confidence || 0)) || []
-
                 const medicine = data.rx_list?.map((item: any) => ({
                     name: item.trade_name || item.generic_name,
                     value: item.trade_name || item.generic_name,
@@ -225,16 +230,19 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
                     priority: item.priority || "routine"
                 })) || []
 
-                const advice = data.advice_list || [];
+                set({ medicine, investigation, templateSelected: true })
+            },
 
-                set({
-                    chiefComplaint,
-                    history,
-                    diagnosis,
-                    medicine,
-                    investigation,
-                    advice,
-                })
+            revertTemplateSelection: () => {
+                const { generatedMedicine, generatedInvestigation } = get();
+                set({ isRevertingTemplate: true, templateSelected: false });
+                setTimeout(() => {
+                    set({
+                        medicine: generatedMedicine,
+                        investigation: generatedInvestigation,
+                        isRevertingTemplate: false,
+                    });
+                }, 300);
             },
 
             getSubmitPayload: (sessionId: string) => {

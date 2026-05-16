@@ -5,17 +5,17 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { Button } from "../ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2Icon } from "lucide-react";
+import { Loader2Icon, Undo2Icon } from "lucide-react";
 import ClinicianHeader from "./paper/clinician-header";
 
 
-export default function DoctorInfo({ 
-    onGenerate, 
+export default function DoctorInfo({
+    onGenerate,
     onCancel,
     hasBeenGenerated,
     hideActions = false
-}: { 
-    onGenerate?: () => void, 
+}: {
+    onGenerate?: () => void,
     onCancel?: () => void,
     hasBeenGenerated?: boolean,
     hideActions?: boolean
@@ -23,9 +23,22 @@ export default function DoctorInfo({
 
     const { userId, storeClinicianInfo } = useAuthStore();
     const isGenerating = usePrescriptionStore(s => s.isGenerating);
+    const templateSelected = usePrescriptionStore(s => s.templateSelected);
+    const generatedMedicine = usePrescriptionStore(s => s.generatedMedicine);
+    const generatedInvestigation = usePrescriptionStore(s => s.generatedInvestigation);
     const setPrescriptionFromTemplate = usePrescriptionStore(s => s.setPrescriptionFromTemplate);
+    const revertTemplateSelection = usePrescriptionStore(s => s.revertTemplateSelection);
 
     const [isApplyingTemplate, setIsApplyingTemplate] = useState(false);
+    const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
+
+    const hasGeneratedData = generatedMedicine.length > 0 || generatedInvestigation.length > 0;
+
+    useEffect(() => {
+        if (!templateSelected) {
+            setSelectedTemplateId(null);
+        }
+    }, [templateSelected]);
 
     const { data: clinician, isLoading } = useQuery({
         queryKey: ["clinician", userId],
@@ -44,18 +57,21 @@ export default function DoctorInfo({
         enabled: !!userId,
     })
 
-    const handleTemplateSelect = async (templateId: string) => {
-        setIsApplyingTemplate(true);
-        
-        if (isGenerating && onCancel) {
-            onCancel();
+    const handleTemplateSelect = async (value: string) => {
+        if (value === "__revert__") {
+            revertTemplateSelection();
+            return;
         }
 
+        setIsApplyingTemplate(true);
+        setSelectedTemplateId(value);
+
         try {
-            const res = await api.get(`/prescription-template/${templateId}`);
+            const res = await api.get(`/prescription-template/${value}`);
             setPrescriptionFromTemplate(res.data.prescription_data);
         } catch (error) {
             console.error("Failed to apply template", error);
+            setSelectedTemplateId(null);
         } finally {
             setIsApplyingTemplate(false);
         }
@@ -94,8 +110,12 @@ export default function DoctorInfo({
                             {hasBeenGenerated ? 'Re-generate' : 'Generate Draft'}
                         </Button>
                     )}
-                    
-                    <Select disabled={isLoadingTemplates || templates.length === 0 || isApplyingTemplate} onValueChange={handleTemplateSelect}>
+
+                    <Select
+                        disabled={isLoadingTemplates || templates.length === 0 || isApplyingTemplate}
+                        value={selectedTemplateId ?? ""}
+                        onValueChange={handleTemplateSelect}
+                    >
                         <SelectTrigger className="w-full">
                             {isApplyingTemplate ? (
                                 <div className="flex items-center gap-2">
@@ -107,6 +127,14 @@ export default function DoctorInfo({
                             )}
                         </SelectTrigger>
                         <SelectContent>
+                            {templateSelected && hasGeneratedData && (
+                                <SelectItem value="__revert__" className="text-amber-600">
+                                    <div className="flex items-center gap-2">
+                                        <Undo2Icon className="h-4 w-4" />
+                                        Revert to Generated
+                                    </div>
+                                </SelectItem>
+                            )}
                             {templates.map(t => (
                                 <SelectItem key={t.template_id} value={t.template_id}>
                                     {t.template_name}

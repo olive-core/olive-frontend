@@ -5,6 +5,7 @@ import { useState } from "react";
 import MedicineEdit from "./medicine-edit";
 import MedicineView from "./medicine-view";
 import type { MeedicineType } from "@/types/prescription";
+import { cn } from "@/lib/utils";
 
 export const MedicineContainer = () => {
 
@@ -13,6 +14,7 @@ export const MedicineContainer = () => {
         addEmptyMedicine,
         updateMedicine,
         removeMedicine,
+        isRevertingTemplate,
     } = usePrescriptionStore();
 
     const [editingItemStatus, setEditingItemStatus] = useState<{ index: number, status: "add" | "update" } | null>(null);
@@ -71,7 +73,7 @@ export const MedicineContainer = () => {
 
 
     return (
-        <div className="mb-4">
+        <div className={cn("mb-4 transition-opacity duration-300", isRevertingTemplate ? "opacity-0" : "opacity-100")}>
             <div className="pt-2">
                 <div className="flex items-center justify-between mb-4">
                     <h3 className="font-semibold text-md text-emerald-600">Medicine (Rx)</h3>
