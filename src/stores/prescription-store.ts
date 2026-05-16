@@ -21,7 +21,7 @@ interface PrescriptionStoreType {
     // methods
     initiatePrescription: (patientId: string, sessionId: string) => void;
     setGenerating: (value: boolean) => void;
-    setPartialData: (data: Pick<PrescriptionResponseType, 'chief_complaints' | 'history' | 'summary'>) => void;
+    setPartialData: (data: Pick<PrescriptionResponseType, 'chief_complaints' | 'history' | 'summary' | 'diagnoses'>) => void;
     getInitialPrescription: (data: PrescriptionResponseType) => Promise<void>;
     setPrescriptionFromTemplate: (data: any) => void;
     getSubmitPayload: (sessionId: string) => Record<string, any>;
@@ -110,9 +110,16 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
                     notes: item.clinical_note || "",
                 })) || []
 
+                const diagnosis = data.diagnoses?.map(item => ({
+                    name: item.diagnosis_name,
+                    icd_code: item.icd_code || "",
+                    confidence: item.confidence,
+                    clinical_reasoning: item.clinical_reasoning,
+                })).sort((a, b) => (b.confidence || 0) - (a.confidence || 0)) || []
+
                 const summary = data.summary;
 
-                set({ chiefComplaint, history, diagnosis: [], medicine: [], investigation: [], summary });
+                set({ chiefComplaint, history, diagnosis, medicine: [], investigation: [], summary });
             },
 
             getInitialPrescription: async (data: PrescriptionResponseType) => {

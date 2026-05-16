@@ -98,9 +98,10 @@ function RouteComponent() {
                   setGenerating(true);
                   break;
 
-                case 'layer00_complete':
+                case 'stage01_complete': // v2_faster
+                case 'layer00_complete': // v1_standard
                   if (payload) {
-                    setPartialData(payload); // ✅ progressive update
+                    setPartialData(payload);
                   }
                   break;
 
