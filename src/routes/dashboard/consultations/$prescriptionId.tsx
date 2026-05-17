@@ -1,7 +1,8 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { AlertCircleIcon, ArrowLeftIcon, PrinterIcon } from 'lucide-react'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
+import { useReactToPrint } from 'react-to-print'
 import toast from 'react-hot-toast'
 
 import api from '@/lib/axios'
@@ -11,6 +12,7 @@ import type { PatientInfoType } from '@/types/patient'
 import PrescriptionReadView, {
   type ClinicianProfile,
 } from '@/components/prescription/paper/read-view'
+import PrescriptionPrintView from '@/components/prescription/paper/print-view'
 import ReadSkeleton from '@/components/prescription/paper/read-skeleton'
 
 export const Route = createFileRoute('/dashboard/consultations/$prescriptionId')({
@@ -74,20 +76,20 @@ function BackButton() {
   )
 }
 
-function PrintButton() {
+function PrintButton({ onPrint }: { onPrint: () => void }) {
   return (
-    <Button variant="outline" size="sm" onClick={() => window.print()} className="gap-2">
+    <Button variant="outline" size="sm" onClick={onPrint} className="gap-2">
       <PrinterIcon className="size-4" />
       Print
     </Button>
   )
 }
 
-function DetailToolbar() {
+function DetailToolbar({ onPrint }: { onPrint: () => void }) {
   return (
     <div className="container mx-auto flex items-center justify-between mt-4 print:hidden">
       <BackButton />
-      <PrintButton />
+      <PrintButton onPrint={onPrint} />
     </div>
   )
 }
@@ -95,7 +97,7 @@ function DetailToolbar() {
 function DetailError() {
   return (
     <div className="container mx-auto">
-      <DetailToolbar />
+      <DetailToolbar onPrint={() => {}} />
       <div className="flex flex-col items-center justify-center py-20 gap-4 text-center">
         <div className="w-14 h-14 rounded-2xl bg-red-50 flex items-center justify-center">
           <AlertCircleIcon className="w-7 h-7 text-red-400" />
@@ -121,12 +123,18 @@ function ConsultationDetailPage() {
   const [summaryText, setSummaryText] = useState<string | null>(null)
   const saveSummary = useSaveSummary(prescriptionId)
 
+  const printRef = useRef(null)
+  const handlePrint = useReactToPrint({
+    contentRef:    printRef,
+    documentTitle: `Prescription_${prescriptionId}`,
+  })
+
   const currentSummary = summaryText ?? (consultation?.prescription_data?.summary ?? null)
 
   if (isLoading) {
     return (
       <>
-        <DetailToolbar />
+        <DetailToolbar onPrint={handlePrint} />
         <ReadSkeleton />
       </>
     )
@@ -136,11 +144,24 @@ function ConsultationDetailPage() {
     return <DetailError />
   }
 
+  const printableConsultation = {
+    ...consultation,
+    prescription_data: { ...consultation.prescription_data, summary: currentSummary },
+  }
+
   return (
     <>
-      <DetailToolbar />
+      <div className="fixed top-0 left-[-9999px] print:left-0 print:block" ref={printRef}>
+        <PrescriptionPrintView
+          consultation={printableConsultation}
+          clinician={clinician}
+          patient={patient}
+        />
+      </div>
+
+      <DetailToolbar onPrint={handlePrint} />
       <PrescriptionReadView
-        consultation={{ ...consultation, prescription_data: { ...consultation.prescription_data, summary: currentSummary } }}
+        consultation={printableConsultation}
         clinician={clinician}
         patient={patient}
         onSummaryChange={setSummaryText}
