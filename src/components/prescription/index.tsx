@@ -53,6 +53,7 @@ export default function Prescription({ onGenerate, onCancel, hasBeenGenerated }:
         setAdvice,
 
         summary,
+        setSummary,
     } = store;
 
     const handlePrint = useReactToPrint({
@@ -88,7 +89,7 @@ export default function Prescription({ onGenerate, onCancel, hasBeenGenerated }:
                 patientStrip={<PatientInfo sessionId={consultationId} />}
                 leftColumn={
                     <>
-                        <SummaryBlock summary={summary} />
+                        <SummaryBlock summary={summary} onChange={setSummary} />
 
                         <ListInfo
                             title="Chief Complaints"

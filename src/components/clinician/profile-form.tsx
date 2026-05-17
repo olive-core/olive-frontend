@@ -63,7 +63,7 @@ export function ProfileForm({ clinicianData }: ProfileFormProps) {
             bmdcNo: clinicianData?.bmdc_no || "",
             qualification: clinicianData?.qualification || "",
             specializations: clinicianData?.specializations || [],
-            defaultGeneration: clinicianData?.generate_ai_draft || false,
+            defaultGeneration: clinicianData?.generate_ai_draft ?? true,
         },
     })
 

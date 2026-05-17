@@ -1,6 +1,8 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { AlertCircleIcon, ArrowLeftIcon, PrinterIcon } from 'lucide-react'
+import { useState } from 'react'
+import toast from 'react-hot-toast'
 
 import api from '@/lib/axios'
 import { Button } from '@/components/ui/button'
@@ -44,6 +46,16 @@ function usePatient(patientId?: string) {
       return response.data
     },
     enabled: !!patientId,
+  })
+}
+
+function useSaveSummary(prescriptionId: string) {
+  return useMutation({
+    mutationFn: async (summary: string) => {
+      await api.put(`/prescription/${prescriptionId}`, { summary })
+    },
+    onSuccess: () => toast.success('Summary saved'),
+    onError:   () => toast.error('Failed to save summary'),
   })
 }
 
@@ -106,6 +118,11 @@ function ConsultationDetailPage() {
   const { data: clinician } = useClinicianProfile(consultation?.clinician_id)
   const { data: patient }   = usePatient(consultation?.patient_id)
 
+  const [summaryText, setSummaryText] = useState<string | null>(null)
+  const saveSummary = useSaveSummary(prescriptionId)
+
+  const currentSummary = summaryText ?? (consultation?.prescription_data?.summary ?? null)
+
   if (isLoading) {
     return (
       <>
@@ -123,10 +140,23 @@ function ConsultationDetailPage() {
     <>
       <DetailToolbar />
       <PrescriptionReadView
-        consultation={consultation}
+        consultation={{ ...consultation, prescription_data: { ...consultation.prescription_data, summary: currentSummary } }}
         clinician={clinician}
         patient={patient}
+        onSummaryChange={setSummaryText}
       />
+      {summaryText !== null && summaryText !== (consultation.prescription_data?.summary ?? null) && (
+        <div className="container mx-auto flex justify-end mt-2 print:hidden">
+          <Button
+            size="sm"
+            onClick={() => saveSummary.mutate(summaryText)}
+            disabled={saveSummary.isPending}
+            className="bg-slate-900 hover:bg-slate-800 text-white font-bold"
+          >
+            {saveSummary.isPending ? 'Saving...' : 'Save Summary'}
+          </Button>
+        </div>
+      )}
     </>
   )
 }

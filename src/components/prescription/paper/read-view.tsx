@@ -24,12 +24,13 @@ export interface ClinicianProfile {
 }
 
 interface PrescriptionReadViewProps {
-    consultation: ConsultationDetail;
-    clinician?:   ClinicianProfile;
-    patient?:     PatientInfoType;
+    consultation:      ConsultationDetail;
+    clinician?:        ClinicianProfile;
+    patient?:          PatientInfoType;
+    onSummaryChange?:  (value: string) => void;
 }
 
-export default function PrescriptionReadView({ consultation, clinician, patient }: PrescriptionReadViewProps) {
+export default function PrescriptionReadView({ consultation, clinician, patient, onSummaryChange }: PrescriptionReadViewProps) {
     const data = consultation.prescription_data ?? {};
 
     return (
@@ -53,7 +54,7 @@ export default function PrescriptionReadView({ consultation, clinician, patient 
             }
             leftColumn={
                 <>
-                    <SummaryBlock summary={data.summary} />
+                    <SummaryBlock summary={data.summary} onChange={onSummaryChange} />
                     <SectionList
                         title="Chief Complaints"
                         items={mapChiefComplaintsToSectionItems(data.chief_complaints)}

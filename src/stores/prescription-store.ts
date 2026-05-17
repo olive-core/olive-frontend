@@ -56,6 +56,8 @@ interface PrescriptionStoreType {
     updateInvestigation: (index: number, data: Partial<InvestigationType>) => void;
     removeInvestigation: (index: number) => void;
 
+    setSummary: (value: string) => void;
+
     // advice methods
     setAdvice: (data: string[]) => void;
 
@@ -347,6 +349,8 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
                 updated.splice(index, 1);
                 return { investigation: updated };
             }),
+
+            setSummary: (value) => set({ summary: value }),
 
             // advice methods
             setAdvice: (data) => set({ advice: data }),

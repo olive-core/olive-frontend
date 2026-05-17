@@ -132,7 +132,7 @@ function RouteComponent() {
   }
 
   useEffect(() => {
-    if (clinician?.generate_ai_draft) {
+    if (clinician?.generate_ai_draft !== false) {
       startSSE();
     } else {
       const { resetStore } = usePrescriptionStore.getState();
