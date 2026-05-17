@@ -7,18 +7,18 @@ interface RoleSelectorProps {
 
 const ROLES = [
     {
-        value: 'patient' as const,
-        label: "I'm a Patient",
-        icon: UserIcon,
-        className: "border-emerald-200 hover:border-emerald-400 hover:bg-emerald-50",
-        iconClassName: "text-emerald-600",
-    },
-    {
         value: 'clinician' as const,
         label: "I'm a Doctor",
         icon: StethoscopeIcon,
         className: "border-slate-200 hover:border-slate-400 hover:bg-slate-50",
         iconClassName: "text-slate-600",
+    },
+    {
+        value: 'patient' as const,
+        label: "I'm a Patient",
+        icon: UserIcon,
+        className: "border-emerald-200 hover:border-emerald-400 hover:bg-emerald-50",
+        iconClassName: "text-emerald-600",
     },
 ];
 

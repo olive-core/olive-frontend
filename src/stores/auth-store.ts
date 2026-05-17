@@ -86,22 +86,16 @@ export const useAuthStore = create<AuthStoreType>()(
                 },
 
                 createClinicianProfile: async (phone: string, otp: string) => {
-
                     const clinician = useAuthStore.getState().clinician;
-
                     const response = await api.post(`/clinician`, {
                         bmdc_no: clinician?.bmdcNo,
-                        // medicine_company_ids: [],
-                        qualification: "",
-                        // specializations: [],
+                        qualification: clinician?.qualification || undefined,
+                        specializations: clinician?.specializations?.length ? clinician.specializations : undefined,
                         first_name: clinician?.firstName || "",
                         last_name: clinician?.lastName || "",
                         phone: phone,
                         otp: otp,
-                        // userId: useAuthStore.getState().userId,
                     });
-                    console.log(response.data)
-                    // set({ clinician: response.data });
                     set({
                         isLoggedIn: true,
                         accessToken: response.data.access_token,

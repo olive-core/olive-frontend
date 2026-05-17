@@ -15,8 +15,11 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 const patientSchema = z.object({
     firstName: z.string().trim().min(1, "First name is required"),
     lastName: z.string().trim().min(1, "Last name is required"),
-    dateOfBirth: z.string().optional(),
-    sex: z.string().optional(),
+    dateOfBirth: z.string().min(1, "Date of birth is required").refine(
+        (val) => new Date(val) <= new Date(),
+        "Date of birth cannot be in the future"
+    ),
+    sex: z.string().min(1, "Sex is required"),
 });
 
 type PatientFormValues = z.infer<typeof patientSchema>;
@@ -58,14 +61,17 @@ export default function CreatePatientForm({ phoneNumber }: CreatePatientFormProp
         setStep(step - 1);
     }
 
-    async function submit(skipOptional: boolean) {
+    async function submit() {
+        const isValid = await trigger(['dateOfBirth', 'sex']);
+        if (!isValid) return;
+
         setIsSubmitting(true);
         const values = getValues();
         storePendingPatient({
             firstName: values.firstName,
             lastName: values.lastName,
-            dateOfBirth: !skipOptional && values.dateOfBirth ? values.dateOfBirth : undefined,
-            sex: !skipOptional && values.sex ? values.sex : undefined,
+            dateOfBirth: values.dateOfBirth,
+            sex: values.sex,
         });
         try {
             await sendOtp("+88".concat(phoneNumber.join("").trim()));
@@ -121,22 +127,31 @@ export default function CreatePatientForm({ phoneNumber }: CreatePatientFormProp
                         )}
                         {step === 2 && (
                             <div className="space-y-4">
-                                <Field>
-                                    <FieldLabel htmlFor="dateOfBirth" className="text-center opacity-60 block">Date of Birth (optional)</FieldLabel>
-                                    <Input {...register('dateOfBirth')} id="dateOfBirth" type="date" autoFocus />
+                                <Field data-invalid={!!errors.dateOfBirth}>
+                                    <FieldLabel htmlFor="dateOfBirth" className="text-center opacity-60 block">Date of Birth</FieldLabel>
+                                    <Input
+                                        {...register('dateOfBirth')}
+                                        id="dateOfBirth"
+                                        type="date"
+                                        max={new Date().toISOString().split('T')[0]}
+                                        autoFocus
+                                    />
+                                    {errors.dateOfBirth && <FieldError errors={[errors.dateOfBirth]} />}
                                 </Field>
-                                <Field>
-                                    <FieldLabel htmlFor="sex" className="text-center opacity-60 block">Sex (optional)</FieldLabel>
+                                <Field data-invalid={!!errors.sex}>
+                                    <FieldLabel htmlFor="sex" className="text-center opacity-60 block">Sex</FieldLabel>
                                     <select
                                         {...register('sex')}
                                         id="sex"
                                         className="w-full h-9 rounded-md border border-input bg-white px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                                     >
-                                        <option value="">Prefer not to say</option>
+                                        <option value="" disabled>Select sex</option>
+                                        <option value="prefer_not_to_say">Prefer not to say</option>
                                         <option value="male">Male</option>
                                         <option value="female">Female</option>
                                         <option value="non_binary">Non-binary</option>
                                     </select>
+                                    {errors.sex && <FieldError errors={[errors.sex]} />}
                                 </Field>
                             </div>
                         )}
@@ -151,14 +166,9 @@ export default function CreatePatientForm({ phoneNumber }: CreatePatientFormProp
                 {step < TOTAL_STEPS - 1 ? (
                     <Button type="button" onClick={goNext} shortCutKey="⏎">Next</Button>
                 ) : (
-                    <div className="flex gap-2">
-                        <Button type="button" variant="outline" onClick={() => submit(true)} isLoading={isSubmitting}>
-                            Skip
-                        </Button>
-                        <Button type="button" onClick={() => submit(false)} isLoading={isSubmitting} shortCutKey="⏎">
-                            Submit
-                        </Button>
-                    </div>
+                    <Button type="button" onClick={submit} isLoading={isSubmitting} shortCutKey="⏎">
+                        Submit
+                    </Button>
                 )}
             </CardFooter>
         </Card>

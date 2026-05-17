@@ -1,9 +1,11 @@
-import type { InputFieldStep, RadioFieldStep } from "@/types/shared";
+import type { InputFieldStep, RadioFieldStep, TagInputFieldStep } from "@/types/shared";
 import { Input } from "../ui/input";
 import { Controller, type Control, type FieldValues } from "react-hook-form";
 import { Field, FieldContent, FieldError, FieldLabel, FieldLegend, FieldSet, FieldTitle } from "../ui/field";
 import { RadioGroupItem, RadioGroup } from "../ui/radio-group";
 import { cn } from "@/lib/utils";
+import { useState } from "react";
+import { Button } from "../ui/button";
 
 interface BaseFieldProps<T extends FieldValues> {
     control: Control<T>;
@@ -49,6 +51,70 @@ export function InputField<T extends FieldValues>({ id, control, placeholder, la
             }}
         />
     )
+}
+
+export function TagInputField<T extends FieldValues>({ id, control, label, placeholder, validationMiddleWare }: BaseFieldProps<T> & TagInputFieldStep<T>) {
+    return (
+        <Controller
+            name={id}
+            control={control}
+            render={({ field, fieldState }) => {
+                const [inputValue, setInputValue] = useState("");
+
+                const addTag = (value: string) => {
+                    const trimmed = value.trim();
+                    if (!trimmed || field.value?.includes(trimmed)) return;
+                    field.onChange([...(field.value ?? []), trimmed]);
+                    setInputValue("");
+                    if (validationMiddleWare) validationMiddleWare();
+                };
+
+                const removeTag = (tag: string) => {
+                    field.onChange(field.value?.filter((t: string) => t !== tag));
+                };
+
+                return (
+                    <Field data-invalid={fieldState.invalid}>
+                        <FieldLabel htmlFor={id} className={fieldLabelClasses}>{label}</FieldLabel>
+                        <div className="flex flex-wrap gap-2 border rounded-xl px-2 py-2 focus-within:ring-1 focus-within:ring-ring min-h-[36px]">
+                            {field.value?.map((tag: string) => (
+                                <div key={tag} className="flex items-center gap-1 px-2 py-1 text-xs bg-emerald-100 text-emerald-700 rounded-lg">
+                                    {tag}
+                                    <button
+                                        type="button"
+                                        onClick={() => removeTag(tag)}
+                                        className="text-emerald-500 hover:text-emerald-700"
+                                    >
+                                        ×
+                                    </button>
+                                </div>
+                            ))}
+                            <input
+                                value={inputValue}
+                                onChange={(e) => setInputValue(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === "Enter") {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        addTag(inputValue);
+                                    }
+                                    if (e.key === "Backspace" && !inputValue) {
+                                        removeTag(field.value?.[field.value.length - 1] ?? "");
+                                    }
+                                }}
+                                placeholder={placeholder ?? "Type and press Enter"}
+                                className="flex-1 min-w-[120px] outline-none text-sm"
+                            />
+                            <Button type="button" size="sm" onClick={() => addTag(inputValue)}>
+                                + Add
+                            </Button>
+                        </div>
+                        {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                    </Field>
+                );
+            }}
+        />
+    );
 }
 
 export function RadioField<T extends FieldValues>({ id, label, control, options, orientation = "horizontal" }: BaseFieldProps<T> & RadioFieldStep<T>) {

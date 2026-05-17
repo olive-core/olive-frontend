@@ -9,19 +9,11 @@ import { handleError } from "@/lib/utils";
 import { useNavigate } from "@tanstack/react-router";
 
 const doctorSchema = z.object({
-    firstName: z
-        .string()
-        .trim()
-        .min(1, "First name is required"),
-
-    lastName: z
-        .string()
-        .trim()
-        .min(1, "Last name is required"),
-
-    bmdcNo: z
-        .string()
-        .regex(/^\d+$/, "BMDC number must contain only numbers"),
+    firstName: z.string().trim().min(1, "First name is required"),
+    lastName: z.string().trim().min(1, "Last name is required"),
+    bmdcNo: z.string().regex(/^\d+$/, "BMDC number must contain only numbers"),
+    qualification: z.string().optional(),
+    specializations: z.array(z.string()).optional(),
 })
 
 type DoctorFormValues = z.infer<typeof doctorSchema>
@@ -43,6 +35,8 @@ export default function CreateDoctorForm({ phoneNumber, doesExist }: CreateDocto
             firstName: "",
             lastName: "",
             bmdcNo: "",
+            qualification: "",
+            specializations: [],
         }
     })
 
@@ -50,7 +44,9 @@ export default function CreateDoctorForm({ phoneNumber, doesExist }: CreateDocto
         storeClinicianInfo({
             bmdcNo: value.bmdcNo,
             firstName: value.firstName,
-            lastName: value.lastName
+            lastName: value.lastName,
+            qualification: value.qualification,
+            specializations: value.specializations,
         })
 
         try {
@@ -63,27 +59,11 @@ export default function CreateDoctorForm({ phoneNumber, doesExist }: CreateDocto
     }
 
     const steps: MultiStepFormSteps<DoctorFormValues> = [
-        {
-            def: "input",
-            id: "firstName",
-            label: "First Name",
-            type: "text",
-            placeholder: "First Name"
-        },
-        {
-            def: "input",
-            id: "lastName",
-            label: "Last Name",
-            type: "text",
-            placeholder: "Last Name"
-        },
-        {
-            def: "input",
-            id: "bmdcNo",
-            label: "BMDC No",
-            type: "text",
-            placeholder: "BMDC No"
-        },
+        { def: "input", id: "firstName", label: "First Name", type: "text", placeholder: "First Name" },
+        { def: "input", id: "lastName", label: "Last Name", type: "text", placeholder: "Last Name" },
+        { def: "input", id: "bmdcNo", label: "BMDC No", type: "text", placeholder: "BMDC No" },
+        { def: "input", id: "qualification", label: "Qualification", type: "text", placeholder: "e.g. MBBS, FCPS" },
+        { def: "tagInput", id: "specializations", label: "Specializations", placeholder: "Type and press Enter" },
     ]
 
     return (

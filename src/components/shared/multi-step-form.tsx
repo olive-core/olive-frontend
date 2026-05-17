@@ -3,8 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
-import type { InputFieldStep, MultiStepFormSteps, RadioFieldStep } from '@/types/shared'
-import { InputField, RadioField } from './form-step'
+import type { InputFieldStep, MultiStepFormSteps, RadioFieldStep, TagInputFieldStep } from '@/types/shared'
+import { InputField, RadioField, TagInputField } from './form-step'
 import type { FieldValues, UseFormReturn } from 'react-hook-form'
 
 interface MultiStepFormProps<T extends FieldValues> {
@@ -65,6 +65,8 @@ export default function MultiStepForm<T extends FieldValues>({ title, className,
                 return <InputField {...(stepDef as InputFieldStep<T>)} control={control} validationMiddleWare={validationMiddleWare} />;
             case "radio":
                 return <RadioField {...(stepDef as RadioFieldStep<T>)} control={control} validationMiddleWare={validationMiddleWare} />;
+            case "tagInput":
+                return <TagInputField {...(stepDef as TagInputFieldStep<T>)} control={control} validationMiddleWare={validationMiddleWare} />;
             default:
                 return null;
         }
