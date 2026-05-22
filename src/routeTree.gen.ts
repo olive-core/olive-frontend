@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as NotFoundRouteImport } from './routes/not-found'
 import { Route as ComingSoonRouteImport } from './routes/coming-soon'
+import { Route as AboutRouteImport } from './routes/about'
 import { Route as PortalRouteRouteImport } from './routes/portal/route'
 import { Route as DashboardRouteRouteImport } from './routes/dashboard/route'
 import { Route as authRouteRouteImport } from './routes/(auth)/route'
@@ -40,6 +41,11 @@ const NotFoundRoute = NotFoundRouteImport.update({
 const ComingSoonRoute = ComingSoonRouteImport.update({
   id: '/coming-soon',
   path: '/coming-soon',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PortalRouteRoute = PortalRouteRouteImport.update({
@@ -153,6 +159,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRouteRouteWithChildren
   '/portal': typeof PortalRouteRouteWithChildren
+  '/about': typeof AboutRoute
   '/coming-soon': typeof ComingSoonRoute
   '/not-found': typeof NotFoundRoute
   '/enter-otp': typeof authEnterOtpRoute
@@ -174,6 +181,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/coming-soon': typeof ComingSoonRoute
   '/not-found': typeof NotFoundRoute
   '/enter-otp': typeof authEnterOtpRoute
@@ -199,6 +207,7 @@ export interface FileRoutesById {
   '/(auth)': typeof authRouteRouteWithChildren
   '/dashboard': typeof DashboardRouteRouteWithChildren
   '/portal': typeof PortalRouteRouteWithChildren
+  '/about': typeof AboutRoute
   '/coming-soon': typeof ComingSoonRoute
   '/not-found': typeof NotFoundRoute
   '/(auth)/enter-otp': typeof authEnterOtpRoute
@@ -224,6 +233,7 @@ export interface FileRouteTypes {
     | '/'
     | '/dashboard'
     | '/portal'
+    | '/about'
     | '/coming-soon'
     | '/not-found'
     | '/enter-otp'
@@ -245,6 +255,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/about'
     | '/coming-soon'
     | '/not-found'
     | '/enter-otp'
@@ -269,6 +280,7 @@ export interface FileRouteTypes {
     | '/(auth)'
     | '/dashboard'
     | '/portal'
+    | '/about'
     | '/coming-soon'
     | '/not-found'
     | '/(auth)/enter-otp'
@@ -294,6 +306,7 @@ export interface RootRouteChildren {
   authRouteRoute: typeof authRouteRouteWithChildren
   DashboardRouteRoute: typeof DashboardRouteRouteWithChildren
   PortalRouteRoute: typeof PortalRouteRouteWithChildren
+  AboutRoute: typeof AboutRoute
   ComingSoonRoute: typeof ComingSoonRoute
   NotFoundRoute: typeof NotFoundRoute
 }
@@ -312,6 +325,13 @@ declare module '@tanstack/react-router' {
       path: '/coming-soon'
       fullPath: '/coming-soon'
       preLoaderRoute: typeof ComingSoonRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/portal': {
@@ -528,6 +548,7 @@ const rootRouteChildren: RootRouteChildren = {
   authRouteRoute: authRouteRouteWithChildren,
   DashboardRouteRoute: DashboardRouteRouteWithChildren,
   PortalRouteRoute: PortalRouteRouteWithChildren,
+  AboutRoute: AboutRoute,
   ComingSoonRoute: ComingSoonRoute,
   NotFoundRoute: NotFoundRoute,
 }

@@ -5,9 +5,10 @@ import { Link } from "@tanstack/react-router";
 import { MenuIcon, XIcon } from "lucide-react";
 
 const NAV_LINKS = [
-    { href: "#how-it-works", label: "How it works" },
-    { href: "#features", label: "Features" },
-    { href: "#values", label: "Values we bring" },
+    { href: "/#how-it-works", label: "How it works" },
+    { href: "/#features", label: "Features" },
+    { href: "/#values", label: "Values we bring" },
+    { href: "/about", label: "About" },
 ];
 
 export default function HomeNavbar() {

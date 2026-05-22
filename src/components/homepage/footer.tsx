@@ -5,5 +5,5 @@ export default function HomeFooter() {
                 &copy; {new Date().getFullYear()} Olive AI. All rights reserved.
             </p>
         </footer>
-    )
+    );
 }
