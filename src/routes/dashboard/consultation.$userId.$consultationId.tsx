@@ -100,14 +100,14 @@ function RouteComponent() {
 
   return (
     <div className="container mt-10 pb-10 md:h-screen">
-      <div className="grid grid-cols-1 md:grid-cols-2 md:h-[calc(100vh-100px)] w-full gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 md:h-[calc(100vh-100px)] w-full gap-6 md:gap-8">
 
-        <div className="flex flex-col md:h-full gap-8 min-h-0">
+        <div className="flex flex-col md:h-full gap-6 md:gap-8 min-h-0">
           <div className="flex-none">
             <Recorder />
           </div>
 
-          <div className="flex-1 min-h-0">
+          <div className="flex-1 min-h-[420px] md:min-h-0">
             <HistoryContainer
               histories={historiesData}
               activeHistoryId={activeHistoryId}

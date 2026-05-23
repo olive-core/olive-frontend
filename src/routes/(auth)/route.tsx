@@ -20,7 +20,7 @@ function AuthLayout() {
   }, [isLoggedIn, role, navigate]);
 
   return (
-    <div className="flex flex-col items-center justify-center w-full min-h-screen">
+    <div className="flex flex-col items-center justify-center w-full min-h-svh">
       <div className="mb-8">
         <NavbarLogo />
       </div>

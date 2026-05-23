@@ -1,4 +1,5 @@
-import { ClipboardListIcon, EllipsisIcon, House, LayoutTemplate, LogOutIcon, UserIcon } from "lucide-react";
+import { ClipboardListIcon, EllipsisIcon, House, LayoutTemplate, LogOutIcon, MenuIcon, UserIcon, XIcon } from "lucide-react";
+import { useState } from "react";
 import NavbarContainer from "../shared/navbar-container";
 import { Button } from "../ui/button";
 import {
@@ -77,6 +78,7 @@ const TOTAL_MENU_TO_SHOW = 4;
 export default function DashboardNavbar() {
 
     const { logout } = useAuthStore();
+    const [mobileOpen, setMobileOpen] = useState(false);
 
     const menuToShowCount = MENU_ITEMS.length > TOTAL_MENU_TO_SHOW ? TOTAL_MENU_TO_SHOW - 1 : MENU_ITEMS.length;
 
@@ -136,47 +138,98 @@ export default function DashboardNavbar() {
     }
 
 
-    return (
-        <NavbarContainer className="border-none print:hidden">
-
-            <div className="md:flex items-center hidden gap-4">
-
-
-                {MENU_ITEMS.slice(0, menuToShowCount).map((menu, index) => (
-                    <div key={index}>
-                        {renderMenuShowButton(menu)}
-                    </div>
-                ))}
-
-                {MENU_ITEMS.length > TOTAL_MENU_TO_SHOW && (
-                    <DropdownMenu>
-
-                        <Tooltip>
-                            <TooltipTrigger>
-                                <DropdownMenuTrigger asChild className="focus:outline-none focus:ring-0 focus:border-none">
-                                    <Button variant="nav-icon">
-                                        <EllipsisIcon />
-                                    </Button>
-                                </DropdownMenuTrigger>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                                <p>More Items</p>
-                            </TooltipContent>
-                        </Tooltip>
-
-
-                        <DropdownMenuContent>
-                            {MENU_ITEMS.slice(menuToShowCount).map((menu, index) => (
-                                <DropdownMenuItem key={index}>
-                                    {renderDropdownMenuItem(menu)}
-                                </DropdownMenuItem>
-                            ))}
-                        </DropdownMenuContent>
-                    </DropdownMenu>
+    const renderMobileMenuItem = (menu: MenuItemType) => {
+        const closeMenu = () => setMobileOpen(false);
+        return (
+            <>
+                {menu.href && (
+                    <Link
+                        to={menu.href}
+                        onClick={closeMenu}
+                        className="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 font-medium hover:bg-emerald-50 hover:text-emerald-600 transition-colors"
+                    >
+                        {menu.icon}
+                        {menu.label}
+                    </Link>
                 )}
 
+                {menu.buttonType && (
+                    <div
+                        className="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 font-medium hover:bg-emerald-50 hover:text-emerald-600 transition-colors cursor-pointer"
+                        onClick={() => { handleMenuClick(menu); closeMenu(); }}
+                    >
+                        {menu.icon}
+                        {menu.label}
+                    </div>
+                )}
+            </>
+        )
+    }
 
-            </div>
-        </NavbarContainer>
+    return (
+        <>
+            <NavbarContainer className="border-none print:hidden">
+
+                <div className="md:flex items-center hidden gap-4">
+
+
+                    {MENU_ITEMS.slice(0, menuToShowCount).map((menu, index) => (
+                        <div key={index}>
+                            {renderMenuShowButton(menu)}
+                        </div>
+                    ))}
+
+                    {MENU_ITEMS.length > TOTAL_MENU_TO_SHOW && (
+                        <DropdownMenu>
+
+                            <Tooltip>
+                                <TooltipTrigger>
+                                    <DropdownMenuTrigger asChild className="focus:outline-none focus:ring-0 focus:border-none">
+                                        <Button variant="nav-icon">
+                                            <EllipsisIcon />
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    <p>More Items</p>
+                                </TooltipContent>
+                            </Tooltip>
+
+
+                            <DropdownMenuContent>
+                                {MENU_ITEMS.slice(menuToShowCount).map((menu, index) => (
+                                    <DropdownMenuItem key={index}>
+                                        {renderDropdownMenuItem(menu)}
+                                    </DropdownMenuItem>
+                                ))}
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    )}
+
+                </div>
+
+                {/* Mobile hamburger */}
+                <button
+                    className="md:hidden flex items-center justify-center p-2 rounded-lg text-slate-600 hover:text-emerald-600 hover:bg-emerald-50 transition-colors"
+                    onClick={() => setMobileOpen((v) => !v)}
+                    aria-label={mobileOpen ? "Close menu" : "Open menu"}
+                >
+                    {mobileOpen ? <XIcon className="size-5" /> : <MenuIcon className="size-5" />}
+                </button>
+            </NavbarContainer>
+
+            {/* Mobile dropdown menu */}
+            {mobileOpen && (
+                <div className="md:hidden fixed top-[57px] left-0 w-full bg-white/95 backdrop-blur-lg border-b border-primary/10 z-40 shadow-md print:hidden">
+                    <div className="flex flex-col px-4 py-4 gap-1">
+                        {MENU_ITEMS.map((menu, index) => (
+                            <div key={index}>
+                                {renderMobileMenuItem(menu)}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+        </>
     )
 }
