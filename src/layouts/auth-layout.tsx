@@ -15,7 +15,7 @@ export default function AuthLayout() {
     }, [isLoggedIn, navigate]);
 
     return (
-        <div className="flex flex-col items-center justify-center w-full min-h-screen">
+        <div className="flex flex-col items-center justify-center w-full min-h-svh">
             <Outlet />
             <Button variant="link" className="mt-8" onClick={() => navigate({ to: "/" })}>
                 Back to Home

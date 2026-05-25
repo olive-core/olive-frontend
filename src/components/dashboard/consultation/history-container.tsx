@@ -23,13 +23,13 @@ function formatDate(dateStr: string) {
 function HistorySkeletonItem() {
     return (
         <div className="flex justify-between items-center py-6 relative px-2">
-            <div className="w-[30%] pr-8 flex flex-col items-end gap-1.5">
+            <div className="w-[30%] pr-3 md:pr-8 flex flex-col items-end gap-1.5">
                 <Skeleton className="h-3 w-16" />
                 <Skeleton className="h-3 w-10" />
             </div>
             <div className="absolute top-0 bottom-0 w-0.5 bg-slate-200/80 left-[30%]" />
             <div className="absolute w-4 h-4 left-[calc(30%-8px)] top-1/2 -translate-y-1/2 rounded-full bg-slate-200" />
-            <div className="w-[70%] pl-8 flex flex-col gap-1.5">
+            <div className="w-[70%] pl-4 md:pl-8 flex flex-col gap-1.5">
                 <Skeleton className="h-3 w-3/4" />
                 <Skeleton className="h-3 w-1/2" />
             </div>
@@ -102,7 +102,7 @@ export default function HistoryContainer({
                             )}
                             onClick={() => setActiveHistoryId(history.prescription_id)}
                         >
-                            <div className={cn("w-[30%] pr-8 text-right text-xs text-slate-500", isActive ? "font-semibold" : "font-normal")}>
+                            <div className={cn("w-[30%] pr-3 md:pr-8 text-right text-xs text-slate-500", isActive ? "font-semibold" : "font-normal")}>
                                 <p>{date}</p>
                                 <p>{time}</p>
                             </div>
@@ -113,7 +113,7 @@ export default function HistoryContainer({
                                 isActive ? "bg-emerald-500" : "bg-slate-300"
                             )} />
 
-                            <div className="w-[70%] pl-8">
+                            <div className="w-[70%] pl-4 md:pl-8">
                                 <p className={cn("text-sm text-slate-700 text-left line-clamp-2", isActive ? "font-semibold" : "font-normal")}>
                                     {summary}
                                 </p>

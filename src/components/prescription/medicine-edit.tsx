@@ -101,7 +101,7 @@ export default function MedicineEdit({ medicine, onRemove, onUpdate, index, setI
         <div className="bg-white border border-primary shadow-xl rounded-2xl overflow-hidden transition-all  duration-200">
 
 
-            <div className="p-5 space-y-3">
+            <div className="p-4 sm:p-5 space-y-3">
                 {/* Section 1: Identity */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="sm:col-span-1 space-y-1.5 flex flex-col">
@@ -119,7 +119,7 @@ export default function MedicineEdit({ medicine, onRemove, onUpdate, index, setI
 
                 {/* Section 2: Routine (The Focus) */}
                 <div className="bg-slate-50/50 border border-slate-100 rounded-xl space-y-2">
-                    <div className="flex items-center gap-4">
+                    <div className="flex flex-wrap items-center gap-4">
                         <label className="text-[11px] font-bold text-slate-500 uppercase tracking-tight">Routine Strategy</label>
                         <Tabs value={routineMode} onValueChange={setRoutineMode} className="w-auto">
                             <TabsList className="h-8 bg-slate-200/50 p-1">
@@ -134,7 +134,7 @@ export default function MedicineEdit({ medicine, onRemove, onUpdate, index, setI
 
                     <div className="min-h-[60px] flex items-center justify-center">
                         {routineMode === "meal" ? (
-                            <div className="flex gap-4">
+                            <div className="flex flex-wrap justify-center gap-2 sm:gap-4">
                                 <EnhancedMealSlot label="Morning" timing={breakfastTiming} setTiming={setBreakfastTiming} />
                                 <EnhancedMealSlot label="Lunch" timing={lunchTiming} setTiming={setLunchTiming} />
                                 <EnhancedMealSlot label="Night" timing={dinnerTiming} setTiming={setDinnerTiming} />
