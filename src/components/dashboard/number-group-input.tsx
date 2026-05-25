@@ -67,14 +67,20 @@ function NumberGroupInput({
         }
 
         switch (e.key) {
-            case "Backspace":
+            case "Backspace": {
                 if (index < dynamicValuesStartIndex) return;
+                const currentIsEmpty = !(numberInput[index] >= "0" && numberInput[index] <= "9");
+                const targetIndex = currentIsEmpty && index > dynamicValuesStartIndex ? index - 1 : index;
                 setNumberInput((prev: string[]) => {
                     const newNumber = [...prev];
-                    newNumber[index] = " ";
+                    newNumber[targetIndex] = " ";
                     return newNumber;
                 });
+                if (targetIndex < index) {
+                    inputRefs[targetIndex].current?.focus();
+                }
                 break;
+            }
             case "ArrowLeft":
                 if (index > dynamicValuesStartIndex) {
                     handleFocusPrev(index);
