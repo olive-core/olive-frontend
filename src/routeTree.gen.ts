@@ -18,6 +18,7 @@ import { Route as authRouteRouteImport } from './routes/(auth)/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PortalIndexRouteImport } from './routes/portal/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
+import { Route as PCodeRouteImport } from './routes/p.$code'
 import { Route as authSignInRouteImport } from './routes/(auth)/sign-in'
 import { Route as authEnterOtpRouteImport } from './routes/(auth)/enter-otp'
 import { Route as PortalProfileIndexRouteImport } from './routes/portal/profile/index'
@@ -76,6 +77,11 @@ const DashboardIndexRoute = DashboardIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => DashboardRouteRoute,
+} as any)
+const PCodeRoute = PCodeRouteImport.update({
+  id: '/p/$code',
+  path: '/p/$code',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const authSignInRoute = authSignInRouteImport.update({
   id: '/sign-in',
@@ -164,6 +170,7 @@ export interface FileRoutesByFullPath {
   '/not-found': typeof NotFoundRoute
   '/enter-otp': typeof authEnterOtpRoute
   '/sign-in': typeof authSignInRoute
+  '/p/$code': typeof PCodeRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/portal/': typeof PortalIndexRoute
   '/dashboard/consultations/$prescriptionId': typeof DashboardConsultationsPrescriptionIdRoute
@@ -186,6 +193,7 @@ export interface FileRoutesByTo {
   '/not-found': typeof NotFoundRoute
   '/enter-otp': typeof authEnterOtpRoute
   '/sign-in': typeof authSignInRoute
+  '/p/$code': typeof PCodeRoute
   '/dashboard': typeof DashboardIndexRoute
   '/portal': typeof PortalIndexRoute
   '/dashboard/consultations/$prescriptionId': typeof DashboardConsultationsPrescriptionIdRoute
@@ -212,6 +220,7 @@ export interface FileRoutesById {
   '/not-found': typeof NotFoundRoute
   '/(auth)/enter-otp': typeof authEnterOtpRoute
   '/(auth)/sign-in': typeof authSignInRoute
+  '/p/$code': typeof PCodeRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/portal/': typeof PortalIndexRoute
   '/dashboard/consultations/$prescriptionId': typeof DashboardConsultationsPrescriptionIdRoute
@@ -238,6 +247,7 @@ export interface FileRouteTypes {
     | '/not-found'
     | '/enter-otp'
     | '/sign-in'
+    | '/p/$code'
     | '/dashboard/'
     | '/portal/'
     | '/dashboard/consultations/$prescriptionId'
@@ -260,6 +270,7 @@ export interface FileRouteTypes {
     | '/not-found'
     | '/enter-otp'
     | '/sign-in'
+    | '/p/$code'
     | '/dashboard'
     | '/portal'
     | '/dashboard/consultations/$prescriptionId'
@@ -285,6 +296,7 @@ export interface FileRouteTypes {
     | '/not-found'
     | '/(auth)/enter-otp'
     | '/(auth)/sign-in'
+    | '/p/$code'
     | '/dashboard/'
     | '/portal/'
     | '/dashboard/consultations/$prescriptionId'
@@ -309,6 +321,7 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   ComingSoonRoute: typeof ComingSoonRoute
   NotFoundRoute: typeof NotFoundRoute
+  PCodeRoute: typeof PCodeRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -375,6 +388,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/dashboard/'
       preLoaderRoute: typeof DashboardIndexRouteImport
       parentRoute: typeof DashboardRouteRoute
+    }
+    '/p/$code': {
+      id: '/p/$code'
+      path: '/p/$code'
+      fullPath: '/p/$code'
+      preLoaderRoute: typeof PCodeRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/(auth)/sign-in': {
       id: '/(auth)/sign-in'
@@ -551,6 +571,7 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   ComingSoonRoute: ComingSoonRoute,
   NotFoundRoute: NotFoundRoute,
+  PCodeRoute: PCodeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
