@@ -1,4 +1,5 @@
 import type { ChiefComplaintItem, DiagnosisItem, RxItem } from "./patient";
+import type { VitalsType } from "./prescription";
 
 export type PatientSex = 'male' | 'female' | 'non_binary';
 
@@ -35,6 +36,7 @@ export type ConsultationPrescriptionData = {
     investigations?:   ConsultationInvestigationItem[];
     rx_list?:          RxItem[];
     advice_list?:      string[];
+    on_examinations?:  VitalsType[];
     follow_up_days?:   number | null;
     follow_up_notes?:  string | null;
     summary?:          string | null;

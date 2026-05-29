@@ -12,6 +12,8 @@ import AdviceList from "./advice-list";
 import { PrescriptionView } from "./view";
 import PrescriptionPaper from "./paper/prescription-paper";
 import SummaryBlock from "./paper/summary-block";
+import VitalsBar from "./paper/vitals-bar";
+import FollowUpBlock from "./paper/follow-up-block";
 import { cn } from "@/lib/utils";
 
 interface PrescriptionProps {
@@ -54,6 +56,12 @@ export default function Prescription({ onGenerate, onCancel, hasBeenGenerated }:
 
         summary,
         setSummary,
+
+        vitals,
+        setVitals,
+
+        followUp,
+        setFollowUp,
     } = store;
 
     const handlePrint = useReactToPrint({
@@ -87,6 +95,7 @@ export default function Prescription({ onGenerate, onCancel, hasBeenGenerated }:
                     />
                 }
                 patientStrip={<PatientInfo sessionId={consultationId} />}
+                vitalsBar={<VitalsBar vitals={vitals} onChange={setVitals} />}
                 leftColumn={
                     <>
                         <SummaryBlock summary={summary} onChange={setSummary} />
@@ -133,8 +142,9 @@ export default function Prescription({ onGenerate, onCancel, hasBeenGenerated }:
                 rightColumn={
                     <>
                         <MedicineContainer />
-                        <div className="mt-auto">
+                        <div className="mt-auto flex flex-col gap-3">
                             <AdviceList value={advice} onChange={setAdvice} />
+                            <FollowUpBlock value={followUp} onChange={setFollowUp} />
                         </div>
                     </>
                 }

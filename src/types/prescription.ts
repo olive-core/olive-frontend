@@ -49,6 +49,22 @@ export type MeedicineType = {
     }
 }
 
+export type VitalsType = {
+    bp_systolic?:      number | null;
+    bp_diastolic?:     number | null;
+    pulse?:            number | null;
+    temperature?:      number | null;
+    respiratory_rate?: number | null;
+    spo2?:             number | null;
+    weight?:           number | null;
+    height?:           number | null;
+};
+
+export type FollowUpType = {
+    follow_up_days:  number | null;
+    follow_up_notes: string | null;
+};
+
 export type ListInfoFieldName = "chief-complaint" | "history" | "diagnosis" | "investigation"
 
 export type PrescriptionResponseType = {
@@ -95,4 +111,6 @@ export type PrescriptionResponseType = {
         priority: string;
     }[];
     advice: string[];
+    vitals?: VitalsType;
+    follow_up?: FollowUpType;
 }

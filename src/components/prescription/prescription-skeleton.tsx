@@ -3,7 +3,9 @@ import { SparklesIcon } from "lucide-react";
 import DoctorInfo from "./doctor-info";
 import PatientInfo from "./patient-info";
 import { usePrescriptionStore } from "@/stores/prescription-store";
+import { hasAnyVital } from "@/lib/vitals";
 import ListInfo from "./list-info";
+import VitalsBar from "./paper/vitals-bar";
 import { AccordionContent, AccordionItem, AccordionTrigger, Accordion } from "../ui/accordion";
 
 // ─── Sliding AI text phrases ───────────────────────────────────────────────────
@@ -105,6 +107,26 @@ function SkeletonListSection({
   );
 }
 
+// ─── Skeleton vitals bar ───────────────────────────────────────────────────────
+function SkeletonVitals() {
+  return (
+    <div className="flex flex-col gap-2.5 border-y py-4">
+      <div className="flex items-center justify-between">
+        <h3 className="font-bold text-[11px] uppercase tracking-widest text-slate-300">On Examination</h3>
+        <SparklesIcon className="w-3 h-3 text-emerald-300 animate-pulse" />
+      </div>
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5">
+        {Array.from({ length: 8 }).map((_, i) => (
+          <div key={i} className="flex flex-col gap-2 rounded-xl border border-slate-100 bg-slate-50 px-3 py-2.5">
+            <ShimmerLine width="50%" thin />
+            <ShimmerLine width="75%" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ─── Skeleton medicine card ────────────────────────────────────────────────────
 function SkeletonMedicineCard({ index }: { index: number }) {
   const widths = ["65%", "80%", "50%", "72%"];
@@ -161,7 +183,11 @@ export default function PrescriptionSkeleton({
     removeInvestigation,
 
     // summary
-    summary
+    summary,
+
+    // vitals
+    vitals,
+    setVitals,
   } = store;
 
   return (
@@ -170,6 +196,11 @@ export default function PrescriptionSkeleton({
         {/* ── Real Doctor & Patient info ─────────────────────────── */}
         <DoctorInfo onCancel={onCancel} />
         <PatientInfo sessionId={sessionId} />
+
+        {/* ── Vitals (real once streamed, skeleton until then) ───── */}
+        {hasAnyVital(vitals)
+          ? <VitalsBar vitals={vitals} onChange={setVitals} />
+          : <SkeletonVitals />}
 
         {/* ── AI Status block ────────────────────────────────────── */}
         <div className="flex items-center gap-3 py-3 px-4 my-3 rounded-xl bg-gradient-to-r from-emerald-50 to-slate-50 border border-emerald-100">

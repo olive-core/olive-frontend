@@ -1,6 +1,9 @@
 import DoctorInfo from "./doctor-info";
 import PatientInfo from "./patient-info";
+import VitalsBar from "./paper/vitals-bar";
+import FollowUpBlock from "./paper/follow-up-block";
 import { usePrescriptionStore } from "@/stores/prescription-store";
+import { vitalsFromOnExaminations } from "@/lib/vitals";
 import { useParams } from "@tanstack/react-router";
 
 const getRoutineString = (routine: any) => {
@@ -20,6 +23,9 @@ export const PrescriptionView = () => {
     const getSubmitPayload = usePrescriptionStore(s => s.getSubmitPayload);
     const data = getSubmitPayload(consultationId);
 
+    const vitals = vitalsFromOnExaminations(data.on_examinations);
+    const followUp = { follow_up_days: data.follow_up_days ?? null, follow_up_notes: data.follow_up_notes ?? null };
+
     return (
         <div className="bg-white text-sm">
             {/* A4 Container (no fixed height → allows pagination) */}
@@ -27,6 +33,8 @@ export const PrescriptionView = () => {
 
                 <DoctorInfo hideActions={true} />
                 <PatientInfo sessionId={consultationId} />
+
+                <VitalsBar vitals={vitals} />
 
                 {/* dashed separator */}
                 <div className="border-t border-dashed my-3" />
@@ -111,6 +119,10 @@ export const PrescriptionView = () => {
                             </li>
                         ))}
                     </ul>
+                </div>
+
+                <div className="mt-4">
+                    <FollowUpBlock value={followUp} />
                 </div>
             </div>
         </div>

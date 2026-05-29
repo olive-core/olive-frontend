@@ -3,6 +3,9 @@ import type { PatientInfoType } from "@/types/patient";
 import type { ClinicianProfile } from "./read-view";
 import ClinicianHeader from "./clinician-header";
 import PatientStrip from "./patient-strip";
+import VitalsBar from "./vitals-bar";
+import FollowUpBlock from "./follow-up-block";
+import { vitalsFromOnExaminations } from "@/lib/vitals";
 
 interface PrescriptionPrintViewProps {
     consultation: ConsultationDetail;
@@ -31,6 +34,8 @@ function PrintSection({ title, children }: { title: string; children: React.Reac
 
 export default function PrescriptionPrintView({ consultation, clinician, patient }: PrescriptionPrintViewProps) {
     const data = consultation.prescription_data ?? {};
+    const vitals = vitalsFromOnExaminations(data.on_examinations);
+    const followUp = { follow_up_days: data.follow_up_days ?? null, follow_up_notes: data.follow_up_notes ?? null };
 
     return (
         <div className="bg-white text-sm">
@@ -50,6 +55,8 @@ export default function PrescriptionPrintView({ consultation, clinician, patient
                     sex={patient?.sex}
                     dateTime={consultation.created_at}
                 />
+
+                <VitalsBar vitals={vitals} />
 
                 <div className="border-t border-dashed my-3" />
 
@@ -116,6 +123,10 @@ export default function PrescriptionPrintView({ consultation, clinician, patient
                             <li key={i} className="break-inside-avoid">{a}</li>
                         ))}
                     </ul>
+                </div>
+
+                <div className="mt-4">
+                    <FollowUpBlock value={followUp} baseDate={consultation.created_at} />
                 </div>
             </div>
         </div>

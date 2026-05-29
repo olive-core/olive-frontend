@@ -1,5 +1,8 @@
-import type { ChiefComplaintType, DiagnosisType, InvestigationType, MeedicineType, HistoryType, PrescriptionResponseType } from "@/types/prescription";
+import type { ChiefComplaintType, DiagnosisType, InvestigationType, MeedicineType, HistoryType, PrescriptionResponseType, VitalsType, FollowUpType } from "@/types/prescription";
+import { hasAnyVital, vitalsForSubmit } from "@/lib/vitals";
 import { create } from "zustand";
+
+const EMPTY_FOLLOW_UP: FollowUpType = { follow_up_days: null, follow_up_notes: null };
 
 
 interface PrescriptionStoreType {
@@ -17,6 +20,8 @@ interface PrescriptionStoreType {
     medicine: MeedicineType[];
     advice: string[];
     summary: string;
+    vitals: VitalsType;
+    followUp: FollowUpType;
 
     templateSelected: boolean;
     generatedMedicine: MeedicineType[];
@@ -26,7 +31,7 @@ interface PrescriptionStoreType {
     // methods
     initiatePrescription: (patientId: string, sessionId: string) => void;
     setGenerating: (value: boolean) => void;
-    setPartialData: (data: Pick<PrescriptionResponseType, 'chief_complaints' | 'history' | 'summary' | 'diagnoses'>) => void;
+    setPartialData: (data: Pick<PrescriptionResponseType, 'chief_complaints' | 'history' | 'summary' | 'diagnoses' | 'vitals' | 'follow_up'>) => void;
     getInitialPrescription: (data: PrescriptionResponseType) => Promise<void>;
     setPrescriptionFromTemplate: (data: any) => void;
     revertTemplateSelection: () => void;
@@ -58,6 +63,12 @@ interface PrescriptionStoreType {
 
     setSummary: (value: string) => void;
 
+    // vitals methods
+    setVitals: (data: Partial<VitalsType>) => void;
+
+    // follow-up methods
+    setFollowUp: (data: Partial<FollowUpType>) => void;
+
     // advice methods
     setAdvice: (data: string[]) => void;
 
@@ -83,6 +94,8 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
             investigation: [],
 
             summary: "",
+            vitals: {},
+            followUp: EMPTY_FOLLOW_UP,
 
             medicine: [],
             advice: [],
@@ -104,6 +117,8 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
                 diagnosis: [],
                 investigation: [],
                 summary: "",
+                vitals: {},
+                followUp: EMPTY_FOLLOW_UP,
                 medicine: [],
                 advice: [],
                 templateSelected: false,
@@ -135,11 +150,13 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
                 })).sort((a, b) => (b.confidence || 0) - (a.confidence || 0)) || []
 
                 const summary = data.summary;
+                const vitals = data.vitals ?? {};
+                const followUp = { ...EMPTY_FOLLOW_UP, ...data.follow_up };
 
                 if (get().templateSelected) {
-                    set({ chiefComplaint, history, diagnosis, summary });
+                    set({ chiefComplaint, history, diagnosis, summary, vitals, followUp });
                 } else {
-                    set({ chiefComplaint, history, diagnosis, medicine: [], investigation: [], summary });
+                    set({ chiefComplaint, history, diagnosis, medicine: [], investigation: [], summary, vitals, followUp });
                 }
             },
 
@@ -190,6 +207,8 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
 
                 const advice = data.advice;
                 const summary = data.summary;
+                const vitals = data.vitals ?? {};
+                const followUp = { ...EMPTY_FOLLOW_UP, ...data.follow_up };
 
                 const medicineAndInvestigationUpdate = get().templateSelected
                     ? {}
@@ -201,6 +220,8 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
                     diagnosis,
                     advice,
                     summary,
+                    vitals,
+                    followUp,
                     generatedMedicine,
                     generatedInvestigation,
                     ...medicineAndInvestigationUpdate,
@@ -290,6 +311,9 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
                         }
                     })),
                     advice_list: state.advice,
+                    on_examinations: hasAnyVital(state.vitals) ? [vitalsForSubmit(state.vitals)] : [],
+                    follow_up_days: state.followUp.follow_up_days,
+                    follow_up_notes: state.followUp.follow_up_notes || null,
                     summary: state.summary || null,
                 }
             },
@@ -351,6 +375,12 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
             }),
 
             setSummary: (value) => set({ summary: value }),
+
+            // vitals methods
+            setVitals: (data) => set((state) => ({ vitals: { ...state.vitals, ...data } })),
+
+            // follow-up methods
+            setFollowUp: (data) => set((state) => ({ followUp: { ...state.followUp, ...data } })),
 
             // advice methods
             setAdvice: (data) => set({ advice: data }),

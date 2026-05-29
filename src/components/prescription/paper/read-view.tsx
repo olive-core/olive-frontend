@@ -8,6 +8,9 @@ import SummaryBlock from "./summary-block";
 import SectionList from "./section-list";
 import MedicineList from "./medicine-list";
 import AdviceList from "./advice-list";
+import VitalsBar from "./vitals-bar";
+import FollowUpBlock from "./follow-up-block";
+import { vitalsFromOnExaminations } from "@/lib/vitals";
 import {
     mapChiefComplaintsToSectionItems,
     mapDiagnosesToSectionItems,
@@ -32,6 +35,8 @@ interface PrescriptionReadViewProps {
 
 export default function PrescriptionReadView({ consultation, clinician, patient, onSummaryChange }: PrescriptionReadViewProps) {
     const data = consultation.prescription_data ?? {};
+    const vitals = vitalsFromOnExaminations(data.on_examinations);
+    const followUp = { follow_up_days: data.follow_up_days ?? null, follow_up_notes: data.follow_up_notes ?? null };
 
     return (
         <PrescriptionPaper
@@ -52,6 +57,7 @@ export default function PrescriptionReadView({ consultation, clinician, patient,
                     dateTime={consultation.created_at}
                 />
             }
+            vitalsBar={<VitalsBar vitals={vitals} />}
             leftColumn={
                 <>
                     <SummaryBlock summary={data.summary} onChange={onSummaryChange} />
@@ -77,8 +83,9 @@ export default function PrescriptionReadView({ consultation, clinician, patient,
             rightColumn={
                 <>
                     <MedicineList medicines={mapRxListToMedicineCards(data.rx_list)} />
-                    <div className="mt-auto">
+                    <div className="mt-auto flex flex-col gap-3">
                         <AdviceList items={data.advice_list ?? []} />
+                        <FollowUpBlock value={followUp} baseDate={consultation.created_at} />
                     </div>
                 </>
             }
