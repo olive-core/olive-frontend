@@ -6,6 +6,7 @@ import {
     CardFooter,
 } from "@/components/ui/card"
 import { useNavigate, useParams } from "@tanstack/react-router";
+import { trackRecordingFinalization } from "@/lib/recording-finalization";
 import { AudioVisualizerMemo } from "./visualizer";
 // import { Mic, MicOff } from "lucide-react";
 
@@ -19,9 +20,10 @@ export default function Recorder() {
     const durationMinutes = Math.floor(duration / 60).toString().padStart(2, '0');
     const durationSeconds = (Math.floor(duration) % 60).toString().padStart(2, '0');
 
-
     const handleStopAndProceed = () => {
-        stopRecording();
+        // Let the final chunk upload finish in the background; the prescribe screen
+        // waits on it behind its loading skeleton before generating the draft.
+        trackRecordingFinalization(consultationId, stopRecording());
         navigate({ to: "/dashboard/prescribe/$consultationId", params: { consultationId } });
     }
 

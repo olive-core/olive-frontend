@@ -1,5 +1,6 @@
 import Prescription from '@/components/prescription'
 import PrescriptionSkeleton from '@/components/prescription/prescription-skeleton'
+import { awaitRecordingFinalization } from '@/lib/recording-finalization';
 import { useAuthStore } from '@/stores/auth-store';
 import { usePrescriptionStore } from '@/stores/prescription-store'
 import { createFileRoute } from '@tanstack/react-router'
@@ -45,17 +46,20 @@ function RouteComponent() {
     };
     if (accessToken) headers['Authorization'] = `Bearer ${accessToken}`;
 
-    fetch('/api/v1/aris/generate-progressive', {
-      method: 'POST',
-      headers,
-      body: JSON.stringify({
-        session_id: consultationId,
-        dialogue: "",
-        force_variant: '',
-        persist_draft: true,
-      }),
-      signal: controller.signal,
-    })
+    // The recorder may still be uploading the final audio chunk. Wait for it so the
+    // draft is generated from the complete transcription; the skeleton covers this wait.
+    awaitRecordingFinalization(consultationId)
+      .then(() => fetch('/api/v1/aris/generate-progressive', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          session_id: consultationId,
+          dialogue: "",
+          force_variant: '',
+          persist_draft: true,
+        }),
+        signal: controller.signal,
+      }))
       .then(async (res) => {
         if (!res.ok || !res.body) {
           setIsError(true);
@@ -137,6 +141,7 @@ function RouteComponent() {
     } else {
       const { resetStore } = usePrescriptionStore.getState();
       resetStore();
+      void awaitRecordingFinalization(consultationId);
       setIsReady(true)
     }
     return () => {
