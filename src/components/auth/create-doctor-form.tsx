@@ -14,6 +14,9 @@ const doctorSchema = z.object({
     bmdcNo: z.string().regex(/^\d+$/, "BMDC number must contain only numbers"),
     qualification: z.string().optional(),
     specializations: z.array(z.string()).optional(),
+    termsAccepted: z.boolean().refine((accepted) => accepted, {
+        message: "You must accept the Terms and Conditions to continue",
+    }),
 })
 
 type DoctorFormValues = z.infer<typeof doctorSchema>
@@ -37,6 +40,7 @@ export default function CreateDoctorForm({ phoneNumber, doesExist }: CreateDocto
             bmdcNo: "",
             qualification: "",
             specializations: [],
+            termsAccepted: false,
         }
     })
 
@@ -64,6 +68,7 @@ export default function CreateDoctorForm({ phoneNumber, doesExist }: CreateDocto
         { def: "input", id: "bmdcNo", label: "BMDC No", type: "text", placeholder: "BMDC No" },
         { def: "input", id: "qualification", label: "Qualification", type: "text", placeholder: "e.g. MBBS, FCPS" },
         { def: "tagInput", id: "specializations", label: "Specializations", placeholder: "Type and press Enter" },
+        { def: "termsAcceptance", id: "termsAccepted", label: "Terms and Conditions" },
     ]
 
     return (

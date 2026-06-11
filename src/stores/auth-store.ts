@@ -1,5 +1,6 @@
 import api from "@/lib/axios";
 
+import { TERMS_VERSION } from "@/lib/terms";
 import type { ClinicianType } from "@/types/shared";
 import type { SendOtpResponse, DoesUserExistResponse, VerifyOtpResponse, UserRole } from "@/types/auth";
 import { create } from "zustand";
@@ -95,6 +96,7 @@ export const useAuthStore = create<AuthStoreType>()(
                         last_name: clinician?.lastName || "",
                         phone: phone,
                         otp: otp,
+                        terms_version: TERMS_VERSION,
                     });
                     set({
                         isLoggedIn: true,

@@ -1,11 +1,13 @@
-import type { InputFieldStep, RadioFieldStep, TagInputFieldStep } from "@/types/shared";
+import type { InputFieldStep, RadioFieldStep, TagInputFieldStep, TermsAcceptanceFieldStep } from "@/types/shared";
 import { Input } from "../ui/input";
 import { Controller, type Control, type FieldValues } from "react-hook-form";
 import { Field, FieldContent, FieldError, FieldLabel, FieldLegend, FieldSet, FieldTitle } from "../ui/field";
 import { RadioGroupItem, RadioGroup } from "../ui/radio-group";
+import { Checkbox } from "../ui/checkbox";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { Button } from "../ui/button";
+import TermsAndConditions from "./terms-and-conditions";
 
 interface BaseFieldProps<T extends FieldValues> {
     control: Control<T>;
@@ -113,6 +115,38 @@ export function TagInputField<T extends FieldValues>({ id, control, label, place
                     </Field>
                 );
             }}
+        />
+    );
+}
+
+export function TermsAcceptanceField<T extends FieldValues>({ id, control }: BaseFieldProps<T> & TermsAcceptanceFieldStep<T>) {
+    return (
+        <Controller
+            name={id}
+            control={control}
+            render={({ field, fieldState }) => (
+                <div className="space-y-3">
+                    <TermsAndConditions />
+
+                    <label
+                        htmlFor={id}
+                        data-invalid={fieldState.invalid}
+                        className="flex items-center gap-3 rounded-lg border p-3 cursor-pointer select-none transition-colors hover:bg-muted/40 data-[invalid=true]:border-destructive"
+                    >
+                        <Checkbox
+                            id={id}
+                            checked={!!field.value}
+                            onCheckedChange={(checked) => field.onChange(checked === true)}
+                            aria-invalid={fieldState.invalid}
+                        />
+                        <span className="text-sm leading-snug">
+                            I have read and agree to the <span className="font-medium">Terms and Conditions</span>.
+                        </span>
+                    </label>
+
+                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                </div>
+            )}
         />
     );
 }

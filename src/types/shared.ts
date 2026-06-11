@@ -11,7 +11,7 @@ export type ClinicianType = {
     generate_ai_draft?: boolean;
 }
 
-type StepDefTypes = 'input' | 'radio' | 'tagInput';
+type StepDefTypes = 'input' | 'radio' | 'tagInput' | 'termsAcceptance';
 
 export type BaseFieldStep<T extends FieldValues> = {
     id: Path<T>;
@@ -33,9 +33,12 @@ export type TagInputFieldStep<T extends FieldValues> = BaseFieldStep<T> & {
     placeholder?: string;
 }
 
+export type TermsAcceptanceFieldStep<T extends FieldValues> = BaseFieldStep<T>;
+
 type FormStep<T extends FieldValues> =
     | InputFieldStep<T>
     | RadioFieldStep<T>
-    | TagInputFieldStep<T>;
+    | TagInputFieldStep<T>
+    | TermsAcceptanceFieldStep<T>;
 
 export type MultiStepFormSteps<T extends FieldValues> = FormStep<T>[];

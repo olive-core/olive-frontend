@@ -3,8 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
-import type { InputFieldStep, MultiStepFormSteps, RadioFieldStep, TagInputFieldStep } from '@/types/shared'
-import { InputField, RadioField, TagInputField } from './form-step'
+import type { InputFieldStep, MultiStepFormSteps, RadioFieldStep, TagInputFieldStep, TermsAcceptanceFieldStep } from '@/types/shared'
+import { InputField, RadioField, TagInputField, TermsAcceptanceField } from './form-step'
 import type { FieldValues, UseFormReturn } from 'react-hook-form'
 
 interface MultiStepFormProps<T extends FieldValues> {
@@ -67,6 +67,8 @@ export default function MultiStepForm<T extends FieldValues>({ title, className,
                 return <RadioField {...(stepDef as RadioFieldStep<T>)} control={control} validationMiddleWare={validationMiddleWare} />;
             case "tagInput":
                 return <TagInputField {...(stepDef as TagInputFieldStep<T>)} control={control} validationMiddleWare={validationMiddleWare} />;
+            case "termsAcceptance":
+                return <TermsAcceptanceField {...(stepDef as TermsAcceptanceFieldStep<T>)} control={control} />;
             default:
                 return null;
         }
@@ -110,7 +112,7 @@ export default function MultiStepForm<T extends FieldValues>({ title, className,
 
     return (
         <form id="form-rhf-demo" onSubmit={handleSubmitWrapper} onKeyDown={handleKeyDown}>
-            <Card className={cn("max-w-xl mx-auto py-10 flex flex-col justify-between items-center h-[400px]", className)}>
+            <Card className={cn("max-w-xl mx-auto py-10 flex flex-col justify-between items-center min-h-[400px]", className)}>
                 {title && <CardHeader className='w-full'>
                     <CardTitle className="text-center">{title}</CardTitle>
                 </CardHeader>}
