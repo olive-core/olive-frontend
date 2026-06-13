@@ -43,6 +43,11 @@ function NumberGroupInput({
     const cellRefs = useRef<Array<HTMLInputElement | null>>([]);
 
     useEffect(() => {
+        focusCell(0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    useEffect(() => {
         onComplete(numberInput.length === inputLength && numberInput.every(isDigit));
     }, [numberInput, inputLength, onComplete]);
 

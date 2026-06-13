@@ -1,24 +1,32 @@
 import useSessionRecorder from "@/hooks/use-session-recorder";
 import { Button } from "@/components/ui/button"
-import {
-    Card,
-    CardContent,
-    CardFooter,
-} from "@/components/ui/card"
+import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { trackRecordingFinalization } from "@/lib/recording-finalization";
-import { AudioVisualizerMemo } from "./visualizer";
-// import { Mic, MicOff } from "lucide-react";
+// import { AudioVisualizerMemo } from "./visualizer"; // disabled — see waveform block below
+import RecordingStatus, { type RecorderStatus } from "./recording-status";
+import DiscardSessionDialog from "./discard-session-dialog";
+import { PauseIcon, PlayIcon } from "lucide-react";
+import { cn, formatDuration } from "@/lib/utils";
 
 export default function Recorder() {
 
     const { consultationId } = useParams({ from: "/dashboard/consultation/$userId/$consultationId" });
-
     const navigate = useNavigate();
 
-    const { duration, isRecording, stopRecording, discardRecording, stream } = useSessionRecorder({ chunkSizeInMs: 30 * 1000, consultationId });
-    const durationMinutes = Math.floor(duration / 60).toString().padStart(2, '0');
-    const durationSeconds = (Math.floor(duration) % 60).toString().padStart(2, '0');
+    const {
+        duration,
+        isPaused,
+        isSilent,
+        pauseRecording,
+        resumeRecording,
+        stopRecording,
+        discardRecording,
+        // stream, // re-add when restoring the AudioVisualizer below
+    } = useSessionRecorder({ chunkSizeInMs: 30 * 1000, consultationId });
+
+    const status: RecorderStatus = isPaused ? "paused" : isSilent ? "silent" : "listening";
+    const isListening = status === "listening";
 
     const handleStopAndProceed = () => {
         // Let the final chunk upload finish in the background; the prescribe screen
@@ -33,53 +41,46 @@ export default function Recorder() {
     }
 
     return (
-        <Card className="w-full">
-            <CardContent>
-                <div className="flex justify-between items-center">
-                    <div className="flex items-center justify-center mb-4">
-                        <div
-                            aria-label={isRecording ? 'Microphone on' : 'Microphone off'}
-                            className={`relative inline-flex items-center justify-center rounded-full`}
-                        >
-                            {/* Ping effect (only when active) */}
-                            {isRecording && (
-                                <span
-                                    aria-hidden
-                                    className="absolute inline-flex h-full w-full items-center justify-center"
-                                >
-                                    {/* The ping circle (expanding, low-opacity) */}
-                                    <span className="absolute inline-flex h-3/4 w-3/4 rounded-full bg-rose-400 opacity-60 animate-ping" />
+        <Card className={cn("w-full gap-4 py-5 transition-shadow", isListening && "rec-card-glow")}>
+            <CardContent className="flex min-h-44 flex-col items-center justify-center gap-3 pt-0">
+                <RecordingStatus status={status} />
 
-
-                                    {/* The steady glow behind the mic */}
-                                    <span className="absolute inline-flex h-1/3 w-1/3 rounded-full bg-rose-600 opacity-90" />
-                                </span>
-                            )}
-
-                            <div className="relative z-10 flex items-center justify-center w-9 h-9" />
-
-                        </div>
-
-                        {/* {isRecording ? <Mic className="w-8 h-8 text-rose-600 ml-2" /> : <MicOff className="w-8 h-8 text-gray-400 ml-2" />} */}
-                    </div>
-
-
-                    <pre className="text-xl">
-                        {durationMinutes}:{durationSeconds}
-                    </pre>
-
+                <div
+                    className={cn(
+                        "text-4xl font-light tabular-nums tracking-tight transition-colors",
+                        isPaused ? "text-slate-300" : "text-slate-800"
+                    )}
+                >
+                    {formatDuration(duration)}
                 </div>
 
-                <AudioVisualizerMemo stream={stream} />
+                {/* Live audio waveform — disabled for now: it drew too much attention during the
+                    consult. The breathing dot + silence warning already reassure capture. To bring
+                    it back, uncomment this, the import, and the `stream` destructure above.
+                <div className="w-full">
+                    <AudioVisualizerMemo stream={stream} />
+                </div> */}
             </CardContent>
-            <CardFooter className="flex gap-2 items-center justify-center">
-                <Button variant="outline" className="" onClick={handleDiscard}>
-                    Discard Session
-                </Button>
-                <Button className="" onClick={handleStopAndProceed}>
-                    Proceed to Prescribe
-                </Button>
 
+            <CardFooter className="flex flex-col gap-3">
+                <div className="flex w-full gap-2">
+                    <Button
+                        variant="outline"
+                        className="flex-1"
+                        onClick={isPaused ? resumeRecording : pauseRecording}
+                    >
+                        {isPaused ? (
+                            <><PlayIcon className="size-4" /> Resume</>
+                        ) : (
+                            <><PauseIcon className="size-4" /> Pause</>
+                        )}
+                    </Button>
+                    <Button className="flex-1" onClick={handleStopAndProceed}>
+                        Finish &amp; Prescribe
+                    </Button>
+                </div>
+
+                <DiscardSessionDialog onConfirm={handleDiscard} />
             </CardFooter>
         </Card>
     )

@@ -1,6 +1,7 @@
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { cn } from "@/lib/utils";
+import ScrollFade from "@/components/shared/scroll-fade";
+import { cn, formatRelativeVisit } from "@/lib/utils";
 import type { HistoryType } from "@/types/patient";
 import { AlertCircle, ClipboardList } from "lucide-react";
 
@@ -10,14 +11,6 @@ interface HistoryContainerProps {
     setActiveHistoryId: (id: string) => void;
     isLoading?: boolean;
     isError?: boolean;
-}
-
-function formatDate(dateStr: string) {
-    const date = new Date(dateStr);
-    return {
-        date: date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
-        time: date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }),
-    };
 }
 
 function HistorySkeletonItem() {
@@ -44,6 +37,8 @@ export default function HistoryContainer({
     isLoading,
     isError,
 }: HistoryContainerProps) {
+
+    const visitCount = histories?.length ?? 0;
 
     const renderContent = () => {
         if (isLoading) {
@@ -87,7 +82,7 @@ export default function HistoryContainer({
         return (
             <div>
                 {histories.map((history) => {
-                    const { date, time } = formatDate(history.created_at);
+                    const { relative, exact } = formatRelativeVisit(history.created_at);
                     const isActive = activeHistoryId === history.prescription_id;
                     const summary = history.diagnoses_summary?.length > 0
                         ? history.diagnoses_summary.join(", ")
@@ -103,9 +98,9 @@ export default function HistoryContainer({
                             )}
                             onClick={() => setActiveHistoryId(history.prescription_id)}
                         >
-                            <div className={cn("w-[30%] pr-3 md:pr-8 text-right text-xs text-slate-500", isActive ? "font-semibold" : "font-normal")}>
-                                <p>{date}</p>
-                                <p>{time}</p>
+                            <div className="w-[30%] pr-3 md:pr-8 text-right">
+                                <p className={cn("text-xs text-slate-600", isActive ? "font-semibold" : "font-medium")}>{relative}</p>
+                                <p className="text-[11px] text-slate-400 mt-0.5">{exact}</p>
                             </div>
 
                             <div className="absolute top-0 bottom-0 w-0.5 bg-slate-200/80 left-[30%]" />
@@ -130,11 +125,15 @@ export default function HistoryContainer({
     };
 
     return (
-        <Card className="flex flex-col h-full min-h-0">
-            <CardHeader className="font-display text-xl">History</CardHeader>
-            <CardContent className="flex-1 overflow-auto">
-                {renderContent()}
-            </CardContent>
+        <Card className="flex flex-col h-full min-h-0 gap-3">
+            <CardHeader className="font-display text-xl flex-row items-baseline gap-2">
+                <span>Past visits</span>
+                {visitCount > 0 && (
+                    <span className="text-sm font-sans font-normal text-slate-400">· {visitCount}</span>
+                )}
+            </CardHeader>
+
+            <ScrollFade className="px-6">{renderContent()}</ScrollFade>
         </Card>
     );
 }
