@@ -1,13 +1,13 @@
 import ConsultationCardMemo from '@/components/dashboard/consultation/consultation-card'
 import HistoryContainer from '@/components/dashboard/consultation/history-container'
+import PatientChip from '@/components/dashboard/consultation/patient-chip'
 import Recorder from '@/components/dashboard/consultation/recorder'
 import api from '@/lib/axios'
 import { useAuthStore } from '@/stores/auth-store'
 import type { HistoryType, PrescriptionType } from '@/types/patient'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
-import { useState } from 'react'
-// import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 export const Route = createFileRoute('/dashboard/consultation/$userId/$consultationId')({
   component: RouteComponent,
@@ -47,6 +47,18 @@ function RouteComponent() {
   });
 
   const histories = historiesData ?? [];
+
+  // For follow-ups, surface the patient's most recent visit on load so its prescription is
+  // already on screen — no clicks. Runs once; the doctor stays in control after that.
+  const [didAutoSelect, setDidAutoSelect] = useState(false);
+  useEffect(() => {
+    if (didAutoSelect || activeHistoryId || !historiesData || historiesData.length === 0) return;
+    const mostRecent = historiesData.reduce((latest, h) =>
+      new Date(h.created_at) > new Date(latest.created_at) ? h : latest
+    );
+    setActiveHistoryId(mostRecent.prescription_id);
+    setDidAutoSelect(true);
+  }, [historiesData, activeHistoryId, didAutoSelect]);
 
   // Track which prescription_id is set as follow-up for the current session
   const [followUpOfPrescriptionId, setFollowUpOfPrescriptionId] = useState<string | undefined>(undefined);
@@ -99,10 +111,14 @@ function RouteComponent() {
   const hasSelection = !!activeHistoryId;
 
   return (
-    <div className="container mt-10 pb-10 md:h-screen">
-      <div className="grid grid-cols-1 md:grid-cols-2 md:h-[calc(100vh-100px)] w-full gap-6 md:gap-8">
+    <div className="container flex flex-col py-6 md:h-[calc(100svh-120px)]">
+      <div className="mb-5 flex-none">
+        <PatientChip userId={userId} />
+      </div>
 
-        <div className="flex flex-col md:h-full gap-6 md:gap-8 min-h-0">
+      <div className="grid grid-cols-1 md:grid-cols-2 w-full gap-6 md:gap-8 md:min-h-0 md:flex-1">
+
+        <div className="flex flex-col gap-6 md:gap-8 md:min-h-0">
           <div className="flex-none">
             <Recorder />
           </div>

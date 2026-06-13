@@ -183,3 +183,16 @@ html::-webkit-scrollbar {
     padding-top: 0 !important;
   }
 }
+
+/* --- Recorder "Listening" state: card edge + inner dot breathe together in one rhythm. --- */
+@keyframes rec-card-glow {
+  0%, 100% { box-shadow: 0 0 0 1px rgba(244,63,94,0.20), 0 0 22px 1px rgba(244,63,94,0.14); }
+  50%      { box-shadow: 0 0 0 1.5px rgba(244,63,94,0.45), 0 0 44px 6px rgba(244,63,94,0.30); }
+}
+.rec-card-glow { animation: rec-card-glow 3.4s ease-in-out infinite; }
+
+@keyframes rec-dot-pulse {
+  0%, 100% { transform: scale(0.9); opacity: 0.45; }
+  50%      { transform: scale(1.9); opacity: 0.06; }
+}
+.rec-dot-pulse { animation: rec-dot-pulse 3.4s ease-in-out infinite; }

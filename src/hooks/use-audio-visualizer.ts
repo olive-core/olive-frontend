@@ -62,6 +62,7 @@
 
 
 import { useEffect, useRef } from "react";
+import { computeRms } from "@/lib/audio";
 
 export function useAudioVisualizer(
     stream: MediaStream | null,
@@ -102,15 +103,8 @@ export function useAudioVisualizer(
 
                 analyserRef.current.getByteTimeDomainData(buffer);
 
-                let sum = 0;
-                for (let i = 0; i < buffer.length; i++) {
-                    const v = (buffer[i] - 128) / 128;
-                    sum += v * v;
-                }
-                const rms = Math.sqrt(sum / buffer.length);
-
                 // Shift target history
-                targetRef.current = [...targetRef.current.slice(1), rms];
+                targetRef.current = [...targetRef.current.slice(1), computeRms(buffer)];
             }
 
             // Interpolate smoothly for animation

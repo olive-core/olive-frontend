@@ -35,7 +35,7 @@ function AudioVisualizer({ stream }: { stream: MediaStream | null }) {
             ref={canvasRef}
             width={800}
             height={150}
-            className="w-full h-[150px] bg-emerald-500/10 block"
+            className="w-full h-20 bg-emerald-500/10 block rounded-md"
         />
     );
 }

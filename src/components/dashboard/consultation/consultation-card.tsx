@@ -1,8 +1,7 @@
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { PrescriptionType, RxItem } from "@/types/patient";
-import { cn } from "@/lib/utils";
+import { cn, formatRelativeVisit } from "@/lib/utils";
 import {
     AlertCircle,
     ArrowLeftIcon,
@@ -50,21 +49,18 @@ function CardSkeleton() {
             <CardHeader>
                 <Skeleton className="h-5 w-32" />
             </CardHeader>
-            <CardContent className="space-y-5">
+            <CardContent className="space-y-6">
                 <Skeleton className="h-4 w-48" />
-                <Separator />
                 <div className="space-y-2">
                     <Skeleton className="h-4 w-24" />
                     <Skeleton className="h-3 w-full" />
                     <Skeleton className="h-3 w-3/4" />
                 </div>
-                <Separator />
                 <div className="space-y-2">
                     <Skeleton className="h-4 w-24" />
                     <Skeleton className="h-3 w-full" />
                     <Skeleton className="h-3 w-2/3" />
                 </div>
-                <Separator />
                 <div className="space-y-2">
                     <Skeleton className="h-4 w-24" />
                     <Skeleton className="h-3 w-full" />
@@ -118,14 +114,21 @@ function ConsultationCard({
     }
 
     if (!hasSelection || !prescription) {
+        const firstVisit = totalHistories === 0;
         return (
             <Card className="w-full h-full rounded-2xl shadow-md flex flex-col items-center justify-center min-h-[300px] gap-3 text-center p-8">
                 <div className="w-12 h-12 rounded-full bg-emerald-50 flex items-center justify-center">
                     <ClipboardList className="w-6 h-6 text-emerald-400" />
                 </div>
                 <div>
-                    <p className="text-sm font-medium text-slate-700">Select a consultation</p>
-                    <p className="text-xs text-slate-400 mt-1">Choose a past session from the history to view its details.</p>
+                    <p className="text-sm font-medium text-slate-700">
+                        {firstVisit ? "First visit" : "Select a consultation"}
+                    </p>
+                    <p className="text-xs text-slate-400 mt-1">
+                        {firstVisit
+                            ? "No past records for this patient yet."
+                            : "Choose a past visit from the list to view its details."}
+                    </p>
                 </div>
             </Card>
         );
@@ -135,19 +138,11 @@ function ConsultationCard({
     const chief_complaints = prescription_data?.chief_complaints ?? [];
     const diagnoses = prescription_data?.diagnoses ?? [];
     const rx_list = prescription_data?.rx_list ?? [];
-    const formattedDate = new Date(created_at).toLocaleDateString("en-US", {
-        month: "long",
-        day: "numeric",
-        year: "numeric",
-    });
-    const formattedTime = new Date(created_at).toLocaleTimeString("en-US", {
-        hour: "2-digit",
-        minute: "2-digit",
-    });
+    const { relative, exact } = formatRelativeVisit(created_at);
 
     return (
         <Card className="w-full h-full rounded-2xl shadow-md flex flex-col">
-            <CardContent className="space-y-4 flex-1 overflow-auto pt-6">
+            <CardContent className="space-y-6 flex-1 overflow-auto pt-6">
                 {/* Header */}
                 <div className="flex items-start justify-between gap-2">
                     <div>
@@ -156,7 +151,7 @@ function ConsultationCard({
                         </h2>
                         <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-0.5">
                             <CalendarDays className="w-3.5 h-3.5" />
-                            <span>{formattedDate} · {formattedTime}</span>
+                            <span>{relative} · {exact}</span>
                         </div>
                     </div>
                     <Button
@@ -164,10 +159,10 @@ function ConsultationCard({
                         disabled={isFollowingUp}
                         onClick={onFollowUp}
                         className={cn(
-                            "shrink-0 border-2 border-emerald-500",
+                            "shrink-0 border border-emerald-600",
                             isFollowUp
                                 ? "bg-emerald-600 text-white hover:bg-emerald-700"
-                                : "bg-white text-emerald-600 border border-emerald-600 hover:bg-emerald-50"
+                                : "bg-white text-emerald-600 hover:bg-emerald-50"
                         )}
                     >
                         {isFollowingUp ? (
@@ -179,45 +174,37 @@ function ConsultationCard({
                     </Button>
                 </div>
 
-                <Separator />
-
                 {/* Chief Complaints */}
                 {chief_complaints.length > 0 && (
-                    <>
-                        <div className="space-y-2">
-                            <h3 className="font-medium text-sm flex items-center gap-2 text-slate-700">
-                                <StethoscopeIcon className="w-4 h-4 text-emerald-500" />
-                                Chief Complaints
-                            </h3>
-                            <ul className="space-y-1.5">
-                                {chief_complaints.map((cc, i) => (
-                                    <li key={i} className="text-sm text-muted-foreground">
-                                        <span className="font-medium text-slate-600">{cc.name_text}</span>
-                                        {cc.notes && <span className="text-slate-400"> — {cc.notes}</span>}
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                        <Separator />
-                    </>
+                    <div className="space-y-2">
+                        <h3 className="font-medium text-sm flex items-center gap-2 text-slate-700">
+                            <StethoscopeIcon className="w-4 h-4 text-emerald-500" />
+                            Chief Complaints
+                        </h3>
+                        <ul className="space-y-1.5">
+                            {chief_complaints.map((cc, i) => (
+                                <li key={i} className="text-sm text-muted-foreground">
+                                    <span className="font-medium text-slate-600">{cc.name_text}</span>
+                                    {cc.notes && <span className="text-slate-400"> — {cc.notes}</span>}
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
                 )}
 
                 {/* Diagnosis */}
                 {diagnoses.length > 0 && (
-                    <>
-                        <div className="space-y-2">
-                            <h3 className="font-medium text-sm flex items-center gap-2 text-slate-700">
-                                <MicroscopeIcon className="w-4 h-4 text-emerald-500" />
-                                Diagnosis
-                            </h3>
-                            <ul className="space-y-1 list-disc list-inside">
-                                {diagnoses.map((d, i) => (
-                                    <li key={i} className="text-sm text-muted-foreground">{d.name_text}</li>
-                                ))}
-                            </ul>
-                        </div>
-                        <Separator />
-                    </>
+                    <div className="space-y-2">
+                        <h3 className="font-medium text-sm flex items-center gap-2 text-slate-700">
+                            <MicroscopeIcon className="w-4 h-4 text-emerald-500" />
+                            Diagnosis
+                        </h3>
+                        <ul className="space-y-1 list-disc list-inside">
+                            {diagnoses.map((d, i) => (
+                                <li key={i} className="text-sm text-muted-foreground">{d.name_text}</li>
+                            ))}
+                        </ul>
+                    </div>
                 )}
 
                 {/* Medicines */}
