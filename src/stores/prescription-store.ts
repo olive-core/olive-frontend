@@ -20,6 +20,7 @@ interface PrescriptionStoreType {
     medicine: MeedicineType[];
     advice: string[];
     summary: string;
+    safetyNet: string[];
     vitals: VitalsType;
     followUp: FollowUpType;
 
@@ -31,7 +32,7 @@ interface PrescriptionStoreType {
     // methods
     initiatePrescription: (patientId: string, sessionId: string) => void;
     setGenerating: (value: boolean) => void;
-    setPartialData: (data: Pick<PrescriptionResponseType, 'chief_complaints' | 'history' | 'summary' | 'diagnoses' | 'vitals' | 'follow_up'>) => void;
+    setPartialData: (data: Pick<PrescriptionResponseType, 'chief_complaints' | 'history' | 'summary' | 'safety_net' | 'diagnoses' | 'vitals' | 'follow_up'>) => void;
     getInitialPrescription: (data: PrescriptionResponseType) => Promise<void>;
     setPrescriptionFromTemplate: (data: any) => void;
     revertTemplateSelection: () => void;
@@ -94,6 +95,7 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
             investigation: [],
 
             summary: "",
+            safetyNet: [],
             vitals: {},
             followUp: EMPTY_FOLLOW_UP,
 
@@ -117,6 +119,7 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
                 diagnosis: [],
                 investigation: [],
                 summary: "",
+                safetyNet: [],
                 vitals: {},
                 followUp: EMPTY_FOLLOW_UP,
                 medicine: [],
@@ -150,13 +153,14 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
                 })).sort((a, b) => (b.confidence || 0) - (a.confidence || 0)) || []
 
                 const summary = data.summary;
+                const safetyNet = data.safety_net ?? [];
                 const vitals = data.vitals ?? {};
                 const followUp = { ...EMPTY_FOLLOW_UP, ...data.follow_up };
 
                 if (get().templateSelected) {
-                    set({ chiefComplaint, history, diagnosis, summary, vitals, followUp });
+                    set({ chiefComplaint, history, diagnosis, summary, safetyNet, vitals, followUp });
                 } else {
-                    set({ chiefComplaint, history, diagnosis, medicine: [], investigation: [], summary, vitals, followUp });
+                    set({ chiefComplaint, history, diagnosis, medicine: [], investigation: [], summary, safetyNet, vitals, followUp });
                 }
             },
 
@@ -207,6 +211,7 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
 
                 const advice = data.advice;
                 const summary = data.summary;
+                const safetyNet = data.safety_net ?? [];
                 const vitals = data.vitals ?? {};
                 const followUp = { ...EMPTY_FOLLOW_UP, ...data.follow_up };
 
@@ -220,6 +225,7 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
                     diagnosis,
                     advice,
                     summary,
+                    safetyNet,
                     vitals,
                     followUp,
                     generatedMedicine,
@@ -315,6 +321,7 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
                     follow_up_days: state.followUp.follow_up_days,
                     follow_up_notes: state.followUp.follow_up_notes || null,
                     summary: state.summary || null,
+                    safety_net: state.safetyNet,
                 }
             },
 

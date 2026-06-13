@@ -209,6 +209,7 @@ export default function PrescriptionSkeleton({
 
     // summary
     summary,
+    safetyNet,
 
     // vitals
     vitals,
@@ -217,8 +218,9 @@ export default function PrescriptionSkeleton({
 
   const [activeDocument, setActiveDocument] = useState<PrescriptionDocument>("prescription");
 
-  const notesContent = summary.length > 0
-    ? <ClinicalNotesPanel notes={summary} />
+  const hasNotesContent = summary.length > 0 || safetyNet.length > 0;
+  const notesContent = hasNotesContent
+    ? <ClinicalNotesPanel notes={summary} safetyNet={safetyNet} />
     : <SkeletonNotes />;
 
   const prescriptionContent = (
@@ -345,7 +347,7 @@ export default function PrescriptionSkeleton({
     <DocumentSwitcher
       value={activeDocument}
       onValueChange={setActiveDocument}
-      notesHasContent={summary.length > 0}
+      notesHasContent={hasNotesContent}
       prescription={prescriptionContent}
       notes={notesContent}
     />

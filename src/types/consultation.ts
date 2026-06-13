@@ -40,6 +40,7 @@ export type ConsultationPrescriptionData = {
     follow_up_days?:   number | null;
     follow_up_notes?:  string | null;
     summary?:          string | null;
+    safety_net?:       string[];
 }
 
 export type ConsultationDetail = {

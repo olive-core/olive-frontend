@@ -66,17 +66,18 @@ function useSaveSummary(prescriptionId: string) {
 }
 
 interface ClinicalNotesTabProps {
-  notes:    string | null
-  onChange: (value: string) => void
-  onSave:   () => void
-  isDirty:  boolean
-  isSaving: boolean
+  notes:     string | null
+  safetyNet: string[]
+  onChange:  (value: string) => void
+  onSave:    () => void
+  isDirty:   boolean
+  isSaving:  boolean
 }
 
-function ClinicalNotesTab({ notes, onChange, onSave, isDirty, isSaving }: ClinicalNotesTabProps) {
+function ClinicalNotesTab({ notes, safetyNet, onChange, onSave, isDirty, isSaving }: ClinicalNotesTabProps) {
   return (
     <>
-      <ClinicalNotesPanel notes={notes} onChange={onChange} />
+      <ClinicalNotesPanel notes={notes} safetyNet={safetyNet} onChange={onChange} />
       {isDirty && (
         <div className="container mx-auto flex justify-end mt-2">
           <Button
@@ -176,6 +177,7 @@ function ConsultationDetailPage() {
   }
 
   const savedNotes = consultation.prescription_data?.summary ?? null
+  const safetyNet = consultation.prescription_data?.safety_net ?? []
   const currentNotes = notesDraft ?? savedNotes
   const notesDirty = notesDraft !== null && notesDraft !== savedNotes
 
@@ -193,7 +195,7 @@ function ConsultationDetailPage() {
       <DocumentSwitcher
         value={activeDocument}
         onValueChange={setActiveDocument}
-        notesHasContent={!!savedNotes?.trim()}
+        notesHasContent={!!savedNotes?.trim() || safetyNet.length > 0}
         prescription={
           <PrescriptionReadView
             consultation={consultation}
@@ -204,6 +206,7 @@ function ConsultationDetailPage() {
         notes={
           <ClinicalNotesTab
             notes={currentNotes}
+            safetyNet={safetyNet}
             onChange={setNotesDraft}
             onSave={() => saveSummary.mutate(notesDraft ?? '')}
             isDirty={notesDirty}

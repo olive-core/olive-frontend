@@ -111,6 +111,7 @@ export type PrescriptionResponseType = {
         priority: string;
     }[];
     advice: string[];
+    safety_net?: string[];
     vitals?: VitalsType;
     follow_up?: FollowUpType;
 }

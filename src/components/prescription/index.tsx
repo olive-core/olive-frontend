@@ -58,6 +58,7 @@ export default function Prescription({ onGenerate, onCancel, hasBeenGenerated }:
 
         summary,
         setSummary,
+        safetyNet,
 
         vitals,
         setVitals,
@@ -166,9 +167,9 @@ export default function Prescription({ onGenerate, onCancel, hasBeenGenerated }:
             <DocumentSwitcher
                 value={activeDocument}
                 onValueChange={setActiveDocument}
-                notesHasContent={!!summary?.trim()}
+                notesHasContent={!!summary?.trim() || safetyNet.length > 0}
                 prescription={prescriptionPaper}
-                notes={<ClinicalNotesPanel notes={summary} onChange={setSummary} />}
+                notes={<ClinicalNotesPanel notes={summary} safetyNet={safetyNet} onChange={setSummary} />}
             />
         </>
     );
