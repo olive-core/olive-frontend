@@ -1,35 +1,71 @@
 import { ProfileForm } from '@/components/clinician/profile-form'
-import api from '@/lib/axios';
-import { useAuthStore } from '@/stores/auth-store';
-import { useQuery } from '@tanstack/react-query';
+import { ProfileSummary } from '@/components/clinician/profile-summary'
+import { Card, CardContent } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
+import api from '@/lib/axios'
+import { useAuthStore } from '@/stores/auth-store'
+import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
-import { Loader2Icon } from 'lucide-react';
 
 export const Route = createFileRoute('/doctor/profile/')({
   component: RouteComponent,
 })
 
-function RouteComponent() {
+function ProfileSkeleton() {
+  return (
+    <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+      <Card className="md:col-span-1">
+        <CardContent className="flex flex-col items-center gap-4">
+          <Skeleton className="size-20 rounded-full" />
+          <Skeleton className="h-5 w-32" />
+          <Skeleton className="h-3 w-24" />
+        </CardContent>
+      </Card>
+      <Card className="md:col-span-2">
+        <CardContent className="space-y-4">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Skeleton key={i} className="h-10 w-full" />
+          ))}
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
 
-  const { userId } = useAuthStore();
+function RouteComponent() {
+  const { userId, phoneNumber } = useAuthStore()
 
   const { data: clinicianData, isLoading } = useQuery({
-    queryKey: ["clinician", userId],
+    queryKey: ['clinician', userId],
     queryFn: async () => {
-      const response = await api.get(`/clinician/${userId}`);
+      const response = await api.get(`/clinician/${userId}`)
       return response.data
-    }
+    },
   })
 
-  if (isLoading) {
-    return <div className='h-full w-full flex items-center justify-center flex-col mt-12'>
-      <Loader2Icon className='h-8 w-8 animate-spin' />
-    </div>
-  }
-
   return (
-    <div className='h-full w-full flex items-center justify-center flex-col mt-12'>
-      <ProfileForm clinicianData={clinicianData} />
+    <div className="container mx-auto max-w-5xl px-4 py-8">
+      <h1 className="mb-6 text-2xl font-bold text-slate-900">Profile</h1>
+
+      {isLoading || !clinicianData ? (
+        <ProfileSkeleton />
+      ) : (
+        <div className="grid grid-cols-1 items-start gap-6 md:grid-cols-3">
+          <div className="md:col-span-1">
+            <ProfileSummary
+              firstName={clinicianData.first_name}
+              lastName={clinicianData.last_name}
+              qualification={clinicianData.qualification}
+              specializations={clinicianData.specializations}
+              bmdcNo={clinicianData.bmdc_no}
+              phone={phoneNumber}
+            />
+          </div>
+          <div className="md:col-span-2">
+            <ProfileForm clinicianData={clinicianData} />
+          </div>
+        </div>
+      )}
     </div>
   )
 }

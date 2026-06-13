@@ -5,14 +5,7 @@ import { Controller, useForm } from "react-hook-form"
 import * as z from "zod"
 
 import { Button } from "@/components/ui/button"
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardFooter,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card"
+import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import {
     Field,
     FieldDescription,
@@ -26,6 +19,8 @@ import { useState } from "react"
 import api from "@/lib/axios"
 import toast from "react-hot-toast"
 import { AxiosError } from "axios"
+import { useQueryClient } from "@tanstack/react-query"
+import { XIcon } from "lucide-react"
 
 const formSchema = z.object({
     firstName: z.string().trim().min(1, "First name is required"),
@@ -35,6 +30,8 @@ const formSchema = z.object({
     specializations: z.array(z.string()).optional(),
     defaultGeneration: z.boolean().optional(),
 })
+
+type FormValues = z.infer<typeof formSchema>
 
 interface ProfileFormProps {
     clinicianData: {
@@ -49,13 +46,82 @@ interface ProfileFormProps {
     };
 }
 
+function SectionTitle({ children }: { children: React.ReactNode }) {
+    return (
+        <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+            {children}
+        </p>
+    );
+}
+
+function SpecializationsInput({
+    value,
+    onChange,
+}: {
+    value: string[];
+    onChange: (next: string[]) => void;
+}) {
+    const [input, setInput] = useState("");
+
+    const addTag = (raw: string) => {
+        const tag = raw.trim();
+        if (!tag || value.includes(tag)) return;
+        onChange([...value, tag]);
+        setInput("");
+    };
+
+    const removeTag = (tag: string) => onChange(value.filter((t) => t !== tag));
+
+    return (
+        <div className="flex flex-wrap gap-2 rounded-xl border px-2 py-2 focus-within:ring-2 focus-within:ring-emerald-500">
+            {value.map((tag) => (
+                <span
+                    key={tag}
+                    className="flex items-center gap-1 rounded-lg bg-emerald-100 px-2 py-1 text-xs text-emerald-700"
+                >
+                    {tag}
+                    <button
+                        type="button"
+                        onClick={() => removeTag(tag)}
+                        aria-label={`Remove ${tag}`}
+                        className="text-emerald-500 hover:text-emerald-700"
+                    >
+                        <XIcon className="size-3" />
+                    </button>
+                </span>
+            ))}
+
+            <input
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                        e.preventDefault();
+                        addTag(input);
+                    }
+                    if (e.key === "Backspace" && !input && value.length) {
+                        removeTag(value[value.length - 1]);
+                    }
+                }}
+                placeholder="Type and press Enter"
+                className="min-w-[120px] flex-1 bg-transparent text-base outline-none sm:text-sm"
+            />
+
+            <Button type="button" size="sm" onClick={() => addTag(input)}>
+                + Add
+            </Button>
+        </div>
+    );
+}
+
 export function ProfileForm({ clinicianData }: ProfileFormProps) {
 
     const [isLoading, setIsLoading] = useState(false)
     const userId = useAuthStore((state) => state.userId)
     const { storeClinicianInfo } = useAuthStore();
+    const queryClient = useQueryClient()
 
-    const form = useForm<z.infer<typeof formSchema>>({
+    const form = useForm<FormValues>({
         resolver: zodResolver(formSchema),
         defaultValues: {
             firstName: clinicianData?.first_name || "",
@@ -67,10 +133,10 @@ export function ProfileForm({ clinicianData }: ProfileFormProps) {
         },
     })
 
-    async function onSubmit(data: z.infer<typeof formSchema>) {
+    const isDirty = form.formState.isDirty
 
+    async function onSubmit(data: FormValues) {
         try {
-
             const payload = {
                 first_name: data.firstName,
                 last_name: data.lastName,
@@ -90,6 +156,8 @@ export function ProfileForm({ clinicianData }: ProfileFormProps) {
                 specializations: payload.specializations,
                 generate_ai_draft: payload.generate_ai_draft,
             })
+            queryClient.invalidateQueries({ queryKey: ["clinician", userId] })
+            form.reset(data) // clears the dirty state and disables Save until the next edit
             toast.success("Profile updated successfully")
         } catch (error) {
             console.error(error)
@@ -97,201 +165,133 @@ export function ProfileForm({ clinicianData }: ProfileFormProps) {
         } finally {
             setIsLoading(false)
         }
-
     }
 
     return (
-        <Card className="w-full sm:max-w-md">
-            <CardHeader>
-                <CardTitle>Profile Settings</CardTitle>
-                <CardDescription>
-                    Update your profile information below.
-                </CardDescription>
-            </CardHeader>
-
+        <Card className="w-full">
             <CardContent>
                 <form id="form-rhf-input" onSubmit={form.handleSubmit(onSubmit)}>
-                    <FieldGroup>
-                        {/* First Name */}
-                        <Controller
-                            name="firstName"
-                            control={form.control}
-                            render={({ field, fieldState }) => (
-                                <Field data-invalid={fieldState.invalid}>
-                                    <FieldLabel>First Name</FieldLabel>
-                                    <Input {...field} placeholder="John" />
-                                    {fieldState.invalid && (
-                                        <FieldError errors={[fieldState.error]} />
+                    <FieldGroup className="gap-8">
+                        {/* Personal */}
+                        <div className="flex flex-col gap-4">
+                            <SectionTitle>Personal</SectionTitle>
+                            <div className="grid gap-4 sm:grid-cols-2">
+                                <Controller
+                                    name="firstName"
+                                    control={form.control}
+                                    render={({ field, fieldState }) => (
+                                        <Field data-invalid={fieldState.invalid}>
+                                            <FieldLabel>First name</FieldLabel>
+                                            <Input {...field} placeholder="John" />
+                                            {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                                        </Field>
                                     )}
-                                </Field>
-                            )}
-                        />
-
-                        {/* Last Name */}
-                        <Controller
-                            name="lastName"
-                            control={form.control}
-                            render={({ field, fieldState }) => (
-                                <Field data-invalid={fieldState.invalid}>
-                                    <FieldLabel>Last Name</FieldLabel>
-                                    <Input {...field} placeholder="Doe" />
-                                    {fieldState.invalid && (
-                                        <FieldError errors={[fieldState.error]} />
+                                />
+                                <Controller
+                                    name="lastName"
+                                    control={form.control}
+                                    render={({ field, fieldState }) => (
+                                        <Field data-invalid={fieldState.invalid}>
+                                            <FieldLabel>Last name</FieldLabel>
+                                            <Input {...field} placeholder="Doe" />
+                                            {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                                        </Field>
                                     )}
-                                </Field>
-                            )}
-                        />
+                                />
+                            </div>
+                        </div>
 
-                        {/* BMDC No */}
-                        <Controller
-                            name="bmdcNo"
-                            control={form.control}
-                            render={({ field, fieldState }) => (
-                                <Field data-invalid={fieldState.invalid}>
-                                    <FieldLabel>BMDC Number</FieldLabel>
-                                    <Input {...field} placeholder="123456" />
-                                    {fieldState.invalid && (
-                                        <FieldError errors={[fieldState.error]} />
-                                    )}
-                                </Field>
-                            )}
-                        />
-
-                        {/* Qualification */}
-                        <Controller
-                            name="qualification"
-                            control={form.control}
-                            render={({ field, fieldState }) => (
-                                <Field data-invalid={fieldState.invalid}>
-                                    <FieldLabel>Qualification</FieldLabel>
-                                    <Input {...field} placeholder="MBBS, FCPS" />
-                                    {fieldState.invalid && (
-                                        <FieldError errors={[fieldState.error]} />
-                                    )}
-                                </Field>
-                            )}
-                        />
-
-                        {/* Specializations (tag input UX) */}
-                        <Controller
-                            name="specializations"
-                            control={form.control}
-                            render={({ field, fieldState }) => {
-                                const [input, setInput] = useState("");
-
-                                const addTag = (value: string) => {
-                                    const v = value.trim();
-                                    if (!v) return;
-                                    if (field.value?.includes(v)) return;
-                                    field.onChange([...field.value ?? [], v]);
-                                    setInput("");
-                                };
-
-                                const removeTag = (tag: string) => {
-                                    field.onChange(field.value?.filter((t: string) => t !== tag));
-                                };
-
-                                return (
+                        {/* Professional */}
+                        <div className="flex flex-col gap-4">
+                            <SectionTitle>Professional</SectionTitle>
+                            <Controller
+                                name="bmdcNo"
+                                control={form.control}
+                                render={({ field, fieldState }) => (
+                                    <Field data-invalid={fieldState.invalid}>
+                                        <FieldLabel>BMDC registration no.</FieldLabel>
+                                        <Input {...field} placeholder="123456" inputMode="numeric" />
+                                        {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                                    </Field>
+                                )}
+                            />
+                            <Controller
+                                name="qualification"
+                                control={form.control}
+                                render={({ field, fieldState }) => (
+                                    <Field data-invalid={fieldState.invalid}>
+                                        <FieldLabel>Qualification</FieldLabel>
+                                        <Input {...field} placeholder="MBBS, FCPS" />
+                                        {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                                    </Field>
+                                )}
+                            />
+                            <Controller
+                                name="specializations"
+                                control={form.control}
+                                render={({ field, fieldState }) => (
                                     <Field data-invalid={fieldState.invalid}>
                                         <FieldLabel>Specializations</FieldLabel>
-
-                                        <div className="flex flex-wrap gap-2 border rounded-xl px-2 py-2 focus-within:ring-2 focus-within:ring-emerald-500">
-                                            {field.value?.map((tag: string) => (
-                                                <div
-                                                    key={tag}
-                                                    className="flex items-center gap-1 px-2 py-1 text-xs bg-emerald-100 text-emerald-700 rounded-lg"
-                                                >
-                                                    {tag}
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => removeTag(tag)}
-                                                        aria-label={`Remove ${tag}`}
-                                                        className="px-1 text-emerald-500 hover:text-emerald-700"
-                                                    >
-                                                        ×
-                                                    </button>
-                                                </div>
-                                            ))}
-
-                                            <input
-                                                value={input}
-                                                onChange={(e) => setInput(e.target.value)}
-                                                onKeyDown={(e) => {
-                                                    if (e.key === "Enter") {
-                                                        e.preventDefault();
-                                                        addTag(input);
-                                                    }
-                                                    if (e.key === "Backspace" && !input) {
-                                                        removeTag(field.value?.[field.value.length - 1] ?? "");
-                                                    }
-                                                }}
-                                                placeholder="Type and press Enter"
-                                                className="flex-1 min-w-[120px] outline-none bg-transparent text-base sm:text-sm"
-                                            />
-
-                                            <Button
-                                                type="button"
-                                                onClick={() => addTag(input)}
-                                                size="sm"
-                                            >
-                                                + Add
-                                            </Button>
-                                        </div>
-
-                                        <FieldDescription>
-                                            Press Enter or click + to add specializations
-                                        </FieldDescription>
-
-                                        {fieldState.invalid && (
-                                            <FieldError errors={[fieldState.error]} />
-                                        )}
-                                    </Field>
-                                );
-                            }}
-                        />
-                    </FieldGroup>
-
-                    {/* generate ai draft */}
-                    <Controller
-                        name="defaultGeneration"
-                        control={form.control}
-                        render={({ field }) => (
-                            <Field>
-                                <div className="flex items-center justify-between mt-2">
-                                    <FieldLabel>Default Generation</FieldLabel>
-
-                                    <button
-                                        type="button"
-                                        onClick={() => field.onChange(!field.value)}
-                                        className={`w-11 h-6 flex items-center rounded-full p-1 transition ${field.value ? "bg-emerald-500" : "bg-gray-300"
-                                            }`}
-                                    >
-                                        <div
-                                            className={`bg-white w-4 h-4 rounded-full shadow-md transform transition ${field.value ? "translate-x-5" : "translate-x-0"
-                                                }`}
+                                        <SpecializationsInput
+                                            value={field.value ?? []}
+                                            onChange={field.onChange}
                                         />
-                                    </button>
-                                </div>
-                            </Field>
-                        )}
-                    />
+                                        <FieldDescription>
+                                            Press Enter or click + to add a specialization.
+                                        </FieldDescription>
+                                        {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                                    </Field>
+                                )}
+                            />
+                        </div>
 
+                        {/* Preferences */}
+                        <div className="flex flex-col gap-4">
+                            <SectionTitle>Preferences</SectionTitle>
+                            <Controller
+                                name="defaultGeneration"
+                                control={form.control}
+                                render={({ field }) => (
+                                    <Field>
+                                        <div className="flex items-center justify-between gap-4">
+                                            <div>
+                                                <FieldLabel>Auto-generate prescription draft</FieldLabel>
+                                                <FieldDescription>
+                                                    When on, ARIS drafts the prescription automatically after each recording.
+                                                </FieldDescription>
+                                            </div>
+                                            <button
+                                                type="button"
+                                                role="switch"
+                                                aria-checked={field.value}
+                                                onClick={() => field.onChange(!field.value)}
+                                                className={`flex h-6 w-11 shrink-0 items-center rounded-full p-1 transition ${field.value ? "bg-emerald-500" : "bg-gray-300"}`}
+                                            >
+                                                <div
+                                                    className={`size-4 rounded-full bg-white shadow-md transition ${field.value ? "translate-x-5" : "translate-x-0"}`}
+                                                />
+                                            </button>
+                                        </div>
+                                    </Field>
+                                )}
+                            />
+                        </div>
+                    </FieldGroup>
                 </form>
             </CardContent>
 
-            <CardFooter>
-                <Field orientation="horizontal">
-                    <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => form.reset()}
-                    >
-                        Reset
-                    </Button>
-                    <Button type="submit" form="form-rhf-input" isLoading={isLoading}>
-                        Save
-                    </Button>
-                </Field>
+            <CardFooter className="justify-end gap-2">
+                <Button
+                    type="button"
+                    variant="outline"
+                    disabled={!isDirty || isLoading}
+                    onClick={() => form.reset()}
+                >
+                    Reset
+                </Button>
+                <Button type="submit" form="form-rhf-input" disabled={!isDirty} isLoading={isLoading}>
+                    Save changes
+                </Button>
             </CardFooter>
         </Card>
     )
