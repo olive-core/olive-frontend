@@ -6,7 +6,7 @@ import { usePrescriptionStore } from '@/stores/prescription-store'
 import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useRef, useState } from 'react';
 
-export const Route = createFileRoute('/dashboard/prescribe/$consultationId')({
+export const Route = createFileRoute('/doctor/prescribe/$consultationId')({
   component: RouteComponent,
 })
 

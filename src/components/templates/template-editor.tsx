@@ -243,7 +243,7 @@ export default function TemplateEditor({
       {/* Top bar */}
       <div className="flex items-center gap-3 mb-6">
         <button
-          onClick={() => navigate({ to: '/dashboard/templates' })}
+          onClick={() => navigate({ to: '/doctor/rx-memory' })}
           className="p-2 rounded-lg hover:bg-slate-100 text-slate-500 transition-colors"
         >
           <ArrowLeftIcon className="w-4 h-4" />
@@ -259,7 +259,7 @@ export default function TemplateEditor({
         <div className="p-4 border-b flex flex-col sm:flex-row gap-3">
           <div className="flex-1">
             <label className="text-[10px] font-black text-slate-400 uppercase tracking-tighter mb-1 block">
-              Template Name *
+              RxMemory name *
             </label>
             <input
               value={templateName}
@@ -271,7 +271,7 @@ export default function TemplateEditor({
                 }`}
             />
             {nameError && (
-              <p className="text-xs text-red-500 mt-1">Template name is required</p>
+              <p className="text-xs text-red-500 mt-1">RxMemory name is required</p>
             )}
           </div>
 
@@ -357,7 +357,7 @@ export default function TemplateEditor({
         {/* Footer */}
         <div className="p-4 border-t flex flex-col sm:flex-row justify-between items-center gap-3 bg-slate-50 rounded-b-xl">
           <p className="text-xs text-slate-400">
-            All fields are optional except the template name.
+            All fields are optional except the RxMemory name.
           </p>
           <button
             onClick={handleSubmit}

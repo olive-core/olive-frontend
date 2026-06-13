@@ -123,7 +123,7 @@ export default function DoctorInfo({
                                     Applying...
                                 </div>
                             ) : (
-                                <SelectValue placeholder="Select Template" />
+                                <SelectValue placeholder="Select RxMemory" />
                             )}
                         </SelectTrigger>
                         <SelectContent>

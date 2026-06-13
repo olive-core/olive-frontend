@@ -12,7 +12,7 @@ import { useClinicianConsultations } from '@/components/dashboard/consultations/
 import { filterConsultationsByName } from '@/components/dashboard/consultations/filters/filter-by-name'
 import { EMPTY_DATE_RANGE, isDateRangeActive, type DateRange } from '@/components/dashboard/consultations/filters/date-range'
 
-export const Route = createFileRoute('/dashboard/consultations/')({
+export const Route = createFileRoute('/doctor/consultations/')({
   component: ConsultationsPage,
 })
 

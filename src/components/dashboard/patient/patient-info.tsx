@@ -56,7 +56,7 @@ export default function PatientInfo({ userId: patientId, setShowContent }: Patie
 
             const sessionId = sessionCreateResponse.data.session_id;
 
-            navigate({ to: "/dashboard/consultation/$userId/$consultationId", params: { userId: patientId, consultationId: sessionId } });
+            navigate({ to: "/doctor/consultation/$userId/$consultationId", params: { userId: patientId, consultationId: sessionId } });
 
         } catch (error) {
             handleError(error, "An error occurred while creating the patient.");

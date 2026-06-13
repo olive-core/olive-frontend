@@ -11,7 +11,7 @@ import { cn, formatDuration } from "@/lib/utils";
 
 export default function Recorder() {
 
-    const { consultationId } = useParams({ from: "/dashboard/consultation/$userId/$consultationId" });
+    const { consultationId } = useParams({ from: "/doctor/consultation/$userId/$consultationId" });
     const navigate = useNavigate();
 
     const {
@@ -32,12 +32,12 @@ export default function Recorder() {
         // Let the final chunk upload finish in the background; the prescribe screen
         // waits on it behind its loading skeleton before generating the draft.
         trackRecordingFinalization(consultationId, stopRecording());
-        navigate({ to: "/dashboard/prescribe/$consultationId", params: { consultationId } });
+        navigate({ to: "/doctor/prescribe/$consultationId", params: { consultationId } });
     }
 
     const handleDiscard = () => {
         discardRecording();
-        navigate({ to: "/dashboard" });
+        navigate({ to: "/doctor" });
     }
 
     return (

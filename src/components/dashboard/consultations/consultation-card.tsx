@@ -15,7 +15,7 @@ export default function ConsultationCard({ consultation }: ConsultationCardProps
 
     const handleOpen = () => {
         navigate({
-            to:     "/dashboard/consultations/$prescriptionId",
+            to:     "/doctor/consultations/$prescriptionId",
             params: { prescriptionId: consultation.prescription_id },
         });
     };

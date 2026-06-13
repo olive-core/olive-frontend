@@ -9,7 +9,7 @@ import { useMutation, useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 
-export const Route = createFileRoute('/dashboard/consultation/$userId/$consultationId')({
+export const Route = createFileRoute('/doctor/consultation/$userId/$consultationId')({
   component: RouteComponent,
 })
 

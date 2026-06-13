@@ -13,26 +13,26 @@ import { Route as NotFoundRouteImport } from './routes/not-found'
 import { Route as ComingSoonRouteImport } from './routes/coming-soon'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as PortalRouteRouteImport } from './routes/portal/route'
-import { Route as DashboardRouteRouteImport } from './routes/dashboard/route'
+import { Route as DoctorRouteRouteImport } from './routes/doctor/route'
 import { Route as authRouteRouteImport } from './routes/(auth)/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PortalIndexRouteImport } from './routes/portal/index'
-import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
+import { Route as DoctorIndexRouteImport } from './routes/doctor/index'
 import { Route as PCodeRouteImport } from './routes/p.$code'
 import { Route as authSignInRouteImport } from './routes/(auth)/sign-in'
 import { Route as authEnterOtpRouteImport } from './routes/(auth)/enter-otp'
 import { Route as PortalProfileIndexRouteImport } from './routes/portal/profile/index'
-import { Route as DashboardTemplatesIndexRouteImport } from './routes/dashboard/templates/index'
-import { Route as DashboardProfileIndexRouteImport } from './routes/dashboard/profile/index'
-import { Route as DashboardConsultationsIndexRouteImport } from './routes/dashboard/consultations/index'
+import { Route as DoctorRxMemoryIndexRouteImport } from './routes/doctor/rx-memory/index'
+import { Route as DoctorProfileIndexRouteImport } from './routes/doctor/profile/index'
+import { Route as DoctorConsultationsIndexRouteImport } from './routes/doctor/consultations/index'
 import { Route as PortalProfileEditRouteImport } from './routes/portal/profile/edit'
 import { Route as PortalPrescriptionsPrescriptionIdRouteImport } from './routes/portal/prescriptions.$prescriptionId'
-import { Route as DashboardProfileEditRouteImport } from './routes/dashboard/profile/edit'
-import { Route as DashboardPrescribeConsultationIdRouteImport } from './routes/dashboard/prescribe.$consultationId'
-import { Route as DashboardConsultationsPrescriptionIdRouteImport } from './routes/dashboard/consultations/$prescriptionId'
-import { Route as DashboardTemplatesManageIndexRouteImport } from './routes/dashboard/templates/manage.index'
-import { Route as DashboardTemplatesManageTemplateIdRouteImport } from './routes/dashboard/templates/manage.$templateId'
-import { Route as DashboardConsultationUserIdConsultationIdRouteImport } from './routes/dashboard/consultation.$userId.$consultationId'
+import { Route as DoctorProfileEditRouteImport } from './routes/doctor/profile/edit'
+import { Route as DoctorPrescribeConsultationIdRouteImport } from './routes/doctor/prescribe.$consultationId'
+import { Route as DoctorConsultationsPrescriptionIdRouteImport } from './routes/doctor/consultations/$prescriptionId'
+import { Route as DoctorRxMemoryManageIndexRouteImport } from './routes/doctor/rx-memory/manage.index'
+import { Route as DoctorRxMemoryManageTemplateIdRouteImport } from './routes/doctor/rx-memory/manage.$templateId'
+import { Route as DoctorConsultationUserIdConsultationIdRouteImport } from './routes/doctor/consultation.$userId.$consultationId'
 
 const NotFoundRoute = NotFoundRouteImport.update({
   id: '/not-found',
@@ -54,9 +54,9 @@ const PortalRouteRoute = PortalRouteRouteImport.update({
   path: '/portal',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DashboardRouteRoute = DashboardRouteRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
+const DoctorRouteRoute = DoctorRouteRouteImport.update({
+  id: '/doctor',
+  path: '/doctor',
   getParentRoute: () => rootRouteImport,
 } as any)
 const authRouteRoute = authRouteRouteImport.update({
@@ -73,10 +73,10 @@ const PortalIndexRoute = PortalIndexRouteImport.update({
   path: '/',
   getParentRoute: () => PortalRouteRoute,
 } as any)
-const DashboardIndexRoute = DashboardIndexRouteImport.update({
+const DoctorIndexRoute = DoctorIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => DashboardRouteRoute,
+  getParentRoute: () => DoctorRouteRoute,
 } as any)
 const PCodeRoute = PCodeRouteImport.update({
   id: '/p/$code',
@@ -98,21 +98,21 @@ const PortalProfileIndexRoute = PortalProfileIndexRouteImport.update({
   path: '/profile/',
   getParentRoute: () => PortalRouteRoute,
 } as any)
-const DashboardTemplatesIndexRoute = DashboardTemplatesIndexRouteImport.update({
-  id: '/templates/',
-  path: '/templates/',
-  getParentRoute: () => DashboardRouteRoute,
+const DoctorRxMemoryIndexRoute = DoctorRxMemoryIndexRouteImport.update({
+  id: '/rx-memory/',
+  path: '/rx-memory/',
+  getParentRoute: () => DoctorRouteRoute,
 } as any)
-const DashboardProfileIndexRoute = DashboardProfileIndexRouteImport.update({
+const DoctorProfileIndexRoute = DoctorProfileIndexRouteImport.update({
   id: '/profile/',
   path: '/profile/',
-  getParentRoute: () => DashboardRouteRoute,
+  getParentRoute: () => DoctorRouteRoute,
 } as any)
-const DashboardConsultationsIndexRoute =
-  DashboardConsultationsIndexRouteImport.update({
+const DoctorConsultationsIndexRoute =
+  DoctorConsultationsIndexRouteImport.update({
     id: '/consultations/',
     path: '/consultations/',
-    getParentRoute: () => DashboardRouteRoute,
+    getParentRoute: () => DoctorRouteRoute,
   } as any)
 const PortalProfileEditRoute = PortalProfileEditRouteImport.update({
   id: '/profile/edit',
@@ -125,45 +125,45 @@ const PortalPrescriptionsPrescriptionIdRoute =
     path: '/prescriptions/$prescriptionId',
     getParentRoute: () => PortalRouteRoute,
   } as any)
-const DashboardProfileEditRoute = DashboardProfileEditRouteImport.update({
+const DoctorProfileEditRoute = DoctorProfileEditRouteImport.update({
   id: '/profile/edit',
   path: '/profile/edit',
-  getParentRoute: () => DashboardRouteRoute,
+  getParentRoute: () => DoctorRouteRoute,
 } as any)
-const DashboardPrescribeConsultationIdRoute =
-  DashboardPrescribeConsultationIdRouteImport.update({
+const DoctorPrescribeConsultationIdRoute =
+  DoctorPrescribeConsultationIdRouteImport.update({
     id: '/prescribe/$consultationId',
     path: '/prescribe/$consultationId',
-    getParentRoute: () => DashboardRouteRoute,
+    getParentRoute: () => DoctorRouteRoute,
   } as any)
-const DashboardConsultationsPrescriptionIdRoute =
-  DashboardConsultationsPrescriptionIdRouteImport.update({
+const DoctorConsultationsPrescriptionIdRoute =
+  DoctorConsultationsPrescriptionIdRouteImport.update({
     id: '/consultations/$prescriptionId',
     path: '/consultations/$prescriptionId',
-    getParentRoute: () => DashboardRouteRoute,
+    getParentRoute: () => DoctorRouteRoute,
   } as any)
-const DashboardTemplatesManageIndexRoute =
-  DashboardTemplatesManageIndexRouteImport.update({
-    id: '/templates/manage/',
-    path: '/templates/manage/',
-    getParentRoute: () => DashboardRouteRoute,
+const DoctorRxMemoryManageIndexRoute =
+  DoctorRxMemoryManageIndexRouteImport.update({
+    id: '/rx-memory/manage/',
+    path: '/rx-memory/manage/',
+    getParentRoute: () => DoctorRouteRoute,
   } as any)
-const DashboardTemplatesManageTemplateIdRoute =
-  DashboardTemplatesManageTemplateIdRouteImport.update({
-    id: '/templates/manage/$templateId',
-    path: '/templates/manage/$templateId',
-    getParentRoute: () => DashboardRouteRoute,
+const DoctorRxMemoryManageTemplateIdRoute =
+  DoctorRxMemoryManageTemplateIdRouteImport.update({
+    id: '/rx-memory/manage/$templateId',
+    path: '/rx-memory/manage/$templateId',
+    getParentRoute: () => DoctorRouteRoute,
   } as any)
-const DashboardConsultationUserIdConsultationIdRoute =
-  DashboardConsultationUserIdConsultationIdRouteImport.update({
+const DoctorConsultationUserIdConsultationIdRoute =
+  DoctorConsultationUserIdConsultationIdRouteImport.update({
     id: '/consultation/$userId/$consultationId',
     path: '/consultation/$userId/$consultationId',
-    getParentRoute: () => DashboardRouteRoute,
+    getParentRoute: () => DoctorRouteRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/dashboard': typeof DashboardRouteRouteWithChildren
+  '/doctor': typeof DoctorRouteRouteWithChildren
   '/portal': typeof PortalRouteRouteWithChildren
   '/about': typeof AboutRoute
   '/coming-soon': typeof ComingSoonRoute
@@ -171,20 +171,20 @@ export interface FileRoutesByFullPath {
   '/enter-otp': typeof authEnterOtpRoute
   '/sign-in': typeof authSignInRoute
   '/p/$code': typeof PCodeRoute
-  '/dashboard/': typeof DashboardIndexRoute
+  '/doctor/': typeof DoctorIndexRoute
   '/portal/': typeof PortalIndexRoute
-  '/dashboard/consultations/$prescriptionId': typeof DashboardConsultationsPrescriptionIdRoute
-  '/dashboard/prescribe/$consultationId': typeof DashboardPrescribeConsultationIdRoute
-  '/dashboard/profile/edit': typeof DashboardProfileEditRoute
+  '/doctor/consultations/$prescriptionId': typeof DoctorConsultationsPrescriptionIdRoute
+  '/doctor/prescribe/$consultationId': typeof DoctorPrescribeConsultationIdRoute
+  '/doctor/profile/edit': typeof DoctorProfileEditRoute
   '/portal/prescriptions/$prescriptionId': typeof PortalPrescriptionsPrescriptionIdRoute
   '/portal/profile/edit': typeof PortalProfileEditRoute
-  '/dashboard/consultations': typeof DashboardConsultationsIndexRoute
-  '/dashboard/profile': typeof DashboardProfileIndexRoute
-  '/dashboard/templates': typeof DashboardTemplatesIndexRoute
+  '/doctor/consultations': typeof DoctorConsultationsIndexRoute
+  '/doctor/profile': typeof DoctorProfileIndexRoute
+  '/doctor/rx-memory': typeof DoctorRxMemoryIndexRoute
   '/portal/profile': typeof PortalProfileIndexRoute
-  '/dashboard/consultation/$userId/$consultationId': typeof DashboardConsultationUserIdConsultationIdRoute
-  '/dashboard/templates/manage/$templateId': typeof DashboardTemplatesManageTemplateIdRoute
-  '/dashboard/templates/manage': typeof DashboardTemplatesManageIndexRoute
+  '/doctor/consultation/$userId/$consultationId': typeof DoctorConsultationUserIdConsultationIdRoute
+  '/doctor/rx-memory/manage/$templateId': typeof DoctorRxMemoryManageTemplateIdRoute
+  '/doctor/rx-memory/manage': typeof DoctorRxMemoryManageIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -194,26 +194,26 @@ export interface FileRoutesByTo {
   '/enter-otp': typeof authEnterOtpRoute
   '/sign-in': typeof authSignInRoute
   '/p/$code': typeof PCodeRoute
-  '/dashboard': typeof DashboardIndexRoute
+  '/doctor': typeof DoctorIndexRoute
   '/portal': typeof PortalIndexRoute
-  '/dashboard/consultations/$prescriptionId': typeof DashboardConsultationsPrescriptionIdRoute
-  '/dashboard/prescribe/$consultationId': typeof DashboardPrescribeConsultationIdRoute
-  '/dashboard/profile/edit': typeof DashboardProfileEditRoute
+  '/doctor/consultations/$prescriptionId': typeof DoctorConsultationsPrescriptionIdRoute
+  '/doctor/prescribe/$consultationId': typeof DoctorPrescribeConsultationIdRoute
+  '/doctor/profile/edit': typeof DoctorProfileEditRoute
   '/portal/prescriptions/$prescriptionId': typeof PortalPrescriptionsPrescriptionIdRoute
   '/portal/profile/edit': typeof PortalProfileEditRoute
-  '/dashboard/consultations': typeof DashboardConsultationsIndexRoute
-  '/dashboard/profile': typeof DashboardProfileIndexRoute
-  '/dashboard/templates': typeof DashboardTemplatesIndexRoute
+  '/doctor/consultations': typeof DoctorConsultationsIndexRoute
+  '/doctor/profile': typeof DoctorProfileIndexRoute
+  '/doctor/rx-memory': typeof DoctorRxMemoryIndexRoute
   '/portal/profile': typeof PortalProfileIndexRoute
-  '/dashboard/consultation/$userId/$consultationId': typeof DashboardConsultationUserIdConsultationIdRoute
-  '/dashboard/templates/manage/$templateId': typeof DashboardTemplatesManageTemplateIdRoute
-  '/dashboard/templates/manage': typeof DashboardTemplatesManageIndexRoute
+  '/doctor/consultation/$userId/$consultationId': typeof DoctorConsultationUserIdConsultationIdRoute
+  '/doctor/rx-memory/manage/$templateId': typeof DoctorRxMemoryManageTemplateIdRoute
+  '/doctor/rx-memory/manage': typeof DoctorRxMemoryManageIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/(auth)': typeof authRouteRouteWithChildren
-  '/dashboard': typeof DashboardRouteRouteWithChildren
+  '/doctor': typeof DoctorRouteRouteWithChildren
   '/portal': typeof PortalRouteRouteWithChildren
   '/about': typeof AboutRoute
   '/coming-soon': typeof ComingSoonRoute
@@ -221,26 +221,26 @@ export interface FileRoutesById {
   '/(auth)/enter-otp': typeof authEnterOtpRoute
   '/(auth)/sign-in': typeof authSignInRoute
   '/p/$code': typeof PCodeRoute
-  '/dashboard/': typeof DashboardIndexRoute
+  '/doctor/': typeof DoctorIndexRoute
   '/portal/': typeof PortalIndexRoute
-  '/dashboard/consultations/$prescriptionId': typeof DashboardConsultationsPrescriptionIdRoute
-  '/dashboard/prescribe/$consultationId': typeof DashboardPrescribeConsultationIdRoute
-  '/dashboard/profile/edit': typeof DashboardProfileEditRoute
+  '/doctor/consultations/$prescriptionId': typeof DoctorConsultationsPrescriptionIdRoute
+  '/doctor/prescribe/$consultationId': typeof DoctorPrescribeConsultationIdRoute
+  '/doctor/profile/edit': typeof DoctorProfileEditRoute
   '/portal/prescriptions/$prescriptionId': typeof PortalPrescriptionsPrescriptionIdRoute
   '/portal/profile/edit': typeof PortalProfileEditRoute
-  '/dashboard/consultations/': typeof DashboardConsultationsIndexRoute
-  '/dashboard/profile/': typeof DashboardProfileIndexRoute
-  '/dashboard/templates/': typeof DashboardTemplatesIndexRoute
+  '/doctor/consultations/': typeof DoctorConsultationsIndexRoute
+  '/doctor/profile/': typeof DoctorProfileIndexRoute
+  '/doctor/rx-memory/': typeof DoctorRxMemoryIndexRoute
   '/portal/profile/': typeof PortalProfileIndexRoute
-  '/dashboard/consultation/$userId/$consultationId': typeof DashboardConsultationUserIdConsultationIdRoute
-  '/dashboard/templates/manage/$templateId': typeof DashboardTemplatesManageTemplateIdRoute
-  '/dashboard/templates/manage/': typeof DashboardTemplatesManageIndexRoute
+  '/doctor/consultation/$userId/$consultationId': typeof DoctorConsultationUserIdConsultationIdRoute
+  '/doctor/rx-memory/manage/$templateId': typeof DoctorRxMemoryManageTemplateIdRoute
+  '/doctor/rx-memory/manage/': typeof DoctorRxMemoryManageIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/dashboard'
+    | '/doctor'
     | '/portal'
     | '/about'
     | '/coming-soon'
@@ -248,20 +248,20 @@ export interface FileRouteTypes {
     | '/enter-otp'
     | '/sign-in'
     | '/p/$code'
-    | '/dashboard/'
+    | '/doctor/'
     | '/portal/'
-    | '/dashboard/consultations/$prescriptionId'
-    | '/dashboard/prescribe/$consultationId'
-    | '/dashboard/profile/edit'
+    | '/doctor/consultations/$prescriptionId'
+    | '/doctor/prescribe/$consultationId'
+    | '/doctor/profile/edit'
     | '/portal/prescriptions/$prescriptionId'
     | '/portal/profile/edit'
-    | '/dashboard/consultations'
-    | '/dashboard/profile'
-    | '/dashboard/templates'
+    | '/doctor/consultations'
+    | '/doctor/profile'
+    | '/doctor/rx-memory'
     | '/portal/profile'
-    | '/dashboard/consultation/$userId/$consultationId'
-    | '/dashboard/templates/manage/$templateId'
-    | '/dashboard/templates/manage'
+    | '/doctor/consultation/$userId/$consultationId'
+    | '/doctor/rx-memory/manage/$templateId'
+    | '/doctor/rx-memory/manage'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -271,25 +271,25 @@ export interface FileRouteTypes {
     | '/enter-otp'
     | '/sign-in'
     | '/p/$code'
-    | '/dashboard'
+    | '/doctor'
     | '/portal'
-    | '/dashboard/consultations/$prescriptionId'
-    | '/dashboard/prescribe/$consultationId'
-    | '/dashboard/profile/edit'
+    | '/doctor/consultations/$prescriptionId'
+    | '/doctor/prescribe/$consultationId'
+    | '/doctor/profile/edit'
     | '/portal/prescriptions/$prescriptionId'
     | '/portal/profile/edit'
-    | '/dashboard/consultations'
-    | '/dashboard/profile'
-    | '/dashboard/templates'
+    | '/doctor/consultations'
+    | '/doctor/profile'
+    | '/doctor/rx-memory'
     | '/portal/profile'
-    | '/dashboard/consultation/$userId/$consultationId'
-    | '/dashboard/templates/manage/$templateId'
-    | '/dashboard/templates/manage'
+    | '/doctor/consultation/$userId/$consultationId'
+    | '/doctor/rx-memory/manage/$templateId'
+    | '/doctor/rx-memory/manage'
   id:
     | '__root__'
     | '/'
     | '/(auth)'
-    | '/dashboard'
+    | '/doctor'
     | '/portal'
     | '/about'
     | '/coming-soon'
@@ -297,26 +297,26 @@ export interface FileRouteTypes {
     | '/(auth)/enter-otp'
     | '/(auth)/sign-in'
     | '/p/$code'
-    | '/dashboard/'
+    | '/doctor/'
     | '/portal/'
-    | '/dashboard/consultations/$prescriptionId'
-    | '/dashboard/prescribe/$consultationId'
-    | '/dashboard/profile/edit'
+    | '/doctor/consultations/$prescriptionId'
+    | '/doctor/prescribe/$consultationId'
+    | '/doctor/profile/edit'
     | '/portal/prescriptions/$prescriptionId'
     | '/portal/profile/edit'
-    | '/dashboard/consultations/'
-    | '/dashboard/profile/'
-    | '/dashboard/templates/'
+    | '/doctor/consultations/'
+    | '/doctor/profile/'
+    | '/doctor/rx-memory/'
     | '/portal/profile/'
-    | '/dashboard/consultation/$userId/$consultationId'
-    | '/dashboard/templates/manage/$templateId'
-    | '/dashboard/templates/manage/'
+    | '/doctor/consultation/$userId/$consultationId'
+    | '/doctor/rx-memory/manage/$templateId'
+    | '/doctor/rx-memory/manage/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   authRouteRoute: typeof authRouteRouteWithChildren
-  DashboardRouteRoute: typeof DashboardRouteRouteWithChildren
+  DoctorRouteRoute: typeof DoctorRouteRouteWithChildren
   PortalRouteRoute: typeof PortalRouteRouteWithChildren
   AboutRoute: typeof AboutRoute
   ComingSoonRoute: typeof ComingSoonRoute
@@ -354,11 +354,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PortalRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/dashboard': {
-      id: '/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof DashboardRouteRouteImport
+    '/doctor': {
+      id: '/doctor'
+      path: '/doctor'
+      fullPath: '/doctor'
+      preLoaderRoute: typeof DoctorRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/(auth)': {
@@ -382,12 +382,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PortalIndexRouteImport
       parentRoute: typeof PortalRouteRoute
     }
-    '/dashboard/': {
-      id: '/dashboard/'
+    '/doctor/': {
+      id: '/doctor/'
       path: '/'
-      fullPath: '/dashboard/'
-      preLoaderRoute: typeof DashboardIndexRouteImport
-      parentRoute: typeof DashboardRouteRoute
+      fullPath: '/doctor/'
+      preLoaderRoute: typeof DoctorIndexRouteImport
+      parentRoute: typeof DoctorRouteRoute
     }
     '/p/$code': {
       id: '/p/$code'
@@ -417,26 +417,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PortalProfileIndexRouteImport
       parentRoute: typeof PortalRouteRoute
     }
-    '/dashboard/templates/': {
-      id: '/dashboard/templates/'
-      path: '/templates'
-      fullPath: '/dashboard/templates'
-      preLoaderRoute: typeof DashboardTemplatesIndexRouteImport
-      parentRoute: typeof DashboardRouteRoute
+    '/doctor/rx-memory/': {
+      id: '/doctor/rx-memory/'
+      path: '/rx-memory'
+      fullPath: '/doctor/rx-memory'
+      preLoaderRoute: typeof DoctorRxMemoryIndexRouteImport
+      parentRoute: typeof DoctorRouteRoute
     }
-    '/dashboard/profile/': {
-      id: '/dashboard/profile/'
+    '/doctor/profile/': {
+      id: '/doctor/profile/'
       path: '/profile'
-      fullPath: '/dashboard/profile'
-      preLoaderRoute: typeof DashboardProfileIndexRouteImport
-      parentRoute: typeof DashboardRouteRoute
+      fullPath: '/doctor/profile'
+      preLoaderRoute: typeof DoctorProfileIndexRouteImport
+      parentRoute: typeof DoctorRouteRoute
     }
-    '/dashboard/consultations/': {
-      id: '/dashboard/consultations/'
+    '/doctor/consultations/': {
+      id: '/doctor/consultations/'
       path: '/consultations'
-      fullPath: '/dashboard/consultations'
-      preLoaderRoute: typeof DashboardConsultationsIndexRouteImport
-      parentRoute: typeof DashboardRouteRoute
+      fullPath: '/doctor/consultations'
+      preLoaderRoute: typeof DoctorConsultationsIndexRouteImport
+      parentRoute: typeof DoctorRouteRoute
     }
     '/portal/profile/edit': {
       id: '/portal/profile/edit'
@@ -452,47 +452,47 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PortalPrescriptionsPrescriptionIdRouteImport
       parentRoute: typeof PortalRouteRoute
     }
-    '/dashboard/profile/edit': {
-      id: '/dashboard/profile/edit'
+    '/doctor/profile/edit': {
+      id: '/doctor/profile/edit'
       path: '/profile/edit'
-      fullPath: '/dashboard/profile/edit'
-      preLoaderRoute: typeof DashboardProfileEditRouteImport
-      parentRoute: typeof DashboardRouteRoute
+      fullPath: '/doctor/profile/edit'
+      preLoaderRoute: typeof DoctorProfileEditRouteImport
+      parentRoute: typeof DoctorRouteRoute
     }
-    '/dashboard/prescribe/$consultationId': {
-      id: '/dashboard/prescribe/$consultationId'
+    '/doctor/prescribe/$consultationId': {
+      id: '/doctor/prescribe/$consultationId'
       path: '/prescribe/$consultationId'
-      fullPath: '/dashboard/prescribe/$consultationId'
-      preLoaderRoute: typeof DashboardPrescribeConsultationIdRouteImport
-      parentRoute: typeof DashboardRouteRoute
+      fullPath: '/doctor/prescribe/$consultationId'
+      preLoaderRoute: typeof DoctorPrescribeConsultationIdRouteImport
+      parentRoute: typeof DoctorRouteRoute
     }
-    '/dashboard/consultations/$prescriptionId': {
-      id: '/dashboard/consultations/$prescriptionId'
+    '/doctor/consultations/$prescriptionId': {
+      id: '/doctor/consultations/$prescriptionId'
       path: '/consultations/$prescriptionId'
-      fullPath: '/dashboard/consultations/$prescriptionId'
-      preLoaderRoute: typeof DashboardConsultationsPrescriptionIdRouteImport
-      parentRoute: typeof DashboardRouteRoute
+      fullPath: '/doctor/consultations/$prescriptionId'
+      preLoaderRoute: typeof DoctorConsultationsPrescriptionIdRouteImport
+      parentRoute: typeof DoctorRouteRoute
     }
-    '/dashboard/templates/manage/': {
-      id: '/dashboard/templates/manage/'
-      path: '/templates/manage'
-      fullPath: '/dashboard/templates/manage'
-      preLoaderRoute: typeof DashboardTemplatesManageIndexRouteImport
-      parentRoute: typeof DashboardRouteRoute
+    '/doctor/rx-memory/manage/': {
+      id: '/doctor/rx-memory/manage/'
+      path: '/rx-memory/manage'
+      fullPath: '/doctor/rx-memory/manage'
+      preLoaderRoute: typeof DoctorRxMemoryManageIndexRouteImport
+      parentRoute: typeof DoctorRouteRoute
     }
-    '/dashboard/templates/manage/$templateId': {
-      id: '/dashboard/templates/manage/$templateId'
-      path: '/templates/manage/$templateId'
-      fullPath: '/dashboard/templates/manage/$templateId'
-      preLoaderRoute: typeof DashboardTemplatesManageTemplateIdRouteImport
-      parentRoute: typeof DashboardRouteRoute
+    '/doctor/rx-memory/manage/$templateId': {
+      id: '/doctor/rx-memory/manage/$templateId'
+      path: '/rx-memory/manage/$templateId'
+      fullPath: '/doctor/rx-memory/manage/$templateId'
+      preLoaderRoute: typeof DoctorRxMemoryManageTemplateIdRouteImport
+      parentRoute: typeof DoctorRouteRoute
     }
-    '/dashboard/consultation/$userId/$consultationId': {
-      id: '/dashboard/consultation/$userId/$consultationId'
+    '/doctor/consultation/$userId/$consultationId': {
+      id: '/doctor/consultation/$userId/$consultationId'
       path: '/consultation/$userId/$consultationId'
-      fullPath: '/dashboard/consultation/$userId/$consultationId'
-      preLoaderRoute: typeof DashboardConsultationUserIdConsultationIdRouteImport
-      parentRoute: typeof DashboardRouteRoute
+      fullPath: '/doctor/consultation/$userId/$consultationId'
+      preLoaderRoute: typeof DoctorConsultationUserIdConsultationIdRouteImport
+      parentRoute: typeof DoctorRouteRoute
     }
   }
 }
@@ -511,37 +511,36 @@ const authRouteRouteWithChildren = authRouteRoute._addFileChildren(
   authRouteRouteChildren,
 )
 
-interface DashboardRouteRouteChildren {
-  DashboardIndexRoute: typeof DashboardIndexRoute
-  DashboardConsultationsPrescriptionIdRoute: typeof DashboardConsultationsPrescriptionIdRoute
-  DashboardPrescribeConsultationIdRoute: typeof DashboardPrescribeConsultationIdRoute
-  DashboardProfileEditRoute: typeof DashboardProfileEditRoute
-  DashboardConsultationsIndexRoute: typeof DashboardConsultationsIndexRoute
-  DashboardProfileIndexRoute: typeof DashboardProfileIndexRoute
-  DashboardTemplatesIndexRoute: typeof DashboardTemplatesIndexRoute
-  DashboardConsultationUserIdConsultationIdRoute: typeof DashboardConsultationUserIdConsultationIdRoute
-  DashboardTemplatesManageTemplateIdRoute: typeof DashboardTemplatesManageTemplateIdRoute
-  DashboardTemplatesManageIndexRoute: typeof DashboardTemplatesManageIndexRoute
+interface DoctorRouteRouteChildren {
+  DoctorIndexRoute: typeof DoctorIndexRoute
+  DoctorConsultationsPrescriptionIdRoute: typeof DoctorConsultationsPrescriptionIdRoute
+  DoctorPrescribeConsultationIdRoute: typeof DoctorPrescribeConsultationIdRoute
+  DoctorProfileEditRoute: typeof DoctorProfileEditRoute
+  DoctorConsultationsIndexRoute: typeof DoctorConsultationsIndexRoute
+  DoctorProfileIndexRoute: typeof DoctorProfileIndexRoute
+  DoctorRxMemoryIndexRoute: typeof DoctorRxMemoryIndexRoute
+  DoctorConsultationUserIdConsultationIdRoute: typeof DoctorConsultationUserIdConsultationIdRoute
+  DoctorRxMemoryManageTemplateIdRoute: typeof DoctorRxMemoryManageTemplateIdRoute
+  DoctorRxMemoryManageIndexRoute: typeof DoctorRxMemoryManageIndexRoute
 }
 
-const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
-  DashboardIndexRoute: DashboardIndexRoute,
-  DashboardConsultationsPrescriptionIdRoute:
-    DashboardConsultationsPrescriptionIdRoute,
-  DashboardPrescribeConsultationIdRoute: DashboardPrescribeConsultationIdRoute,
-  DashboardProfileEditRoute: DashboardProfileEditRoute,
-  DashboardConsultationsIndexRoute: DashboardConsultationsIndexRoute,
-  DashboardProfileIndexRoute: DashboardProfileIndexRoute,
-  DashboardTemplatesIndexRoute: DashboardTemplatesIndexRoute,
-  DashboardConsultationUserIdConsultationIdRoute:
-    DashboardConsultationUserIdConsultationIdRoute,
-  DashboardTemplatesManageTemplateIdRoute:
-    DashboardTemplatesManageTemplateIdRoute,
-  DashboardTemplatesManageIndexRoute: DashboardTemplatesManageIndexRoute,
+const DoctorRouteRouteChildren: DoctorRouteRouteChildren = {
+  DoctorIndexRoute: DoctorIndexRoute,
+  DoctorConsultationsPrescriptionIdRoute:
+    DoctorConsultationsPrescriptionIdRoute,
+  DoctorPrescribeConsultationIdRoute: DoctorPrescribeConsultationIdRoute,
+  DoctorProfileEditRoute: DoctorProfileEditRoute,
+  DoctorConsultationsIndexRoute: DoctorConsultationsIndexRoute,
+  DoctorProfileIndexRoute: DoctorProfileIndexRoute,
+  DoctorRxMemoryIndexRoute: DoctorRxMemoryIndexRoute,
+  DoctorConsultationUserIdConsultationIdRoute:
+    DoctorConsultationUserIdConsultationIdRoute,
+  DoctorRxMemoryManageTemplateIdRoute: DoctorRxMemoryManageTemplateIdRoute,
+  DoctorRxMemoryManageIndexRoute: DoctorRxMemoryManageIndexRoute,
 }
 
-const DashboardRouteRouteWithChildren = DashboardRouteRoute._addFileChildren(
-  DashboardRouteRouteChildren,
+const DoctorRouteRouteWithChildren = DoctorRouteRoute._addFileChildren(
+  DoctorRouteRouteChildren,
 )
 
 interface PortalRouteRouteChildren {
@@ -566,7 +565,7 @@ const PortalRouteRouteWithChildren = PortalRouteRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   authRouteRoute: authRouteRouteWithChildren,
-  DashboardRouteRoute: DashboardRouteRouteWithChildren,
+  DoctorRouteRoute: DoctorRouteRouteWithChildren,
   PortalRouteRoute: PortalRouteRouteWithChildren,
   AboutRoute: AboutRoute,
   ComingSoonRoute: ComingSoonRoute,

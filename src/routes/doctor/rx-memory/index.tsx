@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 
-export const Route = createFileRoute('/dashboard/templates/')({
+export const Route = createFileRoute('/doctor/rx-memory/')({
   component: RouteComponent,
 })
 
@@ -45,7 +45,7 @@ function TemplateCard({
 
   return (
     <div
-      onClick={() => navigate({ to: '/dashboard/templates/manage/$templateId', params: { templateId: template.template_id } })}
+      onClick={() => navigate({ to: '/doctor/rx-memory/manage/$templateId', params: { templateId: template.template_id } })}
       className="group relative bg-white border border-slate-100 rounded-2xl p-5 cursor-pointer transition-all duration-200 hover:shadow-lg hover:border-emerald-200 hover:-translate-y-0.5 flex flex-col gap-3"
     >
       {/* Header */}
@@ -202,15 +202,15 @@ function RouteComponent() {
       {/* Header */}
       <div className="flex items-center justify-between mb-8 gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Prescription Templates</h1>
-          <p className="text-sm text-slate-500 mt-1">Manage and use your saved templates</p>
+          <h1 className="text-2xl font-bold text-slate-900">RxMemory</h1>
+          <p className="text-sm text-slate-500 mt-1">Manage and reuse your saved RxMemory</p>
         </div>
         <button
-          onClick={() => navigate({ to: '/dashboard/templates/manage' })}
+          onClick={() => navigate({ to: '/doctor/rx-memory/manage' })}
           className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-xl shadow-sm transition-colors shrink-0"
         >
           <PlusIcon className="w-4 h-4" />
-          <span className="hidden sm:inline">New Template</span>
+          <span className="hidden sm:inline">New RxMemory</span>
           <span className="sm:hidden">New</span>
         </button>
       </div>
@@ -243,7 +243,7 @@ function RouteComponent() {
           <div className="w-14 h-14 rounded-2xl bg-red-50 flex items-center justify-center">
             <LayoutTemplateIcon className="w-7 h-7 text-red-400" />
           </div>
-          <p className="text-slate-600 font-medium">Failed to load templates</p>
+          <p className="text-slate-600 font-medium">Failed to load RxMemory</p>
           <p className="text-slate-400 text-sm">Please try again later</p>
         </div>
       )}
@@ -255,15 +255,15 @@ function RouteComponent() {
             <LayoutTemplateIcon className="w-8 h-8 text-emerald-400" />
           </div>
           <div>
-            <p className="text-slate-700 font-semibold text-lg">No templates yet</p>
-            <p className="text-slate-400 text-sm mt-1">Create your first prescription template to get started</p>
+            <p className="text-slate-700 font-semibold text-lg">No RxMemory yet</p>
+            <p className="text-slate-400 text-sm mt-1">Create your first RxMemory to get started</p>
           </div>
           <button
-            onClick={() => navigate({ to: '/dashboard/templates/manage' })}
+            onClick={() => navigate({ to: '/doctor/rx-memory/manage' })}
             className="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-xl shadow-sm transition-colors"
           >
             <PlusIcon className="w-4 h-4" />
-            Create Template
+            Create RxMemory
           </button>
         </div>
       )}
@@ -291,11 +291,11 @@ function RouteComponent() {
               <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center shrink-0">
                 <AlertTriangleIcon className="w-5 h-5 text-red-600" />
               </div>
-              <DialogTitle className="text-xl">Delete Template?</DialogTitle>
+              <DialogTitle className="text-xl">Delete RxMemory?</DialogTitle>
             </div>
             <DialogDescription className="text-slate-500 text-left">
               Are you sure you want to delete <span className="font-semibold text-slate-900">"{templateToDelete?.template_name}"</span>?
-              This action cannot be undone and will remove the template for all sessions.
+              This action cannot be undone and will remove the RxMemory for all sessions.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="mt-4 gap-2 sm:gap-0">
@@ -311,7 +311,7 @@ function RouteComponent() {
               onClick={confirmDelete}
               className="bg-red-600 hover:bg-red-700 text-white rounded-xl shadow-sm"
             >
-              Delete Template
+              Delete RxMemory
             </Button>
           </DialogFooter>
         </DialogContent>

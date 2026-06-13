@@ -58,12 +58,12 @@ export default function EnterOtpForm() {
                     navigate({ to: "/portal" });
                 } else {
                     await createClinicianProfile(phoneNumber, otp.join("").trim());
-                    navigate({ to: "/dashboard/profile" });
+                    navigate({ to: "/doctor/profile" });
                 }
             } else {
                 await verifyOtp(phoneNumber, otp.join("").trim());
                 toast.success("OTP verified successfully!");
-                navigate({ to: role === "patient" ? "/portal" : "/dashboard" });
+                navigate({ to: role === "patient" ? "/portal" : "/doctor" });
             }
 
         } catch (error) {

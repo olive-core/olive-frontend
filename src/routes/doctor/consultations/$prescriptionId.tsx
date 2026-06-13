@@ -19,7 +19,7 @@ import DocumentSwitcher, {
   type PrescriptionDocument,
 } from '@/components/prescription/document-switcher'
 
-export const Route = createFileRoute('/dashboard/consultations/$prescriptionId')({
+export const Route = createFileRoute('/doctor/consultations/$prescriptionId')({
   component: ConsultationDetailPage,
 })
 
@@ -100,7 +100,7 @@ function BackButton() {
     <Button
       variant="ghost"
       size="sm"
-      onClick={() => navigate({ to: '/dashboard/consultations' })}
+      onClick={() => navigate({ to: '/doctor/consultations' })}
       className="text-slate-500 hover:text-slate-800 -ml-2"
     >
       <ArrowLeftIcon className="size-4 mr-1" />

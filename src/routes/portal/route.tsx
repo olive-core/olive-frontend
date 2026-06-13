@@ -16,7 +16,7 @@ function PortalLayout() {
     if (!isLoggedIn) {
       navigate({ to: "/sign-in" });
     } else if (role !== "patient") {
-      navigate({ to: "/dashboard" });
+      navigate({ to: "/doctor" });
     }
   }, [isLoggedIn, role, navigate]);
 

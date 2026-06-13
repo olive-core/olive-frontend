@@ -6,7 +6,7 @@ export default function NavbarLogo() {
     const { isLoggedIn } = useAuthStore();
 
     function getHref() {
-        return isLoggedIn ? "/dashboard" : "/";
+        return isLoggedIn ? "/doctor" : "/";
     }
 
     return (

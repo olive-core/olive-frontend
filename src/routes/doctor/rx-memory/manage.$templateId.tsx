@@ -4,7 +4,7 @@ import { useAuthStore } from '@/stores/auth-store'
 import api from '@/lib/axios'
 import TemplateEditor, { type TemplatePayload, type InitialTemplateData } from '@/components/templates/template-editor'
 
-export const Route = createFileRoute('/dashboard/templates/manage/$templateId')({
+export const Route = createFileRoute('/doctor/rx-memory/manage/$templateId')({
   component: RouteComponent,
 })
 
@@ -29,19 +29,19 @@ function RouteComponent() {
       )
     },
     onSuccess: () => {
-      navigate({ to: '/dashboard/templates' })
+      navigate({ to: '/doctor/rx-memory' })
     },
   })
 
   if (fetchError) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[50vh] gap-4">
-        <p className="text-red-500 font-medium">Failed to load template.</p>
+        <p className="text-red-500 font-medium">Failed to load RxMemory.</p>
         <button
-          onClick={() => navigate({ to: '/dashboard/templates' })}
+          onClick={() => navigate({ to: '/doctor/rx-memory' })}
           className="h-9 px-6 font-bold bg-slate-900 text-white hover:bg-slate-800 rounded-lg shadow-md"
         >
-          Back to Templates
+          Back to RxMemory
         </button>
       </div>
     )
@@ -49,8 +49,8 @@ function RouteComponent() {
 
   return (
     <TemplateEditor
-      title="Edit Template"
-      subtitle="Update your prescription template"
+      title="Edit RxMemory"
+      subtitle="Update your saved RxMemory"
       submitLabel="Save Changes"
       submittingLabel="Saving..."
       initialData={template}

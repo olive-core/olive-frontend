@@ -4,7 +4,7 @@ import { useAuthStore } from '@/stores/auth-store'
 import api from '@/lib/axios'
 import TemplateEditor, { type TemplatePayload } from '@/components/templates/template-editor'
 
-export const Route = createFileRoute('/dashboard/templates/manage/')({
+export const Route = createFileRoute('/doctor/rx-memory/manage/')({
   component: RouteComponent,
 })
 
@@ -17,15 +17,15 @@ function RouteComponent() {
       await api.post(`/prescription-template?clinician_id=${userId}`, payload)
     },
     onSuccess: () => {
-      navigate({ to: '/dashboard/templates' })
+      navigate({ to: '/doctor/rx-memory' })
     },
   })
 
   return (
     <TemplateEditor
-      title="New Template"
-      subtitle="Build a reusable prescription template"
-      submitLabel="Create Template"
+      title="New RxMemory"
+      subtitle="Build a reusable RxMemory"
+      submitLabel="Create RxMemory"
       submittingLabel="Creating..."
       isPending={createMutation.isPending}
       isError={createMutation.isError}

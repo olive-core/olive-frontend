@@ -27,42 +27,42 @@ const MENU_ITEMS: MenuItemType[] = [
     {
         label: "Home",
         icon: <House />,
-        href: "/dashboard",
+        href: "/doctor",
     },
     {
         label: "Consultations",
         icon: <ClipboardListIcon />,
-        href: "/dashboard/consultations",
+        href: "/doctor/consultations",
     },
     {
-        label: "Templates",
+        label: "RxMemory",
         icon: <LayoutTemplate />,
-        href: "/dashboard/templates",
+        href: "/doctor/rx-memory",
     },
     // {
     //     label: "Statistics",
     //     icon: <ChartNoAxesColumnIcon />,
-    //     href: "/dashboard/statistics",
+    //     href: "/doctor/statistics",
     // },
     // {
     //     label: "Session History",
     //     icon: <HistoryIcon />,
-    //     href: "/dashboard/history",
+    //     href: "/doctor/history",
     // },
     {
         label: "Profile",
         icon: <UserIcon />,
-        href: "/dashboard/profile",
+        href: "/doctor/profile",
     },
     // {
     //     label: "Settings",
     //     icon: <SettingsIcon />,
-    //     href: "/dashboard/settings",
+    //     href: "/doctor/settings",
     // },
     // {
     //     label: "Billing",
     //     icon: <HandCoinsIcon />,
-    //     href: "/dashboard/billing",
+    //     href: "/doctor/billing",
     // },
     {
         label: "Logout",

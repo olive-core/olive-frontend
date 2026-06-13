@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router'
 import { Loader2Icon } from 'lucide-react';
 
-export const Route = createFileRoute('/dashboard/profile/')({
+export const Route = createFileRoute('/doctor/profile/')({
   component: RouteComponent,
 })
 

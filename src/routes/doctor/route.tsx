@@ -3,7 +3,7 @@ import DashboardNavbar from "@/components/dashboard/navbar";
 import { useAuthStore } from "@/stores/auth-store";
 import { useEffect } from "react";
 
-export const Route = createFileRoute('/dashboard')({
+export const Route = createFileRoute('/doctor')({
   component: DashboardLayout,
 })
 

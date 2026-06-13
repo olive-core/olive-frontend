@@ -27,7 +27,7 @@ export default function Prescription({ onGenerate, onCancel, hasBeenGenerated }:
     const store = usePrescriptionStore();
     const isRevertingTemplate = usePrescriptionStore(s => s.isRevertingTemplate);
     const navigate = useNavigate();
-    const { consultationId } = useParams({ from: "/dashboard/prescribe/$consultationId" });
+    const { consultationId } = useParams({ from: "/doctor/prescribe/$consultationId" });
 
     const prescriptionRef = useRef(null);
     const [activeDocument, setActiveDocument] = useState<PrescriptionDocument>("prescription");
@@ -72,7 +72,7 @@ export default function Prescription({ onGenerate, onCancel, hasBeenGenerated }:
         documentTitle: `Prescription_Report_${consultationId}`,
         // Navigate only after the print dialog closes — on mobile, navigating immediately
         // swaps the DOM (to the dashboard's phone-number screen) before print captures.
-        onAfterPrint:  () => navigate({ to: "/dashboard" }),
+        onAfterPrint:  () => navigate({ to: "/doctor" }),
     });
 
     const confirmMutation = useMutation({

@@ -19,7 +19,7 @@ const getRoutineString = (routine: any) => {
 };
 
 export const PrescriptionView = () => {
-    const { consultationId } = useParams({ from: '/dashboard/prescribe/$consultationId' });
+    const { consultationId } = useParams({ from: '/doctor/prescribe/$consultationId' });
     const getSubmitPayload = usePrescriptionStore(s => s.getSubmitPayload);
     const data = getSubmitPayload(consultationId);
 

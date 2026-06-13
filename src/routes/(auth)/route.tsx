@@ -15,7 +15,7 @@ function AuthLayout() {
 
   useEffect(() => {
     if (isLoggedIn) {
-      navigate({ to: role === "patient" ? "/portal" : "/dashboard" });
+      navigate({ to: role === "patient" ? "/portal" : "/doctor" });
     }
   }, [isLoggedIn, role, navigate]);
 
