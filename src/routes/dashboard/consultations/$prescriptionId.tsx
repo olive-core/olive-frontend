@@ -14,6 +14,10 @@ import PrescriptionReadView, {
 } from '@/components/prescription/paper/read-view'
 import PrescriptionPrintView from '@/components/prescription/paper/print-view'
 import ReadSkeleton from '@/components/prescription/paper/read-skeleton'
+import ClinicalNotesPanel from '@/components/prescription/paper/clinical-notes-panel'
+import DocumentSwitcher, {
+  type PrescriptionDocument,
+} from '@/components/prescription/document-switcher'
 
 export const Route = createFileRoute('/dashboard/consultations/$prescriptionId')({
   component: ConsultationDetailPage,
@@ -59,6 +63,34 @@ function useSaveSummary(prescriptionId: string) {
     onSuccess: () => toast.success('Summary saved'),
     onError:   () => toast.error('Failed to save summary'),
   })
+}
+
+interface ClinicalNotesTabProps {
+  notes:    string | null
+  onChange: (value: string) => void
+  onSave:   () => void
+  isDirty:  boolean
+  isSaving: boolean
+}
+
+function ClinicalNotesTab({ notes, onChange, onSave, isDirty, isSaving }: ClinicalNotesTabProps) {
+  return (
+    <>
+      <ClinicalNotesPanel notes={notes} onChange={onChange} />
+      {isDirty && (
+        <div className="container mx-auto flex justify-end mt-2">
+          <Button
+            size="sm"
+            onClick={onSave}
+            disabled={isSaving}
+            className="bg-slate-900 hover:bg-slate-800 text-white font-bold"
+          >
+            {isSaving ? 'Saving...' : 'Save Notes'}
+          </Button>
+        </div>
+      )}
+    </>
+  )
 }
 
 function BackButton() {
@@ -120,7 +152,8 @@ function ConsultationDetailPage() {
   const { data: clinician } = useClinicianProfile(consultation?.clinician_id)
   const { data: patient }   = usePatient(consultation?.patient_id)
 
-  const [summaryText, setSummaryText] = useState<string | null>(null)
+  const [activeDocument, setActiveDocument] = useState<PrescriptionDocument>('prescription')
+  const [notesDraft, setNotesDraft] = useState<string | null>(null)
   const saveSummary = useSaveSummary(prescriptionId)
 
   const printRef = useRef(null)
@@ -128,8 +161,6 @@ function ConsultationDetailPage() {
     contentRef:    printRef,
     documentTitle: `Prescription_${prescriptionId}`,
   })
-
-  const currentSummary = summaryText ?? (consultation?.prescription_data?.summary ?? null)
 
   if (isLoading) {
     return (
@@ -144,40 +175,42 @@ function ConsultationDetailPage() {
     return <DetailError />
   }
 
-  const printableConsultation = {
-    ...consultation,
-    prescription_data: { ...consultation.prescription_data, summary: currentSummary },
-  }
+  const savedNotes = consultation.prescription_data?.summary ?? null
+  const currentNotes = notesDraft ?? savedNotes
+  const notesDirty = notesDraft !== null && notesDraft !== savedNotes
 
   return (
     <>
       <div className="fixed top-0 left-[-9999px] print:left-0 print:block" ref={printRef}>
         <PrescriptionPrintView
-          consultation={printableConsultation}
+          consultation={consultation}
           clinician={clinician}
           patient={patient}
         />
       </div>
 
       <DetailToolbar onPrint={handlePrint} />
-      <PrescriptionReadView
-        consultation={printableConsultation}
-        clinician={clinician}
-        patient={patient}
-        onSummaryChange={setSummaryText}
+      <DocumentSwitcher
+        value={activeDocument}
+        onValueChange={setActiveDocument}
+        notesHasContent={!!savedNotes?.trim()}
+        prescription={
+          <PrescriptionReadView
+            consultation={consultation}
+            clinician={clinician}
+            patient={patient}
+          />
+        }
+        notes={
+          <ClinicalNotesTab
+            notes={currentNotes}
+            onChange={setNotesDraft}
+            onSave={() => saveSummary.mutate(notesDraft ?? '')}
+            isDirty={notesDirty}
+            isSaving={saveSummary.isPending}
+          />
+        }
       />
-      {summaryText !== null && summaryText !== (consultation.prescription_data?.summary ?? null) && (
-        <div className="container mx-auto flex justify-end mt-2 print:hidden">
-          <Button
-            size="sm"
-            onClick={() => saveSummary.mutate(summaryText)}
-            disabled={saveSummary.isPending}
-            className="bg-slate-900 hover:bg-slate-800 text-white font-bold"
-          >
-            {saveSummary.isPending ? 'Saving...' : 'Save Summary'}
-          </Button>
-        </div>
-      )}
     </>
   )
 }

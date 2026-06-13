@@ -4,7 +4,6 @@ import type { PatientInfoType } from "@/types/patient";
 import PrescriptionPaper from "./prescription-paper";
 import ClinicianHeader from "./clinician-header";
 import PatientStrip from "./patient-strip";
-import SummaryBlock from "./summary-block";
 import SectionList from "./section-list";
 import MedicineList from "./medicine-list";
 import AdviceList from "./advice-list";
@@ -27,13 +26,12 @@ export interface ClinicianProfile {
 }
 
 interface PrescriptionReadViewProps {
-    consultation:      ConsultationDetail;
-    clinician?:        ClinicianProfile;
-    patient?:          PatientInfoType;
-    onSummaryChange?:  (value: string) => void;
+    consultation: ConsultationDetail;
+    clinician?:   ClinicianProfile;
+    patient?:     PatientInfoType;
 }
 
-export default function PrescriptionReadView({ consultation, clinician, patient, onSummaryChange }: PrescriptionReadViewProps) {
+export default function PrescriptionReadView({ consultation, clinician, patient }: PrescriptionReadViewProps) {
     const data = consultation.prescription_data ?? {};
     const vitals = vitalsFromOnExaminations(data.on_examinations);
     const followUp = { follow_up_days: data.follow_up_days ?? null, follow_up_notes: data.follow_up_notes ?? null };
@@ -60,7 +58,6 @@ export default function PrescriptionReadView({ consultation, clinician, patient,
             vitalsBar={<VitalsBar vitals={vitals} />}
             leftColumn={
                 <>
-                    <SummaryBlock summary={data.summary} onChange={onSummaryChange} />
                     <SectionList
                         title="Chief Complaints"
                         items={mapChiefComplaintsToSectionItems(data.chief_complaints)}

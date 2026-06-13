@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
-import { SparklesIcon } from "lucide-react";
+import { SparklesIcon, LockIcon } from "lucide-react";
 import DoctorInfo from "./doctor-info";
 import PatientInfo from "./patient-info";
 import { usePrescriptionStore } from "@/stores/prescription-store";
 import { hasAnyVital } from "@/lib/vitals";
 import ListInfo from "./list-info";
 import VitalsBar from "./paper/vitals-bar";
-import { AccordionContent, AccordionItem, AccordionTrigger, Accordion } from "../ui/accordion";
+import ClinicalNotesPanel from "./paper/clinical-notes-panel";
+import DocumentSwitcher, { type PrescriptionDocument } from "./document-switcher";
 
 // ─── Sliding AI text phrases ───────────────────────────────────────────────────
 const AI_PHRASES = [
@@ -127,6 +128,30 @@ function SkeletonVitals() {
   );
 }
 
+// ─── Skeleton clinical notes (until the summary streams in) ─────────────────────
+function SkeletonNotes() {
+  return (
+    <div className="flex flex-col gap-3 p-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <LockIcon className="size-4 text-slate-300" />
+          <h3 className="font-bold text-sm uppercase tracking-widest text-slate-300">Clinical Notes</h3>
+        </div>
+        <SparklesIcon className="w-3 h-3 text-emerald-300 animate-pulse" />
+      </div>
+      <p className="text-xs text-slate-400">
+        Private &middot; only you can see this. Not shared with the patient and not printed.
+      </p>
+      <div className="rounded-xl border border-border bg-muted/50 px-4 py-3 min-h-[280px] flex flex-col gap-2.5">
+        <ShimmerLine width="90%" />
+        <ShimmerLine width="80%" />
+        <ShimmerLine width="85%" />
+        <ShimmerLine width="60%" />
+      </div>
+    </div>
+  );
+}
+
 // ─── Skeleton medicine card ────────────────────────────────────────────────────
 function SkeletonMedicineCard({ index }: { index: number }) {
   const widths = ["65%", "80%", "50%", "72%"];
@@ -190,7 +215,13 @@ export default function PrescriptionSkeleton({
     setVitals,
   } = store;
 
-  return (
+  const [activeDocument, setActiveDocument] = useState<PrescriptionDocument>("prescription");
+
+  const notesContent = summary.length > 0
+    ? <ClinicalNotesPanel notes={summary} />
+    : <SkeletonNotes />;
+
+  const prescriptionContent = (
     <div className="container rounded-xl border flex flex-col mt-4 mb-12 overflow-hidden">
       <div className="m-4">
         {/* ── Real Doctor & Patient info ─────────────────────────── */}
@@ -221,27 +252,6 @@ export default function PrescriptionSkeleton({
         <div className="grid grid-cols-1 md:grid-cols-3">
           {/* Left panel */}
           <div className="h-full md:border-r md:col-span-1 border-b md:border-b-0 py-4 flex flex-col gap-2">
-
-            {summary.length > 0
-              ? (
-                <div className="px-4">
-                  <Accordion type="single" collapsible defaultValue="item-1">
-                    <AccordionItem value="item-1">
-                      <AccordionTrigger>
-                        <h3 className={`font-bold text-xs uppercase tracking-widest  text-slate-500`}>
-                          Summary
-                        </h3>
-                      </AccordionTrigger>
-                      <AccordionContent>
-                        {summary}
-                      </AccordionContent>
-                    </AccordionItem>
-                  </Accordion>
-                </div>
-              )
-              : (
-                <SkeletonListSection label="Summary" itemCount={3} />
-              )}
 
             {chiefComplaint.length > 0
               ? (
@@ -329,5 +339,15 @@ export default function PrescriptionSkeleton({
         }
       `}</style>
     </div>
+  );
+
+  return (
+    <DocumentSwitcher
+      value={activeDocument}
+      onValueChange={setActiveDocument}
+      notesHasContent={summary.length > 0}
+      prescription={prescriptionContent}
+      notes={notesContent}
+    />
   );
 }
