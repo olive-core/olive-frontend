@@ -31,10 +31,10 @@ const NUMERIC_FIELDS: NumericField[] = [
     { label: "Weight", unit: "kg",   key: "weight", step: "0.1" },
 ];
 
-const GRID = "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5";
+const COMPACT_GRID = "grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2";
 
 const BASE_INPUT =
-    "min-w-0 bg-transparent text-[16px] font-bold text-slate-800 outline-none placeholder:font-medium placeholder:text-slate-300 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none";
+    "min-w-0 bg-transparent text-sm font-bold text-slate-800 outline-none placeholder:font-medium placeholder:text-slate-300 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none";
 
 function parseNum(value: string): number | null {
     if (value.trim() === "") return null;
@@ -52,7 +52,7 @@ function CellCard({ label, accent, children }: { label: string; accent?: boolean
     return (
         <div
             className={cn(
-                "flex flex-col gap-0.5 rounded-xl border px-3 py-2 transition-all focus-within:border-emerald-400 focus-within:shadow-sm",
+                "flex flex-col gap-0.5 rounded-md border px-2 py-1.5 transition-all focus-within:border-emerald-400 focus-within:shadow-sm",
                 accent ? "border-emerald-200 bg-emerald-50/40" : "border-slate-200 bg-white"
             )}
         >
@@ -63,7 +63,7 @@ function CellCard({ label, accent, children }: { label: string; accent?: boolean
 }
 
 function Unit({ children }: { children: ReactNode }) {
-    return <span className="text-[11px] font-medium text-slate-400">{children}</span>;
+    return <span className="text-[10px] font-medium text-slate-400">{children}</span>;
 }
 
 function HeightCell({ cm, onChange }: { cm?: number | null; onChange: (cm: number | null) => void }) {
@@ -87,7 +87,7 @@ function HeightCell({ cm, onChange }: { cm?: number | null; onChange: (cm: numbe
     return (
         <CellCard label="Height">
             <input
-                className={cn(BASE_INPUT, "w-8 text-center")}
+                className={cn(BASE_INPUT, "w-7 text-center")}
                 type="number"
                 inputMode="numeric"
                 placeholder="—"
@@ -99,7 +99,7 @@ function HeightCell({ cm, onChange }: { cm?: number | null; onChange: (cm: numbe
             />
             <Unit>ft</Unit>
             <input
-                className={cn(BASE_INPUT, "w-8 text-center")}
+                className={cn(BASE_INPUT, "w-7 text-center")}
                 type="number"
                 inputMode="numeric"
                 placeholder="—"
@@ -118,19 +118,19 @@ function EditableVitals({ vitals, onChange }: Required<VitalsBarProps>) {
     const bmi = computeBmi(vitals.weight, vitals.height);
 
     return (
-        <div className={GRID}>
+        <div className={COMPACT_GRID}>
             <CellCard label="BP">
                 <input
-                    className={cn(BASE_INPUT, "w-9")}
+                    className={cn(BASE_INPUT, "w-8")}
                     type="number"
                     inputMode="numeric"
                     placeholder="—"
                     value={vitals.bp_systolic ?? ""}
                     onChange={(e) => onChange({ bp_systolic: parseNum(e.target.value) })}
                 />
-                <span className="text-slate-300">/</span>
+                <span className="text-slate-300 text-sm">/</span>
                 <input
-                    className={cn(BASE_INPUT, "w-9")}
+                    className={cn(BASE_INPUT, "w-8")}
                     type="number"
                     inputMode="numeric"
                     placeholder="—"
@@ -158,28 +158,18 @@ function EditableVitals({ vitals, onChange }: Required<VitalsBarProps>) {
             <HeightCell cm={vitals.height} onChange={(cm) => onChange({ height: cm })} />
 
             <CellCard label="BMI" accent>
-                <span className="text-[16px] font-bold text-emerald-700">{bmi ?? "—"}</span>
+                <span className="text-sm font-bold text-emerald-700">{bmi ?? "—"}</span>
                 {bmi !== null && <Unit>kg/m²</Unit>}
             </CellCard>
         </div>
     );
 }
 
-function ReadCell({ label, value, unit, accent }: { label: string; value: string; unit?: string; accent?: boolean }) {
-    return (
-        <div
-            className={cn(
-                "flex flex-col gap-0.5 rounded-xl border px-3 py-2",
-                accent ? "border-emerald-200 bg-emerald-50/40" : "border-slate-200 bg-slate-50/60"
-            )}
-        >
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{label}</span>
-            <div className="flex items-baseline gap-1">
-                <span className={cn("text-[16px] font-bold", accent ? "text-emerald-700" : "text-slate-800")}>{value}</span>
-                {unit && <Unit>{unit}</Unit>}
-            </div>
-        </div>
-    );
+interface VitalChip {
+    label: string;
+    value: string;
+    unit?: string;
+    accent?: boolean;
 }
 
 function ReadOnlyVitals({ vitals }: { vitals: VitalsType }) {
@@ -187,16 +177,29 @@ function ReadOnlyVitals({ vitals }: { vitals: VitalsType }) {
     const height = formatHeightImperial(vitals.height);
     const bmi = computeBmi(vitals.weight, vitals.height);
 
+    const chips: VitalChip[] = [];
+    if (bp)                            chips.push({ label: "BP",    value: bp,                       unit: "mmHg" });
+    if (vitals.pulse != null)          chips.push({ label: "Pulse", value: String(vitals.pulse),     unit: "bpm" });
+    if (vitals.temperature != null)    chips.push({ label: "Temp",  value: String(vitals.temperature), unit: "°F" });
+    if (vitals.respiratory_rate != null) chips.push({ label: "RR",  value: String(vitals.respiratory_rate), unit: "/min" });
+    if (vitals.spo2 != null)           chips.push({ label: "SpO₂",  value: String(vitals.spo2),      unit: "%" });
+    if (vitals.weight != null)         chips.push({ label: "Wt",    value: String(vitals.weight),    unit: "kg" });
+    if (height)                        chips.push({ label: "Ht",    value: height });
+    if (bmi !== null)                  chips.push({ label: "BMI",   value: String(bmi),              unit: "kg/m²", accent: true });
+
+    if (chips.length === 0) return null;
+
     return (
-        <div className={GRID}>
-            {bp && <ReadCell label="BP" value={bp} unit="mmHg" />}
-            {NUMERIC_FIELDS.map((field) =>
-                vitals[field.key] != null ? (
-                    <ReadCell key={field.key} label={field.label} value={String(vitals[field.key])} unit={field.unit} />
-                ) : null
-            )}
-            {height && <ReadCell label="Height" value={height} />}
-            {bmi !== null && <ReadCell label="BMI" value={String(bmi)} unit="kg/m²" accent />}
+        <div className="flex flex-wrap gap-x-3 gap-y-0.5">
+            {chips.map((chip, i) => (
+                <span key={i} className="inline-flex items-baseline gap-1">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{chip.label}</span>
+                    <span className={cn("text-xs font-semibold", chip.accent ? "text-emerald-600" : "text-slate-700")}>
+                        {chip.value}
+                    </span>
+                    {chip.unit && <span className="text-[10px] text-slate-400">{chip.unit}</span>}
+                </span>
+            ))}
         </div>
     );
 }
@@ -206,10 +209,19 @@ export default function VitalsBar({ vitals, onChange }: VitalsBarProps) {
 
     if (!isEditable && !hasAnyVital(vitals)) return null;
 
+    if (isEditable) {
+        return (
+            <div className="flex flex-col gap-2 border-y py-2.5">
+                <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-400">On Examination</h3>
+                <EditableVitals vitals={vitals} onChange={onChange} />
+            </div>
+        );
+    }
+
     return (
-        <div className="flex flex-col gap-2.5 border-y py-4">
-            <h3 className="text-[11px] font-bold uppercase tracking-widest text-slate-500">On Examination</h3>
-            {isEditable ? <EditableVitals vitals={vitals} onChange={onChange} /> : <ReadOnlyVitals vitals={vitals} />}
+        <div className="flex items-baseline gap-3 border-y py-2">
+            <span className="shrink-0 text-[10px] font-bold uppercase tracking-widest text-slate-400">On Exam</span>
+            <ReadOnlyVitals vitals={vitals} />
         </div>
     );
 }

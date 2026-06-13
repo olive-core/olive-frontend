@@ -88,7 +88,7 @@ export default function MedicineCard({ tradeName, genericName, fallbackName, dos
     const timingLabel = getTimingLabel(routine);
 
     return (
-        <div className="group relative rounded-lg border p-3 bg-muted border-border w-full max-w-lg">
+        <div className="group relative rounded-lg border p-3 bg-muted border-border w-full max-w-lg transition-colors hover:bg-emerald-50/50 hover:border-emerald-200">
             <div className="flex justify-between items-start mb-1">
                 <MedicineName tradeName={tradeName} genericName={genericName} fallbackName={fallbackName} />
                 <FrequencyDisplay routine={routine} />
