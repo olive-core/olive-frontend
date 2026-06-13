@@ -15,7 +15,7 @@ export default function Pagination({ page, totalPages, onPageChange }: Paginatio
                 size="sm"
                 disabled={page <= 1}
                 onClick={() => onPageChange(page - 1)}
-                className="gap-1"
+                className="gap-1 h-11 sm:h-9 px-4"
             >
                 <ChevronLeftIcon className="size-4" />
                 Previous
@@ -30,7 +30,7 @@ export default function Pagination({ page, totalPages, onPageChange }: Paginatio
                 size="sm"
                 disabled={page >= totalPages}
                 onClick={() => onPageChange(page + 1)}
-                className="gap-1"
+                className="gap-1 h-11 sm:h-9 px-4"
             >
                 Next
                 <ChevronRightIcon className="size-4" />

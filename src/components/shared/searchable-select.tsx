@@ -43,7 +43,7 @@ export default function SearchableSelect({
                     variant="outline"
                     role="combobox"
                     aria-expanded={open}
-                    className="w-[250px] justify-between"
+                    className="w-full sm:w-[250px] justify-between"
                 >
                     {value
                         ? options.find((opt) => opt.value === value)?.label
@@ -52,7 +52,7 @@ export default function SearchableSelect({
                 </Button>
             </PopoverTrigger>
 
-            <PopoverContent className="w-[250px] p-0">
+            <PopoverContent className="w-[calc(100vw-2rem)] sm:w-[250px] p-0">
                 <Command>
                     <CommandInput placeholder={`Search ${type}...`} />
                     <CommandEmpty>No {type} found.</CommandEmpty>

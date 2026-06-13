@@ -67,6 +67,9 @@ export default function Prescription({ onGenerate, onCancel, hasBeenGenerated }:
     const handlePrint = useReactToPrint({
         contentRef:    prescriptionRef,
         documentTitle: `Prescription_Report_${consultationId}`,
+        // Navigate only after the print dialog closes — on mobile, navigating immediately
+        // swaps the DOM (to the dashboard's phone-number screen) before print captures.
+        onAfterPrint:  () => navigate({ to: "/dashboard" }),
     });
 
     const confirmMutation = useMutation({
@@ -76,7 +79,6 @@ export default function Prescription({ onGenerate, onCancel, hasBeenGenerated }:
         },
         onSuccess: () => {
             handlePrint();
-            navigate({ to: "/dashboard" });
         },
     });
 

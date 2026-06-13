@@ -1,153 +1,184 @@
 import { cn } from "@/lib/utils";
 import { RotateCcwIcon } from "lucide-react";
-import { createRef, Fragment, memo, useEffect } from "react"
+import { Fragment, memo, useEffect, useRef } from "react";
 import { Button } from "../ui/button";
 
-interface PhoneInputProps {
+interface NumberGroupInputProps {
     numberInput: string[];
     setNumberInput: React.Dispatch<React.SetStateAction<string[]>>;
-    onComplete?: (isComplete: boolean) => void; // make sure to make it useCallback when passing from parent
+    onComplete?: (isComplete: boolean) => void; // wrap in useCallback when passing from parent
     inputLength?: number;
     secondGroupStartIndex?: number;
     dynamicValuesStartIndex?: number;
+    groupLabel?: string;
+    autoComplete?: string;
 }
 
+const isDigit = (char: string) => char >= "0" && char <= "9";
+
+// Empty cells render this invisible non-breaking space so that pressing backspace always has
+// a character to delete. Mobile keyboards (Android Gboard / iOS) fire no event on a truly empty
+// field, which is what made backspace get stuck; the sentinel guarantees an onChange every time.
+// It is stripped before anything is stored, so it never becomes data.
+const SENTINEL = " ";
+
+/**
+ * Segmented number input (phone / OTP). Each editable box is its own <input>, so cells are
+ * independent: clicking a box edits only that cell and deleting clears it in place without
+ * shifting the others. All edits flow through onChange (never keydown) to stay robust on mobile.
+ */
 function NumberGroupInput({
     numberInput,
     setNumberInput,
     onComplete = () => { },
     inputLength = 11,
     secondGroupStartIndex = 4,
-    dynamicValuesStartIndex = 2
-}: PhoneInputProps) {
+    dynamicValuesStartIndex = 2,
+    groupLabel = "Phone number",
+    autoComplete,
+}: NumberGroupInputProps) {
 
-    const inputRefs = Array.from({ length: inputLength }, () => createRef<HTMLInputElement>());
-
-    const handleReset = () => {
-        const newNumber = [...numberInput];
-        for (let i = dynamicValuesStartIndex; i < numberInput.length; i++) {
-            newNumber[i] = " "
-        }
-        setNumberInput(newNumber);
-
-        inputRefs[dynamicValuesStartIndex].current?.focus();
-    }
+    const prefixLength = dynamicValuesStartIndex;        // count of fixed, non-editable cells (e.g. "01")
+    const capacity = inputLength - prefixLength;          // number of editable cells
+    const cellRefs = useRef<Array<HTMLInputElement | null>>([]);
 
     useEffect(() => {
-        const isComplete = numberInput.every(char => char >= "0" && char <= "9");
-        onComplete(isComplete);
-    }, [numberInput, onComplete, inputRefs]);
+        onComplete(numberInput.length === inputLength && numberInput.every(isDigit));
+    }, [numberInput, inputLength, onComplete]);
 
-    const handleFocusPrev = (index: number) => {
-        if (index > dynamicValuesStartIndex) {
-            inputRefs[index - 1].current?.focus();
-        }
-    }
+    const writeCell = (arrayIndex: number, value: string) => {
+        setNumberInput((prev) => {
+            const next = Array.from({ length: inputLength }, (_, i) => prev[i] ?? "");
+            next[arrayIndex] = value;
+            return next;
+        });
+    };
 
-    const handleFocusNext = (index: number) => {
-        if (index < inputLength - 1) {
-            inputRefs[index + 1].current?.focus();
-        } else {
-            const newIndex = numberInput.findIndex((char, i) => i >= dynamicValuesStartIndex && !(char >= "0" && char <= "9"));
-            if (newIndex !== -1) {
-                inputRefs[newIndex].current?.focus();
+    const focusCell = (editableIndex: number) => {
+        const cell = cellRefs.current[editableIndex];
+        if (!cell) return;
+        cell.focus();
+        cell.select();
+        // The controlled value updates only after this handler returns, so re-select on the next
+        // frame to keep the (possibly just-changed) content selected — backspace needs it selected.
+        requestAnimationFrame(() => {
+            if (cellRefs.current[editableIndex] === document.activeElement) {
+                cellRefs.current[editableIndex]?.select();
             }
+        });
+    };
+
+    const handleType = (editableIndex: number, digit: string) => {
+        writeCell(prefixLength + editableIndex, digit);
+        if (editableIndex + 1 < capacity) focusCell(editableIndex + 1);
+    };
+
+    const handleDelete = (editableIndex: number) => {
+        if (isDigit(numberInput[prefixLength + editableIndex] ?? "")) {
+            writeCell(prefixLength + editableIndex, "");
+            focusCell(editableIndex); // stay here so the next backspace continues from this box
+        } else if (editableIndex > 0) {
+            writeCell(prefixLength + editableIndex - 1, "");
+            focusCell(editableIndex - 1); // empty box: walk back and clear the previous one
         }
-    }
+    };
 
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, index: number) => {
+    // Paste / SMS autofill: drop consecutive digits into cells from the given start.
+    const distribute = (fromEditableIndex: number, digits: string) => {
+        setNumberInput((prev) => {
+            const next = Array.from({ length: inputLength }, (_, i) => prev[i] ?? "");
+            for (let k = 0; k < digits.length && fromEditableIndex + k < capacity; k++) {
+                next[prefixLength + fromEditableIndex + k] = digits[k];
+            }
+            return next;
+        });
+        focusCell(Math.min(fromEditableIndex + digits.length, capacity - 1));
+    };
 
-        if (e.key >= "0" && e.key <= "9") {
-            const newNumber = [...numberInput];
-            newNumber[index] = e.key;
-            setNumberInput(newNumber);
-            handleFocusNext(index);
+    const handleChange = (editableIndex: number, rawValue: string) => {
+        const digits = rawValue.replace(/\D/g, "");
+        if (digits.length === 0) return handleDelete(editableIndex);
+        if (digits.length >= 2) {
+            // A full-length code always fills from the start; a shorter paste drops in here.
+            return distribute(digits.length >= capacity ? 0 : editableIndex, digits);
+        }
+        handleType(editableIndex, digits);
+    };
+
+    const handleKeyDown = (editableIndex: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === "ArrowLeft" && editableIndex > 0) {
             e.preventDefault();
-            return;
+            focusCell(editableIndex - 1);
+        } else if (e.key === "ArrowRight" && editableIndex + 1 < capacity) {
+            e.preventDefault();
+            focusCell(editableIndex + 1);
         }
+    };
 
-        switch (e.key) {
-            case "Backspace": {
-                if (index < dynamicValuesStartIndex) return;
-                const currentIsEmpty = !(numberInput[index] >= "0" && numberInput[index] <= "9");
-                const targetIndex = currentIsEmpty && index > dynamicValuesStartIndex ? index - 1 : index;
-                setNumberInput((prev: string[]) => {
-                    const newNumber = [...prev];
-                    newNumber[targetIndex] = " ";
-                    return newNumber;
-                });
-                if (targetIndex < index) {
-                    inputRefs[targetIndex].current?.focus();
-                }
-                break;
-            }
-            case "ArrowLeft":
-                if (index > dynamicValuesStartIndex) {
-                    handleFocusPrev(index);
-                }
-                break;
-            case "ArrowRight":
-                if (index < inputLength - 1) {
-                    handleFocusNext(index);
-                }
-                break;
-            default:
-                break;
-        }
-    }
+    const handleReset = () => {
+        setNumberInput((prev) => prev.map((char, i) => (i < prefixLength ? char : "")));
+        focusCell(0);
+    };
 
-    const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>, index: number) => {
-        e.preventDefault();
-        const pasteData = e.clipboardData.getData("text").trim();
-        const digits = pasteData.replace(/\D/g, "").split("");
-
-        const newNumber = [...numberInput];
-        for (let i = 0; i < digits.length; i++) {
-            newNumber[index + i] = digits[i];
-            if (index + i + 1 >= inputLength) break;
-
-            handleFocusNext(index + i);
-        }
-        setNumberInput(newNumber);
-    }
-
+    // h-11 touch target; flex-1 fills the row on phone; sm:max-w-12 caps each box at 48px so every
+    // screen (login / welcome / OTP) shows the same size regardless of its container width.
+    const cellBase =
+        "h-11 min-w-0 flex-1 rounded-lg border bg-white text-center text-base font-medium sm:h-12 sm:max-w-12";
 
     return (
-        <div className="mx-auto overflow-x-auto max-w-full pb-1">
-            <div className="flex items-center w-max mx-auto">
-                {Array.from({ length: inputLength }).map((_, index) => (
+        <div className="flex w-full items-center justify-center gap-1 sm:gap-1.5">
+            {Array.from({ length: inputLength }).map((_, index) => {
+                const isPrefix = index < prefixLength;
+                const editableIndex = index - prefixLength;
+                const char = numberInput[index] ?? "";
+
+                return (
                     <Fragment key={index}>
-                        <input
-                            ref={inputRefs[index]}
-                            type="text"
-                            value={numberInput[index]}
-                            maxLength={1}
-                            className={cn(
-                                "w-8 h-8 sm:w-10 sm:h-10 text-center text-sm sm:text-base border border-gray-300 focus:outline-primary disabled:bg-slate-200",
-                                (index === secondGroupStartIndex || index === inputLength - 1) ? "border-r" : "border-r-0",
-                                index === inputLength - 1 ? "rounded-r-lg" : "rounded-r-none",
-                                index === 0 ? "rounded-l-lg" : "rounded-l-none"
-                            )}
-                            disabled={index < dynamicValuesStartIndex}
-                            autoFocus={index === dynamicValuesStartIndex}
-                            onKeyDown={(e) => handleKeyDown(e, index)}
-                            onChange={() => { }}
-                            onPaste={(e) => handlePaste(e, index)}
-                        />
-
-                        {index === secondGroupStartIndex ? <span className="mx-1 sm:mx-2">-</span> : null}
-
-                        {index === inputLength - 1 && (
-                            <Button size="icon" className="ml-2 sm:ml-3 w-8 h-8 sm:w-10 sm:h-10 rounded-lg border flex items-center justify-center bg-rose-100 text-rose-500 border-rose-200 hover:bg-rose-200 p-0" onClick={handleReset}>
-                                <RotateCcwIcon className="size-4 sm:size-5" />
-                            </Button>
+                        {isPrefix ? (
+                            <div
+                                aria-hidden
+                                className={cn(cellBase, "flex items-center justify-center border-gray-200 bg-slate-100 text-slate-400")}
+                            >
+                                {char}
+                            </div>
+                        ) : (
+                            <input
+                                ref={(el) => { cellRefs.current[editableIndex] = el; }}
+                                type="text"
+                                inputMode="numeric"
+                                pattern="[0-9]*"
+                                size={1} // lets the input shrink in flexbox instead of overflowing the screen
+                                autoComplete={autoComplete}
+                                aria-label={`${groupLabel} — digit ${editableIndex + 1}`}
+                                value={char || SENTINEL}
+                                onChange={(e) => handleChange(editableIndex, e.target.value)}
+                                onKeyDown={(e) => handleKeyDown(editableIndex, e)}
+                                onFocus={(e) => e.target.select()}
+                                className={cn(
+                                    cellBase,
+                                    "border-gray-300 text-gray-900 caret-primary outline-none",
+                                    "focus:border-primary focus:ring-2 focus:ring-primary",
+                                )}
+                            />
                         )}
 
+                        {index === secondGroupStartIndex && (
+                            <span aria-hidden className="hidden shrink-0 px-0.5 text-gray-400 sm:inline">-</span>
+                        )}
                     </Fragment>
-                ))}
-            </div>
+                );
+            })}
+
+            <Button
+                type="button"
+                aria-label="Clear"
+                onClick={handleReset}
+                className="ml-0.5 h-11 w-10 shrink-0 rounded-lg border border-rose-200 bg-rose-100 p-0 text-rose-500 hover:bg-rose-200 sm:ml-1 sm:h-12"
+            >
+                <RotateCcwIcon className="size-5" />
+            </Button>
         </div>
-    )
+    );
 }
 
 const NumberGroupInputMemo = memo(NumberGroupInput);

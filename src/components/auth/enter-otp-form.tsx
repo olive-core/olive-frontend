@@ -19,7 +19,7 @@ export default function EnterOtpForm() {
 
     const [isLoading, setIsLoading] = useState(false);
 
-    const [otp, setOtp] = useState<string[]>(Array(OTP_LENGTH).fill(" "));
+    const [otp, setOtp] = useState<string[]>(Array(OTP_LENGTH).fill(""));
     const [isValidOtp, setIsValidOtp] = useState(false);
     const [resetOtp, setResetOtp] = useState(Math.random());
 
@@ -99,6 +99,8 @@ export default function EnterOtpForm() {
                 inputLength={OTP_LENGTH}
                 secondGroupStartIndex={-1}
                 dynamicValuesStartIndex={0}
+                groupLabel="One-time passcode"
+                autoComplete="one-time-code"
                 key={resetOtp}
             />
             <div className="flex items-center justify-between">
@@ -118,7 +120,8 @@ export default function EnterOtpForm() {
                         variant="ghost"
                         disabled={resendTimer > 0}
                         onClick={resendOtp}
-                        className="disabled:pointer-none"
+                        aria-label="Resend OTP"
+                        className="disabled:pointer-events-none"
                     >
                         <RefreshCwIcon className="inline-block size-4 cursor-pointer text-gray-600 hover:text-gray-800" />
                     </Button>

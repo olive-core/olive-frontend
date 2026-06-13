@@ -18,7 +18,7 @@ export default function WelcomeScreen() {
     const clinician = useAuthStore(state => state.clinician);
 
     const [showContent, setShowContent] = useState<ShowContentStatus>({ status: "NOTHING" });
-    const [phoneNumber, setPhoneNumber] = useState<string[]>(["0", "1"].concat(Array(9).fill(" ")));
+    const [phoneNumber, setPhoneNumber] = useState<string[]>(["0", "1"].concat(Array(9).fill("")));
 
     const handlePhoneComplete = useCallback(async (isComplete: boolean) => {
 

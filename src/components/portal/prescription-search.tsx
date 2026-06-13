@@ -15,13 +15,13 @@ export default function PrescriptionSearch({ value, onChange }: PrescriptionSear
                 placeholder="Search by doctor or diagnosis"
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
-                className="pl-9 pr-9 h-9"
+                className="pl-9 pr-11 h-11 sm:h-9"
             />
             {value && (
                 <button
                     type="button"
                     onClick={() => onChange("")}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                    className="absolute right-0 top-0 h-full w-11 flex items-center justify-center text-slate-400 hover:text-slate-600 transition-colors"
                     aria-label="Clear search"
                 >
                     <XIcon className="size-4" />

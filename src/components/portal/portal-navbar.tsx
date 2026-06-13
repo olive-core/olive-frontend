@@ -18,12 +18,12 @@ export default function PortalNavbar() {
             <div className="flex items-center gap-4">
 
                 <Tooltip>
-                    <TooltipTrigger>
-                        <Link to="/portal/profile">
-                            <Button variant="nav-icon">
+                    <TooltipTrigger asChild>
+                        <Button asChild variant="nav-icon" aria-label="Profile" className="size-11 sm:size-9">
+                            <Link to="/portal/profile">
                                 <UserIcon />
-                            </Button>
-                        </Link>
+                            </Link>
+                        </Button>
                     </TooltipTrigger>
                     <TooltipContent>
                         <p>Profile</p>
@@ -31,8 +31,8 @@ export default function PortalNavbar() {
                 </Tooltip>
 
                 <Tooltip>
-                    <TooltipTrigger>
-                        <Button variant="nav-icon" onClick={logout}>
+                    <TooltipTrigger asChild>
+                        <Button variant="nav-icon" onClick={logout} aria-label="Log out" className="size-11 sm:size-9">
                             <LogOutIcon />
                         </Button>
                     </TooltipTrigger>

@@ -113,37 +113,42 @@ export default function CreatePatientForm({ phoneNumber }: CreatePatientFormProp
                     >
                         {step === 0 && (
                             <Field data-invalid={!!errors.firstName}>
-                                <FieldLabel htmlFor="firstName" className="text-center opacity-60 block">First Name</FieldLabel>
-                                <Input {...register('firstName')} id="firstName" placeholder="First Name" autoFocus autoComplete="off" />
-                                {errors.firstName && <FieldError errors={[errors.firstName]} />}
+                                <FieldLabel htmlFor="firstName" className="text-center text-muted-foreground block">First Name</FieldLabel>
+                                <Input {...register('firstName')} id="firstName" placeholder="First Name" autoFocus autoComplete="given-name" aria-invalid={!!errors.firstName} aria-describedby={errors.firstName ? "firstName-error" : undefined} />
+                                {errors.firstName && <FieldError id="firstName-error" errors={[errors.firstName]} />}
                             </Field>
                         )}
                         {step === 1 && (
                             <Field data-invalid={!!errors.lastName}>
-                                <FieldLabel htmlFor="lastName" className="text-center opacity-60 block">Last Name</FieldLabel>
-                                <Input {...register('lastName')} id="lastName" placeholder="Last Name" autoFocus autoComplete="off" />
-                                {errors.lastName && <FieldError errors={[errors.lastName]} />}
+                                <FieldLabel htmlFor="lastName" className="text-center text-muted-foreground block">Last Name</FieldLabel>
+                                <Input {...register('lastName')} id="lastName" placeholder="Last Name" autoFocus autoComplete="family-name" aria-invalid={!!errors.lastName} aria-describedby={errors.lastName ? "lastName-error" : undefined} />
+                                {errors.lastName && <FieldError id="lastName-error" errors={[errors.lastName]} />}
                             </Field>
                         )}
                         {step === 2 && (
                             <div className="space-y-4">
                                 <Field data-invalid={!!errors.dateOfBirth}>
-                                    <FieldLabel htmlFor="dateOfBirth" className="text-center opacity-60 block">Date of Birth</FieldLabel>
+                                    <FieldLabel htmlFor="dateOfBirth" className="text-center text-muted-foreground block">Date of Birth</FieldLabel>
                                     <Input
                                         {...register('dateOfBirth')}
                                         id="dateOfBirth"
                                         type="date"
                                         max={new Date().toISOString().split('T')[0]}
+                                        autoComplete="bday"
+                                        aria-invalid={!!errors.dateOfBirth}
+                                        aria-describedby={errors.dateOfBirth ? "dateOfBirth-error" : undefined}
                                         autoFocus
                                     />
-                                    {errors.dateOfBirth && <FieldError errors={[errors.dateOfBirth]} />}
+                                    {errors.dateOfBirth && <FieldError id="dateOfBirth-error" errors={[errors.dateOfBirth]} />}
                                 </Field>
                                 <Field data-invalid={!!errors.sex}>
-                                    <FieldLabel htmlFor="sex" className="text-center opacity-60 block">Sex</FieldLabel>
+                                    <FieldLabel htmlFor="sex" className="text-center text-muted-foreground block">Sex</FieldLabel>
                                     <select
                                         {...register('sex')}
                                         id="sex"
-                                        className="w-full h-9 rounded-md border border-input bg-white px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                                        aria-invalid={!!errors.sex}
+                                        aria-describedby={errors.sex ? "sex-error" : undefined}
+                                        className="w-full h-11 sm:h-9 rounded-md border border-input bg-white px-3 py-1 text-base sm:text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                                     >
                                         <option value="" disabled>Select sex</option>
                                         <option value="prefer_not_to_say">Prefer not to say</option>
@@ -151,7 +156,7 @@ export default function CreatePatientForm({ phoneNumber }: CreatePatientFormProp
                                         <option value="female">Female</option>
                                         <option value="non_binary">Non-binary</option>
                                     </select>
-                                    {errors.sex && <FieldError errors={[errors.sex]} />}
+                                    {errors.sex && <FieldError id="sex-error" errors={[errors.sex]} />}
                                 </Field>
                             </div>
                         )}

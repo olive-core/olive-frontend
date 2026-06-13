@@ -37,7 +37,7 @@ export default function PrescriptionCard({ prescription }: PrescriptionCardProps
                 <h3 className="font-semibold text-slate-800 text-sm truncate group-hover:text-emerald-700 transition-colors">
                     {clinicianName}
                 </h3>
-                <p className="text-xs text-slate-400 mt-0.5">
+                <p className="text-xs text-slate-500 mt-0.5">
                     {getDayLabel(prescription.created_at)}
                 </p>
             </div>
@@ -47,10 +47,10 @@ export default function PrescriptionCard({ prescription }: PrescriptionCardProps
             </div>
 
             <div className="flex items-center gap-2 shrink-0 ml-auto">
-                <span className="text-xs text-slate-400 font-mono">
+                <span className="text-xs text-slate-500 font-mono">
                     {getTimeOfDay(prescription.created_at)}
                 </span>
-                <ChevronRightIcon className="size-4 text-slate-300 group-hover:text-emerald-500 transition-colors" />
+                <ChevronRightIcon aria-hidden className="size-4 text-slate-400 group-hover:text-emerald-500 transition-colors" />
             </div>
         </button>
     );

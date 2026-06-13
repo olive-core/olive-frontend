@@ -14,7 +14,7 @@ interface BaseFieldProps<T extends FieldValues> {
     validationMiddleWare?: () => Promise<void>;
 }
 
-const fieldLabelClasses = "text-center opacity-60 block";
+const fieldLabelClasses = "text-center text-muted-foreground block";
 
 export function InputField<T extends FieldValues>({ id, control, placeholder, label, validationMiddleWare }: BaseFieldProps<T> & InputFieldStep<T>) {
     return (
@@ -85,7 +85,8 @@ export function TagInputField<T extends FieldValues>({ id, control, label, place
                                     <button
                                         type="button"
                                         onClick={() => removeTag(tag)}
-                                        className="text-emerald-500 hover:text-emerald-700"
+                                        aria-label={`Remove ${tag}`}
+                                        className="px-1 text-emerald-500 hover:text-emerald-700"
                                     >
                                         ×
                                     </button>
@@ -105,7 +106,7 @@ export function TagInputField<T extends FieldValues>({ id, control, label, place
                                     }
                                 }}
                                 placeholder={placeholder ?? "Type and press Enter"}
-                                className="flex-1 min-w-[120px] outline-none text-sm"
+                                className="flex-1 min-w-[120px] outline-none bg-transparent text-base sm:text-sm"
                             />
                             <Button type="button" size="sm" onClick={() => addTag(inputValue)}>
                                 + Add

@@ -95,17 +95,15 @@ export default function DashboardNavbar() {
     const renderMenuShowButton = (menu: MenuItemType) => {
         return (
             <Tooltip>
-                <TooltipTrigger>
-                    {menu.href && (
-                        <Link to={menu.href}>
-                            <Button variant="nav-icon">
+                <TooltipTrigger asChild>
+                    {menu.href ? (
+                        <Button asChild variant="nav-icon" aria-label={menu.label}>
+                            <Link to={menu.href}>
                                 {menu.icon}
-                            </Button>
-                        </Link>
-                    )}
-
-                    {menu.buttonType && (
-                        <Button variant="nav-icon" onClick={() => handleMenuClick(menu)}>
+                            </Link>
+                        </Button>
+                    ) : (
+                        <Button variant="nav-icon" aria-label={menu.label} onClick={() => handleMenuClick(menu)}>
                             {menu.icon}
                         </Button>
                     )}
@@ -128,10 +126,10 @@ export default function DashboardNavbar() {
                 )}
 
                 {menu.buttonType && (
-                    <div className="flex items-center gap-2 cursor-pointer w-full" onClick={() => handleMenuClick(menu)}>
+                    <button type="button" className="flex items-center gap-2 cursor-pointer w-full text-left" onClick={() => handleMenuClick(menu)}>
                         {menu.icon}
                         {menu.label}
-                    </div>
+                    </button>
                 )}
             </>
         )
@@ -154,13 +152,14 @@ export default function DashboardNavbar() {
                 )}
 
                 {menu.buttonType && (
-                    <div
-                        className="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 font-medium hover:bg-emerald-50 hover:text-emerald-600 transition-colors cursor-pointer"
+                    <button
+                        type="button"
+                        className="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 font-medium hover:bg-emerald-50 hover:text-emerald-600 transition-colors cursor-pointer w-full text-left"
                         onClick={() => { handleMenuClick(menu); closeMenu(); }}
                     >
                         {menu.icon}
                         {menu.label}
-                    </div>
+                    </button>
                 )}
             </>
         )
@@ -182,19 +181,11 @@ export default function DashboardNavbar() {
                     {MENU_ITEMS.length > TOTAL_MENU_TO_SHOW && (
                         <DropdownMenu>
 
-                            <Tooltip>
-                                <TooltipTrigger>
-                                    <DropdownMenuTrigger asChild className="focus:outline-none focus:ring-0 focus:border-none">
-                                        <Button variant="nav-icon">
-                                            <EllipsisIcon />
-                                        </Button>
-                                    </DropdownMenuTrigger>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                    <p>More Items</p>
-                                </TooltipContent>
-                            </Tooltip>
-
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="nav-icon" aria-label="More items">
+                                    <EllipsisIcon />
+                                </Button>
+                            </DropdownMenuTrigger>
 
                             <DropdownMenuContent>
                                 {MENU_ITEMS.slice(menuToShowCount).map((menu, index) => (

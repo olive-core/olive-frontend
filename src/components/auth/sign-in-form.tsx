@@ -21,7 +21,7 @@ export default function SignInForm() {
     const [isChecking, setIsChecking] = useState(false);
     const [doesExist, setDoesExist] = useState<0 | 1>(1);
 
-    const [phoneNumber, setPhoneNumber] = useState<string[]>(["0", "1"].concat(Array(9).fill(" ")));
+    const [phoneNumber, setPhoneNumber] = useState<string[]>(["0", "1"].concat(Array(9).fill("")));
 
     const [showPanel, setShowPanel] = useState<ShowPanel>(null);
 

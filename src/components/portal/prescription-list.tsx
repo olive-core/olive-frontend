@@ -7,13 +7,12 @@ interface PrescriptionListProps {
 
 export default function PrescriptionList({ prescriptions }: PrescriptionListProps) {
     return (
-        <div className="flex flex-col gap-3">
+        <ul className="flex flex-col gap-3">
             {prescriptions.map((prescription) => (
-                <PrescriptionCard
-                    key={prescription.prescription_id}
-                    prescription={prescription}
-                />
+                <li key={prescription.prescription_id}>
+                    <PrescriptionCard prescription={prescription} />
+                </li>
             ))}
-        </div>
+        </ul>
     );
 }

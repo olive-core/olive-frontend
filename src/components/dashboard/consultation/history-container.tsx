@@ -94,10 +94,11 @@ export default function HistoryContainer({
                         : "No diagnosis summary";
 
                     return (
-                        <div
+                        <button
+                            type="button"
                             key={history.prescription_id}
                             className={cn(
-                                "flex justify-between items-center py-6 relative cursor-pointer hover:bg-slate-50 px-2 rounded-md transition-colors",
+                                "flex w-full text-left justify-between items-center py-6 relative cursor-pointer hover:bg-slate-50 px-2 rounded-md transition-colors",
                                 isActive ? "bg-slate-100/70" : ""
                             )}
                             onClick={() => setActiveHistoryId(history.prescription_id)}
@@ -113,15 +114,15 @@ export default function HistoryContainer({
                                 isActive ? "bg-emerald-500" : "bg-slate-300"
                             )} />
 
-                            <div className="w-[70%] pl-4 md:pl-8">
-                                <p className={cn("text-sm text-slate-700 text-left line-clamp-2", isActive ? "font-semibold" : "font-normal")}>
+                            <div className="w-[70%] min-w-0 pl-4 md:pl-8">
+                                <p className={cn("text-sm text-slate-700 text-left line-clamp-2 break-words", isActive ? "font-semibold" : "font-normal")}>
                                     {summary}
                                 </p>
                                 <p className="text-xs text-slate-400 mt-0.5">
                                     Dr. {history.clinician_first_name} {history.clinician_last_name}
                                 </p>
                             </div>
-                        </div>
+                        </button>
                     );
                 })}
             </div>
