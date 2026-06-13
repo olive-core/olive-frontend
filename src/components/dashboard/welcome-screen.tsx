@@ -1,7 +1,5 @@
 
-import { PhoneIcon } from "lucide-react";
 import { useCallback, useState } from "react";
-import { TextAnimate } from "../ui/text-animate";
 import { AnimatePresence, motion } from "motion/react";
 import PatientInfo from "./patient/patient-info";
 import api from "@/lib/axios";
@@ -58,18 +56,18 @@ export default function WelcomeScreen() {
             />
 
             <motion.div className="flex flex-col items-center justify-center mb-10">
-                <TextAnimate animation="blurInUp" by="character" once as="h3" className="font-display text-3xl md:text-xl leading-10 font-light text-center">
-                    {`Welcome, Dr. ${clinician?.firstName ?? ""} ${clinician?.lastName ?? ""!}`}
-                </TextAnimate>
-                <p className="my-4 text-center text-gray-600">
-                    <PhoneIcon className="inline-block mr-1 size-4" />
-                    Enter patient's phone number to get started:
+                <p className="mb-6 text-lg text-center text-gray-500 font-light">
+                    {clinician?.firstName
+                        ? `Dr. ${clinician.firstName}, enter your patient's phone number`
+                        : "Enter your patient's phone number"}
                 </p>
-                <NumberGroupInputMemo
-                    onComplete={handlePhoneComplete}
-                    numberInput={phoneNumber}
-                    setNumberInput={setPhoneNumber}
-                />
+                <div className="w-full max-w-md">
+                    <NumberGroupInputMemo
+                        onComplete={handlePhoneComplete}
+                        numberInput={phoneNumber}
+                        setNumberInput={setPhoneNumber}
+                    />
+                </div>
             </motion.div>
 
 
