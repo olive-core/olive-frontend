@@ -1,6 +1,7 @@
 import { createFileRoute, Outlet, useNavigate } from '@tanstack/react-router'
 import { useEffect } from "react";
 import PortalNavbar from "@/components/portal/portal-navbar";
+import AppFooter from "@/components/shared/app-footer";
 import { useAuthStore } from "@/stores/auth-store";
 
 export const Route = createFileRoute('/portal')({
@@ -27,6 +28,7 @@ function PortalLayout() {
         <div className="w-full h-full flex-1 flex flex-col">
           <Outlet />
         </div>
+        <AppFooter />
       </main>
     </div>
   )

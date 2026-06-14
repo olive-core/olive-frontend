@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import FeaturesSection from "@/components/homepage/features";
-import HomeFooter from "@/components/homepage/footer";
+import AppFooter from "@/components/shared/app-footer";
 import HeroSection from "@/components/homepage/hero";
 import HomeNavbar from "@/components/homepage/navbar";
 import StepsSection from "@/components/homepage/steps";
@@ -32,7 +32,7 @@ function HomePage() {
             <StepsSection />
             <FeaturesSection />
             <ValuesSection />
-            <HomeFooter />
+            <AppFooter />
         </>
     )
 }

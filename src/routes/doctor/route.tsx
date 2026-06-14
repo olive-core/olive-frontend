@@ -1,5 +1,6 @@
 import { createFileRoute, Outlet, useNavigate } from '@tanstack/react-router'
 import DashboardNavbar from "@/components/dashboard/navbar";
+import AppFooter from "@/components/shared/app-footer";
 import { useAuthStore } from "@/stores/auth-store";
 import { useEffect } from "react";
 
@@ -29,9 +30,7 @@ function DashboardLayout() {
         <div className="w-full h-full flex-1 flex flex-col">
           <Outlet />
         </div>
-        <footer className="flex h-12 flex-none items-center justify-center px-4 text-xs text-slate-400">
-          © {new Date().getFullYear()} Olive · All rights reserved.
-        </footer>
+        <AppFooter />
       </main>
     </div>
   )
