@@ -41,7 +41,7 @@ function EditableFollowUp({ value, onChange }: Required<Omit<FollowUpBlockProps,
                             type="button"
                             onClick={() => onChange({ follow_up_days: isActive ? null : preset.days })}
                             className={cn(
-                                "rounded-full border px-3 py-1 text-xs font-semibold transition-colors",
+                                "cursor-pointer rounded-full border px-3 py-1 text-xs font-semibold transition-colors",
                                 isActive
                                     ? "border-emerald-500 bg-emerald-500 text-white shadow-sm"
                                     : "border-slate-200 bg-white text-slate-600 hover:border-emerald-300 hover:text-emerald-700"
@@ -105,7 +105,7 @@ export default function FollowUpBlock({ value, onChange, baseDate }: FollowUpBlo
 
     return (
         <div className="flex flex-col gap-2 rounded-xl border bg-white p-3">
-            <h3 className="text-sm font-semibold text-slate-700">Follow Up</h3>
+            <h3 className="font-bold text-xs uppercase tracking-widest text-slate-500">Follow Up</h3>
             {isEditable ? <EditableFollowUp value={value} onChange={onChange} /> : <ReadOnlyFollowUp value={value} baseDate={baseDate} />}
         </div>
     );

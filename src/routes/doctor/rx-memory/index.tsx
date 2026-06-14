@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import api from '@/lib/axios'
 import { useAuthStore } from '@/stores/auth-store'
-import { BookmarkIcon, PlusIcon, LayoutTemplateIcon, ClockIcon, GlobeIcon, LockIcon, Trash2Icon, AlertTriangleIcon } from 'lucide-react'
+import { BookmarkIcon, PlusIcon, BookMarkedIcon, ClockIcon, GlobeIcon, LockIcon, Trash2Icon, AlertTriangleIcon } from 'lucide-react'
 import { format } from 'date-fns'
 import {
   Dialog,
@@ -52,7 +52,7 @@ function TemplateCard({
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
           <div className="shrink-0 w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
-            <LayoutTemplateIcon className="w-5 h-5 text-emerald-600" />
+            <BookMarkedIcon className="w-5 h-5 text-emerald-600" />
           </div>
           <h3 className="font-semibold text-slate-800 text-sm leading-snug line-clamp-2 group-hover:text-emerald-700 transition-colors">
             {template.template_name}
@@ -241,7 +241,7 @@ function RouteComponent() {
       {isError && !isLoading && (
         <div className="flex flex-col items-center justify-center py-20 gap-4 text-center">
           <div className="w-14 h-14 rounded-2xl bg-red-50 flex items-center justify-center">
-            <LayoutTemplateIcon className="w-7 h-7 text-red-400" />
+            <BookMarkedIcon className="w-7 h-7 text-red-400" />
           </div>
           <p className="text-slate-600 font-medium">Failed to load RxMemory</p>
           <p className="text-slate-400 text-sm">Please try again later</p>
@@ -252,7 +252,7 @@ function RouteComponent() {
       {!isLoading && !isError && templates.length === 0 && (
         <div className="flex flex-col items-center justify-center py-20 gap-4 text-center">
           <div className="w-16 h-16 rounded-2xl bg-emerald-50 flex items-center justify-center">
-            <LayoutTemplateIcon className="w-8 h-8 text-emerald-400" />
+            <BookMarkedIcon className="w-8 h-8 text-emerald-400" />
           </div>
           <div>
             <p className="text-slate-700 font-semibold text-lg">No RxMemory yet</p>

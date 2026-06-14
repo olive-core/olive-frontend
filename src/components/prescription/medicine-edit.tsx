@@ -193,14 +193,14 @@ export default function MedicineEdit({ medicine, onRemove, onUpdate, index, setI
                     className="text-xs font-bold text-slate-400 hover:text-rose-500 transition-colors"
                     onClick={() => { onRemove(index); setIsEditing(false, index); }}
                 >
-                    <Trash2 className="size-3.5 mr-2" /> REMOVE
+                    <Trash2 className="size-3.5 mr-2" /> Remove
                 </Button>
                 <div className="flex gap-2">
                     <Button variant="ghost" size="sm" className="h-9 text-xs font-bold text-slate-500" onClick={handleCancel}>
-                        CANCEL
+                        Cancel
                     </Button>
-                    <Button size="sm" className="h-9 text-xs px-6 font-bold bg-slate-900 text-white hover:bg-slate-800 rounded-lg shadow-md" onClick={handleSave}>
-                        DONE
+                    <Button size="sm" className="h-9 text-xs px-6 font-bold shadow-md" onClick={handleSave}>
+                        Done
                     </Button>
                 </div>
             </div>
@@ -215,7 +215,7 @@ function EnhancedMealSlot({ label, timing, setTiming }: { label: string, timing:
             <div className="flex items-center p-0.5 bg-slate-200/50 border border-slate-200 rounded-lg shadow-inner">
                 <button
                     onClick={() => setTiming(timing === "before" ? "none" : "before")}
-                    className={`px-3 py-1.5 text-[9px] font-black rounded-md transition-all ${timing === "before" ? "bg-white text-amber-600 shadow-sm" : "text-slate-400 hover:text-slate-600"
+                    className={`cursor-pointer px-3 py-1.5 text-[9px] font-black rounded-md transition-all ${timing === "before" ? "bg-white text-amber-600 shadow-sm" : "text-slate-400 hover:text-slate-600"
                         }`}
                 >
                     PRE
@@ -225,7 +225,7 @@ function EnhancedMealSlot({ label, timing, setTiming }: { label: string, timing:
                 </div>
                 <button
                     onClick={() => setTiming(timing === "after" ? "none" : "after")}
-                    className={`px-3 py-1.5 text-[9px] font-black rounded-md transition-all ${timing === "after" ? "bg-white text-emerald-600 shadow-sm" : "text-slate-400 hover:text-slate-600"
+                    className={`cursor-pointer px-3 py-1.5 text-[9px] font-black rounded-md transition-all ${timing === "after" ? "bg-white text-emerald-600 shadow-sm" : "text-slate-400 hover:text-slate-600"
                         }`}
                 >
                     POST

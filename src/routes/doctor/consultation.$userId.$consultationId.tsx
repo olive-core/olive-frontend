@@ -111,7 +111,7 @@ function RouteComponent() {
   const hasSelection = !!activeHistoryId;
 
   return (
-    <div className="container flex flex-col py-6 md:h-[calc(100svh-120px)]">
+    <div className="container flex flex-col py-6 md:h-[calc(100svh-136px)]">
       <div className="mb-5 flex-none">
         <PatientChip userId={userId} />
       </div>

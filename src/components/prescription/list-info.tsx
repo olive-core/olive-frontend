@@ -49,7 +49,7 @@ export default function ListInfo({ title, info, fieldName, addEmptyItem, updateI
     return (
         <div
             className={`flex flex-col gap-2 p-2 rounded-xl transition-colors duration-300 
-            ${isDiagnosis ? "bg-emerald-50/40 border-2 border-emerald-500 pl-3" : ""}`}
+            ${isDiagnosis ? "bg-emerald-50/40 border border-emerald-300 pl-3" : ""}`}
         >
             {/* Header */}
             <div className="flex items-center justify-between px-1">
@@ -62,7 +62,7 @@ export default function ListInfo({ title, info, fieldName, addEmptyItem, updateI
                     className="h-7 text-xs font-bold text-emerald-600 hover:bg-emerald-100/50"
                     onClick={handleAdd}
                 >
-                    <PlusCircle className="size-3 mr-1" /> ADD
+                    <PlusCircle className="size-3 mr-1" /> Add
                 </Button>
             </div>
 
@@ -223,34 +223,6 @@ const EditingItem = ({ item, index, setIsEditing, onUpdate, onRemove, editingIte
                         fetchOptions={fetchOptions}
                         queryKeyBase={`${fieldName}-search`}
                     />
-
-                    {/* <Input
-                        autoFocus
-                        className="h-9 text-sm"
-                        value={localItem.name}
-                        onChange={(e) => setLocalItem({ ...localItem, name: e.target.value })}
-                        onKeyDown={(e) => e.key === "Enter" && handleSave()}
-                        onFocus={() => setIsFocused(true)}
-                        onBlur={() => setTimeout(() => setIsFocused(false), 150)} // Delay blur so click registers on suggestions
-                    /> */}
-
-                    {/* Custom Dropdown Menu */}
-                    {/* {isFocused && filteredSuggestions.length > 0 && (
-                        <ul className="absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded-md shadow-lg max-h-48 overflow-auto">
-                            {filteredSuggestions.map((name) => (
-                                <li
-                                    key={name}
-                                    className="px-3 py-2 text-sm cursor-pointer hover:bg-slate-100 text-slate-700"
-                                    onMouseDown={() => {
-                                        setLocalItem({ ...localItem, name: name });
-                                        setIsFocused(false);
-                                    }}
-                                >
-                                    {name}
-                                </li>
-                            ))}
-                        </ul>
-                    )} */}
                 </div>
 
                 {/* Duration Input - Conditional */}
@@ -299,7 +271,7 @@ const EditingItem = ({ item, index, setIsEditing, onUpdate, onRemove, editingIte
                         setIsEditing(false);
                     }}
                 >
-                    <Trash2 className="size-3.5 mr-1.5" /> REMOVE
+                    <Trash2 className="size-3.5 mr-1.5" /> Remove
                 </Button>
                 <div className="flex gap-2">
                     <Button
@@ -308,14 +280,14 @@ const EditingItem = ({ item, index, setIsEditing, onUpdate, onRemove, editingIte
                         className="h-8 text-xs font-bold text-slate-500"
                         onClick={handleCancel}
                     >
-                        CANCEL
+                        Cancel
                     </Button>
                     <Button
                         size="sm"
-                        className="h-8 text-xs font-bold bg-slate-900 hover:bg-slate-800 px-4 text-white"
+                        className="h-8 text-xs font-bold px-4"
                         onClick={handleSave}
                     >
-                        DONE
+                        Done
                     </Button>
                 </div>
             </div>

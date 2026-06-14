@@ -15,6 +15,7 @@ import ClinicalNotesPanel from "./paper/clinical-notes-panel";
 import DocumentSwitcher, { type PrescriptionDocument } from "./document-switcher";
 import VitalsBar from "./paper/vitals-bar";
 import FollowUpBlock from "./paper/follow-up-block";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 interface PrescriptionProps {
@@ -147,13 +148,13 @@ export default function Prescription({ onGenerate, onCancel, hasBeenGenerated }:
                 </>
             }
             footer={
-                <button
+                <Button
                     onClick={() => confirmMutation.mutate()}
-                    disabled={confirmMutation.isPending}
-                    className="h-9 px-8 font-bold bg-slate-900 text-white hover:bg-slate-800 rounded-lg shadow-md transition-colors disabled:opacity-50"
+                    isLoading={confirmMutation.isPending}
+                    className="px-8 font-bold shadow-md"
                 >
-                    {confirmMutation.isPending ? "Saving..." : "Confirm"}
-                </button>
+                    Save &amp; Print
+                </Button>
             }
         />
     );

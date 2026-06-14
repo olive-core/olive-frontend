@@ -29,7 +29,10 @@ export default function PrescriptionPaper({ header, patientStrip, vitalsBar, lef
             </div>
 
             {footer && (
-                <div className="p-4 border-t flex justify-end bg-slate-50 rounded-b-xl print:hidden">
+                <div className="sticky bottom-0 z-20 flex items-center justify-end gap-4 rounded-b-xl border-t bg-white/85 px-4 py-3 backdrop-blur sm:justify-between print:hidden">
+                    <span className="hidden text-xs text-slate-400 sm:block">
+                        Review everything, then save &amp; print.
+                    </span>
                     {footer}
                 </div>
             )}

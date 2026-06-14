@@ -1,4 +1,4 @@
-import { ClipboardListIcon, EllipsisIcon, House, LayoutTemplate, LogOutIcon, MenuIcon, UserIcon, XIcon } from "lucide-react";
+import { BookMarked, ClipboardListIcon, EllipsisIcon, House, LogOutIcon, MenuIcon, UserIcon, XIcon } from "lucide-react";
 import { useState } from "react";
 import NavbarContainer from "../shared/navbar-container";
 import { Button } from "../ui/button";
@@ -36,7 +36,7 @@ const MENU_ITEMS: MenuItemType[] = [
     },
     {
         label: "RxMemory",
-        icon: <LayoutTemplate />,
+        icon: <BookMarked />,
         href: "/doctor/rx-memory",
     },
     // {
