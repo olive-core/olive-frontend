@@ -24,15 +24,14 @@ export default function DoctorInfo({
     const { userId, storeClinicianInfo } = useAuthStore();
     const isGenerating = usePrescriptionStore(s => s.isGenerating);
     const templateSelected = usePrescriptionStore(s => s.templateSelected);
-    const generatedMedicine = usePrescriptionStore(s => s.generatedMedicine);
-    const generatedInvestigation = usePrescriptionStore(s => s.generatedInvestigation);
+    const generatedSections = usePrescriptionStore(s => s.generatedSections);
     const setPrescriptionFromTemplate = usePrescriptionStore(s => s.setPrescriptionFromTemplate);
     const revertTemplateSelection = usePrescriptionStore(s => s.revertTemplateSelection);
 
     const [isApplyingTemplate, setIsApplyingTemplate] = useState(false);
     const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
 
-    const hasGeneratedData = generatedMedicine.length > 0 || generatedInvestigation.length > 0;
+    const hasGeneratedData = Object.values(generatedSections).some(items => items.length > 0);
 
     useEffect(() => {
         if (!templateSelected) {

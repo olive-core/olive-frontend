@@ -3,6 +3,7 @@ import { useMutation, useQuery } from '@tanstack/react-query'
 import { useAuthStore } from '@/stores/auth-store'
 import api from '@/lib/axios'
 import TemplateEditor, { type TemplatePayload, type InitialTemplateData } from '@/components/templates/template-editor'
+import { Button } from '@/components/ui/button'
 
 export const Route = createFileRoute('/doctor/rx-memory/manage/$templateId')({
   component: RouteComponent,
@@ -37,12 +38,9 @@ function RouteComponent() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[50vh] gap-4">
         <p className="text-red-500 font-medium">Failed to load RxMemory.</p>
-        <button
-          onClick={() => navigate({ to: '/doctor/rx-memory' })}
-          className="h-9 px-6 font-bold bg-slate-900 text-white hover:bg-slate-800 rounded-lg shadow-md"
-        >
+        <Button variant="outline" onClick={() => navigate({ to: '/doctor/rx-memory' })}>
           Back to RxMemory
-        </button>
+        </Button>
       </div>
     )
   }

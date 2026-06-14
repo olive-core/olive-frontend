@@ -4,7 +4,9 @@ import { usePrescriptionStore } from '@/stores/prescription-store'
 import ListInfo from '@/components/prescription/list-info'
 import { MedicineContainer } from '@/components/prescription/medicine-container'
 import AdviceList from '@/components/prescription/advice-list'
-import { ArrowLeftIcon, GlobeIcon, LockIcon, SaveIcon } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { isRxMemorySection } from '@/lib/rx-memory'
+import { ArrowLeftIcon, SaveIcon } from 'lucide-react'
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -75,7 +77,6 @@ export default function TemplateEditor({
   const navigate = useNavigate()
 
   const [templateName, setTemplateName] = useState('')
-  const [visibility, setVisibility] = useState<'private' | 'public'>('private')
   const [nameError, setNameError] = useState(false)
   const [initialized, setInitialized] = useState(false)
 
@@ -93,7 +94,6 @@ export default function TemplateEditor({
     if (!initialData || initialized) return
 
     setTemplateName(initialData.template_name)
-    setVisibility(initialData.visibility === 'public' ? 'public' : 'private')
 
     const pd = initialData.prescription_data
     usePrescriptionStore.setState({
@@ -155,7 +155,7 @@ export default function TemplateEditor({
 
   const buildPayload = (): TemplatePayload => ({
     template_name: templateName.trim(),
-    visibility,
+    visibility: 'private',
     prescription_data: {
       chief_complaints: chiefComplaint.map(item => ({
         ccn_id: null,
@@ -244,7 +244,7 @@ export default function TemplateEditor({
       <div className="flex items-center gap-3 mb-6">
         <button
           onClick={() => navigate({ to: '/doctor/rx-memory' })}
-          className="p-2 rounded-lg hover:bg-slate-100 text-slate-500 transition-colors"
+          className="cursor-pointer p-2 rounded-lg hover:bg-slate-100 text-slate-500 transition-colors"
         >
           <ArrowLeftIcon className="w-4 h-4" />
         </button>
@@ -255,54 +255,23 @@ export default function TemplateEditor({
       </div>
 
       <div className="rounded-xl border flex flex-col mb-12 bg-white">
-        {/* Template meta: name + visibility */}
-        <div className="p-4 border-b flex flex-col sm:flex-row gap-3">
-          <div className="flex-1">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-tighter mb-1 block">
-              RxMemory name *
-            </label>
-            <input
-              value={templateName}
-              onChange={(e) => { setTemplateName(e.target.value); setNameError(false) }}
-              placeholder="e.g. URTI Protocol, Hypertension Starter..."
-              className={`w-full h-10 px-3 text-sm border rounded-xl shadow-sm outline-none focus:ring-2 transition-all ${nameError
-                ? 'border-red-400 focus:ring-red-200'
-                : 'border-slate-200 focus:ring-emerald-500/20'
-                }`}
-            />
-            {nameError && (
-              <p className="text-xs text-red-500 mt-1">RxMemory name is required</p>
-            )}
-          </div>
-
-          {/* Visibility toggle */}
-          <div>
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-tighter mb-1 block">
-              Visibility
-            </label>
-            <div className="flex rounded-xl border border-slate-200 overflow-hidden h-10">
-              <button
-                onClick={() => setVisibility('private')}
-                className={`flex items-center gap-1.5 px-4 text-sm font-medium transition-colors ${visibility === 'private'
-                  ? 'bg-slate-900 text-white'
-                  : 'bg-white text-slate-500 hover:bg-slate-50'
-                  }`}
-              >
-                <LockIcon className="w-3.5 h-3.5" />
-                Private
-              </button>
-              <button
-                onClick={() => setVisibility('public')}
-                className={`flex items-center gap-1.5 px-4 text-sm font-medium transition-colors border-l border-slate-200 ${visibility === 'public'
-                  ? 'bg-emerald-600 text-white border-emerald-600'
-                  : 'bg-white text-slate-500 hover:bg-slate-50'
-                  }`}
-              >
-                <GlobeIcon className="w-3.5 h-3.5" />
-                Public
-              </button>
-            </div>
-          </div>
+        {/* RxMemory name */}
+        <div className="p-4 border-b">
+          <label className="text-[10px] font-black text-slate-400 uppercase tracking-tighter mb-1 block">
+            RxMemory name *
+          </label>
+          <input
+            value={templateName}
+            onChange={(e) => { setTemplateName(e.target.value); setNameError(false) }}
+            placeholder="e.g. URTI Protocol, Hypertension Starter..."
+            className={`w-full h-10 px-3 text-sm border rounded-xl shadow-sm outline-none focus:ring-2 transition-all ${nameError
+              ? 'border-red-400 focus:ring-red-200'
+              : 'border-slate-200 focus:ring-emerald-500/20'
+              }`}
+          />
+          {nameError && (
+            <p className="text-xs text-red-500 mt-1">RxMemory name is required</p>
+          )}
         </div>
 
         {/* Main editor */}
@@ -310,46 +279,56 @@ export default function TemplateEditor({
           <div className="grid grid-cols-1 md:grid-cols-3">
             {/* Left column */}
             <div className="h-full md:border-r md:col-span-1 border-b md:border-b-0 py-4 flex flex-col gap-2">
-              <ListInfo
-                title="Chief Complaints"
-                info={chiefComplaint}
-                fieldName="chief-complaint"
-                addEmptyItem={addEmptyChiefComplaint}
-                updateItem={updateChiefComplaint}
-                removeItem={removeChiefComplaint}
-              />
-              <ListInfo
-                title="History"
-                info={history}
-                fieldName="history"
-                addEmptyItem={addEmptyHistory}
-                updateItem={updateHistory}
-                removeItem={removeHistory}
-              />
-              <ListInfo
-                title="Diagnosis"
-                info={diagnosis}
-                fieldName="diagnosis"
-                addEmptyItem={addEmptyDiagnosis}
-                updateItem={updateDiagnosis}
-                removeItem={removeDiagnosis}
-              />
-              <ListInfo
-                title="Investigation"
-                info={investigation}
-                fieldName="investigation"
-                addEmptyItem={addEmptyInvestigation}
-                updateItem={updateInvestigation}
-                removeItem={removeInvestigation}
-              />
+              {isRxMemorySection("chief-complaint") && (
+                <ListInfo
+                  title="Chief Complaints"
+                  info={chiefComplaint}
+                  fieldName="chief-complaint"
+                  addEmptyItem={addEmptyChiefComplaint}
+                  updateItem={updateChiefComplaint}
+                  removeItem={removeChiefComplaint}
+                />
+              )}
+              {isRxMemorySection("history") && (
+                <ListInfo
+                  title="History"
+                  info={history}
+                  fieldName="history"
+                  addEmptyItem={addEmptyHistory}
+                  updateItem={updateHistory}
+                  removeItem={removeHistory}
+                />
+              )}
+              {isRxMemorySection("diagnosis") && (
+                <ListInfo
+                  title="Diagnosis"
+                  info={diagnosis}
+                  fieldName="diagnosis"
+                  addEmptyItem={addEmptyDiagnosis}
+                  updateItem={updateDiagnosis}
+                  removeItem={removeDiagnosis}
+                />
+              )}
+              {isRxMemorySection("investigation") && (
+                <ListInfo
+                  title="Investigation"
+                  info={investigation}
+                  fieldName="investigation"
+                  addEmptyItem={addEmptyInvestigation}
+                  updateItem={updateInvestigation}
+                  removeItem={removeInvestigation}
+                />
+              )}
             </div>
 
             {/* Right column */}
             <div className="col-span-1 md:col-span-2 py-4 px-4 md:px-8 flex flex-col justify-between gap-4">
-              <MedicineContainer />
-              <div className="mt-auto">
-                <AdviceList value={advice} onChange={setAdvice} />
-              </div>
+              {isRxMemorySection("medicine") && <MedicineContainer />}
+              {isRxMemorySection("advice") && (
+                <div className="mt-auto">
+                  <AdviceList value={advice} onChange={setAdvice} />
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -359,14 +338,14 @@ export default function TemplateEditor({
           <p className="text-xs text-slate-400">
             All fields are optional except the RxMemory name.
           </p>
-          <button
+          <Button
             onClick={handleSubmit}
             disabled={isPending}
-            className="flex items-center gap-2 h-9 px-6 font-bold bg-emerald-600 text-white hover:bg-emerald-700 rounded-lg shadow-sm transition-colors disabled:opacity-50 text-sm"
+            className="px-6 font-bold shadow-sm"
           >
             <SaveIcon className="w-4 h-4" />
             {isPending ? submittingLabel : submitLabel}
-          </button>
+          </Button>
         </div>
       </div>
 

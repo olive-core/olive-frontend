@@ -1,5 +1,11 @@
 import type { ChiefComplaintType, DiagnosisType, InvestigationType, MeedicineType, HistoryType, PrescriptionResponseType, VitalsType, FollowUpType } from "@/types/prescription";
 import { hasAnyVital, vitalsForSubmit } from "@/lib/vitals";
+import {
+    applyRxMemoryToStore,
+    clearedRxMemorySections,
+    omitRxMemorySections,
+    pickRxMemorySections,
+} from "@/lib/rx-memory";
 import { create } from "zustand";
 
 const EMPTY_FOLLOW_UP: FollowUpType = { follow_up_days: null, follow_up_notes: null };
@@ -25,8 +31,7 @@ interface PrescriptionStoreType {
     followUp: FollowUpType;
 
     templateSelected: boolean;
-    generatedMedicine: MeedicineType[];
-    generatedInvestigation: InvestigationType[];
+    generatedSections: Record<string, unknown[]>;
     isRevertingTemplate: boolean;
 
     // methods
@@ -103,8 +108,7 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
             advice: [],
 
             templateSelected: false,
-            generatedMedicine: [],
-            generatedInvestigation: [],
+            generatedSections: {},
             isRevertingTemplate: false,
 
             initiatePrescription: (patientId, sessionId) => {
@@ -125,8 +129,7 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
                 medicine: [],
                 advice: [],
                 templateSelected: false,
-                generatedMedicine: [],
-                generatedInvestigation: [],
+                generatedSections: {},
                 isRevertingTemplate: false,
             }),
 
@@ -157,11 +160,12 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
                 const vitals = data.vitals ?? {};
                 const followUp = { ...EMPTY_FOLLOW_UP, ...data.follow_up };
 
-                if (get().templateSelected) {
-                    set({ chiefComplaint, history, diagnosis, summary, safetyNet, vitals, followUp });
-                } else {
-                    set({ chiefComplaint, history, diagnosis, medicine: [], investigation: [], summary, safetyNet, vitals, followUp });
-                }
+                // Covered sections are cleared until the full draft arrives — unless an RxMemory is
+                // applied, in which case its values must survive the partial update.
+                set({
+                    chiefComplaint, history, diagnosis, summary, safetyNet, vitals, followUp,
+                    ...(get().templateSelected ? {} : clearedRxMemorySections()),
+                });
             },
 
             getInitialPrescription: async (data: PrescriptionResponseType) => {
@@ -215,60 +219,33 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
                 const vitals = data.vitals ?? {};
                 const followUp = { ...EMPTY_FOLLOW_UP, ...data.follow_up };
 
-                const medicineAndInvestigationUpdate = get().templateSelected
-                    ? {}
-                    : { medicine: generatedMedicine, investigation: generatedInvestigation };
+                const generatedByKey = { medicine: generatedMedicine, investigation: generatedInvestigation, chiefComplaint, history, diagnosis, advice };
+                const generatedSections = pickRxMemorySections(generatedByKey);
 
                 set({
-                    chiefComplaint,
-                    history,
-                    diagnosis,
-                    advice,
+                    // Sections the draft owns outright are always written; covered sections are snapshotted
+                    // and applied only when no RxMemory is already in place (so it isn't clobbered).
+                    ...(omitRxMemorySections({ chiefComplaint, history, diagnosis, advice }) as Partial<PrescriptionStoreType>),
                     summary,
                     safetyNet,
                     vitals,
                     followUp,
-                    generatedMedicine,
-                    generatedInvestigation,
-                    ...medicineAndInvestigationUpdate,
+                    generatedSections,
+                    ...(get().templateSelected ? {} : (generatedSections as Partial<PrescriptionStoreType>)),
                 })
             },
 
             setPrescriptionFromTemplate: (data: any) => {
-                const medicine = data.rx_list?.map((item: any) => ({
-                    name: item.trade_name || item.generic_name,
-                    value: item.trade_name || item.generic_name,
-                    trade_name: item.trade_name,
-                    generic_name: item.generic_name,
-                    dosage: item.dosage,
-                    notes: item.duration,
-                    routine: {
-                        beforeBreakfast: item.routine?.before_breakfast || false,
-                        afterBreakfast: item.routine?.after_breakfast || false,
-                        beforeLunch: item.routine?.before_lunch || false,
-                        afterLunch: item.routine?.after_lunch || false,
-                        beforeDinner: item.routine?.before_dinner || false,
-                        afterDinner: item.routine?.after_dinner || false,
-                        gapHours: item.routine?.gap_hour || 0,
-                    }
-                })) || []
-
-                const investigation = data.investigations?.map((item: any) => ({
-                    name: item.name_text,
-                    notes: item.reason || "",
-                    priority: item.priority || "routine"
-                })) || []
-
-                set({ medicine, investigation, templateSelected: true })
+                const patch = applyRxMemoryToStore(data, get() as unknown as Record<string, unknown[]>);
+                set({ ...(patch as Partial<PrescriptionStoreType>), templateSelected: true });
             },
 
             revertTemplateSelection: () => {
-                const { generatedMedicine, generatedInvestigation } = get();
+                const { generatedSections } = get();
                 set({ isRevertingTemplate: true, templateSelected: false });
                 setTimeout(() => {
                     set({
-                        medicine: generatedMedicine,
-                        investigation: generatedInvestigation,
+                        ...(generatedSections as Partial<PrescriptionStoreType>),
                         isRevertingTemplate: false,
                     });
                 }, 300);

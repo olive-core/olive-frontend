@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import api from '@/lib/axios'
 import { useAuthStore } from '@/stores/auth-store'
-import { BookmarkIcon, PlusIcon, BookMarkedIcon, ClockIcon, GlobeIcon, LockIcon, Trash2Icon, AlertTriangleIcon } from 'lucide-react'
+import { PlusIcon, BookMarkedIcon, ClockIcon, Trash2Icon, AlertTriangleIcon } from 'lucide-react'
 import { format } from 'date-fns'
 import {
   Dialog,
@@ -30,14 +30,10 @@ type Template = {
 
 function TemplateCard({
   template,
-  onBookmarkToggle,
-  isBookmarkPending,
   onDelete,
   isDeletePending,
 }: {
   template: Template
-  onBookmarkToggle: (template: Template) => void
-  isBookmarkPending: boolean
   onDelete: (template: Template) => void
   isDeletePending: boolean
 }) {
@@ -61,24 +57,6 @@ function TemplateCard({
 
         {/* Action buttons */}
         <div className="flex items-center gap-1 shrink-0">
-          {/* Bookmark button */}
-          <button
-            onClick={(e) => {
-              e.stopPropagation()
-              onBookmarkToggle(template)
-            }}
-            disabled={isBookmarkPending}
-            className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 disabled:opacity-50 ${template.is_bookmarked
-              ? 'bg-amber-50 text-amber-500 hover:bg-amber-100'
-              : 'bg-slate-50 text-slate-400 hover:bg-slate-100 hover:text-slate-600'
-              }`}
-          >
-            <BookmarkIcon
-              className="w-4 h-4 transition-transform"
-              fill={template.is_bookmarked ? 'currentColor' : 'none'}
-            />
-          </button>
-
           {/* Delete button */}
           <button
             onClick={(e) => {
@@ -86,7 +64,7 @@ function TemplateCard({
               onDelete(template)
             }}
             disabled={isDeletePending}
-            className="w-8 h-8 rounded-lg flex items-center justify-center bg-slate-50 text-slate-400 hover:bg-red-50 hover:text-red-500 transition-all duration-200 disabled:opacity-50"
+            className="w-8 h-8 rounded-lg flex items-center justify-center bg-slate-50 text-slate-400 hover:bg-red-50 hover:text-red-500 transition-all duration-200 disabled:opacity-50 cursor-pointer"
           >
             <Trash2Icon className="w-4 h-4" />
           </button>
@@ -94,20 +72,10 @@ function TemplateCard({
       </div>
 
       {/* Footer */}
-      <div className="flex items-center justify-between text-xs text-slate-400">
+      <div className="flex items-center text-xs text-slate-400">
         <span className="flex items-center gap-1.5">
           <ClockIcon className="w-3 h-3" />
           {format(new Date(template.created_at), 'MMM d, yyyy')}
-        </span>
-        <span className={`flex items-center gap-1 px-2 py-0.5 rounded-full font-medium ${template.visibility === 'public'
-          ? 'bg-emerald-50 text-emerald-600'
-          : 'bg-slate-100 text-slate-500'
-          }`}>
-          {template.visibility === 'public'
-            ? <GlobeIcon className="w-3 h-3" />
-            : <LockIcon className="w-3 h-3" />
-          }
-          {template.visibility}
         </span>
       </div>
     </div>
@@ -127,34 +95,6 @@ function RouteComponent() {
     queryFn: async () => {
       const res = await api.get(`/prescription-template/my?clinician_id=${userId}`)
       return res.data
-    },
-  })
-
-  const bookmarkMutation = useMutation({
-    mutationFn: async ({ template, action }: { template: Template; action: 'add' | 'remove' }) => {
-      if (action === 'add') {
-        await api.post(`/prescription-template/${template.template_id}/bookmark?clinician_id=${userId}`)
-      } else {
-        await api.delete(`/prescription-template/${template.template_id}/bookmark?clinician_id=${userId}`)
-      }
-    },
-    onMutate: async ({ template, action }) => {
-      await queryClient.cancelQueries({ queryKey: ['prescription-templates'] })
-      const prev = queryClient.getQueryData<Template[]>(['prescription-templates'])
-      queryClient.setQueryData<Template[]>(['prescription-templates'], (old) =>
-        old?.map((t) =>
-          t.template_id === template.template_id
-            ? { ...t, is_bookmarked: action === 'add' }
-            : t
-        ) ?? []
-      )
-      return { prev }
-    },
-    onError: (_err, _vars, ctx) => {
-      if (ctx?.prev) queryClient.setQueryData(['prescription-templates'], ctx.prev)
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['prescription-templates'] })
     },
   })
 
@@ -178,13 +118,6 @@ function RouteComponent() {
     },
   })
 
-  const handleBookmarkToggle = (template: Template) => {
-    bookmarkMutation.mutate({
-      template,
-      action: template.is_bookmarked ? 'remove' : 'add',
-    })
-  }
-
   const handleDelete = (template: Template) => {
     setTemplateToDelete(template)
     setIsDeleteDialogOpen(true)
@@ -205,14 +138,14 @@ function RouteComponent() {
           <h1 className="text-2xl font-bold text-slate-900">RxMemory</h1>
           <p className="text-sm text-slate-500 mt-1">Manage and reuse your saved RxMemory</p>
         </div>
-        <button
+        <Button
           onClick={() => navigate({ to: '/doctor/rx-memory/manage' })}
-          className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-xl shadow-sm transition-colors shrink-0"
+          className="shrink-0 font-semibold shadow-sm"
         >
           <PlusIcon className="w-4 h-4" />
           <span className="hidden sm:inline">New RxMemory</span>
           <span className="sm:hidden">New</span>
-        </button>
+        </Button>
       </div>
 
       {/* Loading */}
@@ -258,13 +191,13 @@ function RouteComponent() {
             <p className="text-slate-700 font-semibold text-lg">No RxMemory yet</p>
             <p className="text-slate-400 text-sm mt-1">Create your first RxMemory to get started</p>
           </div>
-          <button
+          <Button
             onClick={() => navigate({ to: '/doctor/rx-memory/manage' })}
-            className="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-xl shadow-sm transition-colors"
+            className="font-semibold shadow-sm"
           >
             <PlusIcon className="w-4 h-4" />
             Create RxMemory
-          </button>
+          </Button>
         </div>
       )}
 
@@ -275,8 +208,6 @@ function RouteComponent() {
             <TemplateCard
               key={template.template_id}
               template={template}
-              onBookmarkToggle={handleBookmarkToggle}
-              isBookmarkPending={bookmarkMutation.isPending}
               onDelete={handleDelete}
               isDeletePending={deleteMutation.isPending}
             />
