@@ -1,5 +1,11 @@
 import { format } from "date-fns";
 
+const SEX_LABELS: Record<string, string> = {
+    male: "Male",
+    female: "Female",
+    non_binary: "Non-binary",
+};
+
 interface PatientStripProps {
     firstName?:    string | null;
     lastName?:     string | null;
@@ -42,7 +48,7 @@ export default function PatientStrip({ firstName, lastName, dateOfBirth, sex, da
 
                 {sex && (
                     <p className="text-slate-500">
-                        Sex: <span className="font-semibold">{sex}</span>
+                        Sex: <span className="font-semibold">{SEX_LABELS[sex] ?? sex}</span>
                     </p>
                 )}
             </div>

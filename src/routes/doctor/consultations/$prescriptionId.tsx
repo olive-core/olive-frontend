@@ -109,29 +109,29 @@ function BackButton() {
   )
 }
 
-function PrintButton({ onPrint }: { onPrint: () => void }) {
+function PrintButton({ onPrint, disabled }: { onPrint: () => void; disabled?: boolean }) {
   return (
-    <Button variant="outline" size="sm" onClick={onPrint} className="gap-2">
+    <Button size="sm" onClick={onPrint} disabled={disabled} className="gap-2">
       <PrinterIcon className="size-4" />
       Print
     </Button>
   )
 }
 
-function DetailToolbar({ onPrint }: { onPrint: () => void }) {
+function DetailToolbar({ onPrint, printDisabled }: { onPrint?: () => void; printDisabled?: boolean }) {
   return (
-    <div className="container mx-auto flex items-center justify-between mt-4 print:hidden">
+    <div className="container mx-auto flex items-center justify-between mt-4 mb-6 print:hidden">
       <BackButton />
-      <PrintButton onPrint={onPrint} />
+      {onPrint && <PrintButton onPrint={onPrint} disabled={printDisabled} />}
     </div>
   )
 }
 
 function DetailError() {
   return (
-    <div className="container mx-auto">
-      <DetailToolbar onPrint={() => {}} />
-      <div className="flex flex-col items-center justify-center py-20 gap-4 text-center">
+    <>
+      <DetailToolbar />
+      <div className="container mx-auto flex flex-col items-center justify-center py-20 gap-4 text-center">
         <div className="w-14 h-14 rounded-2xl bg-red-50 flex items-center justify-center">
           <AlertCircleIcon className="w-7 h-7 text-red-400" />
         </div>
@@ -142,7 +142,7 @@ function DetailError() {
           </p>
         </div>
       </div>
-    </div>
+    </>
   )
 }
 
@@ -166,7 +166,7 @@ function ConsultationDetailPage() {
   if (isLoading) {
     return (
       <>
-        <DetailToolbar onPrint={handlePrint} />
+        <DetailToolbar onPrint={handlePrint} printDisabled />
         <ReadSkeleton />
       </>
     )

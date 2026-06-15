@@ -12,21 +12,21 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as NotFoundRouteImport } from './routes/not-found'
 import { Route as ComingSoonRouteImport } from './routes/coming-soon'
 import { Route as AboutRouteImport } from './routes/about'
-import { Route as PortalRouteRouteImport } from './routes/portal/route'
+import { Route as PatientRouteRouteImport } from './routes/patient/route'
 import { Route as DoctorRouteRouteImport } from './routes/doctor/route'
 import { Route as authRouteRouteImport } from './routes/(auth)/route'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as PortalIndexRouteImport } from './routes/portal/index'
+import { Route as PatientIndexRouteImport } from './routes/patient/index'
 import { Route as DoctorIndexRouteImport } from './routes/doctor/index'
 import { Route as PCodeRouteImport } from './routes/p.$code'
 import { Route as authSignInRouteImport } from './routes/(auth)/sign-in'
 import { Route as authEnterOtpRouteImport } from './routes/(auth)/enter-otp'
-import { Route as PortalProfileIndexRouteImport } from './routes/portal/profile/index'
+import { Route as PatientProfileIndexRouteImport } from './routes/patient/profile/index'
 import { Route as DoctorRxMemoryIndexRouteImport } from './routes/doctor/rx-memory/index'
 import { Route as DoctorProfileIndexRouteImport } from './routes/doctor/profile/index'
 import { Route as DoctorConsultationsIndexRouteImport } from './routes/doctor/consultations/index'
-import { Route as PortalProfileEditRouteImport } from './routes/portal/profile/edit'
-import { Route as PortalPrescriptionsPrescriptionIdRouteImport } from './routes/portal/prescriptions.$prescriptionId'
+import { Route as PatientProfileEditRouteImport } from './routes/patient/profile/edit'
+import { Route as PatientPrescriptionsPrescriptionIdRouteImport } from './routes/patient/prescriptions.$prescriptionId'
 import { Route as DoctorPrescribeConsultationIdRouteImport } from './routes/doctor/prescribe.$consultationId'
 import { Route as DoctorConsultationsPrescriptionIdRouteImport } from './routes/doctor/consultations/$prescriptionId'
 import { Route as DoctorRxMemoryManageIndexRouteImport } from './routes/doctor/rx-memory/manage.index'
@@ -48,9 +48,9 @@ const AboutRoute = AboutRouteImport.update({
   path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PortalRouteRoute = PortalRouteRouteImport.update({
-  id: '/portal',
-  path: '/portal',
+const PatientRouteRoute = PatientRouteRouteImport.update({
+  id: '/patient',
+  path: '/patient',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DoctorRouteRoute = DoctorRouteRouteImport.update({
@@ -67,10 +67,10 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PortalIndexRoute = PortalIndexRouteImport.update({
+const PatientIndexRoute = PatientIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => PortalRouteRoute,
+  getParentRoute: () => PatientRouteRoute,
 } as any)
 const DoctorIndexRoute = DoctorIndexRouteImport.update({
   id: '/',
@@ -92,10 +92,10 @@ const authEnterOtpRoute = authEnterOtpRouteImport.update({
   path: '/enter-otp',
   getParentRoute: () => authRouteRoute,
 } as any)
-const PortalProfileIndexRoute = PortalProfileIndexRouteImport.update({
+const PatientProfileIndexRoute = PatientProfileIndexRouteImport.update({
   id: '/profile/',
   path: '/profile/',
-  getParentRoute: () => PortalRouteRoute,
+  getParentRoute: () => PatientRouteRoute,
 } as any)
 const DoctorRxMemoryIndexRoute = DoctorRxMemoryIndexRouteImport.update({
   id: '/rx-memory/',
@@ -113,16 +113,16 @@ const DoctorConsultationsIndexRoute =
     path: '/consultations/',
     getParentRoute: () => DoctorRouteRoute,
   } as any)
-const PortalProfileEditRoute = PortalProfileEditRouteImport.update({
+const PatientProfileEditRoute = PatientProfileEditRouteImport.update({
   id: '/profile/edit',
   path: '/profile/edit',
-  getParentRoute: () => PortalRouteRoute,
+  getParentRoute: () => PatientRouteRoute,
 } as any)
-const PortalPrescriptionsPrescriptionIdRoute =
-  PortalPrescriptionsPrescriptionIdRouteImport.update({
+const PatientPrescriptionsPrescriptionIdRoute =
+  PatientPrescriptionsPrescriptionIdRouteImport.update({
     id: '/prescriptions/$prescriptionId',
     path: '/prescriptions/$prescriptionId',
-    getParentRoute: () => PortalRouteRoute,
+    getParentRoute: () => PatientRouteRoute,
   } as any)
 const DoctorPrescribeConsultationIdRoute =
   DoctorPrescribeConsultationIdRouteImport.update({
@@ -158,7 +158,7 @@ const DoctorConsultationUserIdConsultationIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/doctor': typeof DoctorRouteRouteWithChildren
-  '/portal': typeof PortalRouteRouteWithChildren
+  '/patient': typeof PatientRouteRouteWithChildren
   '/about': typeof AboutRoute
   '/coming-soon': typeof ComingSoonRoute
   '/not-found': typeof NotFoundRoute
@@ -166,15 +166,15 @@ export interface FileRoutesByFullPath {
   '/sign-in': typeof authSignInRoute
   '/p/$code': typeof PCodeRoute
   '/doctor/': typeof DoctorIndexRoute
-  '/portal/': typeof PortalIndexRoute
+  '/patient/': typeof PatientIndexRoute
   '/doctor/consultations/$prescriptionId': typeof DoctorConsultationsPrescriptionIdRoute
   '/doctor/prescribe/$consultationId': typeof DoctorPrescribeConsultationIdRoute
-  '/portal/prescriptions/$prescriptionId': typeof PortalPrescriptionsPrescriptionIdRoute
-  '/portal/profile/edit': typeof PortalProfileEditRoute
+  '/patient/prescriptions/$prescriptionId': typeof PatientPrescriptionsPrescriptionIdRoute
+  '/patient/profile/edit': typeof PatientProfileEditRoute
   '/doctor/consultations': typeof DoctorConsultationsIndexRoute
   '/doctor/profile': typeof DoctorProfileIndexRoute
   '/doctor/rx-memory': typeof DoctorRxMemoryIndexRoute
-  '/portal/profile': typeof PortalProfileIndexRoute
+  '/patient/profile': typeof PatientProfileIndexRoute
   '/doctor/consultation/$userId/$consultationId': typeof DoctorConsultationUserIdConsultationIdRoute
   '/doctor/rx-memory/manage/$templateId': typeof DoctorRxMemoryManageTemplateIdRoute
   '/doctor/rx-memory/manage': typeof DoctorRxMemoryManageIndexRoute
@@ -188,15 +188,15 @@ export interface FileRoutesByTo {
   '/sign-in': typeof authSignInRoute
   '/p/$code': typeof PCodeRoute
   '/doctor': typeof DoctorIndexRoute
-  '/portal': typeof PortalIndexRoute
+  '/patient': typeof PatientIndexRoute
   '/doctor/consultations/$prescriptionId': typeof DoctorConsultationsPrescriptionIdRoute
   '/doctor/prescribe/$consultationId': typeof DoctorPrescribeConsultationIdRoute
-  '/portal/prescriptions/$prescriptionId': typeof PortalPrescriptionsPrescriptionIdRoute
-  '/portal/profile/edit': typeof PortalProfileEditRoute
+  '/patient/prescriptions/$prescriptionId': typeof PatientPrescriptionsPrescriptionIdRoute
+  '/patient/profile/edit': typeof PatientProfileEditRoute
   '/doctor/consultations': typeof DoctorConsultationsIndexRoute
   '/doctor/profile': typeof DoctorProfileIndexRoute
   '/doctor/rx-memory': typeof DoctorRxMemoryIndexRoute
-  '/portal/profile': typeof PortalProfileIndexRoute
+  '/patient/profile': typeof PatientProfileIndexRoute
   '/doctor/consultation/$userId/$consultationId': typeof DoctorConsultationUserIdConsultationIdRoute
   '/doctor/rx-memory/manage/$templateId': typeof DoctorRxMemoryManageTemplateIdRoute
   '/doctor/rx-memory/manage': typeof DoctorRxMemoryManageIndexRoute
@@ -206,7 +206,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/(auth)': typeof authRouteRouteWithChildren
   '/doctor': typeof DoctorRouteRouteWithChildren
-  '/portal': typeof PortalRouteRouteWithChildren
+  '/patient': typeof PatientRouteRouteWithChildren
   '/about': typeof AboutRoute
   '/coming-soon': typeof ComingSoonRoute
   '/not-found': typeof NotFoundRoute
@@ -214,15 +214,15 @@ export interface FileRoutesById {
   '/(auth)/sign-in': typeof authSignInRoute
   '/p/$code': typeof PCodeRoute
   '/doctor/': typeof DoctorIndexRoute
-  '/portal/': typeof PortalIndexRoute
+  '/patient/': typeof PatientIndexRoute
   '/doctor/consultations/$prescriptionId': typeof DoctorConsultationsPrescriptionIdRoute
   '/doctor/prescribe/$consultationId': typeof DoctorPrescribeConsultationIdRoute
-  '/portal/prescriptions/$prescriptionId': typeof PortalPrescriptionsPrescriptionIdRoute
-  '/portal/profile/edit': typeof PortalProfileEditRoute
+  '/patient/prescriptions/$prescriptionId': typeof PatientPrescriptionsPrescriptionIdRoute
+  '/patient/profile/edit': typeof PatientProfileEditRoute
   '/doctor/consultations/': typeof DoctorConsultationsIndexRoute
   '/doctor/profile/': typeof DoctorProfileIndexRoute
   '/doctor/rx-memory/': typeof DoctorRxMemoryIndexRoute
-  '/portal/profile/': typeof PortalProfileIndexRoute
+  '/patient/profile/': typeof PatientProfileIndexRoute
   '/doctor/consultation/$userId/$consultationId': typeof DoctorConsultationUserIdConsultationIdRoute
   '/doctor/rx-memory/manage/$templateId': typeof DoctorRxMemoryManageTemplateIdRoute
   '/doctor/rx-memory/manage/': typeof DoctorRxMemoryManageIndexRoute
@@ -232,7 +232,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/doctor'
-    | '/portal'
+    | '/patient'
     | '/about'
     | '/coming-soon'
     | '/not-found'
@@ -240,15 +240,15 @@ export interface FileRouteTypes {
     | '/sign-in'
     | '/p/$code'
     | '/doctor/'
-    | '/portal/'
+    | '/patient/'
     | '/doctor/consultations/$prescriptionId'
     | '/doctor/prescribe/$consultationId'
-    | '/portal/prescriptions/$prescriptionId'
-    | '/portal/profile/edit'
+    | '/patient/prescriptions/$prescriptionId'
+    | '/patient/profile/edit'
     | '/doctor/consultations'
     | '/doctor/profile'
     | '/doctor/rx-memory'
-    | '/portal/profile'
+    | '/patient/profile'
     | '/doctor/consultation/$userId/$consultationId'
     | '/doctor/rx-memory/manage/$templateId'
     | '/doctor/rx-memory/manage'
@@ -262,15 +262,15 @@ export interface FileRouteTypes {
     | '/sign-in'
     | '/p/$code'
     | '/doctor'
-    | '/portal'
+    | '/patient'
     | '/doctor/consultations/$prescriptionId'
     | '/doctor/prescribe/$consultationId'
-    | '/portal/prescriptions/$prescriptionId'
-    | '/portal/profile/edit'
+    | '/patient/prescriptions/$prescriptionId'
+    | '/patient/profile/edit'
     | '/doctor/consultations'
     | '/doctor/profile'
     | '/doctor/rx-memory'
-    | '/portal/profile'
+    | '/patient/profile'
     | '/doctor/consultation/$userId/$consultationId'
     | '/doctor/rx-memory/manage/$templateId'
     | '/doctor/rx-memory/manage'
@@ -279,7 +279,7 @@ export interface FileRouteTypes {
     | '/'
     | '/(auth)'
     | '/doctor'
-    | '/portal'
+    | '/patient'
     | '/about'
     | '/coming-soon'
     | '/not-found'
@@ -287,15 +287,15 @@ export interface FileRouteTypes {
     | '/(auth)/sign-in'
     | '/p/$code'
     | '/doctor/'
-    | '/portal/'
+    | '/patient/'
     | '/doctor/consultations/$prescriptionId'
     | '/doctor/prescribe/$consultationId'
-    | '/portal/prescriptions/$prescriptionId'
-    | '/portal/profile/edit'
+    | '/patient/prescriptions/$prescriptionId'
+    | '/patient/profile/edit'
     | '/doctor/consultations/'
     | '/doctor/profile/'
     | '/doctor/rx-memory/'
-    | '/portal/profile/'
+    | '/patient/profile/'
     | '/doctor/consultation/$userId/$consultationId'
     | '/doctor/rx-memory/manage/$templateId'
     | '/doctor/rx-memory/manage/'
@@ -305,7 +305,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   authRouteRoute: typeof authRouteRouteWithChildren
   DoctorRouteRoute: typeof DoctorRouteRouteWithChildren
-  PortalRouteRoute: typeof PortalRouteRouteWithChildren
+  PatientRouteRoute: typeof PatientRouteRouteWithChildren
   AboutRoute: typeof AboutRoute
   ComingSoonRoute: typeof ComingSoonRoute
   NotFoundRoute: typeof NotFoundRoute
@@ -335,11 +335,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/portal': {
-      id: '/portal'
-      path: '/portal'
-      fullPath: '/portal'
-      preLoaderRoute: typeof PortalRouteRouteImport
+    '/patient': {
+      id: '/patient'
+      path: '/patient'
+      fullPath: '/patient'
+      preLoaderRoute: typeof PatientRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/doctor': {
@@ -363,12 +363,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/portal/': {
-      id: '/portal/'
+    '/patient/': {
+      id: '/patient/'
       path: '/'
-      fullPath: '/portal/'
-      preLoaderRoute: typeof PortalIndexRouteImport
-      parentRoute: typeof PortalRouteRoute
+      fullPath: '/patient/'
+      preLoaderRoute: typeof PatientIndexRouteImport
+      parentRoute: typeof PatientRouteRoute
     }
     '/doctor/': {
       id: '/doctor/'
@@ -398,12 +398,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof authEnterOtpRouteImport
       parentRoute: typeof authRouteRoute
     }
-    '/portal/profile/': {
-      id: '/portal/profile/'
+    '/patient/profile/': {
+      id: '/patient/profile/'
       path: '/profile'
-      fullPath: '/portal/profile'
-      preLoaderRoute: typeof PortalProfileIndexRouteImport
-      parentRoute: typeof PortalRouteRoute
+      fullPath: '/patient/profile'
+      preLoaderRoute: typeof PatientProfileIndexRouteImport
+      parentRoute: typeof PatientRouteRoute
     }
     '/doctor/rx-memory/': {
       id: '/doctor/rx-memory/'
@@ -426,19 +426,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DoctorConsultationsIndexRouteImport
       parentRoute: typeof DoctorRouteRoute
     }
-    '/portal/profile/edit': {
-      id: '/portal/profile/edit'
+    '/patient/profile/edit': {
+      id: '/patient/profile/edit'
       path: '/profile/edit'
-      fullPath: '/portal/profile/edit'
-      preLoaderRoute: typeof PortalProfileEditRouteImport
-      parentRoute: typeof PortalRouteRoute
+      fullPath: '/patient/profile/edit'
+      preLoaderRoute: typeof PatientProfileEditRouteImport
+      parentRoute: typeof PatientRouteRoute
     }
-    '/portal/prescriptions/$prescriptionId': {
-      id: '/portal/prescriptions/$prescriptionId'
+    '/patient/prescriptions/$prescriptionId': {
+      id: '/patient/prescriptions/$prescriptionId'
       path: '/prescriptions/$prescriptionId'
-      fullPath: '/portal/prescriptions/$prescriptionId'
-      preLoaderRoute: typeof PortalPrescriptionsPrescriptionIdRouteImport
-      parentRoute: typeof PortalRouteRoute
+      fullPath: '/patient/prescriptions/$prescriptionId'
+      preLoaderRoute: typeof PatientPrescriptionsPrescriptionIdRouteImport
+      parentRoute: typeof PatientRouteRoute
     }
     '/doctor/prescribe/$consultationId': {
       id: '/doctor/prescribe/$consultationId'
@@ -522,30 +522,30 @@ const DoctorRouteRouteWithChildren = DoctorRouteRoute._addFileChildren(
   DoctorRouteRouteChildren,
 )
 
-interface PortalRouteRouteChildren {
-  PortalIndexRoute: typeof PortalIndexRoute
-  PortalPrescriptionsPrescriptionIdRoute: typeof PortalPrescriptionsPrescriptionIdRoute
-  PortalProfileEditRoute: typeof PortalProfileEditRoute
-  PortalProfileIndexRoute: typeof PortalProfileIndexRoute
+interface PatientRouteRouteChildren {
+  PatientIndexRoute: typeof PatientIndexRoute
+  PatientPrescriptionsPrescriptionIdRoute: typeof PatientPrescriptionsPrescriptionIdRoute
+  PatientProfileEditRoute: typeof PatientProfileEditRoute
+  PatientProfileIndexRoute: typeof PatientProfileIndexRoute
 }
 
-const PortalRouteRouteChildren: PortalRouteRouteChildren = {
-  PortalIndexRoute: PortalIndexRoute,
-  PortalPrescriptionsPrescriptionIdRoute:
-    PortalPrescriptionsPrescriptionIdRoute,
-  PortalProfileEditRoute: PortalProfileEditRoute,
-  PortalProfileIndexRoute: PortalProfileIndexRoute,
+const PatientRouteRouteChildren: PatientRouteRouteChildren = {
+  PatientIndexRoute: PatientIndexRoute,
+  PatientPrescriptionsPrescriptionIdRoute:
+    PatientPrescriptionsPrescriptionIdRoute,
+  PatientProfileEditRoute: PatientProfileEditRoute,
+  PatientProfileIndexRoute: PatientProfileIndexRoute,
 }
 
-const PortalRouteRouteWithChildren = PortalRouteRoute._addFileChildren(
-  PortalRouteRouteChildren,
+const PatientRouteRouteWithChildren = PatientRouteRoute._addFileChildren(
+  PatientRouteRouteChildren,
 )
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   authRouteRoute: authRouteRouteWithChildren,
   DoctorRouteRoute: DoctorRouteRouteWithChildren,
-  PortalRouteRoute: PortalRouteRouteWithChildren,
+  PatientRouteRoute: PatientRouteRouteWithChildren,
   AboutRoute: AboutRoute,
   ComingSoonRoute: ComingSoonRoute,
   NotFoundRoute: NotFoundRoute,

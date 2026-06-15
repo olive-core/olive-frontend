@@ -4,17 +4,17 @@ import { useQuery } from '@tanstack/react-query'
 import api from '@/lib/axios'
 import { useAuthStore } from '@/stores/auth-store'
 import type { PatientPrescriptionListItem } from '@/types/patient'
-import { applyFilters, isFiltersActive, type Period } from '@/components/portal/filter-prescriptions'
-import PrescriptionsFilters from '@/components/portal/prescriptions-filters'
-import PrescriptionList from '@/components/portal/prescription-list'
-import Pagination from '@/components/portal/pagination'
+import { applyFilters, isFiltersActive, type Period } from '@/components/patient/filter-prescriptions'
+import PrescriptionsFilters from '@/components/patient/prescriptions-filters'
+import PrescriptionList from '@/components/patient/prescription-list'
+import Pagination from '@/components/patient/pagination'
 import GridSkeleton from '@/components/dashboard/consultations/grid-skeleton'
 import EmptyState from '@/components/dashboard/consultations/empty-state'
 import ErrorState from '@/components/dashboard/consultations/error-state'
 import NoResultsState from '@/components/dashboard/consultations/no-results-state'
 
-export const Route = createFileRoute('/portal/')({
-  component: PortalPrescriptionsPage,
+export const Route = createFileRoute('/patient/')({
+  component: PatientPrescriptionsPage,
 })
 
 const PAGE_SIZE = 10
@@ -30,7 +30,7 @@ function useAllPatientPrescriptions(userId: string | undefined) {
   })
 }
 
-function PortalPrescriptionsPage() {
+function PatientPrescriptionsPage() {
   const userId = useAuthStore((state) => state.userId)
 
   const [page, setPage]             = useState(1)

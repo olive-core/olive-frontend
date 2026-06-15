@@ -8,7 +8,7 @@ interface SectionListProps {
 
 function getContainerClass(isHighlighted: boolean): string {
     return isHighlighted
-        ? "flex flex-col gap-2 p-2 rounded-xl bg-emerald-50/40 border-2 border-emerald-500 pl-3"
+        ? "flex flex-col gap-2 p-2 rounded-xl bg-emerald-50/40 border border-emerald-300 pl-3"
         : "flex flex-col gap-2 p-2 rounded-xl";
 }
 

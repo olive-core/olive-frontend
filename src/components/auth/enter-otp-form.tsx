@@ -55,7 +55,7 @@ export default function EnterOtpForm() {
             if (exists === 0) {
                 if (role_intent === 'patient') {
                     await createPatientProfile(phoneNumber, otp.join("").trim());
-                    navigate({ to: "/portal" });
+                    navigate({ to: "/patient" });
                 } else {
                     await createClinicianProfile(phoneNumber, otp.join("").trim());
                     navigate({ to: "/doctor/profile" });
@@ -63,7 +63,7 @@ export default function EnterOtpForm() {
             } else {
                 await verifyOtp(phoneNumber, otp.join("").trim());
                 toast.success("OTP verified successfully!");
-                navigate({ to: role === "patient" ? "/portal" : "/doctor" });
+                navigate({ to: role === "patient" ? "/patient" : "/doctor" });
             }
 
         } catch (error) {

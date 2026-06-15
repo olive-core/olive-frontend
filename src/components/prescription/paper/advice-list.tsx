@@ -8,7 +8,7 @@ export default function AdviceList({ items }: AdviceListProps) {
     return (
         <div className="flex flex-col gap-3 p-3 border rounded-xl bg-white">
             <div className="flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-slate-700">Advice</h3>
+                <h3 className="font-bold text-xs uppercase tracking-widest text-slate-500">Advice</h3>
             </div>
 
             <div className="flex flex-col gap-2">

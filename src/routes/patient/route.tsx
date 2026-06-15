@@ -1,14 +1,14 @@
 import { createFileRoute, Outlet, useNavigate } from '@tanstack/react-router'
 import { useEffect } from "react";
-import PortalNavbar from "@/components/portal/portal-navbar";
+import PatientNavbar from "@/components/patient/patient-navbar";
 import AppFooter from "@/components/shared/app-footer";
 import { useAuthStore } from "@/stores/auth-store";
 
-export const Route = createFileRoute('/portal')({
-  component: PortalLayout,
+export const Route = createFileRoute('/patient')({
+  component: PatientLayout,
 })
 
-function PortalLayout() {
+function PatientLayout() {
 
   const { isLoggedIn, role } = useAuthStore();
   const navigate = useNavigate()
@@ -24,7 +24,7 @@ function PortalLayout() {
   return (
     <div className="">
       <main className="w-full min-h-svh pt-18 flex flex-col">
-        <PortalNavbar />
+        <PatientNavbar />
         <div className="w-full h-full flex-1 flex flex-col">
           <Outlet />
         </div>

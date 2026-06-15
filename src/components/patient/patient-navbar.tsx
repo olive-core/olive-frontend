@@ -1,4 +1,4 @@
-import { LogOutIcon, UserIcon } from "lucide-react";
+import { ClipboardListIcon, LogOutIcon, UserIcon } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import NavbarContainer from "../shared/navbar-container";
 import { Button } from "../ui/button";
@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/tooltip";
 import { useAuthStore } from "@/stores/auth-store";
 
-export default function PortalNavbar() {
+export default function PatientNavbar() {
 
     const { logout } = useAuthStore();
 
@@ -19,8 +19,21 @@ export default function PortalNavbar() {
 
                 <Tooltip>
                     <TooltipTrigger asChild>
+                        <Button asChild variant="nav-icon" aria-label="Prescriptions" className="size-11 sm:size-9">
+                            <Link to="/patient">
+                                <ClipboardListIcon />
+                            </Link>
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                        <p>Prescriptions</p>
+                    </TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                    <TooltipTrigger asChild>
                         <Button asChild variant="nav-icon" aria-label="Profile" className="size-11 sm:size-9">
-                            <Link to="/portal/profile">
+                            <Link to="/patient/profile">
                                 <UserIcon />
                             </Link>
                         </Button>

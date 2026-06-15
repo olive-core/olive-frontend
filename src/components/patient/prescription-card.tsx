@@ -18,7 +18,7 @@ export default function PrescriptionCard({ prescription }: PrescriptionCardProps
 
     const handleOpen = () => {
         navigate({
-            to:     "/portal/prescriptions/$prescriptionId",
+            to:     "/patient/prescriptions/$prescriptionId",
             params: { prescriptionId: prescription.prescription_id },
         });
     };

@@ -38,7 +38,7 @@ function PrescriptionLinkRedeem() {
                 });
 
                 navigate({
-                    to: "/portal/prescriptions/$prescriptionId",
+                    to: "/patient/prescriptions/$prescriptionId",
                     params: { prescriptionId: response.data.prescription_id },
                     replace: true,
                 });
