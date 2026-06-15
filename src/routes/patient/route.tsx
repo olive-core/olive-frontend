@@ -23,7 +23,7 @@ function PatientLayout() {
 
   return (
     <div className="">
-      <main className="w-full min-h-svh pt-18 flex flex-col">
+      <main className="w-full min-h-svh pt-[calc(5rem+env(safe-area-inset-top))] sm:pt-[calc(4.5rem+env(safe-area-inset-top))] flex flex-col">
         <PatientNavbar />
         <div className="w-full h-full flex-1 flex flex-col">
           <Outlet />

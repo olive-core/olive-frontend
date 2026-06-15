@@ -6,8 +6,7 @@ import { MedicineContainer } from "./medicine-container";
 import api from "@/lib/axios";
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate, useParams } from "@tanstack/react-router";
-import { useReactToPrint } from "react-to-print";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import AdviceList from "./advice-list";
 import { PrescriptionView } from "./view";
 import PrescriptionPaper from "./paper/prescription-paper";
@@ -16,6 +15,7 @@ import DocumentSwitcher, { type PrescriptionDocument } from "./document-switcher
 import VitalsBar from "./paper/vitals-bar";
 import FollowUpBlock from "./paper/follow-up-block";
 import { Button } from "@/components/ui/button";
+import { usePrintDocument } from "@/hooks/use-print-document";
 import { cn } from "@/lib/utils";
 
 interface PrescriptionProps {
@@ -30,7 +30,6 @@ export default function Prescription({ onGenerate, onCancel, hasBeenGenerated }:
     const navigate = useNavigate();
     const { consultationId } = useParams({ from: "/doctor/prescribe/$consultationId" });
 
-    const prescriptionRef = useRef(null);
     const [activeDocument, setActiveDocument] = useState<PrescriptionDocument>("prescription");
 
     const {
@@ -68,11 +67,10 @@ export default function Prescription({ onGenerate, onCancel, hasBeenGenerated }:
         setFollowUp,
     } = store;
 
-    const handlePrint = useReactToPrint({
-        contentRef:    prescriptionRef,
+    // Navigate to the dashboard only after printing finishes — doing it immediately would
+    // swap out the DOM before the browser captures the prescription.
+    const handlePrint = usePrintDocument({
         documentTitle: `Prescription_Report_${consultationId}`,
-        // Navigate only after the print dialog closes — on mobile, navigating immediately
-        // swaps the DOM (to the dashboard's phone-number screen) before print captures.
         onAfterPrint:  () => navigate({ to: "/doctor" }),
     });
 
@@ -161,17 +159,19 @@ export default function Prescription({ onGenerate, onCancel, hasBeenGenerated }:
 
     return (
         <>
-            <div className="fixed top-0 left-[-9999px] print:left-0 print:block pb-8" ref={prescriptionRef}>
+            <div className="hidden print:block pb-8">
                 <PrescriptionView />
             </div>
 
-            <DocumentSwitcher
-                value={activeDocument}
-                onValueChange={setActiveDocument}
-                notesHasContent={!!summary?.trim() || safetyNet.length > 0}
-                prescription={prescriptionPaper}
-                notes={<ClinicalNotesPanel notes={summary} safetyNet={safetyNet} onChange={setSummary} />}
-            />
+            <div className="print:hidden">
+                <DocumentSwitcher
+                    value={activeDocument}
+                    onValueChange={setActiveDocument}
+                    notesHasContent={!!summary?.trim() || safetyNet.length > 0}
+                    prescription={prescriptionPaper}
+                    notes={<ClinicalNotesPanel notes={summary} safetyNet={safetyNet} onChange={setSummary} />}
+                />
+            </div>
         </>
     );
 }

@@ -175,8 +175,17 @@ html::-webkit-scrollbar {
 }
 
 @media print {
+  /* Matches react-to-print's default: full-bleed page so the prescription's own
+     padding provides the margin and the browser's URL/date headers are suppressed. */
+  @page {
+    size: auto;
+    margin: 0;
+  }
+
   body {
     background: white;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 
   main {

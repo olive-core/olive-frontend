@@ -11,18 +11,18 @@ interface PrescriptionPaperProps {
 
 export default function PrescriptionPaper({ header, patientStrip, vitalsBar, leftColumn, rightColumn, footer }: PrescriptionPaperProps) {
     return (
-        <div className="container rounded-xl border flex flex-col mt-4 mb-12">
-            <div className="m-4">
+        <div className="container rounded-xl border flex flex-col mt-4 mb-12 overflow-hidden">
+            <div className="m-3 sm:m-4">
                 {header}
                 {patientStrip}
                 {vitalsBar}
 
                 <div className="grid grid-cols-1 md:grid-cols-3">
-                    <div className="h-full md:border-r md:col-span-1 border-b md:border-b-0 py-4 flex flex-col gap-2">
+                    <div className="min-w-0 h-full md:border-r md:col-span-1 border-b md:border-b-0 py-4 flex flex-col gap-2">
                         {leftColumn}
                     </div>
 
-                    <div className="h-full col-span-1 md:col-span-2 py-4 px-4 md:px-8 flex flex-col justify-between">
+                    <div className="min-w-0 h-full col-span-1 md:col-span-2 py-4 md:px-8 flex flex-col justify-between">
                         {rightColumn}
                     </div>
                 </div>

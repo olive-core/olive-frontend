@@ -50,8 +50,8 @@ function getTimingLabelClass(label: string): string {
 
 function MedicineName({ tradeName, genericName, fallbackName }: Pick<MedicineCardProps, "tradeName" | "genericName" | "fallbackName">) {
     return (
-        <div className="flex flex-col">
-            <h3 className="text-slate-900 leading-tight">
+        <div className="flex flex-col min-w-0">
+            <h3 className="text-slate-900 leading-tight break-words">
                 {tradeName ? (
                     <span className="font-bold text-base">{tradeName}</span>
                 ) : (
@@ -70,14 +70,14 @@ function FrequencyDisplay({ routine }: { routine: MedicineRoutine }) {
 
     if (pattern) {
         return (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 shrink-0">
                 <span className="font-mono font-bold text-lg text-slate-800 tracking-wider">{pattern}</span>
             </div>
         );
     }
 
     return (
-        <div className="flex items-center gap-1 text-emerald-600 font-medium text-sm">
+        <div className="flex items-center gap-1 text-emerald-600 font-medium text-sm shrink-0">
             <Clock size={14} />
             <span>Every {routine.gapHours}h</span>
         </div>
@@ -89,7 +89,7 @@ export default function MedicineCard({ tradeName, genericName, fallbackName, dos
 
     return (
         <div className="group relative rounded-lg border p-3 bg-muted border-border w-full max-w-lg transition-colors hover:bg-emerald-50/50 hover:border-emerald-200">
-            <div className="flex justify-between items-start mb-1">
+            <div className="flex justify-between items-start gap-2 mb-1">
                 <MedicineName tradeName={tradeName} genericName={genericName} fallbackName={fallbackName} />
                 <FrequencyDisplay routine={routine} />
             </div>

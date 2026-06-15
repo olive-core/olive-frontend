@@ -116,39 +116,43 @@ function RouteComponent() {
         <PatientChip userId={userId} />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 w-full gap-6 md:gap-8 md:min-h-0 md:flex-1">
+      {/*
+        DOM order (Recorder → Detail → History) sets the mobile single-column order.
+        The md: grid coordinates restore the desktop two-column layout regardless of it.
+      */}
+      <div className="grid grid-cols-1 md:grid-cols-2 md:grid-rows-[auto_minmax(0,1fr)] w-full gap-6 md:gap-8 md:min-h-0 md:flex-1">
 
-        <div className="flex flex-col gap-6 md:gap-8 md:min-h-0">
-          <div className="flex-none">
-            <Recorder />
-          </div>
-
-          <div className="flex-1 min-h-[420px] md:min-h-0">
-            <HistoryContainer
-              histories={historiesData}
-              activeHistoryId={activeHistoryId}
-              setActiveHistoryId={setActiveHistoryId}
-              isLoading={isLoadingHistories}
-              isError={isErrorHistories}
-            />
-          </div>
+        <div className="flex-none md:col-start-1 md:row-start-1">
+          <Recorder />
         </div>
 
-        <ConsultationCardMemo
-          prescription={prescriptionData}
-          totalHistories={histories.length}
-          currentHistoryIndex={currentIndex + 1}
-          onFollowUp={handleFollowUp}
-          isFollowUp={followUpOfPrescriptionId === activeHistoryId}
-          isFollowingUp={isFollowingUp}
-          handleNext={handleNext}
-          handlePrevious={handlePrevious}
-          isFirst={currentIndex <= 0}
-          isLast={!hasSelection || currentIndex >= histories.length - 1}
-          isLoading={isLoadingPrescription}
-          isError={isErrorPrescription}
-          hasSelection={hasSelection}
-        />
+        <div className="md:col-start-2 md:row-start-1 md:row-span-2 md:min-h-0">
+          <ConsultationCardMemo
+            prescription={prescriptionData}
+            totalHistories={histories.length}
+            currentHistoryIndex={currentIndex + 1}
+            onFollowUp={handleFollowUp}
+            isFollowUp={followUpOfPrescriptionId === activeHistoryId}
+            isFollowingUp={isFollowingUp}
+            handleNext={handleNext}
+            handlePrevious={handlePrevious}
+            isFirst={currentIndex <= 0}
+            isLast={!hasSelection || currentIndex >= histories.length - 1}
+            isLoading={isLoadingPrescription}
+            isError={isErrorPrescription}
+            hasSelection={hasSelection}
+          />
+        </div>
+
+        <div className="h-[60svh] md:h-auto md:col-start-1 md:row-start-2 md:min-h-0">
+          <HistoryContainer
+            histories={historiesData}
+            activeHistoryId={activeHistoryId}
+            setActiveHistoryId={setActiveHistoryId}
+            isLoading={isLoadingHistories}
+            isError={isErrorHistories}
+          />
+        </div>
 
       </div>
     </div>

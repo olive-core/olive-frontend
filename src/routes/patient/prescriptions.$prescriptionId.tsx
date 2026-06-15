@@ -1,10 +1,9 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { AlertCircleIcon, ArrowLeftIcon, PrinterIcon } from 'lucide-react'
-import { useRef } from 'react'
-import { useReactToPrint } from 'react-to-print'
 
 import api from '@/lib/axios'
+import { usePrintDocument } from '@/hooks/use-print-document'
 import { Button } from '@/components/ui/button'
 import type { ConsultationDetail } from '@/types/consultation'
 import type { PatientInfoType } from '@/types/patient'
@@ -55,19 +54,19 @@ function BackButton() {
   return (
     <Button
       variant="ghost"
-      size="sm"
       onClick={() => navigate({ to: '/patient' })}
-      className="text-slate-500 hover:text-slate-800 -ml-2"
+      className="text-slate-500 hover:text-slate-800 -ml-2 h-10"
     >
-      <ArrowLeftIcon className="size-4 mr-1" />
-      Back to prescriptions
+      <ArrowLeftIcon className="size-4 sm:mr-1" />
+      <span className="hidden sm:inline">Back to prescriptions</span>
+      <span className="sm:hidden">Back</span>
     </Button>
   )
 }
 
 function PrintButton({ onPrint, disabled }: { onPrint: () => void; disabled?: boolean }) {
   return (
-    <Button size="sm" onClick={onPrint} disabled={disabled} className="gap-2">
+    <Button onClick={onPrint} disabled={disabled} className="gap-2 h-10 px-5">
       <PrinterIcon className="size-4" />
       Print
     </Button>
@@ -76,7 +75,7 @@ function PrintButton({ onPrint, disabled }: { onPrint: () => void; disabled?: bo
 
 function DetailToolbar({ onPrint, printDisabled }: { onPrint?: () => void; printDisabled?: boolean }) {
   return (
-    <div className="container mx-auto flex items-center justify-between mt-4 mb-8 print:hidden">
+    <div className="container flex items-center justify-between gap-3 mt-4 mb-6 print:hidden">
       <BackButton />
       {onPrint && <PrintButton onPrint={onPrint} disabled={printDisabled} />}
     </div>
@@ -109,11 +108,7 @@ function PrescriptionDetailPage() {
   const { data: clinician } = useClinicianProfile(consultation?.clinician_id)
   const { data: patient }   = usePatient(consultation?.patient_id)
 
-  const printRef = useRef(null)
-  const handlePrint = useReactToPrint({
-    contentRef:    printRef,
-    documentTitle: `Prescription_${prescriptionId}`,
-  })
+  const handlePrint = usePrintDocument({ documentTitle: `Prescription_${prescriptionId}` })
 
   if (isLoading) {
     return (
@@ -130,7 +125,7 @@ function PrescriptionDetailPage() {
 
   return (
     <>
-      <div className="fixed top-0 left-[-9999px] print:left-0 print:block" ref={printRef}>
+      <div className="hidden print:block">
         <PrescriptionPrintView
           consultation={consultation}
           clinician={clinician}
@@ -138,12 +133,14 @@ function PrescriptionDetailPage() {
         />
       </div>
 
-      <DetailToolbar onPrint={handlePrint} />
-      <PrescriptionReadView
-        consultation={consultation}
-        clinician={clinician}
-        patient={patient}
-      />
+      <div className="print:hidden">
+        <DetailToolbar onPrint={handlePrint} />
+        <PrescriptionReadView
+          consultation={consultation}
+          clinician={clinician}
+          patient={patient}
+        />
+      </div>
     </>
   )
 }

@@ -1,11 +1,11 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { AlertCircleIcon, ArrowLeftIcon, PrinterIcon } from 'lucide-react'
-import { useRef, useState } from 'react'
-import { useReactToPrint } from 'react-to-print'
+import { useState } from 'react'
 import toast from 'react-hot-toast'
 
 import api from '@/lib/axios'
+import { usePrintDocument } from '@/hooks/use-print-document'
 import { Button } from '@/components/ui/button'
 import type { ConsultationDetail } from '@/types/consultation'
 import type { PatientInfoType } from '@/types/patient'
@@ -157,11 +157,7 @@ function ConsultationDetailPage() {
   const [notesDraft, setNotesDraft] = useState<string | null>(null)
   const saveSummary = useSaveSummary(prescriptionId)
 
-  const printRef = useRef(null)
-  const handlePrint = useReactToPrint({
-    contentRef:    printRef,
-    documentTitle: `Prescription_${prescriptionId}`,
-  })
+  const handlePrint = usePrintDocument({ documentTitle: `Prescription_${prescriptionId}` })
 
   if (isLoading) {
     return (
@@ -183,7 +179,7 @@ function ConsultationDetailPage() {
 
   return (
     <>
-      <div className="fixed top-0 left-[-9999px] print:left-0 print:block" ref={printRef}>
+      <div className="hidden print:block">
         <PrescriptionPrintView
           consultation={consultation}
           clinician={clinician}
@@ -191,29 +187,31 @@ function ConsultationDetailPage() {
         />
       </div>
 
-      <DetailToolbar onPrint={handlePrint} />
-      <DocumentSwitcher
-        value={activeDocument}
-        onValueChange={setActiveDocument}
-        notesHasContent={!!savedNotes?.trim() || safetyNet.length > 0}
-        prescription={
-          <PrescriptionReadView
-            consultation={consultation}
-            clinician={clinician}
-            patient={patient}
-          />
-        }
-        notes={
-          <ClinicalNotesTab
-            notes={currentNotes}
-            safetyNet={safetyNet}
-            onChange={setNotesDraft}
-            onSave={() => saveSummary.mutate(notesDraft ?? '')}
-            isDirty={notesDirty}
-            isSaving={saveSummary.isPending}
-          />
-        }
-      />
+      <div className="print:hidden">
+        <DetailToolbar onPrint={handlePrint} />
+        <DocumentSwitcher
+          value={activeDocument}
+          onValueChange={setActiveDocument}
+          notesHasContent={!!savedNotes?.trim() || safetyNet.length > 0}
+          prescription={
+            <PrescriptionReadView
+              consultation={consultation}
+              clinician={clinician}
+              patient={patient}
+            />
+          }
+          notes={
+            <ClinicalNotesTab
+              notes={currentNotes}
+              safetyNet={safetyNet}
+              onChange={setNotesDraft}
+              onSave={() => saveSummary.mutate(notesDraft ?? '')}
+              isDirty={notesDirty}
+              isSaving={saveSummary.isPending}
+            />
+          }
+        />
+      </div>
     </>
   )
 }
