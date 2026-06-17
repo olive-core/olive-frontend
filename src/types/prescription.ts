@@ -1,3 +1,5 @@
+import type { MedicineCategory } from "@/lib/dosage-form";
+
 export type ChiefComplaintType = {
     // id: string;
     name: string;
@@ -30,11 +32,45 @@ export type InvestigationType = {
 
 export type ListInfoType = ChiefComplaintType | HistoryType | DiagnosisType | InvestigationType;
 
+export type MedicineDose = {
+    amount?: string;
+    unit?: string;
+};
+
+export type MedicineDuration = {
+    value?: number | null;
+    unit?: string;
+    preset?: string;
+};
+
+export type MedicineSchedule = {
+    timing?: "before" | "after" | "with" | "empty" | "bedtime";
+    morning?: number;   // per-meal counts (support 0.5) — meal mode
+    noon?: number;
+    night?: number;
+    gapHours?: number;  // interval mode
+    code?: string;      // OD/BD/TDS/QDS/HS/SOS/PRN/Stat... — code mode
+};
+
 export type MeedicineType = {
     name: string;
     value: string;
     trade_name?: string;
     generic_name?: string;
+
+    // Structured fields driving the type-aware editor.
+    dosage_form?: string;      // raw value from the medicine table
+    type?: MedicineCategory;   // normalized canonical category
+    route?: string;
+    site?: string;
+    dose?: MedicineDose;
+    schedule?: MedicineSchedule;
+    frequencyCode?: string;
+    mealTiming?: string;
+    duration?: MedicineDuration;
+    instructions?: string;
+
+    // Kept for back-compat / composition (rendered by older views, sent to backend).
     dosage?: string;
     notes?: string;
     reasoning?: string;

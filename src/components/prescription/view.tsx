@@ -5,18 +5,8 @@ import FollowUpBlock from "./paper/follow-up-block";
 import { usePrescriptionStore } from "@/stores/prescription-store";
 import { vitalsFromOnExaminations } from "@/lib/vitals";
 import { useParams } from "@tanstack/react-router";
-
-const getRoutineString = (routine: any) => {
-    if (routine.gap_hour) return `Every ${routine.gap_hour} hours`;
-
-    let m = 0, n = 0, e = 0;
-    
-    if (routine.before_breakfast || routine.after_breakfast) m = 1;
-    if (routine.before_lunch || routine.after_lunch) n = 1;
-    if (routine.before_dinner || routine.after_dinner) e = 1;
-
-    return `${m}+${n}+${e}`;
-};
+import { formatStoredDuration, formatStoredFrequency } from "@/lib/rx-format";
+import { categoryLabel } from "@/lib/dosage-form";
 
 export const PrescriptionView = () => {
     const { consultationId } = useParams({ from: '/doctor/prescribe/$consultationId' });
@@ -80,6 +70,9 @@ export const PrescriptionView = () => {
                                 >
                                     {/* LEFT */}
                                     <div className="flex-1">
+                                        {categoryLabel(m.type) && (
+                                            <p className="text-[10px] font-semibold uppercase tracking-wide text-emerald-600">{categoryLabel(m.type)}</p>
+                                        )}
                                         <p className="font-semibold">
                                             {i + 1}. {m.trade_name}
                                             <span className="text-gray-500 text-xs ml-1">
@@ -94,11 +87,11 @@ export const PrescriptionView = () => {
 
                                     {/* RIGHT */}
                                     <div className="text-right">
-                                        <p className="font-mono text-base tracking-wider font-semibold">
-                                            {getRoutineString(m.routine)}
+                                        <p className="text-sm font-semibold">
+                                            {formatStoredFrequency(m)}
                                         </p>
                                         <p className="text-xs text-gray-600">
-                                            {m.duration}
+                                            {formatStoredDuration(m)}
                                         </p>
                                     </div>
                                 </div>

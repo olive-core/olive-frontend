@@ -2,6 +2,8 @@ import { XIcon } from "lucide-react";
 import { Button } from "../ui/button";
 import type { MeedicineType } from "@/types/prescription";
 import MedicineCard from "./paper/medicine-card";
+import { formatDuration, formatSchedule } from "@/lib/rx-format";
+import { categoryLabel } from "@/lib/dosage-form";
 
 interface MedicineViewProps {
     medicine:     MeedicineType;
@@ -23,13 +25,15 @@ export default function MedicineView({ medicine, onRemove, index, setIsEditing }
         >
             <div className="relative max-w-lg">
                 <MedicineCard
+                    typeLabel={categoryLabel(medicine.type)}
                     tradeName={medicine.trade_name}
                     genericName={medicine.generic_name}
                     fallbackName={medicine.name}
                     dosage={medicine.dosage}
-                    notes={medicine.notes}
+                    frequencyText={formatSchedule(medicine.schedule, medicine.routine)}
+                    durationText={formatDuration(medicine.duration)}
+                    notes={medicine.instructions ?? medicine.notes}
                     reasoning={medicine.reasoning}
-                    routine={medicine.routine}
                 />
 
                 <Button

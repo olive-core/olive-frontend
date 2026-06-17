@@ -24,6 +24,7 @@ export type Option = {
     value: string;
     trade_name?: string;
     generic_name?: string;
+    dosage_form?: string;
 };
 
 interface Props {
@@ -168,9 +169,16 @@ export default function DebouncedSearchSelect({
                                 }`}
                         >
                             {option.trade_name ? (
-                                <div>
-                                    <span className="font-bold">{option.trade_name}</span>
-                                    {option.generic_name && <span className="text-gray-500 text-xs ml-1">({option.generic_name})</span>}
+                                <div className="flex items-start justify-between gap-2">
+                                    <div className="min-w-0">
+                                        <span className="font-bold">{option.trade_name}</span>
+                                        {option.generic_name && <span className="text-gray-500 text-xs ml-1">({option.generic_name})</span>}
+                                    </div>
+                                    {option.dosage_form && (
+                                        <span className="shrink-0 text-[10px] font-medium px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-600 border border-emerald-100">
+                                            {option.dosage_form}
+                                        </span>
+                                    )}
                                 </div>
                             ) : (
                                 option.label

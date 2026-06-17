@@ -54,6 +54,26 @@ export type RxItem = {
     trade_name: string;
     medicine_id: string | null;
     generic_name: string;
+
+    // Structured fields (optional — older saved prescriptions won't have them).
+    dosage_form?: string;
+    type?: string;
+    route?: string;
+    site?: string;
+    dose?: { amount?: string; unit?: string };
+    schedule?: {
+        timing?: string;
+        morning?: number;
+        noon?: number;
+        night?: number;
+        gap_hours?: number;
+        code?: string;
+    };
+    frequency_code?: string;
+    duration_value?: number | null;
+    duration_unit?: string;
+    duration_preset?: string;
+    instructions?: string;
 }
 
 export type DiagnosisItem = {

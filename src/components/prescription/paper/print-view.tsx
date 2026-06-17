@@ -6,21 +6,13 @@ import PatientStrip from "./patient-strip";
 import VitalsBar from "./vitals-bar";
 import FollowUpBlock from "./follow-up-block";
 import { vitalsFromOnExaminations } from "@/lib/vitals";
+import { formatStoredDuration, formatStoredFrequency } from "@/lib/rx-format";
+import { categoryLabel } from "@/lib/dosage-form";
 
 interface PrescriptionPrintViewProps {
     consultation: ConsultationDetail;
     clinician?:   ClinicianProfile;
     patient?:     PatientInfoType;
-}
-
-function getRoutineString(routine: any): string {
-    if (routine?.gap_hour) return `Every ${routine.gap_hour} hours`;
-
-    const morning = routine?.before_breakfast || routine?.after_breakfast ? 1 : 0;
-    const noon    = routine?.before_lunch     || routine?.after_lunch     ? 1 : 0;
-    const evening = routine?.before_dinner    || routine?.after_dinner    ? 1 : 0;
-
-    return `${morning}+${noon}+${evening}`;
 }
 
 function PrintSection({ title, children }: { title: string; children: React.ReactNode }) {
@@ -96,6 +88,9 @@ export default function PrescriptionPrintView({ consultation, clinician, patient
                                     className="flex justify-between items-start border-b border-dashed pb-2 break-inside-avoid"
                                 >
                                     <div className="flex-1">
+                                        {categoryLabel(m.type) && (
+                                            <p className="text-[10px] font-semibold uppercase tracking-wide text-emerald-600">{categoryLabel(m.type)}</p>
+                                        )}
                                         <p className="font-semibold">
                                             {i + 1}. {m.trade_name}
                                             <span className="text-gray-500 text-xs ml-1">({m.generic_name})</span>
@@ -103,10 +98,10 @@ export default function PrescriptionPrintView({ consultation, clinician, patient
                                         <p className="text-xs text-gray-700">{m.dosage}</p>
                                     </div>
                                     <div className="text-right">
-                                        <p className="font-mono text-base tracking-wider font-semibold">
-                                            {getRoutineString(m.routine)}
+                                        <p className="text-sm font-semibold">
+                                            {formatStoredFrequency(m)}
                                         </p>
-                                        <p className="text-xs text-gray-600">{m.duration}</p>
+                                        <p className="text-xs text-gray-600">{formatStoredDuration(m)}</p>
                                     </div>
                                 </div>
                             ))}

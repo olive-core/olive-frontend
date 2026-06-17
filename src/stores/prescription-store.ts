@@ -1,5 +1,7 @@
 import type { ChiefComplaintType, DiagnosisType, InvestigationType, MeedicineType, HistoryType, PrescriptionResponseType, VitalsType, FollowUpType } from "@/types/prescription";
 import { hasAnyVital, vitalsForSubmit } from "@/lib/vitals";
+import { composeDose, composeDuration, parseDuration } from "@/lib/rx-compose";
+import { scheduleFromRoutine } from "@/lib/rx-format";
 import {
     applyRxMemoryToStore,
     clearedRxMemorySections,
@@ -9,6 +11,19 @@ import {
 import { create } from "zustand";
 
 const EMPTY_FOLLOW_UP: FollowUpType = { follow_up_days: null, follow_up_notes: null };
+
+function routineForGenerated(routine?: { gap_hours?: number; meal_times?: string[] }) {
+    const meals = routine?.meal_times ?? [];
+    return {
+        beforeBreakfast: meals.includes("before_breakfast"),
+        afterBreakfast: meals.includes("after_breakfast"),
+        beforeLunch: meals.includes("before_lunch"),
+        afterLunch: meals.includes("after_lunch"),
+        beforeDinner: meals.includes("before_dinner"),
+        afterDinner: meals.includes("after_dinner"),
+        gapHours: routine?.gap_hours || 0,
+    };
+}
 
 
 interface PrescriptionStoreType {
@@ -194,16 +209,9 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
                     trade_name: item.trade_name,
                     generic_name: item.generic_name,
                     dosage: item.dosage,
-                    notes: item.duration,
-                    routine: {
-                        beforeBreakfast: item.routine?.meal_times?.includes('before_breakfast'),
-                        afterBreakfast: item.routine?.meal_times?.includes('after_breakfast'),
-                        beforeLunch: item.routine?.meal_times?.includes('before_lunch'),
-                        afterLunch: item.routine?.meal_times?.includes('after_lunch'),
-                        beforeDinner: item.routine?.meal_times?.includes('before_dinner'),
-                        afterDinner: item.routine?.meal_times?.includes('after_dinner'),
-                        gapHours: item.routine?.gap_hours || 0,
-                    },
+                    duration: parseDuration(item.duration),
+                    routine: routineForGenerated(item.routine),
+                    schedule: scheduleFromRoutine(routineForGenerated(item.routine)),
                     reasoning: item.purpose
                 })) || []
 
@@ -281,8 +289,8 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
                         medicine_id: null,
                         trade_name: item.trade_name || item.value,
                         generic_name: item.generic_name || item.value,
-                        dosage: item.dosage,
-                        duration: item.notes,
+                        dosage: item.dosage || composeDose(item),
+                        duration: composeDuration(item),
                         routine: {
                             before_breakfast: item.routine?.beforeBreakfast || false,
                             after_breakfast: item.routine?.afterBreakfast || false,
@@ -291,7 +299,26 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
                             before_dinner: item.routine?.beforeDinner || false,
                             after_dinner: item.routine?.afterDinner || false,
                             gap_hour: item.routine?.gapHours || 0
-                        }
+                        },
+                        // Structured fields persisted to the prescription JSONB.
+                        dosage_form: item.dosage_form ?? null,
+                        type: item.type ?? null,
+                        route: item.route ?? null,
+                        site: item.site ?? null,
+                        dose: item.dose ?? null,
+                        schedule: item.schedule ? {
+                            timing: item.schedule.timing ?? null,
+                            morning: item.schedule.morning ?? null,
+                            noon: item.schedule.noon ?? null,
+                            night: item.schedule.night ?? null,
+                            gap_hours: item.schedule.gapHours ?? null,
+                            code: item.schedule.code ?? null,
+                        } : null,
+                        frequency_code: item.schedule?.code ?? item.frequencyCode ?? null,
+                        duration_value: item.duration?.value ?? null,
+                        duration_unit: item.duration?.unit ?? null,
+                        duration_preset: item.duration?.preset ?? null,
+                        instructions: item.instructions ?? null,
                     })),
                     advice_list: state.advice,
                     on_examinations: hasAnyVital(state.vitals) ? [vitalsForSubmit(state.vitals)] : [],
@@ -371,7 +398,7 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
 
             // medicine methods
             addMedicine: (data) => set((state) => ({ medicine: [...state.medicine, data] })),
-            addEmptyMedicine: () => set((state) => ({ medicine: [...state.medicine, { name: "", value: "", dosage: "", notes: "", routine: {} }] })),
+            addEmptyMedicine: () => set((state) => ({ medicine: [...state.medicine, { name: "", value: "", dosage: "", routine: {}, schedule: {}, dose: {}, duration: {} }] })),
             updateMedicine: (index, data) => set((state) => {
                 const updated = [...state.medicine];
                 updated[index] = { ...updated[index], ...data };

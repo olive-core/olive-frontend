@@ -1,56 +1,21 @@
-import { AlertCircle, Clock, Sparkles } from "lucide-react";
-
-export interface MedicineRoutine {
-    beforeBreakfast?: boolean;
-    afterBreakfast?:  boolean;
-    beforeLunch?:     boolean;
-    afterLunch?:      boolean;
-    beforeDinner?:    boolean;
-    afterDinner?:     boolean;
-    gapHours?:        number | null;
-}
+import { AlertCircle, Sparkles } from "lucide-react";
 
 export interface MedicineCardProps {
-    tradeName?:    string | null;
-    genericName?:  string | null;
-    fallbackName?: string | null;
-    dosage?:       string | null;
-    notes?:        string | null;
-    reasoning?:    string | null;
-    routine:       MedicineRoutine;
+    typeLabel?:     string | null;
+    tradeName?:     string | null;
+    genericName?:   string | null;
+    fallbackName?:  string | null;
+    dosage?:        string | null;
+    frequencyText?: string | null;
+    durationText?:  string | null;
+    notes?:         string | null;
+    reasoning?:     string | null;
 }
 
-function getFrequencyPattern(routine: MedicineRoutine): string | null {
-    const morning = routine.beforeBreakfast || routine.afterBreakfast ? "1" : "0";
-    const noon    = routine.beforeLunch     || routine.afterLunch     ? "1" : "0";
-    const night   = routine.beforeDinner    || routine.afterDinner    ? "1" : "0";
-
-    const pattern = `${morning} + ${noon} + ${night}`;
-    if (pattern === "0 + 0 + 0" && routine.gapHours) return null;
-    return pattern;
-}
-
-function getTimingLabel(routine: MedicineRoutine): string {
-    if (routine.gapHours) return `Every ${routine.gapHours}h`;
-
-    const isBefore = routine.beforeBreakfast || routine.beforeLunch || routine.beforeDinner;
-    const isAfter  = routine.afterBreakfast  || routine.afterLunch  || routine.afterDinner;
-
-    if (isBefore && isAfter) return "See Notes";
-    if (isBefore) return "Before Meal";
-    if (isAfter)  return "After Meal";
-    return "";
-}
-
-function getTimingLabelClass(label: string): string {
-    return label === "Before Meal"
-        ? "bg-slate-100 text-slate-700 border-slate-200"
-        : "bg-emerald-50 text-emerald-600 border-emerald-100";
-}
-
-function MedicineName({ tradeName, genericName, fallbackName }: Pick<MedicineCardProps, "tradeName" | "genericName" | "fallbackName">) {
+function MedicineName({ typeLabel, tradeName, genericName, fallbackName }: Pick<MedicineCardProps, "typeLabel" | "tradeName" | "genericName" | "fallbackName">) {
     return (
         <div className="flex flex-col min-w-0">
+            {typeLabel && <span className="text-[11px] font-semibold uppercase tracking-wide text-emerald-600">{typeLabel}</span>}
             <h3 className="text-slate-900 leading-tight break-words">
                 {tradeName ? (
                     <span className="font-bold text-base">{tradeName}</span>
@@ -58,51 +23,24 @@ function MedicineName({ tradeName, genericName, fallbackName }: Pick<MedicineCar
                     <span className="font-semibold text-base">{fallbackName}</span>
                 )}
             </h3>
-            {genericName && (
-                <div className="text-xs text-slate-500 mt-0.5">{genericName}</div>
-            )}
+            {genericName && <div className="text-xs text-slate-500 mt-0.5">{genericName}</div>}
         </div>
     );
 }
 
-function FrequencyDisplay({ routine }: { routine: MedicineRoutine }) {
-    const pattern = getFrequencyPattern(routine);
-
-    if (pattern) {
-        return (
-            <div className="flex items-center gap-2 shrink-0">
-                <span className="font-mono font-bold text-lg text-slate-800 tracking-wider">{pattern}</span>
-            </div>
-        );
-    }
-
-    return (
-        <div className="flex items-center gap-1 text-emerald-600 font-medium text-sm shrink-0">
-            <Clock size={14} />
-            <span>Every {routine.gapHours}h</span>
-        </div>
-    );
-}
-
-export default function MedicineCard({ tradeName, genericName, fallbackName, dosage, notes, reasoning, routine }: MedicineCardProps) {
-    const timingLabel = getTimingLabel(routine);
+export default function MedicineCard({ typeLabel, tradeName, genericName, fallbackName, dosage, frequencyText, durationText, notes, reasoning }: MedicineCardProps) {
+    const detail = [dosage, durationText].filter(Boolean).join(" · ");
 
     return (
         <div className="group relative rounded-lg border p-3 bg-muted border-border w-full max-w-lg transition-colors hover:bg-emerald-50/50 hover:border-emerald-200">
-            <div className="flex justify-between items-start gap-2 mb-1">
-                <MedicineName tradeName={tradeName} genericName={genericName} fallbackName={fallbackName} />
-                <FrequencyDisplay routine={routine} />
-            </div>
-
-            <div className="flex justify-between items-center">
-                <div className="text-sm text-slate-500">{dosage}</div>
-
-                {timingLabel && !routine.gapHours && (
-                    <span className={`text-xs font-medium px-2 py-0.5 rounded border ${getTimingLabelClass(timingLabel)}`}>
-                        {timingLabel}
-                    </span>
+            <div className="flex justify-between items-start gap-2">
+                <MedicineName typeLabel={typeLabel} tradeName={tradeName} genericName={genericName} fallbackName={fallbackName} />
+                {frequencyText && (
+                    <span className="shrink-0 text-right text-sm font-semibold text-slate-800">{frequencyText}</span>
                 )}
             </div>
+
+            {detail && <div className="text-sm text-slate-500 mt-1">{detail}</div>}
 
             {reasoning && (
                 <div className="mt-2 p-2 rounded-lg bg-emerald-50/50 border border-emerald-100 flex items-start gap-1.5">
