@@ -1,6 +1,7 @@
-import { BookMarked, ClipboardListIcon, EllipsisIcon, House, LogOutIcon, MenuIcon, UserIcon, XIcon } from "lucide-react";
+import { BookMarked, ClipboardListIcon, EllipsisIcon, HandCoinsIcon, House, LogOutIcon, MenuIcon, UserIcon, XIcon } from "lucide-react";
 import { useState } from "react";
 import NavbarContainer from "../shared/navbar-container";
+import SubscriptionStatusPill from "./subscription/status-pill";
 import { Button } from "../ui/button";
 import {
     DropdownMenu,
@@ -59,11 +60,11 @@ const MENU_ITEMS: MenuItemType[] = [
     //     icon: <SettingsIcon />,
     //     href: "/doctor/settings",
     // },
-    // {
-    //     label: "Billing",
-    //     icon: <HandCoinsIcon />,
-    //     href: "/doctor/billing",
-    // },
+    {
+        label: "Membership",
+        icon: <HandCoinsIcon />,
+        href: "/doctor/billing",
+    },
     {
         label: "Logout",
         icon: <LogOutIcon />,
@@ -116,22 +117,20 @@ export default function DashboardNavbar() {
     }
 
     const renderDropdownMenuItem = (menu: MenuItemType) => {
-        return (
-            <>
-                {menu.href && (
-                    <Link to={menu.href} className="flex items-center gap-2 w-full">
-                        {menu.icon}
-                        {menu.label}
-                    </Link>
-                )}
+        if (menu.href) {
+            return (
+                <Link to={menu.href} className="flex items-center gap-2 w-full">
+                    {menu.icon}
+                    {menu.label}
+                </Link>
+            )
+        }
 
-                {menu.buttonType && (
-                    <button type="button" className="flex items-center gap-2 cursor-pointer w-full text-left" onClick={() => handleMenuClick(menu)}>
-                        {menu.icon}
-                        {menu.label}
-                    </button>
-                )}
-            </>
+        return (
+            <button type="button" className="flex items-center gap-2 cursor-pointer w-full text-left" onClick={() => handleMenuClick(menu)}>
+                {menu.icon}
+                {menu.label}
+            </button>
         )
     }
 
@@ -171,6 +170,7 @@ export default function DashboardNavbar() {
 
                 <div className="md:flex items-center hidden gap-4">
 
+                    <SubscriptionStatusPill />
 
                     {MENU_ITEMS.slice(0, menuToShowCount).map((menu, index) => (
                         <div key={index}>
@@ -189,7 +189,7 @@ export default function DashboardNavbar() {
 
                             <DropdownMenuContent>
                                 {MENU_ITEMS.slice(menuToShowCount).map((menu, index) => (
-                                    <DropdownMenuItem key={index}>
+                                    <DropdownMenuItem asChild key={index}>
                                         {renderDropdownMenuItem(menu)}
                                     </DropdownMenuItem>
                                 ))}

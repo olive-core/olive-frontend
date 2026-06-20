@@ -12,6 +12,8 @@ import { format } from "date-fns";
 import api from "@/lib/axios";
 import type { PatientInfoType, ShowContentStatus } from "@/types/patient";
 import { getAgeFromDOB, handleError } from "@/lib/utils";
+import { getSubscriptionStatusFromError, isSubscriptionBlocked } from "@/lib/subscription";
+import { useSubscriptionGate } from "@/stores/subscription-gate-store";
 import PatientSkeleton from "./skeleton";
 import { useAuthStore } from "@/stores/auth-store";
 import { useState } from "react";
@@ -38,6 +40,7 @@ export default function PatientInfo({ userId: patientId, setShowContent }: Patie
     });
 
     const { userId: clinicianId } = useAuthStore();
+    const showSubscriptionGate = useSubscriptionGate((s) => s.show);
 
 
     if (isLoading) {
@@ -59,6 +62,10 @@ export default function PatientInfo({ userId: patientId, setShowContent }: Patie
             navigate({ to: "/doctor/consultation/$userId/$consultationId", params: { userId: patientId, consultationId: sessionId } });
 
         } catch (error) {
+            if (isSubscriptionBlocked(error)) {
+                showSubscriptionGate(getSubscriptionStatusFromError(error));
+                return;
+            }
             handleError(error, "An error occurred while creating the patient.");
         } finally {
             setIsCreatingConsultation(false);

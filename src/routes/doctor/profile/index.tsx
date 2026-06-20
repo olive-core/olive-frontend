@@ -1,5 +1,6 @@
 import { ProfileForm } from '@/components/clinician/profile-form'
 import { ProfileSummary } from '@/components/clinician/profile-summary'
+import MembershipBadge from '@/components/dashboard/subscription/membership-badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import api from '@/lib/axios'
@@ -46,6 +47,8 @@ function RouteComponent() {
   return (
     <div className="container mx-auto max-w-5xl px-4 py-8">
       <h1 className="mb-6 text-2xl font-bold text-slate-900">Profile</h1>
+
+      <MembershipBadge />
 
       {isLoading || !clinicianData ? (
         <ProfileSkeleton />

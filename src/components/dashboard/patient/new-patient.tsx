@@ -5,6 +5,8 @@ import MultiStepForm from '@/components/shared/multi-step-form'
 import type { MultiStepFormSteps } from '@/types/shared'
 import { MarsIcon, TransgenderIcon, VenusIcon } from 'lucide-react'
 import { handleError } from '@/lib/utils'
+import { getSubscriptionStatusFromError, isSubscriptionBlocked } from '@/lib/subscription'
+import { useSubscriptionGate } from '@/stores/subscription-gate-store'
 import { useNavigate } from '@tanstack/react-router'
 import api from '@/lib/axios'
 import { useAuthStore } from '@/stores/auth-store'
@@ -38,6 +40,7 @@ export default function NewPatient({ phone, name, age, sex, userId }: NewPatient
 
     const navigate = useNavigate();
     const { userId: clinicianId } = useAuthStore();
+    const showSubscriptionGate = useSubscriptionGate((s) => s.show);
     // const queryClient = useQueryClient();
 
     const form = useForm<PatientFormValues>({
@@ -117,6 +120,10 @@ export default function NewPatient({ phone, name, age, sex, userId }: NewPatient
             navigate({ to: "/doctor/consultation/$userId/$consultationId", params: { userId: patientId, consultationId: sessionId } });
 
         } catch (error) {
+            if (isSubscriptionBlocked(error)) {
+                showSubscriptionGate(getSubscriptionStatusFromError(error));
+                return;
+            }
             handleError(error, "An error occurred while creating the patient.");
         }
     }
