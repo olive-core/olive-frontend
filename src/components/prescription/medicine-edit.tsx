@@ -46,7 +46,7 @@ const fetchMedicine = async (query: string): Promise<Option[]> => {
         generic_name_strength: string;
         trade_name: string;
         dosage_form?: string;
-    }[]>(`/medicine/search?q=${query}&search_in=both`);
+    }[]>(`/medicine/search?q=${encodeURIComponent(query)}&search_in=both`);
 
     return res.data.map(item => ({
         label: item.trade_name ?? item.generic_name_strength ?? "",
