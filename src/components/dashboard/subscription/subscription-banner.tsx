@@ -14,18 +14,17 @@ export default function SubscriptionBanner() {
     const { data: status } = useSubscriptionStatus();
     const [hidden, setHidden] = useState(true);
 
+    // Grace nudging lives in the navbar pill + a start-consultation prompt, so the
+    // banner only covers the low-trial case here.
     const nudge = status?.nudge_level ?? "none";
 
     useEffect(() => {
-        setHidden(nudge === "none" || dismissedToday());
+        setHidden(nudge !== "trial_low" || dismissedToday());
     }, [nudge]);
 
     if (hidden || !status) return null;
 
-    const message =
-        nudge === "trial_low"
-            ? `${status.consultations_remaining} free consultation${status.consultations_remaining === 1 ? "" : "s"} left — activate your membership to keep going.`
-            : "Your membership has expired. Renew now to keep your founding rate.";
+    const message = `${status.consultations_remaining} free consultation${status.consultations_remaining === 1 ? "" : "s"} left — activate your membership to keep going.`;
 
     const dismiss = () => {
         localStorage.setItem(DISMISS_KEY, new Date().toDateString());

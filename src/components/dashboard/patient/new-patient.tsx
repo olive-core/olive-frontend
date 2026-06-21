@@ -7,6 +7,7 @@ import { MarsIcon, TransgenderIcon, VenusIcon } from 'lucide-react'
 import { handleError } from '@/lib/utils'
 import { getSubscriptionStatusFromError, isSubscriptionBlocked } from '@/lib/subscription'
 import { useSubscriptionGate } from '@/stores/subscription-gate-store'
+import { useGraceGuard } from '@/hooks/use-grace-guard'
 import { useNavigate } from '@tanstack/react-router'
 import api from '@/lib/axios'
 import { useAuthStore } from '@/stores/auth-store'
@@ -41,6 +42,7 @@ export default function NewPatient({ phone, name, age, sex, userId }: NewPatient
     const navigate = useNavigate();
     const { userId: clinicianId } = useAuthStore();
     const showSubscriptionGate = useSubscriptionGate((s) => s.show);
+    const { guardStart, dialog: graceDialog } = useGraceGuard();
     // const queryClient = useQueryClient();
 
     const form = useForm<PatientFormValues>({
@@ -100,7 +102,9 @@ export default function NewPatient({ phone, name, age, sex, userId }: NewPatient
         }
     })
 
-    async function onSubmit(values: PatientFormValues) {
+    const onSubmit = async (values: PatientFormValues) => guardStart(() => submitConsultation(values));
+
+    async function submitConsultation(values: PatientFormValues) {
         try {
 
             // create | edit patient -> create consultation -> navigate to consultation page
@@ -175,11 +179,14 @@ export default function NewPatient({ phone, name, age, sex, userId }: NewPatient
     ]
 
     return (
-        <MultiStepForm
-            title="New Patient Information"
-            steps={steps}
-            onSubmit={onSubmit}
-            form={form}
-        />
+        <>
+            <MultiStepForm
+                title="New Patient Information"
+                steps={steps}
+                onSubmit={onSubmit}
+                form={form}
+            />
+            {graceDialog}
+        </>
     )
 }

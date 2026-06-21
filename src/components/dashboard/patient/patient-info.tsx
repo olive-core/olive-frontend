@@ -14,6 +14,7 @@ import type { PatientInfoType, ShowContentStatus } from "@/types/patient";
 import { getAgeFromDOB, handleError } from "@/lib/utils";
 import { getSubscriptionStatusFromError, isSubscriptionBlocked } from "@/lib/subscription";
 import { useSubscriptionGate } from "@/stores/subscription-gate-store";
+import { useGraceGuard } from "@/hooks/use-grace-guard";
 import PatientSkeleton from "./skeleton";
 import { useAuthStore } from "@/stores/auth-store";
 import { useState } from "react";
@@ -41,13 +42,14 @@ export default function PatientInfo({ userId: patientId, setShowContent }: Patie
 
     const { userId: clinicianId } = useAuthStore();
     const showSubscriptionGate = useSubscriptionGate((s) => s.show);
+    const { guardStart, dialog: graceDialog } = useGraceGuard();
 
 
     if (isLoading) {
         return <PatientSkeleton />;
     }
 
-    const handleStartConsultation = async () => {
+    const createConsultation = async () => {
         try {
             //  create consultation -> navigate to consultation page
             setIsCreatingConsultation(true);
@@ -71,6 +73,8 @@ export default function PatientInfo({ userId: patientId, setShowContent }: Patie
             setIsCreatingConsultation(false);
         }
     }
+
+    const handleStartConsultation = () => guardStart(createConsultation);
 
     if (isError || !patientData) {
         return <div className="py-4 px-6 bg-rose-100 text-rose-500 rounded-lg border-rose-300 border-2">Error loading patient info.</div>;
@@ -136,6 +140,7 @@ export default function PatientInfo({ userId: patientId, setShowContent }: Patie
                     Start Consultation
                 </Button>
             </Item>
+            {graceDialog}
         </div>
     )
 }

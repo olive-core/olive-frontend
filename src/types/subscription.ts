@@ -14,6 +14,7 @@ export interface SubscriptionStatus {
     nudge_level: NudgeLevel;
     consultations_used: number;
     consultations_remaining: number | null;
+    grace_consultations_remaining: number | null;
     trial_limit: number;
     subscription_until: string | null;
     price: number | null;

@@ -4,7 +4,6 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useSubscriptionStatus } from "@/hooks/use-subscription";
 import { formatTaka, formatUntilDate } from "@/lib/subscription";
-import { useAuthStore } from "@/stores/auth-store";
 
 import PaidClaimForm from "./paid-claim-form";
 import PaymentInstructions from "./payment-instructions";
@@ -22,7 +21,6 @@ function StatusSummary({ label, value }: { label: string; value: string }) {
 
 export default function MembershipPanel() {
     const { data: status, isLoading } = useSubscriptionStatus();
-    const phoneNumber = useAuthStore((s) => s.phoneNumber);
 
     const [step, setStep] = useState<Step>("overview");
     const [months, setMonths] = useState(1);
@@ -45,7 +43,7 @@ export default function MembershipPanel() {
                 : status.state === "grace"
                     ? `Expired — renew to keep your founding rate`
                     : status.subscription_until
-                        ? `Membership expired — renew to continue`
+                        ? `Membership expired. Renew to continue`
                         : `Trial ended. Activate to continue.`;
 
     return (
@@ -124,7 +122,6 @@ export default function MembershipPanel() {
                     <PaymentInstructions
                         bkashNumber={status.bkash_number}
                         amount={amount}
-                        reference={phoneNumber}
                         onPaid={() => setStep("claim")}
                     />
                 )}

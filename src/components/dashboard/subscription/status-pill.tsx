@@ -10,7 +10,9 @@ export default function SubscriptionStatusPill() {
     const { label, tone } =
         status.state !== "active" && status.pending_payment
             ? { label: "Payment under review", tone: "bg-sky-50 text-sky-700 hover:bg-sky-100" }
-            : describe(status.state, status.consultations_remaining, status.subscription_until);
+            : status.state === "grace"
+                ? { label: `Grace · ${status.grace_consultations_remaining ?? 0} left`, tone: "bg-amber-50 text-amber-700 hover:bg-amber-100" }
+                : describe(status.state, status.consultations_remaining, status.subscription_until);
 
     return (
         <Link
