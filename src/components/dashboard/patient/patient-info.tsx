@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { CalendarIcon, MarsIcon, MicIcon, PenIcon, TransgenderIcon, VenusIcon } from "lucide-react";
 import {
     Item,
@@ -43,6 +43,7 @@ export default function PatientInfo({ userId: patientId, setShowContent }: Patie
     const { userId: clinicianId } = useAuthStore();
     const showSubscriptionGate = useSubscriptionGate((s) => s.show);
     const { guardStart, dialog: graceDialog } = useGraceGuard();
+    const queryClient = useQueryClient();
 
 
     if (isLoading) {
@@ -60,6 +61,9 @@ export default function PatientInfo({ userId: patientId, setShowContent }: Patie
             });
 
             const sessionId = sessionCreateResponse.data.session_id;
+
+            // The session is the unit we meter, so refresh the cached status the navbar reads.
+            queryClient.invalidateQueries({ queryKey: ["subscription"] });
 
             navigate({ to: "/doctor/consultation/$userId/$consultationId", params: { userId: patientId, consultationId: sessionId } });
 

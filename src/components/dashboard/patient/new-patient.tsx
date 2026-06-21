@@ -11,7 +11,7 @@ import { useGraceGuard } from '@/hooks/use-grace-guard'
 import { useNavigate } from '@tanstack/react-router'
 import api from '@/lib/axios'
 import { useAuthStore } from '@/stores/auth-store'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 const patientSchema = z.object({
     name: z.string(),
@@ -43,7 +43,7 @@ export default function NewPatient({ phone, name, age, sex, userId }: NewPatient
     const { userId: clinicianId } = useAuthStore();
     const showSubscriptionGate = useSubscriptionGate((s) => s.show);
     const { guardStart, dialog: graceDialog } = useGraceGuard();
-    // const queryClient = useQueryClient();
+    const queryClient = useQueryClient();
 
     const form = useForm<PatientFormValues>({
         resolver: zodResolver(patientSchema),
@@ -118,6 +118,9 @@ export default function NewPatient({ phone, name, age, sex, userId }: NewPatient
             });
 
             const sessionId = sessionCreateResponse.data.session_id;
+
+            // The session is the unit we meter, so refresh the cached status the navbar reads.
+            queryClient.invalidateQueries({ queryKey: ["subscription"] });
 
             form.reset();
 
