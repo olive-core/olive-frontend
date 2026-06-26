@@ -52,7 +52,6 @@ function applyType(medicine: MeedicineType, category: MedicineCategory, hints: R
         duration: {},
         instructions: "",
         frequencyCode: undefined,
-        mealTiming: undefined,
     };
 }
 

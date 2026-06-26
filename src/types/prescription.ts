@@ -50,7 +50,7 @@ export type MedicineSchedule = {
     noon?: number;
     night?: number;
     gapHours?: number;  // interval mode
-    code?: string;      // OD/BD/TDS/QDS/HS/SOS/PRN/Stat... — code mode
+    code?: string;      // OD/BD/TDS/QDS/Q6H/Q8H/Q12H/HS/SOS/Stat — code mode
 };
 
 export type MeedicineType = {
@@ -67,7 +67,6 @@ export type MeedicineType = {
     dose?: MedicineDose;
     schedule?: MedicineSchedule;
     frequencyCode?: string;
-    mealTiming?: string;
     duration?: MedicineDuration;
     instructions?: string;
 
@@ -159,7 +158,6 @@ export type PrescriptionResponseType = {
         duration_unit?: string;
         duration_preset?: string;
         frequency_code?: string;
-        meal_timing?: string;
         instructions?: string;
     }[];
     investigations: {
