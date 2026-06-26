@@ -1,5 +1,12 @@
 import type { MedicineDuration, MeedicineType } from "@/types/prescription";
 import { DOSE_UNITS, DURATION_PRESETS, ROUTES, SITES, expandCode } from "@/constants/prescription";
+import { parseFraction, toFractionLabel } from "@/lib/rx-format";
+
+// Numeric amounts ("1.5", "½") print as mixed fractions ("1½"); ranges / free text ("1-2") pass through.
+function formatAmount(amount: string): string {
+    const value = parseFraction(amount);
+    return value ? toFractionLabel(value) : amount;
+}
 
 // Builds the human-readable `dosage` / `duration` strings from the structured fields.
 // Abbreviations are expanded for the patient ("1 TSF (teaspoon), I/V (intravenous)"), and
@@ -12,11 +19,16 @@ const IMPLIED_ROUTES = new Set(["P/O", "Ophthalmic", "Otic", "Nasal", "Top.", "I
 export function composeDose(medicine: Pick<MeedicineType, "dose" | "route" | "site">): string {
     const amount = medicine.dose?.amount?.trim();
     const unit = medicine.dose?.unit?.trim();
+    const diluentAmount = medicine.dose?.diluent?.amount?.trim();
     // A unit without an amount carries no information (e.g. oral solids count via the schedule).
-    const doseText = amount ? [amount, unit ? expandCode(unit, DOSE_UNITS) : ""].filter(Boolean).join(" ") : "";
+    const doseText = amount ? [formatAmount(amount), unit ? expandCode(unit, DOSE_UNITS) : ""].filter(Boolean).join(" ") : "";
+    // An empty / zero diluent volume means the medicine is given undiluted.
+    const dilutedText = diluentAmount && parseFraction(diluentAmount) > 0
+        ? [doseText, `diluted in ${diluentAmount} ${medicine.dose?.diluent?.unit ?? "ml"} normal saline`].filter(Boolean).join(" ")
+        : doseText;
     const route = medicine.route && !IMPLIED_ROUTES.has(medicine.route) ? expandCode(medicine.route, ROUTES) : "";
     const site = medicine.site ? expandCode(medicine.site, SITES) : "";
-    return [doseText, route, site].filter(Boolean).join(", ");
+    return [dilutedText, route, site].filter(Boolean).join(", ");
 }
 
 export function composeDuration(medicine: Pick<MeedicineType, "duration">): string {

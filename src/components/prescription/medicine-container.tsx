@@ -39,8 +39,14 @@ export const MedicineContainer = () => {
     }
 
     const handleAdd = () => {
+        // Reuse an existing name-less row instead of stacking up empty medicines.
+        const emptyIndex = medicine.findIndex(med => !med.name && !med.value);
+        if (emptyIndex >= 0) {
+            setEditingItemStatus({ index: emptyIndex, status: "add" });
+            return;
+        }
         addEmptyMedicine();
-        setEditingItemIndex(medicine.length); // Set to the new item's index
+        setEditingItemStatus({ index: medicine.length, status: "add" }); // the newly appended row
     }
 
     const renderMedicine = (med: MeedicineType, idx: number) => {

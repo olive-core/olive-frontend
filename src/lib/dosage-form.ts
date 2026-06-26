@@ -9,7 +9,7 @@ export type MedicineCategory =
     | "syrup" | "suspension" | "oral_solution" | "oral_drops" | "elixir"
     | "injection" | "iv_fluid"
     | "eye_drops" | "ear_drops" | "nasal_drops" | "drops"
-    | "nasal_spray" | "gtn_spray"
+    | "nasal_spray" | "gtn_spray" | "spray"
     | "inhaler" | "nebulizer"
     | "ointment" | "cream" | "gel" | "lotion" | "eye_ointment" | "vaginal_cream"
     | "suppository" | "pessary" | "enema"
@@ -27,16 +27,14 @@ export type RxDefaults = {
     route?: string;
     doseUnit?: string;
     site?: string;
+    diluent?: { amount?: string; unit?: string };
 };
 
 // Ordered most-specific first; the first matching keyword wins.
 const CATEGORY_RULES: ReadonlyArray<[MedicineCategory, string[]]> = [
     ["eye_ointment", ["eye ointment", "ophthalmic ointment", "opthalmic ointment"]],
-    ["eye_drops", ["eye drop", "ophthalmic", "opthalmic"]],
-    ["ear_drops", ["ear drop", "otic", "aural"]],
-    ["nasal_spray", ["nasal spray", "nasal inhaler"]],
-    ["nasal_drops", ["nasal drop", "nasal"]],
-    ["gtn_spray", ["gtn spray", "sublingual spray", "nitro"]],
+    ["spray", ["nasal spray", "nasal inhaler", "gtn spray", "sublingual spray", "nitro"]],
+    ["drops", ["eye drop", "ophthalmic", "opthalmic", "ear drop", "otic", "aural", "nasal drop", "nasal"]],
     ["inhaler", ["metered dose", "mdi", "dpi", "rotacap", "rotacaps", "inhaler", "inhalation", "hfa", "accuhaler", "turbuhaler"]],
     ["nebulizer", ["nebul", "respule", "respirator solution"]],
     ["iv_fluid", ["iv fluid", "i.v. fluid", "infusion", "drip", "iv solution", "large volume"]],
@@ -49,6 +47,7 @@ const CATEGORY_RULES: ReadonlyArray<[MedicineCategory, string[]]> = [
     ["transdermal_patch", ["transdermal", "patch"]],
     ["mouthwash", ["mouthwash", "mouth wash", "oral rinse"]],
     ["gargle", ["gargle"]],
+    ["spray", ["spray"]],
     ["ors", ["ors", "oral rehydration", "rehydration salt"]],
     ["sachet", ["sachet"]],
     ["granules", ["granule", "gran."]],
@@ -66,7 +65,6 @@ const CATEGORY_RULES: ReadonlyArray<[MedicineCategory, string[]]> = [
     ["cream", ["cream"]],
     ["gel", ["gel", "jelly"]],
     ["lotion", ["lotion"]],
-    ["nasal_spray", ["spray"]],
 ];
 
 // Explicit mapping for every distinct dosage_form value in the medicine table
@@ -92,12 +90,12 @@ const DOSAGE_FORM_CATEGORY: Record<string, MedicineCategory> = {
     "injection": "injection", "iv injection": "injection", "im injection": "injection",
     "iv/im injection": "injection", "solution for injection": "injection", "water for injection": "injection", "vaccine": "injection",
     "iv infusion": "iv_fluid", "solution for infusion": "iv_fluid", "dialysis solution": "iv_fluid", "pvc bag": "iv_fluid",
-    "eye drops": "eye_drops", "eye solution": "eye_drops", "opthalmic solution": "eye_drops",
-    "ophthalmic emulsion": "eye_drops", "eye cleanser solution": "eye_drops",
-    "ear drop": "ear_drops", "ear spray": "ear_drops",
-    "nasal drops": "nasal_drops",
+    "eye drops": "drops", "eye solution": "drops", "opthalmic solution": "drops",
+    "ophthalmic emulsion": "drops", "eye cleanser solution": "drops",
+    "ear drop": "drops", "ear spray": "drops",
+    "nasal drops": "drops",
     "eye, ear & nasal drops": "drops", "eye and ear drops": "drops", "eye & nasal drops": "drops",
-    "nasal spray": "nasal_spray", "spray": "nasal_spray",
+    "nasal spray": "spray", "spray": "spray",
     "metered dose inhaler": "inhaler", "dry powder inhaler": "inhaler", "hfa inhaler": "inhaler",
     "inhaler": "inhaler", "inhalation aerosol": "inhaler", "aerosol inhalation": "inhaler", "inhalation capsule": "inhaler",
     "nebuliser solution": "nebulizer", "nebuliser suspension": "nebulizer", "respirator suspension": "nebulizer",
@@ -152,7 +150,7 @@ const CATEGORY_ARCHETYPE: Record<MedicineCategory, ArchetypeKey> = {
     injection: "injection",
     iv_fluid: "iv_fluid",
     eye_drops: "drops", ear_drops: "drops", nasal_drops: "drops", drops: "drops",
-    nasal_spray: "spray", gtn_spray: "spray",
+    nasal_spray: "spray", gtn_spray: "spray", spray: "spray",
     inhaler: "inhaler",
     nebulizer: "nebulizer",
     ointment: "topical", cream: "topical", gel: "topical", lotion: "topical", eye_ointment: "topical", vaginal_cream: "topical",
@@ -187,8 +185,9 @@ const CATEGORY_DEFAULTS: Record<MedicineCategory, RxDefaults> = {
     drops: { doseUnit: "drops" },
     nasal_spray: { route: "Nasal", doseUnit: "spray", site: "Each nostril" },
     gtn_spray: { route: "S/L", doseUnit: "spray" },
+    spray: { doseUnit: "spray" },
     inhaler: { route: "Inh.", doseUnit: "puff" },
-    nebulizer: { route: "Neb.", doseUnit: "ml" },
+    nebulizer: { route: "Neb.", doseUnit: "ml", diluent: { amount: "2.5", unit: "ml" } },
     ointment: { route: "Top.", site: "Affected area" },
     cream: { route: "Top.", site: "Affected area" },
     gel: { route: "Top.", site: "Affected area" },
@@ -213,6 +212,23 @@ export function getCategoryDefaults(category?: MedicineCategory): RxDefaults {
     return CATEGORY_DEFAULTS[category];
 }
 
+// Smart per-medicine defaults read from the raw dosage_form text. The merged drops/spray
+// categories are generic, so an "Eye Drop" still lands on the eye and a GTN spray sublingually.
+export function getFormHints(rawDosageForm?: string | null, category?: MedicineCategory): RxDefaults {
+    const text = (rawDosageForm ?? "").toLowerCase();
+    if (category === "drops") {
+        if (text.includes("eye") || text.includes("ophthalmic") || text.includes("opthalmic")) return { site: "O/E", route: "Ophthalmic" };
+        if (text.includes("ear") || text.includes("otic") || text.includes("aural")) return { site: "Both ears", route: "Otic" };
+        if (text.includes("nasal") || text.includes("nose")) return { site: "Each nostril", route: "Nasal" };
+    }
+    if (category === "spray") {
+        if (text.includes("sublingual") || text.includes("gtn") || text.includes("nitro")) return { site: "Sublingual", route: "S/L" };
+        if (text.includes("throat")) return { site: "Throat" };
+        if (text.includes("nasal") || text.includes("nose")) return { site: "Each nostril", route: "Nasal" };
+    }
+    return {};
+}
+
 // Human label shown above the medicine name on the prescription (blank for unknown/custom).
 export function categoryLabel(type?: string | null): string {
     if (!type || type === "other") return "";
@@ -235,9 +251,10 @@ export const CATEGORY_LABELS: Record<MedicineCategory, string> = {
     eye_drops: "Eye Drops",
     ear_drops: "Ear Drops",
     nasal_drops: "Nasal Drops",
-    drops: "Drops (eye/ear/nasal)",
+    drops: "Drops",
     nasal_spray: "Nasal Spray",
     gtn_spray: "GTN Spray",
+    spray: "Spray",
     inhaler: "Inhaler",
     nebulizer: "Nebulizer",
     ointment: "Ointment",
@@ -264,13 +281,11 @@ export const MEDICINE_CATEGORIES: readonly MedicineCategory[] = [
     "tablet", "capsule", "sublingual_tab", "buccal_tab", "lozenge",
     "syrup", "suspension", "oral_solution", "oral_drops", "elixir",
     "injection", "iv_fluid",
-    "eye_drops", "ear_drops", "nasal_drops", "drops",
-    "nasal_spray", "gtn_spray",
-    "inhaler", "nebulizer",
+    "drops", "spray", "inhaler", "nebulizer",
     "ointment", "cream", "gel", "lotion", "eye_ointment", "vaginal_cream",
     "suppository", "pessary", "enema",
-    "sachet", "powder", "granules", "ors",
+    "sachet", "ors",
     "transdermal_patch",
-    "mouthwash", "gargle",
+    "mouthwash",
     "other",
 ];

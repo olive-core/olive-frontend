@@ -1,4 +1,4 @@
-import type { ArchetypeKey } from "@/lib/dosage-form";
+import { getRxArchetype, type ArchetypeKey, type MedicineCategory } from "@/lib/dosage-form";
 import {
     DROP_DOSE_UNITS,
     INHALER_DOSE_UNITS,
@@ -23,6 +23,7 @@ export type RxTypeConfig = {
     showRoute: boolean;
     showSite: boolean;        // site options are derived from the category (getSiteOptions)
     showMealTiming: boolean;  // a before/after-meal field for code-mode oral types
+    showDiluent?: boolean;    // a "dilute in ..." field under dose (nebulizer)
     units?: readonly RxOption[];
     instructions: string[];
 };
@@ -35,11 +36,11 @@ export const RX_TYPE_CONFIG: Record<ArchetypeKey, RxTypeConfig> = {
     },
     oral_liquid: {
         doseMode: "explicit", units: LIQUID_DOSE_UNITS, frequencyMode: "code", showRoute: false, showSite: false, showMealTiming: true,
-        instructions: ["Shake well before use", "After meal", "Complete the full course"],
+        instructions: ["Shake well before use", "Mix with half a glass of water", "Complete the full course"],
     },
     injection: {
         doseMode: "explicit", units: INJECTION_DOSE_UNITS, frequencyMode: "code", showRoute: true, showSite: false, showMealTiming: false,
-        instructions: ["Reconstitute before use", "Give slowly", "Rotate injection/patch sites"],
+        instructions: ["Give after skin sensitivity test", "Inject slowly", "Reconstitute before use", "Rotate injection sites"],
     },
     iv_fluid: {
         doseMode: "explicit", units: VOLUME_DOSE_UNITS, frequencyMode: "code", showRoute: false, showSite: false, showMealTiming: false,
@@ -47,7 +48,7 @@ export const RX_TYPE_CONFIG: Record<ArchetypeKey, RxTypeConfig> = {
     },
     drops: {
         doseMode: "explicit", units: DROP_DOSE_UNITS, frequencyMode: "code", showRoute: false, showSite: true, showMealTiming: false,
-        instructions: [],
+        instructions: ["Shake well before use", "Do not touch the dropper tip", "Discard 1 month after opening"],
     },
     spray: {
         doseMode: "explicit", units: SPRAY_DOSE_UNITS, frequencyMode: "code", showRoute: false, showSite: true, showMealTiming: false,
@@ -55,11 +56,11 @@ export const RX_TYPE_CONFIG: Record<ArchetypeKey, RxTypeConfig> = {
     },
     inhaler: {
         doseMode: "explicit", units: INHALER_DOSE_UNITS, frequencyMode: "code", showRoute: false, showSite: false, showMealTiming: false,
-        instructions: ["Rinse mouth with water after use", "Use spacer when possible"],
+        instructions: ["Rinse mouth with water a few minutes after use", "Use spacer when possible"],
     },
     nebulizer: {
-        doseMode: "explicit", units: DROP_DOSE_UNITS, frequencyMode: "code", showRoute: false, showSite: false, showMealTiming: false,
-        instructions: ["Dilute in 2.5 ml normal saline", "Via nebulizer"],
+        doseMode: "explicit", units: DROP_DOSE_UNITS, frequencyMode: "code", showRoute: false, showSite: false, showMealTiming: false, showDiluent: true,
+        instructions: ["Via nebulizer"],
     },
     topical: {
         doseMode: "none", frequencyMode: "code", showRoute: false, showSite: true, showMealTiming: false,
@@ -86,3 +87,16 @@ export const RX_TYPE_CONFIG: Record<ArchetypeKey, RxTypeConfig> = {
         instructions: [],
     },
 };
+
+// Per-category instruction overrides for categories that share an archetype but need
+// different sig phrases (e.g. a rectal suppository vs a vaginal pessary, both `insert`).
+const INSTRUCTIONS_BY_CATEGORY: Partial<Record<MedicineCategory, string[]>> = {
+    suppository: ["Insert into the rectum", "Use only if temperature is 102°F or higher", "Moisten with water before insertion"],
+    pessary: ["Insert high into the vagina at bedtime", "Remain lying down for a while after insertion"],
+    enema: ["Retain as long as possible", "Use at bedtime"],
+};
+
+// The suggestion phrases for a medicine: a category override if one exists, else the archetype default.
+export function getInstructions(category?: MedicineCategory): string[] {
+    return (category && INSTRUCTIONS_BY_CATEGORY[category]) || RX_TYPE_CONFIG[getRxArchetype(category)].instructions;
+}

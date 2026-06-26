@@ -35,7 +35,7 @@ export const FREQUENCIES: readonly FrequencyOption[] = [
     { code: "Q12H", fullForm: "every 12 hours", gapHours: 12 },
     { code: "SOS", fullForm: "when necessary", asNeeded: true, quick: true },
     { code: "PRN", fullForm: "as needed", asNeeded: true },
-    { code: "Stat", fullForm: "immediately, single dose", asNeeded: true, quick: true },
+    { code: "Stat", fullForm: "immediately", asNeeded: true, quick: true },
     { code: "EOD", fullForm: "every other day", asNeeded: true },
     { code: "OW", fullForm: "once weekly", asNeeded: true },
     { code: "BW", fullForm: "twice weekly", asNeeded: true },
@@ -95,6 +95,8 @@ export const SITES: readonly RxOption[] = [
     { code: "L/Ear", fullForm: "left ear" },
     { code: "Both ears", fullForm: "both ears" },
     { code: "Each nostril", fullForm: "each nostril" },
+    { code: "Sublingual", fullForm: "under the tongue" },
+    { code: "Throat", fullForm: "throat" },
     { code: "Affected area", fullForm: "affected area" },
 ];
 
@@ -144,13 +146,14 @@ const pickUnits = (...codes: string[]): RxOption[] =>
     codes.map(code => DOSE_UNITS.find(unit => unit.code === code)).filter((u): u is RxOption => Boolean(u));
 
 // Curated unit / route subsets so each archetype form offers only what's relevant.
-export const LIQUID_DOSE_UNITS = pickUnits("TSF", "DTSF", "BSF", "ml", "drops");
+export const LIQUID_DOSE_UNITS = pickUnits("TSF", "BSF", "ml", "drops");
 export const INJECTION_DOSE_UNITS = pickUnits("Vial", "Amp", "ml", "mg", "Unit", "IU");
 export const DROP_DOSE_UNITS = pickUnits("drops", "ml");
 export const SPRAY_DOSE_UNITS = pickUnits("spray");
 export const INHALER_DOSE_UNITS = pickUnits("puff");
 export const VOLUME_DOSE_UNITS = pickUnits("ml", "Sachet");
-export const INJECTION_ROUTES = ROUTES.filter(route => ["I/V", "I/M", "S/C", "I/D", "I/A", "I/T"].includes(route.code));
+export const DILUENT_UNITS = pickUnits("ml");
+export const INJECTION_ROUTES = ROUTES.filter(route => ["I/V", "I/M", "S/C", "I/D", "I/A"].includes(route.code));
 
 const findOption = (code: string, options: readonly RxOption[]): RxOption | undefined =>
     options.find(option => option.code.toLowerCase() === code.toLowerCase());

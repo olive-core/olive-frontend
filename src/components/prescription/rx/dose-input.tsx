@@ -1,8 +1,9 @@
 import { Input } from "../../ui/input";
 import { cn } from "@/lib/utils";
 import { DOSE_UNITS, type RxOption } from "@/constants/prescription";
+import { parseFraction, toFractionLabel } from "@/lib/rx-format";
 import type { MedicineDose } from "@/types/prescription";
-import SuggestInput from "./suggest-input";
+import Combobox, { type ComboboxOption } from "./combobox";
 
 interface DoseInputProps {
     dose?: MedicineDose;
@@ -14,7 +15,10 @@ interface DoseInputProps {
 
 const AMOUNT_PRESETS = ["½", "1", "1½", "2"];
 
-// Amount (with quick presets for minimal typing) + a typeahead unit picker.
+const toUnitOptions = (units: readonly RxOption[]): ComboboxOption[] =>
+    units.map(unit => ({ value: unit.code, label: unit.code, hint: unit.fullForm }));
+
+// Amount (typed decimals/fractions normalise to ½, 1¼ on blur) + a searchable unit picker.
 export default function DoseInput({
     dose,
     onChange,
@@ -25,21 +29,28 @@ export default function DoseInput({
     const amount = dose?.amount ?? "";
     const unit = dose?.unit ?? "";
 
+    const normalizeAmount = () => {
+        const parsed = parseFraction(amount);
+        if (parsed) onChange({ amount: toFractionLabel(parsed), unit });
+    };
+
     return (
         <div className="space-y-1.5">
             <div className="flex gap-2">
                 <Input
                     value={amount}
                     onChange={event => onChange({ amount: event.target.value, unit })}
+                    onBlur={normalizeAmount}
                     placeholder={amountPlaceholder}
                     className="h-10 w-20 text-center text-base sm:text-sm"
                 />
                 <div className="flex-1">
-                    <SuggestInput
+                    <Combobox
                         value={unit}
                         onChange={nextUnit => onChange({ amount, unit: nextUnit })}
-                        options={unitOptions}
+                        options={toUnitOptions(unitOptions)}
                         placeholder={unitPlaceholder}
+                        allowCustom
                     />
                 </div>
             </div>

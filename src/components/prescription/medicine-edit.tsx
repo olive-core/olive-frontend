@@ -1,22 +1,26 @@
 import { useState } from "react";
 import { Trash2 } from "lucide-react";
 import { Button } from "../ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
-import type { MeedicineType } from "@/types/prescription";
+import type { MedicineSchedule, MeedicineType } from "@/types/prescription";
 import api from "@/lib/axios";
 import DebouncedSearchSelect, { type Option } from "./debounced-search-select";
 import RxForm from "./rx/rx-form";
+import Combobox from "./rx/combobox";
 import { RX_TYPE_CONFIG } from "./rx/rx-type-config";
 import {
     CATEGORY_LABELS,
     MEDICINE_CATEGORIES,
     getCategoryDefaults,
+    getFormHints,
     getRxArchetype,
     normalizeDosageForm,
     type MedicineCategory,
+    type RxDefaults,
 } from "@/lib/dosage-form";
 import { composeDose } from "@/lib/rx-compose";
 import { routineFromSchedule, scheduleFromRoutine } from "@/lib/rx-format";
+
+const TYPE_OPTIONS = MEDICINE_CATEGORIES.map(category => ({ value: category, label: CATEGORY_LABELS[category] }));
 
 interface MedicineProps {
     medicine: MeedicineType;
@@ -27,17 +31,28 @@ interface MedicineProps {
     editingItemStatus: "add" | "update";
 }
 
-// Switching type re-seeds route / site / dose unit from the category defaults, keeping any
-// dose amount, and only keeps a dose object for types that have an explicit dose field.
-function applyType(medicine: MeedicineType, category: MedicineCategory): MeedicineType {
-    const defaults = getCategoryDefaults(category);
+// Oral types default to "after meal" so the doctor rarely has to set it; others start unset.
+function seedSchedule(category: MedicineCategory): MedicineSchedule {
+    const config = RX_TYPE_CONFIG[getRxArchetype(category)];
+    return config.frequencyMode === "meal" || config.showMealTiming ? { timing: "after" } : {};
+}
+
+// Switching medicine or type fully re-seeds the type-specific fields from the category defaults
+// (plus any smart hints), so a previous type's dose / schedule / instructions never leak through.
+function applyType(medicine: MeedicineType, category: MedicineCategory, hints: RxDefaults = {}): MeedicineType {
+    const defaults = { ...getCategoryDefaults(category), ...hints };
     const config = RX_TYPE_CONFIG[getRxArchetype(category)];
     return {
         ...medicine,
         type: category,
         route: defaults.route,
         site: defaults.site,
-        dose: config.doseMode === "explicit" ? { amount: medicine.dose?.amount, unit: defaults.doseUnit } : undefined,
+        dose: config.doseMode === "explicit" ? { amount: undefined, unit: defaults.doseUnit, diluent: defaults.diluent } : undefined,
+        schedule: seedSchedule(category),
+        duration: {},
+        instructions: "",
+        frequencyCode: undefined,
+        mealTiming: undefined,
     };
 }
 
@@ -71,14 +86,18 @@ export default function MedicineEdit({ medicine, onRemove, onUpdate, index, setI
             return;
         }
         const category = normalizeDosageForm(option.dosage_form);
-        setWorking(prev => ({
-            ...applyType(prev, category),
-            name: option.label,
-            value: option.value,
-            trade_name: option.trade_name,
-            generic_name: option.generic_name,
-            dosage_form: option.dosage_form,
-        }));
+        setWorking(prev => {
+            const sameMedicine = prev.value === option.value && prev.name === option.label;
+            const base = sameMedicine ? prev : applyType(prev, category, getFormHints(option.dosage_form, category));
+            return {
+                ...base,
+                name: option.label,
+                value: option.value,
+                trade_name: option.trade_name,
+                generic_name: option.generic_name,
+                dosage_form: option.dosage_form,
+            };
+        });
     };
 
     const handleSave = () => {
@@ -117,20 +136,26 @@ export default function MedicineEdit({ medicine, onRemove, onUpdate, index, setI
                     />
                 </div>
 
+                {hasMedicine && working.generic_name && (
+                    <div className="ml-1 flex flex-wrap items-baseline gap-x-2 text-xs">
+                        <span className="font-semibold text-slate-700">{working.generic_name}</span>
+                        {working.dosage_form && <span className="text-slate-400">· {working.dosage_form}</span>}
+                    </div>
+                )}
+
                 {hasMedicine ? (
                     <>
                         <div className="flex items-center gap-2">
                             <label className="text-[11px] font-semibold text-slate-500 ml-1 shrink-0">Type</label>
-                            <Select value={working.type} onValueChange={value => setWorking(prev => applyType(prev, value as MedicineCategory))}>
-                                <SelectTrigger className="h-9 w-full max-w-xs">
-                                    <SelectValue placeholder="Auto / Custom" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {MEDICINE_CATEGORIES.map(category => (
-                                        <SelectItem key={category} value={category}>{CATEGORY_LABELS[category]}</SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
+                            <div className="w-full max-w-xs">
+                                <Combobox
+                                    value={working.type ?? ""}
+                                    onChange={value => setWorking(prev => applyType(prev, value as MedicineCategory))}
+                                    options={TYPE_OPTIONS}
+                                    placeholder="Auto / Custom"
+                                    searchPlaceholder="Search type..."
+                                />
+                            </div>
                         </div>
 
                         <RxForm medicine={working} config={config} onChange={update} />

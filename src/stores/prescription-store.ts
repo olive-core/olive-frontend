@@ -1,7 +1,7 @@
 import type { ChiefComplaintType, DiagnosisType, InvestigationType, MeedicineType, HistoryType, PrescriptionResponseType, VitalsType, FollowUpType } from "@/types/prescription";
 import { hasAnyVital, vitalsForSubmit } from "@/lib/vitals";
 import { composeDose, composeDuration, parseDuration } from "@/lib/rx-compose";
-import { scheduleFromRoutine } from "@/lib/rx-format";
+import { scheduleFromRoutine, scheduleFromStored } from "@/lib/rx-format";
 import {
     applyRxMemoryToStore,
     clearedRxMemorySections,
@@ -203,17 +203,40 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
                     clinical_reasoning: item.clinical_reasoning
                 })).sort((a, b) => (b.confidence || 0) - (a.confidence || 0)) || []
 
-                const generatedMedicine = data.medicines?.map(item => ({
-                    name: item.trade_name || item.generic_name,
-                    value: item.trade_name || item.generic_name,
-                    trade_name: item.trade_name,
-                    generic_name: item.generic_name,
-                    dosage: item.dosage,
-                    duration: parseDuration(item.duration),
-                    routine: routineForGenerated(item.routine),
-                    schedule: scheduleFromRoutine(routineForGenerated(item.routine)),
-                    reasoning: item.purpose
-                })) || []
+                const generatedMedicine = data.medicines?.map(item => {
+                    // Prefer the structured fields ARIS Stage 4 emits; fall back to deriving
+                    // from the flat dosage/routine/duration for older variants or drafts.
+                    const routine = routineForGenerated(item.routine);
+                    const hasStructuredDuration = item.duration_value != null || !!item.duration_unit || !!item.duration_preset;
+                    const hasStructuredFields = !!(item.type || item.route || item.dose || item.schedule);
+                    return {
+                        name: item.trade_name || item.generic_name,
+                        value: item.trade_name || item.generic_name,
+                        trade_name: item.trade_name,
+                        generic_name: item.generic_name,
+                        type: item.type,
+                        dosage_form: item.dosage_form,
+                        route: item.route,
+                        site: item.site,
+                        dose: item.dose,
+                        instructions: item.instructions,
+                        frequencyCode: item.frequency_code,
+                        // The read card shows `dosage` directly, so compose it from the structured
+                        // fields when Stage 4 provided them — otherwise the stale Stage 3 string leaks.
+                        dosage: hasStructuredFields ? composeDose({ dose: item.dose, route: item.route, site: item.site }) : item.dosage,
+                        duration: hasStructuredDuration
+                            ? { value: item.duration_value ?? undefined, unit: item.duration_unit, preset: item.duration_preset }
+                            : parseDuration(item.duration),
+                        routine,
+                        // Stage 4 sends a schedule only when there is a regular rhythm; an as-needed
+                        // drug (SOS/Stat duration) intentionally has none, so don't resurrect a stale
+                        // Stage-3 routine. The legacy routine fallback is only for drafts/old variants.
+                        schedule: item.schedule
+                            ? scheduleFromStored({ schedule: item.schedule })
+                            : hasStructuredFields ? {} : scheduleFromRoutine(routine),
+                        reasoning: item.purpose,
+                    };
+                }) || []
 
                 const generatedInvestigation = data.investigations?.map(item => ({
                     name: item.investigation_name,
