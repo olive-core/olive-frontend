@@ -1,4 +1,5 @@
-import type { InvestigationType, MeedicineType } from "@/types/prescription";
+import type { InvestigationType } from "@/types/prescription";
+import { deserializeMedicine, type StoredRxItem } from "@/lib/rx-medicine";
 
 // Single source of truth for which prescription sections an RxMemory carries. Changing this list
 // changes — together, in one place — which sections the RxMemory editor shows and which sections an
@@ -10,24 +11,8 @@ export type RxMemorySectionKey = (typeof RX_MEMORY_SECTIONS)[number];
 type MergeStrategy = "replace" | "append";
 
 interface RxMemoryTemplateData {
-    rx_list?: TemplateMedicine[];
+    rx_list?: StoredRxItem[];
     investigations?: TemplateInvestigation[];
-}
-
-interface TemplateMedicine {
-    trade_name?: string;
-    generic_name?: string;
-    dosage?: string;
-    duration?: string;
-    routine?: {
-        before_breakfast?: boolean;
-        after_breakfast?: boolean;
-        before_lunch?: boolean;
-        after_lunch?: boolean;
-        before_dinner?: boolean;
-        after_dinner?: boolean;
-        gap_hour?: number;
-    };
 }
 
 interface TemplateInvestigation {
@@ -43,26 +28,6 @@ interface RxMemorySectionDefinition {
     fromTemplateData: (data: RxMemoryTemplateData) => unknown[];
 }
 
-function toStoreMedicine(item: TemplateMedicine): MeedicineType {
-    return {
-        name: item.trade_name || item.generic_name || "",
-        value: item.trade_name || item.generic_name || "",
-        trade_name: item.trade_name,
-        generic_name: item.generic_name,
-        dosage: item.dosage,
-        notes: item.duration,
-        routine: {
-            beforeBreakfast: item.routine?.before_breakfast || false,
-            afterBreakfast: item.routine?.after_breakfast || false,
-            beforeLunch: item.routine?.before_lunch || false,
-            afterLunch: item.routine?.after_lunch || false,
-            beforeDinner: item.routine?.before_dinner || false,
-            afterDinner: item.routine?.after_dinner || false,
-            gapHours: item.routine?.gap_hour || 0,
-        },
-    };
-}
-
 function toStoreInvestigation(item: TemplateInvestigation): InvestigationType {
     return {
         name: item.name_text || "",
@@ -75,7 +40,7 @@ export const RX_MEMORY_SECTION_DEFINITIONS: Record<RxMemorySectionKey, RxMemoryS
     medicine: {
         label: "Medicine",
         strategy: "replace",
-        fromTemplateData: (data) => (data.rx_list ?? []).map(toStoreMedicine),
+        fromTemplateData: (data) => (data.rx_list ?? []).map(deserializeMedicine),
     },
     investigation: {
         label: "Investigation",

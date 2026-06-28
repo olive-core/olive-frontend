@@ -1,7 +1,8 @@
 import type { ChiefComplaintType, DiagnosisType, InvestigationType, MeedicineType, HistoryType, PrescriptionResponseType, VitalsType, FollowUpType } from "@/types/prescription";
 import { hasAnyVital, vitalsForSubmit } from "@/lib/vitals";
-import { composeDose, composeDuration, parseDuration } from "@/lib/rx-compose";
+import { composeDose, parseDuration } from "@/lib/rx-compose";
 import { scheduleFromRoutine, scheduleFromStored } from "@/lib/rx-format";
+import { serializeMedicine } from "@/lib/rx-medicine";
 import {
     applyRxMemoryToStore,
     clearedRxMemorySections,
@@ -308,41 +309,7 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
                         reason: item.notes,
                         priority: "routine"
                     })),
-                    rx_list: state.medicine.map(item => ({
-                        medicine_id: null,
-                        trade_name: item.trade_name || item.value,
-                        generic_name: item.generic_name || item.value,
-                        dosage: item.dosage || composeDose(item),
-                        duration: composeDuration(item),
-                        routine: {
-                            before_breakfast: item.routine?.beforeBreakfast || false,
-                            after_breakfast: item.routine?.afterBreakfast || false,
-                            before_lunch: item.routine?.beforeLunch || false,
-                            after_lunch: item.routine?.afterLunch || false,
-                            before_dinner: item.routine?.beforeDinner || false,
-                            after_dinner: item.routine?.afterDinner || false,
-                            gap_hour: item.routine?.gapHours || 0
-                        },
-                        // Structured fields persisted to the prescription JSONB.
-                        dosage_form: item.dosage_form ?? null,
-                        type: item.type ?? null,
-                        route: item.route ?? null,
-                        site: item.site ?? null,
-                        dose: item.dose ?? null,
-                        schedule: item.schedule ? {
-                            timing: item.schedule.timing ?? null,
-                            morning: item.schedule.morning ?? null,
-                            noon: item.schedule.noon ?? null,
-                            night: item.schedule.night ?? null,
-                            gap_hours: item.schedule.gapHours ?? null,
-                            code: item.schedule.code ?? null,
-                        } : null,
-                        frequency_code: item.schedule?.code ?? item.frequencyCode ?? null,
-                        duration_value: item.duration?.value ?? null,
-                        duration_unit: item.duration?.unit ?? null,
-                        duration_preset: item.duration?.preset ?? null,
-                        instructions: item.instructions ?? null,
-                    })),
+                    rx_list: state.medicine.map(serializeMedicine),
                     advice_list: state.advice,
                     on_examinations: hasAnyVital(state.vitals) ? [vitalsForSubmit(state.vitals)] : [],
                     follow_up_days: state.followUp.follow_up_days,

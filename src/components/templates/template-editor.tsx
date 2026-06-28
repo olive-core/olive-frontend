@@ -6,6 +6,7 @@ import { MedicineContainer } from '@/components/prescription/medicine-container'
 import AdviceList from '@/components/prescription/advice-list'
 import { Button } from '@/components/ui/button'
 import { isRxMemorySection } from '@/lib/rx-memory'
+import { deserializeMedicine, serializeMedicine, type StoredRxItem } from '@/lib/rx-medicine'
 import { ArrowLeftIcon, SaveIcon } from 'lucide-react'
 
 // ─── Types ──────────────────────────────────────────────────────────────────
@@ -15,22 +16,7 @@ export type TemplatePrescriptionData = {
   histories: { hn_id: string | null; name_text: string; duration: string; notes: string }[]
   diagnoses: { dn_id: string | null; name_text: string; icd_code?: string; confidence?: number; clinical_reasoning?: string }[]
   on_examinations: any[]
-  rx_list: {
-    medicine_id: string | null
-    trade_name: string
-    generic_name: string
-    dosage: string
-    duration: string
-    routine: {
-      before_breakfast: boolean
-      after_breakfast: boolean
-      before_lunch: boolean
-      after_lunch: boolean
-      before_dinner: boolean
-      after_dinner: boolean
-      gap_hour: number
-    }
-  }[]
+  rx_list: StoredRxItem[]
   investigations: { investigation_name_id: string | null; name_text: string; reason: string; priority: string }[]
   advice_list: string[]
   follow_up_days: number
@@ -118,20 +104,7 @@ export default function TemplateEditor({
         notes: i.reason ?? '',
         priority: i.priority ?? 'routine',
       })),
-      medicine: (pd.rx_list ?? []).map(m => ({
-        name: m.generic_name,
-        value: m.generic_name,
-        dosage: m.dosage,
-        notes: m.duration,
-        routine: {
-          beforeBreakfast: m.routine?.before_breakfast ?? false,
-          afterBreakfast: m.routine?.after_breakfast ?? false,
-          beforeLunch: m.routine?.before_lunch ?? false,
-          afterLunch: m.routine?.after_lunch ?? false,
-          beforeDinner: m.routine?.before_dinner ?? false,
-          afterDinner: m.routine?.after_dinner ?? false,
-        },
-      })),
+      medicine: (pd.rx_list ?? []).map(deserializeMedicine),
       advice: pd.advice_list ?? [],
     })
 
@@ -177,22 +150,7 @@ export default function TemplateEditor({
         clinical_reasoning: item.clinical_reasoning ?? undefined,
       })),
       on_examinations: [],
-      rx_list: medicine.map(item => ({
-        medicine_id: null,
-        trade_name: item.value,
-        generic_name: item.value,
-        dosage: item.dosage ?? '',
-        duration: item.notes ?? '',
-        routine: {
-          before_breakfast: item.routine?.beforeBreakfast ?? false,
-          after_breakfast: item.routine?.afterBreakfast ?? false,
-          before_lunch: item.routine?.beforeLunch ?? false,
-          after_lunch: item.routine?.afterLunch ?? false,
-          before_dinner: item.routine?.beforeDinner ?? false,
-          after_dinner: item.routine?.afterDinner ?? false,
-          gap_hour: 0,
-        },
-      })),
+      rx_list: medicine.map(serializeMedicine),
       investigations: investigation.map(item => ({
         investigation_name_id: null,
         name_text: item.name,
