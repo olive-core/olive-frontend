@@ -2,6 +2,10 @@ import React, { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Input } from "../ui/input";
 
+// How many results to render per scroll page. All matches stay reachable by
+// scrolling; only this many are mounted at a time.
+const RESULT_PAGE_SIZE = 50;
+
 // -----------------------------
 // Hook: Debounce
 // -----------------------------
@@ -53,6 +57,7 @@ export default function DebouncedSearchSelect({
     const [inputValue, setInputValue] = useState(value?.label || "");
     const [isOpen, setIsOpen] = useState(false);
     const [highlightIndex, setHighlightIndex] = useState(-1);
+    const [visibleCount, setVisibleCount] = useState(RESULT_PAGE_SIZE);
 
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -76,10 +81,22 @@ export default function DebouncedSearchSelect({
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-    // Reset highlight when options change
+    // Reset highlight and the visible window whenever the result set changes
     useEffect(() => {
         setHighlightIndex(-1);
+        setVisibleCount(RESULT_PAGE_SIZE);
     }, [options]);
+
+    // Grow the rendered slice as the user scrolls near the bottom, so every match
+    // is reachable while the DOM stays light.
+    const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+        const el = e.currentTarget;
+        if (el.scrollHeight - el.scrollTop - el.clientHeight < 40 && visibleCount < options.length) {
+            setVisibleCount(prev => prev + RESULT_PAGE_SIZE);
+        }
+    };
+
+    const visibleOptions = options.slice(0, visibleCount);
 
     const handleSelect = (option: Option) => {
         onChange(option);
@@ -102,7 +119,11 @@ export default function DebouncedSearchSelect({
 
         if (e.key === "ArrowDown") {
             e.preventDefault();
-            setHighlightIndex((prev) => Math.min(prev + 1, options.length - 1));
+            setHighlightIndex((prev) => {
+                const next = Math.min(prev + 1, options.length - 1);
+                if (next >= visibleCount) setVisibleCount(visibleCount + RESULT_PAGE_SIZE);
+                return next;
+            });
         }
 
         if (e.key === "ArrowUp") {
@@ -139,7 +160,10 @@ export default function DebouncedSearchSelect({
             />
 
             {isOpen && (
-                <div className="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-auto">
+                <div
+                    onScroll={handleScroll}
+                    className="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-auto"
+                >
 
 
                     {inputValue?.length > 0 && (
@@ -159,7 +183,7 @@ export default function DebouncedSearchSelect({
                         <div className="px-3 py-2 text-xs text-gray-500">No results</div>
                     )}
 
-                    {options.map((option, index) => (
+                    {visibleOptions.map((option, index) => (
                         <div
                             key={index}
                             onMouseDown={() => handleSelect(option)}

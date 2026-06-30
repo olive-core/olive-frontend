@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Trash2 } from "lucide-react";
 import { Button } from "../ui/button";
 import type { MedicineSchedule, MeedicineType } from "@/types/prescription";
-import api from "@/lib/axios";
+import { useMedicineSearch } from "@/hooks/use-medicine-search";
 import DebouncedSearchSelect, { type Option } from "./debounced-search-select";
 import RxForm from "./rx/rx-form";
 import Combobox from "./rx/combobox";
@@ -55,23 +55,8 @@ function applyType(medicine: MeedicineType, category: MedicineCategory, hints: R
     };
 }
 
-const fetchMedicine = async (query: string): Promise<Option[]> => {
-    const res = await api.get<{
-        generic_name_strength: string;
-        trade_name: string;
-        dosage_form?: string;
-    }[]>(`/medicine/search?q=${encodeURIComponent(query)}&search_in=both`);
-
-    return res.data.map(item => ({
-        label: item.trade_name ?? item.generic_name_strength ?? "",
-        value: item.trade_name ?? item.generic_name_strength ?? "",
-        trade_name: item.trade_name,
-        generic_name: item.generic_name_strength,
-        dosage_form: item.dosage_form,
-    }));
-};
-
 export default function MedicineEdit({ medicine, onRemove, onUpdate, index, setIsEditing, editingItemStatus }: MedicineProps) {
+    const { search: searchMedicines, ready: isIndexReady } = useMedicineSearch();
     const [working, setWorking] = useState<MeedicineType>(() => ({
         ...medicine,
         schedule: medicine.schedule ?? scheduleFromRoutine(medicine.routine),
@@ -130,8 +115,10 @@ export default function MedicineEdit({ medicine, onRemove, onUpdate, index, setI
                     <DebouncedSearchSelect
                         value={{ label: working.name, value: working.value || working.name, trade_name: working.trade_name, generic_name: working.generic_name }}
                         onChange={handleMedicineSelect}
-                        fetchOptions={fetchMedicine}
-                        queryKeyBase={"medicine-search"}
+                        fetchOptions={searchMedicines}
+                        minLength={1}
+                        debounceTime={120}
+                        queryKeyBase={["medicine-search", isIndexReady]}
                     />
                 </div>
 
