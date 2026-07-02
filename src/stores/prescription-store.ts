@@ -1,7 +1,8 @@
 import type { ChiefComplaintType, DiagnosisType, InvestigationType, MeedicineType, HistoryType, PrescriptionResponseType, VitalsType, FollowUpType } from "@/types/prescription";
 import { hasAnyVital, vitalsForSubmit } from "@/lib/vitals";
-import { composeDose, composeDuration, parseDuration } from "@/lib/rx-compose";
-import { scheduleFromRoutine } from "@/lib/rx-format";
+import { composeDose, parseDuration } from "@/lib/rx-compose";
+import { scheduleFromRoutine, scheduleFromStored } from "@/lib/rx-format";
+import { serializeMedicine } from "@/lib/rx-medicine";
 import {
     applyRxMemoryToStore,
     clearedRxMemorySections,
@@ -203,17 +204,40 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
                     clinical_reasoning: item.clinical_reasoning
                 })).sort((a, b) => (b.confidence || 0) - (a.confidence || 0)) || []
 
-                const generatedMedicine = data.medicines?.map(item => ({
-                    name: item.trade_name || item.generic_name,
-                    value: item.trade_name || item.generic_name,
-                    trade_name: item.trade_name,
-                    generic_name: item.generic_name,
-                    dosage: item.dosage,
-                    duration: parseDuration(item.duration),
-                    routine: routineForGenerated(item.routine),
-                    schedule: scheduleFromRoutine(routineForGenerated(item.routine)),
-                    reasoning: item.purpose
-                })) || []
+                const generatedMedicine = data.medicines?.map(item => {
+                    // Prefer the structured fields ARIS Stage 4 emits; fall back to deriving
+                    // from the flat dosage/routine/duration for older variants or drafts.
+                    const routine = routineForGenerated(item.routine);
+                    const hasStructuredDuration = item.duration_value != null || !!item.duration_unit || !!item.duration_preset;
+                    const hasStructuredFields = !!(item.type || item.route || item.dose || item.schedule);
+                    return {
+                        name: item.trade_name || item.generic_name,
+                        value: item.trade_name || item.generic_name,
+                        trade_name: item.trade_name,
+                        generic_name: item.generic_name,
+                        type: item.type,
+                        dosage_form: item.dosage_form,
+                        route: item.route,
+                        site: item.site,
+                        dose: item.dose,
+                        instructions: item.instructions,
+                        frequencyCode: item.frequency_code,
+                        // The read card shows `dosage` directly, so compose it from the structured
+                        // fields when Stage 4 provided them — otherwise the stale Stage 3 string leaks.
+                        dosage: hasStructuredFields ? composeDose({ dose: item.dose, route: item.route, site: item.site }) : item.dosage,
+                        duration: hasStructuredDuration
+                            ? { value: item.duration_value ?? undefined, unit: item.duration_unit, preset: item.duration_preset }
+                            : parseDuration(item.duration),
+                        routine,
+                        // Stage 4 sends a schedule only when there is a regular rhythm; an as-needed
+                        // drug (SOS/Stat duration) intentionally has none, so don't resurrect a stale
+                        // Stage-3 routine. The legacy routine fallback is only for drafts/old variants.
+                        schedule: item.schedule
+                            ? scheduleFromStored({ schedule: item.schedule })
+                            : hasStructuredFields ? {} : scheduleFromRoutine(routine),
+                        reasoning: item.purpose,
+                    };
+                }) || []
 
                 const generatedInvestigation = data.investigations?.map(item => ({
                     name: item.investigation_name,
@@ -285,41 +309,7 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
                         reason: item.notes,
                         priority: "routine"
                     })),
-                    rx_list: state.medicine.map(item => ({
-                        medicine_id: null,
-                        trade_name: item.trade_name || item.value,
-                        generic_name: item.generic_name || item.value,
-                        dosage: item.dosage || composeDose(item),
-                        duration: composeDuration(item),
-                        routine: {
-                            before_breakfast: item.routine?.beforeBreakfast || false,
-                            after_breakfast: item.routine?.afterBreakfast || false,
-                            before_lunch: item.routine?.beforeLunch || false,
-                            after_lunch: item.routine?.afterLunch || false,
-                            before_dinner: item.routine?.beforeDinner || false,
-                            after_dinner: item.routine?.afterDinner || false,
-                            gap_hour: item.routine?.gapHours || 0
-                        },
-                        // Structured fields persisted to the prescription JSONB.
-                        dosage_form: item.dosage_form ?? null,
-                        type: item.type ?? null,
-                        route: item.route ?? null,
-                        site: item.site ?? null,
-                        dose: item.dose ?? null,
-                        schedule: item.schedule ? {
-                            timing: item.schedule.timing ?? null,
-                            morning: item.schedule.morning ?? null,
-                            noon: item.schedule.noon ?? null,
-                            night: item.schedule.night ?? null,
-                            gap_hours: item.schedule.gapHours ?? null,
-                            code: item.schedule.code ?? null,
-                        } : null,
-                        frequency_code: item.schedule?.code ?? item.frequencyCode ?? null,
-                        duration_value: item.duration?.value ?? null,
-                        duration_unit: item.duration?.unit ?? null,
-                        duration_preset: item.duration?.preset ?? null,
-                        instructions: item.instructions ?? null,
-                    })),
+                    rx_list: state.medicine.map(serializeMedicine),
                     advice_list: state.advice,
                     on_examinations: hasAnyVital(state.vitals) ? [vitalsForSubmit(state.vitals)] : [],
                     follow_up_days: state.followUp.follow_up_days,

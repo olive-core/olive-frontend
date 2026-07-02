@@ -7,39 +7,19 @@ export type RxOption = {
     fullForm: string;
 };
 
-export type MealSlot = "breakfast" | "lunch" | "dinner";
-
-export type FrequencyOption = RxOption & {
-    timesPerDay?: number;
-    // Which meal slots a quick-pick activates (applied with the chosen meal timing).
-    slots?: MealSlot[];
-    // For interval-style codes (every N hours) that don't map to meal slots.
-    gapHours?: number;
-    // As-needed / single-dose codes carry no fixed schedule.
-    asNeeded?: boolean;
-    // Surfaced as a quick chip in the frequency picker.
-    quick?: boolean;
-};
-
-export const FREQUENCIES: readonly FrequencyOption[] = [
-    { code: "OD", fullForm: "once daily", timesPerDay: 1, slots: ["breakfast"], quick: true },
-    { code: "BD", fullForm: "twice daily", timesPerDay: 2, slots: ["breakfast", "dinner"], quick: true },
-    { code: "TDS", fullForm: "three times daily", timesPerDay: 3, slots: ["breakfast", "lunch", "dinner"], quick: true },
-    { code: "QDS", fullForm: "four times daily", timesPerDay: 4, gapHours: 6, quick: true },
-    { code: "HS", fullForm: "at bedtime", timesPerDay: 1, slots: ["dinner"], quick: true },
-    { code: "Mane", fullForm: "in the morning", timesPerDay: 1, slots: ["breakfast"] },
-    { code: "Nocte", fullForm: "at night", timesPerDay: 1, slots: ["dinner"] },
-    { code: "Q4H", fullForm: "every 4 hours", gapHours: 4 },
-    { code: "Q6H", fullForm: "every 6 hours", gapHours: 6 },
-    { code: "Q8H", fullForm: "every 8 hours", gapHours: 8 },
-    { code: "Q12H", fullForm: "every 12 hours", gapHours: 12 },
-    { code: "SOS", fullForm: "when necessary", asNeeded: true, quick: true },
-    { code: "PRN", fullForm: "as needed", asNeeded: true },
-    { code: "Stat", fullForm: "immediately, single dose", asNeeded: true, quick: true },
-    { code: "EOD", fullForm: "every other day", asNeeded: true },
-    { code: "OW", fullForm: "once weekly", asNeeded: true },
-    { code: "BW", fullForm: "twice weekly", asNeeded: true },
-    { code: "Monthly", fullForm: "once monthly", asNeeded: true },
+// The frequency codes the picker can produce: `code` mode shows them as chips, `meal` mode
+// reuses OD/BD/TDS/HS. expandCode() turns a saved code into its patient-facing full form.
+export const FREQUENCIES: readonly RxOption[] = [
+    { code: "OD", fullForm: "once daily" },
+    { code: "BD", fullForm: "twice daily" },
+    { code: "TDS", fullForm: "three times daily" },
+    { code: "QDS", fullForm: "four times daily" },
+    { code: "Q6H", fullForm: "every 6 hours" },
+    { code: "Q8H", fullForm: "every 8 hours" },
+    { code: "Q12H", fullForm: "every 12 hours" },
+    { code: "HS", fullForm: "at bedtime" },
+    { code: "SOS", fullForm: "when necessary" },
+    { code: "Stat", fullForm: "immediately" },
 ];
 
 export const ROUTES: readonly RxOption[] = [
@@ -95,15 +75,9 @@ export const SITES: readonly RxOption[] = [
     { code: "L/Ear", fullForm: "left ear" },
     { code: "Both ears", fullForm: "both ears" },
     { code: "Each nostril", fullForm: "each nostril" },
+    { code: "Sublingual", fullForm: "under the tongue" },
+    { code: "Throat", fullForm: "throat" },
     { code: "Affected area", fullForm: "affected area" },
-];
-
-export const MEAL_TIMINGS: readonly RxOption[] = [
-    { code: "AC", fullForm: "before meal" },
-    { code: "PC", fullForm: "after meal" },
-    { code: "CC", fullForm: "with meal" },
-    { code: "Empty stomach", fullForm: "on an empty stomach" },
-    { code: "HS", fullForm: "at bedtime" },
 ];
 
 export const DURATION_UNITS: readonly RxOption[] = [
@@ -119,38 +93,18 @@ export const DURATION_PRESETS: readonly RxOption[] = [
     { code: "SOS", fullForm: "only when needed" },
 ];
 
-export const SIG_INSTRUCTIONS: readonly string[] = [
-    "Shake well before use",
-    "Store in refrigerator (2-8°C)",
-    "Protect from light",
-    "Do not crush or chew",
-    "Swallow whole with water",
-    "Dissolve in water before taking",
-    "Rinse mouth with water after use",
-    "Apply thinly / Apply sparingly",
-    "Avoid sun exposure",
-    "Avoid alcohol",
-    "Take with full glass of water",
-    "Take with food or milk",
-    "Do not stop abruptly",
-    "Complete the full course",
-    "Rotate injection/patch sites",
-    "Stay upright for 30 min after taking",
-    "Insert high into vagina",
-    "Use spacer when possible",
-];
-
 const pickUnits = (...codes: string[]): RxOption[] =>
     codes.map(code => DOSE_UNITS.find(unit => unit.code === code)).filter((u): u is RxOption => Boolean(u));
 
 // Curated unit / route subsets so each archetype form offers only what's relevant.
-export const LIQUID_DOSE_UNITS = pickUnits("TSF", "DTSF", "BSF", "ml", "drops");
+export const LIQUID_DOSE_UNITS = pickUnits("TSF", "BSF", "ml", "drops");
 export const INJECTION_DOSE_UNITS = pickUnits("Vial", "Amp", "ml", "mg", "Unit", "IU");
 export const DROP_DOSE_UNITS = pickUnits("drops", "ml");
 export const SPRAY_DOSE_UNITS = pickUnits("spray");
 export const INHALER_DOSE_UNITS = pickUnits("puff");
 export const VOLUME_DOSE_UNITS = pickUnits("ml", "Sachet");
-export const INJECTION_ROUTES = ROUTES.filter(route => ["I/V", "I/M", "S/C", "I/D", "I/A", "I/T"].includes(route.code));
+export const DILUENT_UNITS = pickUnits("ml");
+export const INJECTION_ROUTES = ROUTES.filter(route => ["I/V", "I/M", "S/C", "I/D", "I/A"].includes(route.code));
 
 const findOption = (code: string, options: readonly RxOption[]): RxOption | undefined =>
     options.find(option => option.code.toLowerCase() === code.toLowerCase());
@@ -166,5 +120,4 @@ export function expandCode(code: string | undefined | null, options: readonly Rx
     return `${match.code} (${match.fullForm})`;
 }
 
-export const getFrequency = (code: string): FrequencyOption | undefined =>
-    findOption(code, FREQUENCIES) as FrequencyOption | undefined;
+export const getFrequency = (code: string): RxOption | undefined => findOption(code, FREQUENCIES);

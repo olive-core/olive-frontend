@@ -1,8 +1,9 @@
+import { useState } from "react";
 import { Clock } from "lucide-react";
 import { Input } from "../../ui/input";
 import { cn } from "@/lib/utils";
 import { getFrequency } from "@/constants/prescription";
-import { formatCount, formatSchedule } from "@/lib/rx-format";
+import { formatCount, formatSchedule, parseMealPattern } from "@/lib/rx-format";
 import type { MedicineSchedule } from "@/types/prescription";
 import type { FrequencyMode } from "./rx-type-config";
 
@@ -15,16 +16,19 @@ interface FrequencyPickerProps {
 const CYCLE = [0, 0.5, 1, 2, 3];
 const nextCount = (value?: number) => CYCLE[(CYCLE.indexOf(value ?? 0) + 1) % CYCLE.length];
 
+// OD is handled on its own (once daily, no meal slot); these fill the meal cells directly.
 const MEAL_QUICK = [
-    { code: "OD", morning: 1, noon: 0, night: 0 },
     { code: "BD", morning: 1, noon: 0, night: 1 },
     { code: "TDS", morning: 1, noon: 1, night: 1 },
     { code: "HS", morning: 0, noon: 0, night: 1 },
 ];
 
-const CODE_CHIPS = ["OD", "BD", "TDS", "QDS", "Q6H", "Q8H", "Q12H", "HS", "SOS", "PRN", "Stat"];
+const CODE_CHIPS = ["OD", "BD", "TDS", "QDS", "Q6H", "Q8H", "Q12H", "HS", "SOS", "Stat"];
 
 export default function FrequencyPicker({ schedule, mode, onChange }: FrequencyPickerProps) {
+    // While the doctor types the pattern box, `draft` holds the raw text so the cursor doesn't jump;
+    // any tap clears it so the canonical pattern (derived from the schedule) shows again.
+    const [draft, setDraft] = useState<string | null>(null);
     const preview = formatSchedule(schedule);
 
     if (mode === "code") {
@@ -60,8 +64,36 @@ export default function FrequencyPicker({ schedule, mode, onChange }: FrequencyP
     const timing = schedule.timing === "before" ? "before" : "after";
     const setTiming = (value: "before" | "after") => onChange({ ...schedule, timing: value });
     const clearCode = { code: undefined, gapHours: undefined };
+
+    const setCounts = (patch: Partial<MedicineSchedule>) => {
+        setDraft(null);
+        onChange({ ...schedule, timing, ...clearCode, ...patch });
+    };
     const applyQuick = (quick: typeof MEAL_QUICK[number]) =>
-        onChange({ timing, morning: quick.morning, noon: quick.noon, night: quick.night, ...clearCode });
+        setCounts({ morning: quick.morning, noon: quick.noon, night: quick.night });
+    const applyOnceDaily = () => {
+        setDraft(null);
+        onChange({ timing, code: "OD", morning: undefined, noon: undefined, night: undefined, gapHours: undefined });
+    };
+    const applyInterval = () => {
+        setDraft(null);
+        onChange({ timing, gapHours: 6, code: undefined, morning: undefined, noon: undefined, night: undefined });
+    };
+
+    const matchesQuick = (quick: typeof MEAL_QUICK[number]) =>
+        !schedule.code && !schedule.gapHours &&
+        (schedule.morning ?? 0) === quick.morning && (schedule.noon ?? 0) === quick.noon && (schedule.night ?? 0) === quick.night;
+
+    const derivedPattern = schedule.code
+        ? schedule.code
+        : schedule.gapHours
+        ? `Q${schedule.gapHours}H`
+        : `${formatCount(schedule.morning)}+${formatCount(schedule.noon)}+${formatCount(schedule.night)}`;
+    const patternText = draft ?? derivedPattern;
+    const onPatternChange = (raw: string) => {
+        setDraft(raw);
+        onChange({ ...schedule, timing, ...clearCode, ...parseMealPattern(raw) });
+    };
 
     return (
         <div className="bg-slate-50/50 border border-slate-100 rounded-xl p-3 space-y-2.5">
@@ -70,20 +102,27 @@ export default function FrequencyPicker({ schedule, mode, onChange }: FrequencyP
                     <TimingButton label="After meal" active={timing === "after"} onClick={() => setTiming("after")} />
                     <TimingButton label="Before meal" active={timing === "before"} onClick={() => setTiming("before")} />
                 </div>
-                <span className="ml-auto font-mono font-bold text-base tracking-wider text-slate-800">{preview}</span>
+                <Input
+                    value={patternText}
+                    onChange={event => onPatternChange(event.target.value)}
+                    onBlur={() => setDraft(null)}
+                    aria-label="Morning + Noon + Night pattern"
+                    className="ml-auto w-28 h-9 text-center font-mono font-bold text-base tracking-wider text-slate-800"
+                />
             </div>
 
             <div className="grid grid-cols-3 gap-2">
-                <MealCell label="Morning" value={schedule.morning} onClick={() => onChange({ ...schedule, timing, morning: nextCount(schedule.morning), ...clearCode })} />
-                <MealCell label="Noon" value={schedule.noon} onClick={() => onChange({ ...schedule, timing, noon: nextCount(schedule.noon), ...clearCode })} />
-                <MealCell label="Night" value={schedule.night} onClick={() => onChange({ ...schedule, timing, night: nextCount(schedule.night), ...clearCode })} />
+                <MealCell label="Morning" value={schedule.morning} onClick={() => setCounts({ morning: nextCount(schedule.morning) })} />
+                <MealCell label="Noon" value={schedule.noon} onClick={() => setCounts({ noon: nextCount(schedule.noon) })} />
+                <MealCell label="Night" value={schedule.night} onClick={() => setCounts({ night: nextCount(schedule.night) })} />
             </div>
 
             <div className="flex flex-wrap gap-1.5">
+                <Chip label="OD" title={getFrequency("OD")?.fullForm} active={schedule.code === "OD"} onClick={applyOnceDaily} />
                 {MEAL_QUICK.map(quick => (
-                    <Chip key={quick.code} active={schedule.code === quick.code} label={quick.code} title={getFrequency(quick.code)?.fullForm} onClick={() => applyQuick(quick)} />
+                    <Chip key={quick.code} active={matchesQuick(quick)} label={quick.code} title={getFrequency(quick.code)?.fullForm} onClick={() => applyQuick(quick)} />
                 ))}
-                <Chip label="QDS" title={getFrequency("QDS")?.fullForm} active={schedule.gapHours === 6} onClick={() => onChange({ timing, gapHours: 6, code: "QDS" })} />
+                <Chip label="QDS" title={getFrequency("QDS")?.fullForm} active={schedule.gapHours === 6} onClick={applyInterval} />
             </div>
         </div>
     );

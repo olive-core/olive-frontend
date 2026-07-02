@@ -44,7 +44,7 @@ export default function DurationInput({ duration, onChange }: DurationInputProps
                             className={cn(
                                 "px-3 py-1 text-xs rounded-md border transition-colors cursor-pointer",
                                 !preset && unit === option.code
-                                    ? "bg-emerald-50 border-emerald-200 text-emerald-700 font-semibold"
+                                    ? "bg-emerald-600 border-emerald-600 text-white font-semibold"
                                     : "border-slate-200 text-slate-500 hover:bg-slate-50",
                             )}
                         >

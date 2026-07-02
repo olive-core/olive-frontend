@@ -35,6 +35,7 @@ export type ListInfoType = ChiefComplaintType | HistoryType | DiagnosisType | In
 export type MedicineDose = {
     amount?: string;
     unit?: string;
+    diluent?: MedicineDose;   // nebulizer dilution volume (e.g. 2.5 ml); empty amount = not diluted
 };
 
 export type MedicineDuration = {
@@ -49,7 +50,7 @@ export type MedicineSchedule = {
     noon?: number;
     night?: number;
     gapHours?: number;  // interval mode
-    code?: string;      // OD/BD/TDS/QDS/HS/SOS/PRN/Stat... — code mode
+    code?: string;      // OD/BD/TDS/QDS/Q6H/Q8H/Q12H/HS/SOS/Stat — code mode
 };
 
 export type MeedicineType = {
@@ -66,7 +67,6 @@ export type MeedicineType = {
     dose?: MedicineDose;
     schedule?: MedicineSchedule;
     frequencyCode?: string;
-    mealTiming?: string;
     duration?: MedicineDuration;
     instructions?: string;
 
@@ -140,6 +140,25 @@ export type PrescriptionResponseType = {
         };
         duration: string;
         purpose: string;
+        // Structured fields from ARIS Stage 4 (optional — older variants/drafts omit them).
+        type?: MedicineCategory;
+        dosage_form?: string;
+        route?: string;
+        site?: string;
+        dose?: MedicineDose;
+        schedule?: {
+            timing?: MedicineSchedule["timing"];
+            morning?: number;
+            noon?: number;
+            night?: number;
+            gap_hours?: number;   // snake_case as sent by the backend
+            code?: string;
+        };
+        duration_value?: number | null;
+        duration_unit?: string;
+        duration_preset?: string;
+        frequency_code?: string;
+        instructions?: string;
     }[];
     investigations: {
         investigation_name: string;
