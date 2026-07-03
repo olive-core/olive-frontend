@@ -26,6 +26,76 @@ function routineForGenerated(routine?: { gap_hours?: number; meal_times?: string
     };
 }
 
+function mapGeneratedChiefComplaints(items: PrescriptionResponseType["chief_complaints"] | undefined) {
+    return items?.map(item => ({
+        name: item.complaint_name,
+        duration: "",
+        notes: item.clinical_note || "",
+    })) || [];
+}
+
+function mapGeneratedHistory(items: PrescriptionResponseType["history"] | undefined) {
+    return items?.map(item => ({
+        name: item.history_name,
+        duration: "",
+        notes: item.clinical_note || "",
+    })) || [];
+}
+
+function mapGeneratedDiagnoses(items: PrescriptionResponseType["diagnoses"] | undefined) {
+    return items?.map(item => ({
+        name: item.diagnosis_name,
+        icd_code: item.icd_code || "",
+        confidence: item.confidence,
+        clinical_reasoning: item.clinical_reasoning,
+    })).sort((a, b) => (b.confidence || 0) - (a.confidence || 0)) || [];
+}
+
+function mapGeneratedMedicines(items: PrescriptionResponseType["medicines"] | undefined) {
+    return items?.map(item => {
+        // Prefer the structured fields ARIS emits; fall back to deriving from the flat
+        // dosage/routine/duration for older variants or drafts.
+        const routine = routineForGenerated(item.routine);
+        const hasStructuredDuration = item.duration_value != null || !!item.duration_unit || !!item.duration_preset;
+        const hasStructuredFields = !!(item.type || item.route || item.dose || item.schedule);
+        return {
+            name: item.trade_name || item.generic_name,
+            value: item.trade_name || item.generic_name,
+            trade_name: item.trade_name,
+            generic_name: item.generic_name,
+            type: item.type,
+            dosage_form: item.dosage_form,
+            route: item.route,
+            site: item.site,
+            dose: item.dose,
+            instructions: item.instructions,
+            frequencyCode: item.frequency_code,
+            // The read card shows `dosage` directly, so compose it from the structured
+            // fields when provided — otherwise the stale flat string leaks.
+            dosage: hasStructuredFields ? composeDose({ dose: item.dose, route: item.route, site: item.site }) : item.dosage,
+            duration: hasStructuredDuration
+                ? { value: item.duration_value ?? undefined, unit: item.duration_unit, preset: item.duration_preset }
+                : parseDuration(item.duration),
+            routine,
+            // A schedule is sent only when there is a regular rhythm; an as-needed drug
+            // (SOS/Stat duration) intentionally has none, so don't resurrect a stale
+            // routine. The legacy routine fallback is only for drafts/old variants.
+            schedule: item.schedule
+                ? scheduleFromStored({ schedule: item.schedule })
+                : hasStructuredFields ? {} : scheduleFromRoutine(routine),
+            reasoning: item.purpose,
+        };
+    }) || [];
+}
+
+function mapGeneratedInvestigations(items: PrescriptionResponseType["investigations"] | undefined) {
+    return items?.map(item => ({
+        name: item.investigation_name,
+        notes: item.reason || "",
+        priority: item.priority || "routine",
+    })) || [];
+}
+
 
 interface PrescriptionStoreType {
     patientId: string | null;
@@ -54,6 +124,8 @@ interface PrescriptionStoreType {
     initiatePrescription: (patientId: string, sessionId: string) => void;
     setGenerating: (value: boolean) => void;
     setPartialData: (data: Pick<PrescriptionResponseType, 'chief_complaints' | 'history' | 'summary' | 'safety_net' | 'diagnoses' | 'vitals' | 'follow_up'>) => void;
+    applyScribeData: (data: Pick<PrescriptionResponseType, 'chief_complaints' | 'history' | 'summary' | 'safety_net' | 'vitals' | 'follow_up' | 'advice'>) => void;
+    applyDecideData: (data: Pick<PrescriptionResponseType, 'diagnoses' | 'medicines' | 'investigations'>) => void;
     getInitialPrescription: (data: PrescriptionResponseType) => Promise<void>;
     setPrescriptionFromTemplate: (data: any) => void;
     revertTemplateSelection: () => void;
@@ -152,98 +224,54 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
             setGenerating: (value) => set({ isGenerating: value }),
 
             setPartialData: (data) => {
-                const chiefComplaint = data.chief_complaints?.map(item => ({
-                    name: item.complaint_name,
-                    duration: "",
-                    notes: item.clinical_note || "",
-                })) || []
-
-                const history = data.history?.map(item => ({
-                    name: item.history_name,
-                    duration: "",
-                    notes: item.clinical_note || "",
-                })) || []
-
-                const diagnosis = data.diagnoses?.map(item => ({
-                    name: item.diagnosis_name,
-                    icd_code: item.icd_code || "",
-                    confidence: item.confidence,
-                    clinical_reasoning: item.clinical_reasoning,
-                })).sort((a, b) => (b.confidence || 0) - (a.confidence || 0)) || []
-
-                const summary = data.summary;
-                const safetyNet = data.safety_net ?? [];
-                const vitals = data.vitals ?? {};
-                const followUp = { ...EMPTY_FOLLOW_UP, ...data.follow_up };
-
                 // Covered sections are cleared until the full draft arrives — unless an RxMemory is
                 // applied, in which case its values must survive the partial update.
                 set({
-                    chiefComplaint, history, diagnosis, summary, safetyNet, vitals, followUp,
+                    chiefComplaint: mapGeneratedChiefComplaints(data.chief_complaints),
+                    history: mapGeneratedHistory(data.history),
+                    diagnosis: mapGeneratedDiagnoses(data.diagnoses),
+                    summary: data.summary,
+                    safetyNet: data.safety_net ?? [],
+                    vitals: data.vitals ?? {},
+                    followUp: { ...EMPTY_FOLLOW_UP, ...data.follow_up },
                     ...(get().templateSelected ? {} : clearedRxMemorySections()),
                 });
             },
 
+            applyScribeData: (data) => {
+                set({
+                    chiefComplaint: mapGeneratedChiefComplaints(data.chief_complaints),
+                    history: mapGeneratedHistory(data.history),
+                    summary: data.summary ?? "",
+                    safetyNet: data.safety_net ?? [],
+                    vitals: data.vitals ?? {},
+                    followUp: { ...EMPTY_FOLLOW_UP, ...data.follow_up },
+                    advice: data.advice ?? [],
+                });
+            },
+
+            applyDecideData: (data) => {
+                // Decide's medicines arrive already gated (database-verified), so they use the
+                // same mapping as the final draft. RxMemory-covered sections stay guarded.
+                const medicine = mapGeneratedMedicines(data.medicines);
+                const investigation = mapGeneratedInvestigations(data.investigations);
+                const generatedSections = {
+                    ...get().generatedSections,
+                    ...pickRxMemorySections({ medicine, investigation }),
+                };
+                set({
+                    diagnosis: mapGeneratedDiagnoses(data.diagnoses),
+                    generatedSections,
+                    ...(get().templateSelected ? {} : { medicine, investigation }),
+                });
+            },
+
             getInitialPrescription: async (data: PrescriptionResponseType) => {
-                const chiefComplaint = data.chief_complaints?.map(item => ({
-                    name: item.complaint_name,
-                    duration: "",
-                    notes: item.clinical_note || "",
-                })) || []
-
-                const history = data.history?.map(item => ({
-                    name: item.history_name,
-                    duration: "",
-                    notes: item.clinical_note || "",
-                })) || []
-
-                const diagnosis = data.diagnoses?.map(item => ({
-                    name: item.diagnosis_name,
-                    icd_code: item.icd_code,
-                    confidence: item.confidence,
-                    clinical_reasoning: item.clinical_reasoning
-                })).sort((a, b) => (b.confidence || 0) - (a.confidence || 0)) || []
-
-                const generatedMedicine = data.medicines?.map(item => {
-                    // Prefer the structured fields ARIS Stage 4 emits; fall back to deriving
-                    // from the flat dosage/routine/duration for older variants or drafts.
-                    const routine = routineForGenerated(item.routine);
-                    const hasStructuredDuration = item.duration_value != null || !!item.duration_unit || !!item.duration_preset;
-                    const hasStructuredFields = !!(item.type || item.route || item.dose || item.schedule);
-                    return {
-                        name: item.trade_name || item.generic_name,
-                        value: item.trade_name || item.generic_name,
-                        trade_name: item.trade_name,
-                        generic_name: item.generic_name,
-                        type: item.type,
-                        dosage_form: item.dosage_form,
-                        route: item.route,
-                        site: item.site,
-                        dose: item.dose,
-                        instructions: item.instructions,
-                        frequencyCode: item.frequency_code,
-                        // The read card shows `dosage` directly, so compose it from the structured
-                        // fields when Stage 4 provided them — otherwise the stale Stage 3 string leaks.
-                        dosage: hasStructuredFields ? composeDose({ dose: item.dose, route: item.route, site: item.site }) : item.dosage,
-                        duration: hasStructuredDuration
-                            ? { value: item.duration_value ?? undefined, unit: item.duration_unit, preset: item.duration_preset }
-                            : parseDuration(item.duration),
-                        routine,
-                        // Stage 4 sends a schedule only when there is a regular rhythm; an as-needed
-                        // drug (SOS/Stat duration) intentionally has none, so don't resurrect a stale
-                        // Stage-3 routine. The legacy routine fallback is only for drafts/old variants.
-                        schedule: item.schedule
-                            ? scheduleFromStored({ schedule: item.schedule })
-                            : hasStructuredFields ? {} : scheduleFromRoutine(routine),
-                        reasoning: item.purpose,
-                    };
-                }) || []
-
-                const generatedInvestigation = data.investigations?.map(item => ({
-                    name: item.investigation_name,
-                    notes: item.reason || "",
-                    priority: item.priority || "routine"
-                })) || []
+                const chiefComplaint = mapGeneratedChiefComplaints(data.chief_complaints);
+                const history = mapGeneratedHistory(data.history);
+                const diagnosis = mapGeneratedDiagnoses(data.diagnoses);
+                const generatedMedicine = mapGeneratedMedicines(data.medicines);
+                const generatedInvestigation = mapGeneratedInvestigations(data.investigations);
 
                 const advice = data.advice;
                 const summary = data.summary;

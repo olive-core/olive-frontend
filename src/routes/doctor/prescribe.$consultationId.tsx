@@ -12,7 +12,7 @@ export const Route = createFileRoute('/doctor/prescribe/$consultationId')({
 
 function RouteComponent() {
   const { consultationId } = Route.useParams();
-  const { getInitialPrescription, setPartialData, setGenerating } = usePrescriptionStore();
+  const { getInitialPrescription, setPartialData, applyScribeData, applyDecideData, setGenerating } = usePrescriptionStore();
   const accessToken = useAuthStore((s) => s.accessToken);
   const { clinician } = useAuthStore();
 
@@ -106,6 +106,20 @@ function RouteComponent() {
                 case 'layer00_complete': // v1_standard
                   if (payload) {
                     setPartialData(payload);
+                  }
+                  break;
+
+                // Arise One runs Scribe and Decide in parallel; each patches its own
+                // sections as it lands, in whichever order the calls finish.
+                case 'scribe_complete':
+                  if (payload) {
+                    applyScribeData(payload);
+                  }
+                  break;
+
+                case 'decide_complete':
+                  if (payload) {
+                    applyDecideData(payload);
                   }
                   break;
 
