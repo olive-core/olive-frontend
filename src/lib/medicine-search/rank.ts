@@ -1,4 +1,5 @@
 import { toKey, toNorm } from "./normalize";
+import { genericLabel } from "./types";
 import type { IndexedMedicine, MedicineRecord, SearchResult } from "./types";
 
 // Ranking ladder — single source of truth, mirrored by the backend tiered query:
@@ -13,7 +14,7 @@ const FUZZY_TRIGGER_COUNT = 8;
 
 export function indexMedicine(record: MedicineRecord): IndexedMedicine {
     const trade = record.trade_name ?? "";
-    const generic = record.generic_name_strength ?? "";
+    const generic = genericLabel(record);
     return {
         record,
         tradeNorm: toNorm(trade),

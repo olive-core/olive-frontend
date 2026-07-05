@@ -6,18 +6,21 @@ import {
     isMedicineIndexReady,
     searchMedicineIndex,
 } from "@/lib/medicine-search/index-store";
+import { genericLabel } from "@/lib/medicine-search/types";
 import type { MedicineRecord } from "@/lib/medicine-search/types";
 
 const RESULT_LIMIT = 200;
 const SERVER_MIN_QUERY_LENGTH = 2;
 
 function toOption(record: MedicineRecord): Option {
-    const label = record.trade_name ?? record.generic_name_strength ?? "";
+    const generic = genericLabel(record);
+    const label = record.trade_name ?? generic;
     return {
         label,
         value: label,
         trade_name: record.trade_name ?? undefined,
-        generic_name: record.generic_name_strength ?? undefined,
+        // Composed "generic + strength" for display continuity in the prescription.
+        generic_name: generic || undefined,
         dosage_form: record.dosage_form ?? undefined,
     };
 }
