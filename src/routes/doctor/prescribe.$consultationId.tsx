@@ -49,7 +49,7 @@ function RouteComponent() {
     // The recorder may still be uploading the final audio chunk. Wait for it so the
     // draft is generated from the complete transcription; the skeleton covers this wait.
     awaitRecordingFinalization(consultationId)
-      .then(() => fetch('/api/v1/aris/generate-progressive', {
+      .then(() => fetch('/api/v1/arise/generate-progressive', {
         method: 'POST',
         headers,
         body: JSON.stringify({
