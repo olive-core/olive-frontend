@@ -24,6 +24,7 @@ import { Route as authEnterOtpRouteImport } from './routes/(auth)/enter-otp'
 import { Route as PatientProfileIndexRouteImport } from './routes/patient/profile/index'
 import { Route as DoctorRxMemoryIndexRouteImport } from './routes/doctor/rx-memory/index'
 import { Route as DoctorProfileIndexRouteImport } from './routes/doctor/profile/index'
+import { Route as DoctorPrescriptionHeaderIndexRouteImport } from './routes/doctor/prescription-header/index'
 import { Route as DoctorConsultationsIndexRouteImport } from './routes/doctor/consultations/index'
 import { Route as DoctorBillingIndexRouteImport } from './routes/doctor/billing/index'
 import { Route as PatientProfileEditRouteImport } from './routes/patient/profile/edit'
@@ -108,6 +109,12 @@ const DoctorProfileIndexRoute = DoctorProfileIndexRouteImport.update({
   path: '/profile/',
   getParentRoute: () => DoctorRouteRoute,
 } as any)
+const DoctorPrescriptionHeaderIndexRoute =
+  DoctorPrescriptionHeaderIndexRouteImport.update({
+    id: '/prescription-header/',
+    path: '/prescription-header/',
+    getParentRoute: () => DoctorRouteRoute,
+  } as any)
 const DoctorConsultationsIndexRoute =
   DoctorConsultationsIndexRouteImport.update({
     id: '/consultations/',
@@ -179,6 +186,7 @@ export interface FileRoutesByFullPath {
   '/patient/profile/edit': typeof PatientProfileEditRoute
   '/doctor/billing': typeof DoctorBillingIndexRoute
   '/doctor/consultations': typeof DoctorConsultationsIndexRoute
+  '/doctor/prescription-header': typeof DoctorPrescriptionHeaderIndexRoute
   '/doctor/profile': typeof DoctorProfileIndexRoute
   '/doctor/rx-memory': typeof DoctorRxMemoryIndexRoute
   '/patient/profile': typeof PatientProfileIndexRoute
@@ -202,6 +210,7 @@ export interface FileRoutesByTo {
   '/patient/profile/edit': typeof PatientProfileEditRoute
   '/doctor/billing': typeof DoctorBillingIndexRoute
   '/doctor/consultations': typeof DoctorConsultationsIndexRoute
+  '/doctor/prescription-header': typeof DoctorPrescriptionHeaderIndexRoute
   '/doctor/profile': typeof DoctorProfileIndexRoute
   '/doctor/rx-memory': typeof DoctorRxMemoryIndexRoute
   '/patient/profile': typeof PatientProfileIndexRoute
@@ -229,6 +238,7 @@ export interface FileRoutesById {
   '/patient/profile/edit': typeof PatientProfileEditRoute
   '/doctor/billing/': typeof DoctorBillingIndexRoute
   '/doctor/consultations/': typeof DoctorConsultationsIndexRoute
+  '/doctor/prescription-header/': typeof DoctorPrescriptionHeaderIndexRoute
   '/doctor/profile/': typeof DoctorProfileIndexRoute
   '/doctor/rx-memory/': typeof DoctorRxMemoryIndexRoute
   '/patient/profile/': typeof PatientProfileIndexRoute
@@ -256,6 +266,7 @@ export interface FileRouteTypes {
     | '/patient/profile/edit'
     | '/doctor/billing'
     | '/doctor/consultations'
+    | '/doctor/prescription-header'
     | '/doctor/profile'
     | '/doctor/rx-memory'
     | '/patient/profile'
@@ -279,6 +290,7 @@ export interface FileRouteTypes {
     | '/patient/profile/edit'
     | '/doctor/billing'
     | '/doctor/consultations'
+    | '/doctor/prescription-header'
     | '/doctor/profile'
     | '/doctor/rx-memory'
     | '/patient/profile'
@@ -305,6 +317,7 @@ export interface FileRouteTypes {
     | '/patient/profile/edit'
     | '/doctor/billing/'
     | '/doctor/consultations/'
+    | '/doctor/prescription-header/'
     | '/doctor/profile/'
     | '/doctor/rx-memory/'
     | '/patient/profile/'
@@ -431,6 +444,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DoctorProfileIndexRouteImport
       parentRoute: typeof DoctorRouteRoute
     }
+    '/doctor/prescription-header/': {
+      id: '/doctor/prescription-header/'
+      path: '/prescription-header'
+      fullPath: '/doctor/prescription-header'
+      preLoaderRoute: typeof DoctorPrescriptionHeaderIndexRouteImport
+      parentRoute: typeof DoctorRouteRoute
+    }
     '/doctor/consultations/': {
       id: '/doctor/consultations/'
       path: '/consultations'
@@ -517,6 +537,7 @@ interface DoctorRouteRouteChildren {
   DoctorPrescribeConsultationIdRoute: typeof DoctorPrescribeConsultationIdRoute
   DoctorBillingIndexRoute: typeof DoctorBillingIndexRoute
   DoctorConsultationsIndexRoute: typeof DoctorConsultationsIndexRoute
+  DoctorPrescriptionHeaderIndexRoute: typeof DoctorPrescriptionHeaderIndexRoute
   DoctorProfileIndexRoute: typeof DoctorProfileIndexRoute
   DoctorRxMemoryIndexRoute: typeof DoctorRxMemoryIndexRoute
   DoctorConsultationUserIdConsultationIdRoute: typeof DoctorConsultationUserIdConsultationIdRoute
@@ -531,6 +552,7 @@ const DoctorRouteRouteChildren: DoctorRouteRouteChildren = {
   DoctorPrescribeConsultationIdRoute: DoctorPrescribeConsultationIdRoute,
   DoctorBillingIndexRoute: DoctorBillingIndexRoute,
   DoctorConsultationsIndexRoute: DoctorConsultationsIndexRoute,
+  DoctorPrescriptionHeaderIndexRoute: DoctorPrescriptionHeaderIndexRoute,
   DoctorProfileIndexRoute: DoctorProfileIndexRoute,
   DoctorRxMemoryIndexRoute: DoctorRxMemoryIndexRoute,
   DoctorConsultationUserIdConsultationIdRoute:

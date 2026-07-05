@@ -1,4 +1,4 @@
-import { BookMarked, ClipboardListIcon, EllipsisIcon, HandCoinsIcon, House, LogOutIcon, MenuIcon, UserIcon, XIcon } from "lucide-react";
+import { BookMarked, ClipboardListIcon, EllipsisIcon, HandCoinsIcon, House, LogOutIcon, MenuIcon, StampIcon, UserIcon, XIcon } from "lucide-react";
 import { useState } from "react";
 import NavbarContainer from "../shared/navbar-container";
 import SubscriptionStatusPill from "./subscription/status-pill";
@@ -39,6 +39,11 @@ const MENU_ITEMS: MenuItemType[] = [
         label: "RxMemory",
         icon: <BookMarked />,
         href: "/doctor/rx-memory",
+    },
+    {
+        label: "Prescription Header",
+        icon: <StampIcon />,
+        href: "/doctor/prescription-header",
     },
     // {
     //     label: "Statistics",

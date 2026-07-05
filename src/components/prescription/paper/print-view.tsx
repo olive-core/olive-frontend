@@ -1,7 +1,7 @@
 import type { ConsultationDetail } from "@/types/consultation";
 import type { PatientInfoType } from "@/types/patient";
 import type { ClinicianProfile } from "./read-view";
-import ClinicianHeader from "./clinician-header";
+import ClinicianPrescriptionHeader from "../header/clinician-prescription-header";
 import PatientStrip from "./patient-strip";
 import VitalsBar from "./vitals-bar";
 import FollowUpBlock from "./follow-up-block";
@@ -33,11 +33,12 @@ export default function PrescriptionPrintView({ consultation, clinician, patient
         <div className="bg-white text-sm">
             <div className="w-[210mm] mx-auto p-6 border print:border-none">
 
-                <ClinicianHeader
+                <ClinicianPrescriptionHeader
                     firstName={clinician?.first_name ?? consultation.clinician_first_name}
                     lastName={clinician?.last_name ?? consultation.clinician_last_name}
                     qualification={clinician?.qualification}
                     bmdcNo={clinician?.bmdc_no}
+                    headerConfig={clinician?.header_config}
                 />
 
                 <PatientStrip

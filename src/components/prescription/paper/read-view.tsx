@@ -2,7 +2,7 @@ import type { ConsultationDetail } from "@/types/consultation";
 import type { PatientInfoType } from "@/types/patient";
 
 import PrescriptionPaper from "./prescription-paper";
-import ClinicianHeader from "./clinician-header";
+import ClinicianPrescriptionHeader from "../header/clinician-prescription-header";
 import PatientStrip from "./patient-strip";
 import SectionList from "./section-list";
 import MedicineList from "./medicine-list";
@@ -10,6 +10,7 @@ import AdviceList from "./advice-list";
 import VitalsBar from "./vitals-bar";
 import FollowUpBlock from "./follow-up-block";
 import { vitalsFromOnExaminations } from "@/lib/vitals";
+import type { HeaderConfigApi } from "@/lib/header-config";
 import {
     mapChiefComplaintsToSectionItems,
     mapDiagnosesToSectionItems,
@@ -23,6 +24,7 @@ export interface ClinicianProfile {
     last_name?:     string | null;
     qualification?: string | null;
     bmdc_no?:       string | null;
+    header_config?: HeaderConfigApi | null;
 }
 
 interface PrescriptionReadViewProps {
@@ -39,11 +41,12 @@ export default function PrescriptionReadView({ consultation, clinician, patient 
     return (
         <PrescriptionPaper
             header={
-                <ClinicianHeader
+                <ClinicianPrescriptionHeader
                     firstName={clinician?.first_name ?? consultation.clinician_first_name}
                     lastName={clinician?.last_name ?? consultation.clinician_last_name}
                     qualification={clinician?.qualification}
                     bmdcNo={clinician?.bmdc_no}
+                    headerConfig={clinician?.header_config}
                 />
             }
             patientStrip={

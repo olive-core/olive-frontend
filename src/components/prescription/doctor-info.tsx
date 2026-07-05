@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { Button } from "../ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2Icon, Undo2Icon } from "lucide-react";
-import ClinicianHeader from "./paper/clinician-header";
+import ClinicianPrescriptionHeader from "./header/clinician-prescription-header";
 
 
 export default function DoctorInfo({
@@ -91,11 +91,12 @@ export default function DoctorInfo({
 
     return (
         <div className="flex justify-between">
-            <ClinicianHeader
+            <ClinicianPrescriptionHeader
                 firstName={clinician.first_name}
                 lastName={clinician.last_name}
                 qualification={clinician.qualification}
                 bmdcNo={clinician.bmdc_no}
+                headerConfig={clinician.header_config}
             />
 
             {!hideActions && (
