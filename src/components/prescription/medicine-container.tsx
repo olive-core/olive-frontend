@@ -4,6 +4,7 @@ import { PlusCircleIcon } from "lucide-react";
 import { useState } from "react";
 import MedicineEdit from "./medicine-edit";
 import MedicineView from "./medicine-view";
+import UnresolvedMedicineCard from "./unresolved-medicine-card";
 import type { MeedicineType } from "@/types/prescription";
 import { cn } from "@/lib/utils";
 
@@ -11,9 +12,13 @@ export const MedicineContainer = () => {
 
     const {
         medicine,
+        unresolvedMedicines,
         addEmptyMedicine,
         updateMedicine,
         removeMedicine,
+        moveMedicine,
+        resolveUnresolvedMedicine,
+        dismissUnresolvedMedicine,
         isRevertingTemplate,
     } = usePrescriptionStore();
 
@@ -49,6 +54,11 @@ export const MedicineContainer = () => {
         setEditingItemStatus({ index: medicine.length, status: "add" }); // the newly appended row
     }
 
+    const handleResolveMention = (mentionIndex: number) => {
+        const newIndex = resolveUnresolvedMedicine(mentionIndex);
+        setEditingItemStatus({ index: newIndex, status: "add" });
+    }
+
     const renderMedicine = (med: MeedicineType, idx: number) => {
         if (editingItemIndex === idx) {
             return (
@@ -72,6 +82,8 @@ export const MedicineContainer = () => {
                     onRemove={removeMedicine}
                     index={idx}
                     setIsEditing={setIsEditing}
+                    onMoveUp={idx > 0 ? () => moveMedicine(idx, idx - 1) : undefined}
+                    onMoveDown={idx < medicine.length - 1 ? () => moveMedicine(idx, idx + 1) : undefined}
                 />
             )
         }
@@ -86,6 +98,14 @@ export const MedicineContainer = () => {
                 </div>
                 <div className="flex flex-col gap-2">
                     {medicine.map((med, idx) => renderMedicine(med, idx))}
+                    {unresolvedMedicines.map((heardAs, idx) => (
+                        <UnresolvedMedicineCard
+                            key={`unresolved-${idx}`}
+                            heardAs={heardAs}
+                            onResolve={() => handleResolveMention(idx)}
+                            onDismiss={() => dismissUnresolvedMedicine(idx)}
+                        />
+                    ))}
                 </div>
             </div>
 

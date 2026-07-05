@@ -169,4 +169,8 @@ export type PrescriptionResponseType = {
     safety_net?: string[];
     vitals?: VitalsType;
     follow_up?: FollowUpType;
+    // Medicines heard during the consultation that could not be verified against the
+    // database, as their Latin transliteration. Surfaced for the doctor to add manually;
+    // never part of the prescription itself.
+    unresolved_mentions?: string[];
 }

@@ -1,4 +1,5 @@
 import { AlertCircle, Sparkles } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export interface MedicineCardProps {
     typeLabel?:     string | null;
@@ -10,6 +11,8 @@ export interface MedicineCardProps {
     durationText?:  string | null;
     notes?:         string | null;
     reasoning?:     string | null;
+    // Width is capped for the paper view; the editor list overrides it to fill its column.
+    className?:     string;
 }
 
 function MedicineName({ typeLabel, tradeName, genericName, fallbackName }: Pick<MedicineCardProps, "typeLabel" | "tradeName" | "genericName" | "fallbackName">) {
@@ -28,11 +31,11 @@ function MedicineName({ typeLabel, tradeName, genericName, fallbackName }: Pick<
     );
 }
 
-export default function MedicineCard({ typeLabel, tradeName, genericName, fallbackName, dosage, frequencyText, durationText, notes, reasoning }: MedicineCardProps) {
+export default function MedicineCard({ typeLabel, tradeName, genericName, fallbackName, dosage, frequencyText, durationText, notes, reasoning, className }: MedicineCardProps) {
     const detail = [dosage, durationText].filter(Boolean).join(" · ");
 
     return (
-        <div className="group relative rounded-lg border p-3 bg-muted border-border w-full max-w-lg transition-colors hover:bg-emerald-50/50 hover:border-emerald-200">
+        <div className={cn("group relative rounded-lg border p-3 bg-muted border-border w-full max-w-lg transition-colors hover:bg-emerald-50/50 hover:border-emerald-200", className)}>
             <div className="flex justify-between items-start gap-2">
                 <MedicineName typeLabel={typeLabel} tradeName={tradeName} genericName={genericName} fallbackName={fallbackName} />
                 {frequencyText && (

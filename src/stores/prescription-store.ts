@@ -110,6 +110,7 @@ interface PrescriptionStoreType {
     investigation: InvestigationType[];
 
     medicine: MeedicineType[];
+    unresolvedMedicines: string[];
     advice: string[];
     summary: string;
     safetyNet: string[];
@@ -125,7 +126,7 @@ interface PrescriptionStoreType {
     setGenerating: (value: boolean) => void;
     setPartialData: (data: Pick<PrescriptionResponseType, 'chief_complaints' | 'history' | 'summary' | 'safety_net' | 'diagnoses' | 'vitals' | 'follow_up'>) => void;
     applyScribeData: (data: Pick<PrescriptionResponseType, 'chief_complaints' | 'history' | 'summary' | 'safety_net' | 'vitals' | 'follow_up' | 'advice'>) => void;
-    applyDecideData: (data: Pick<PrescriptionResponseType, 'diagnoses' | 'medicines' | 'investigations'>) => void;
+    applyDecideData: (data: Pick<PrescriptionResponseType, 'diagnoses' | 'medicines' | 'investigations' | 'unresolved_mentions'>) => void;
     getInitialPrescription: (data: PrescriptionResponseType) => Promise<void>;
     setPrescriptionFromTemplate: (data: any) => void;
     revertTemplateSelection: () => void;
@@ -171,6 +172,12 @@ interface PrescriptionStoreType {
     addEmptyMedicine: () => void;
     updateMedicine: (index: number, data: Partial<MeedicineType>) => void;
     removeMedicine: (index: number) => void;
+    moveMedicine: (from: number, to: number) => void;
+
+    // unresolved-medicine methods
+    resolveUnresolvedMedicine: (index: number) => number;
+    dismissUnresolvedMedicine: (index: number) => void;
+
     resetStore: () => void;
 }
 
@@ -193,6 +200,7 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
             followUp: EMPTY_FOLLOW_UP,
 
             medicine: [],
+            unresolvedMedicines: [],
             advice: [],
 
             templateSelected: false,
@@ -215,6 +223,7 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
                 vitals: {},
                 followUp: EMPTY_FOLLOW_UP,
                 medicine: [],
+                unresolvedMedicines: [],
                 advice: [],
                 templateSelected: false,
                 generatedSections: {},
@@ -262,6 +271,7 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
                 set({
                     diagnosis: mapGeneratedDiagnoses(data.diagnoses),
                     generatedSections,
+                    unresolvedMedicines: data.unresolved_mentions ?? [],
                     ...(get().templateSelected ? {} : { medicine, investigation }),
                 });
             },
@@ -291,6 +301,7 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
                     vitals,
                     followUp,
                     generatedSections,
+                    unresolvedMedicines: data.unresolved_mentions ?? [],
                     ...(get().templateSelected ? {} : (generatedSections as Partial<PrescriptionStoreType>)),
                 })
             },
@@ -428,7 +439,27 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
                 updated.splice(index, 1);
                 return { medicine: updated };
             }),
+            moveMedicine: (from, to) => set((state) => {
+                if (to < 0 || to >= state.medicine.length) return {};
+                const updated = [...state.medicine];
+                const [moved] = updated.splice(from, 1);
+                updated.splice(to, 0, moved);
+                return { medicine: updated };
+            }),
 
+            // Promote an unresolved mention into a fresh, empty medicine row and open it. The
+            // search starts blank — the heard text is the garble the search already failed on,
+            // so the doctor types the real name; returns the new row's index for the editor.
+            resolveUnresolvedMedicine: (index) => {
+                set((state) => ({
+                    unresolvedMedicines: state.unresolvedMedicines.filter((_, i) => i !== index),
+                    medicine: [...state.medicine, { name: "", value: "", dosage: "", routine: {}, schedule: {}, dose: {}, duration: {} }],
+                }));
+                return get().medicine.length - 1;
+            },
+            dismissUnresolvedMedicine: (index) => set((state) => ({
+                unresolvedMedicines: state.unresolvedMedicines.filter((_, i) => i !== index),
+            })),
 
         })
     }

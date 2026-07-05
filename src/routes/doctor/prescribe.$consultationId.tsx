@@ -55,7 +55,7 @@ function RouteComponent() {
         body: JSON.stringify({
           session_id: consultationId,
           dialogue: "",
-          force_variant: '',
+          force_variant: 'one',
           persist_draft: true,
         }),
         signal: controller.signal,
