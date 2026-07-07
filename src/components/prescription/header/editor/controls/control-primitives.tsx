@@ -1,3 +1,4 @@
+import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
@@ -5,23 +6,36 @@ import { Input } from "@/components/ui/input";
 
 // Shared building blocks that give the header editor's control panel a consistent look.
 
-export function ControlSection({ title, description, children }: {
+export function ControlSection({ title, description, icon: Icon, action, children }: {
     title:        string;
     description?:  string;
+    icon?:        LucideIcon;
+    action?:      ReactNode;
     children:     ReactNode;
 }) {
     return (
-        <section className="flex flex-col gap-4 rounded-xl border bg-white p-4">
-            <div>
-                <h3 className="text-sm font-semibold text-slate-800">{title}</h3>
-                {description && <p className="mt-0.5 text-xs text-slate-400">{description}</p>}
+        <section className="flex flex-col gap-3.5 rounded-xl border bg-white p-4 shadow-xs">
+            <div className="flex items-start justify-between gap-3">
+                <div className="flex items-center gap-2.5">
+                    {Icon && (
+                        <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
+                            <Icon className="size-4" />
+                        </span>
+                    )}
+                    <div>
+                        <h3 className="text-sm font-semibold text-slate-800">{title}</h3>
+                        {description && <p className="text-xs text-slate-400">{description}</p>}
+                    </div>
+                </div>
+                {action}
             </div>
             {children}
         </section>
     );
 }
 
-export function LabeledInput({ label, value, onChange, placeholder }: {
+export function LabeledInput({ id, label, value, onChange, placeholder }: {
+    id?:          string;
     label:        string;
     value:        string;
     onChange:     (value: string) => void;
@@ -30,12 +44,39 @@ export function LabeledInput({ label, value, onChange, placeholder }: {
     return (
         <label className="flex flex-col gap-1">
             <span className="text-xs font-medium text-slate-500">{label}</span>
-            <Input value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} />
+            <Input id={id} value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} />
         </label>
     );
 }
 
-export function ToggleRow({ label, description, checked, onChange }: {
+export function LabeledTextarea({ id, label, value, onChange, placeholder, rows = 2 }: {
+    id?:          string;
+    label:        string;
+    value:        string;
+    onChange:     (value: string) => void;
+    placeholder?: string;
+    rows?:        number;
+}) {
+    return (
+        <label className="flex flex-col gap-1">
+            <span className="flex items-baseline justify-between text-xs font-medium text-slate-500">
+                {label}
+                <span className="text-[10px] font-normal text-slate-300">Enter ↵ for a new line</span>
+            </span>
+            <textarea
+                id={id}
+                value={value}
+                onChange={(event) => onChange(event.target.value)}
+                placeholder={placeholder}
+                rows={rows}
+                className="w-full resize-y rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
+            />
+        </label>
+    );
+}
+
+export function ToggleRow({ id, label, description, checked, onChange }: {
+    id?:          string;
     label:        string;
     description?: string;
     checked:      boolean;
@@ -48,6 +89,7 @@ export function ToggleRow({ label, description, checked, onChange }: {
                 {description && <p className="text-xs text-slate-400">{description}</p>}
             </div>
             <button
+                id={id}
                 type="button"
                 role="switch"
                 aria-checked={checked}
@@ -77,7 +119,7 @@ export function SegmentedControl<T extends string>({ value, options, onChange }:
                     type="button"
                     onClick={() => onChange(option.value)}
                     className={cn(
-                        "rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
+                        "rounded-md px-3 py-1 text-xs font-medium transition-colors",
                         value === option.value ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700",
                     )}
                 >

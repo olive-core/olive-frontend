@@ -7,23 +7,34 @@ interface DoctorIdentityBlockProps extends HeaderRenderProps {
 }
 
 // The doctor's name (branded with the accent) plus designation, qualification and BMDC.
-// Qualification and BMDC stay neutral slate so they read on any printer.
+// Qualification and BMDC stay neutral slate so they read on any printer. `data-focus` marks
+// each field so clicking it in the editor preview jumps to its control; `whitespace-pre-line`
+// honours the line breaks doctors type into multi-line fields.
 export default function DoctorIdentityBlock({ identity, config, palette, align = "left" }: DoctorIdentityBlockProps) {
     const name = joinDoctorName(identity);
 
     return (
         <div className={cn("flex min-w-0 flex-col", align === "center" ? "items-center text-center" : "items-start")}>
             <h2
-                className="font-display text-xl font-semibold leading-tight md:text-2xl"
+                data-focus="firstName"
+                className="font-display text-[1.35rem] font-semibold leading-tight tracking-tight"
                 style={{ color: palette.nameColor }}
             >
                 {name || "Doctor name"}
             </h2>
-            {config.designation && <p className="text-sm font-medium text-slate-700">{config.designation}</p>}
-            {identity.qualification && <p className="text-sm text-slate-500">{identity.qualification}</p>}
+            {identity.qualification && (
+                <p data-focus="qualification" className="whitespace-pre-line text-[13px] leading-snug text-slate-600">
+                    {identity.qualification}
+                </p>
+            )}
+            {config.designation && (
+                <p data-focus="designation" className="whitespace-pre-line text-[13px] font-medium leading-snug text-slate-700">
+                    {config.designation}
+                </p>
+            )}
             {identity.bmdcNo && (
-                <p className="mt-1 text-xs text-slate-600">
-                    BMDC Reg: <span className="font-semibold">{identity.bmdcNo}</span>
+                <p data-focus="bmdcNo" className="text-[11.5px] leading-snug text-slate-500">
+                    BMDC Reg: <span className="font-semibold text-slate-600">{identity.bmdcNo}</span>
                 </p>
             )}
         </div>

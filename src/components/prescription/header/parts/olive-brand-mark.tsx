@@ -2,19 +2,23 @@ import { cn } from "@/lib/utils";
 
 interface OliveBrandMarkProps {
     isMono:    boolean;
+    size?:     number;
     className?: string;
 }
 
-// Subtle "Powered by Olive" wordmark, reusing the navbar logo's pill + display type so the
-// brand reads consistently. Turns near-black in monochrome mode to stay B/W-printer safe.
-export default function OliveBrandMark({ isMono, className }: OliveBrandMarkProps) {
+// "Powered by Olive" using the real Olive monogram, shown on prescriptions only (the site
+// header keeps its own logo). `size` is the monogram height; the tag sits beside it so the
+// lockup stays one shallow row. Grayscaled in monochrome mode to stay B/W-printer safe.
+export default function OliveBrandMark({ isMono, size = 32, className }: OliveBrandMarkProps) {
     return (
-        <div className={cn("flex items-center gap-1.5 text-[11px] leading-none", className)}>
-            <span className="text-slate-400">Powered by</span>
-            <span className="flex items-center gap-1">
-                <span className={cn("h-3 w-2 rounded-full", isMono ? "bg-slate-800" : "bg-primary")} />
-                <span className={cn("font-display text-sm", isMono ? "text-slate-800" : "text-primary")}>Olive</span>
-            </span>
+        <div data-focus="oliveBrand" className={cn("flex items-center gap-1.5", className)}>
+            <span className="text-[9px] leading-none text-slate-400">Powered by</span>
+            <img
+                src="/logo/olive-logo-test.png"
+                alt="Olive"
+                style={{ height: size }}
+                className={cn("w-auto object-contain", isMono && "grayscale")}
+            />
         </div>
     );
 }

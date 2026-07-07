@@ -1,13 +1,44 @@
 import { useRef, useState } from "react";
-import { ImageUpIcon, Loader2Icon, XIcon } from "lucide-react";
+import { ImageIcon, ImageUpIcon, Loader2Icon, XIcon } from "lucide-react";
 import toast from "react-hot-toast";
 
 import api from "@/lib/axios";
-import { handleError } from "@/lib/utils";
-import { headerConfigFromApi } from "@/lib/header-config";
+import { cn, handleError } from "@/lib/utils";
+import { clampLogoSize, headerConfigFromApi, MAX_LOGO_SIZE, MIN_LOGO_SIZE, type LogoShape } from "@/lib/header-config";
 import { useHeaderConfigStore } from "@/stores/header-config-store";
 import { Button } from "@/components/ui/button";
+import { controlId } from "../focus-field";
 import { ControlSection } from "./control-primitives";
+
+const LOGO_SHAPES: { value: LogoShape; label: string; frameClass: string }[] = [
+    { value: "circle",  label: "Circle",  frameClass: "rounded-full" },
+    { value: "rounded", label: "Rounded", frameClass: "rounded-md" },
+    { value: "square",  label: "Square",  frameClass: "rounded-none" },
+];
+
+function ShapePicker({ value, onChange }: { value: LogoShape; onChange: (shape: LogoShape) => void }) {
+    return (
+        <div className="flex items-center gap-1.5">
+            {LOGO_SHAPES.map((shape) => (
+                <button
+                    key={shape.value}
+                    type="button"
+                    title={shape.label}
+                    aria-label={`${shape.label} logo frame`}
+                    onClick={() => onChange(shape.value)}
+                    className={cn(
+                        "flex size-9 items-center justify-center rounded-lg border transition-colors",
+                        value === shape.value
+                            ? "border-emerald-500 bg-emerald-50/60 ring-1 ring-emerald-500/30"
+                            : "border-slate-200 hover:border-slate-300",
+                    )}
+                >
+                    <span className={cn("size-5 border-[1.5px] border-slate-400", shape.frameClass)} />
+                </button>
+            ))}
+        </div>
+    );
+}
 
 // Uploads the center logo to GCS via the clinician header-logo endpoint. Uploads persist
 // immediately (the returned signed URL is stored on the config); the rest of the letterhead
@@ -15,6 +46,8 @@ import { ControlSection } from "./control-primitives";
 export default function LogoUploadControl({ userId }: { userId: string }) {
     const logoUrl = useHeaderConfigStore((state) => state.config.logoUrl);
     const showLogo = useHeaderConfigStore((state) => state.config.showLogo);
+    const logoSize = useHeaderConfigStore((state) => state.config.logoSize);
+    const logoShape = useHeaderConfigStore((state) => state.config.logoShape);
     const patch = useHeaderConfigStore((state) => state.patch);
 
     const inputRef = useRef<HTMLInputElement>(null);
@@ -57,9 +90,14 @@ export default function LogoUploadControl({ userId }: { userId: string }) {
     };
 
     return (
-        <ControlSection title="Center logo" description="PNG or JPG, up to 2 MB.">
+        <ControlSection title="Center logo" description="PNG or JPG, up to 2 MB." icon={ImageIcon}>
             <div className="flex items-center gap-4">
-                <div className="flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-lg border bg-slate-50">
+                <div
+                    className={cn(
+                        "flex size-20 shrink-0 items-center justify-center overflow-hidden border bg-slate-50 p-1",
+                        LOGO_SHAPES.find((shape) => shape.value === logoShape)?.frameClass,
+                    )}
+                >
                     {logoUrl
                         ? <img src={logoUrl} alt="Center logo" className="h-full w-full object-contain" />
                         : <ImageUpIcon className="size-6 text-slate-300" />}
@@ -80,6 +118,32 @@ export default function LogoUploadControl({ userId }: { userId: string }) {
                     {!showLogo && <p className="text-xs text-amber-600">Logo is hidden — enable "Show center logo" above.</p>}
                 </div>
             </div>
+
+            {logoUrl && (
+                <div className="flex flex-wrap items-center justify-between gap-4">
+                    <div className="flex flex-col gap-1.5">
+                        <span className="text-xs font-medium text-slate-500">Frame</span>
+                        <ShapePicker value={logoShape} onChange={(shape) => patch({ logoShape: shape })} />
+                    </div>
+
+                    <label className="flex min-w-48 flex-1 flex-col gap-1.5">
+                        <span className="text-xs font-medium text-slate-500">Size</span>
+                        <span className="flex items-center gap-3">
+                            <input
+                                id={controlId("logo")}
+                                type="range"
+                                min={MIN_LOGO_SIZE}
+                                max={MAX_LOGO_SIZE}
+                                step={2}
+                                value={logoSize}
+                                onChange={(event) => patch({ logoSize: clampLogoSize(Number(event.target.value)) })}
+                                className="h-1.5 flex-1 cursor-pointer appearance-none rounded-full bg-slate-200 accent-emerald-500"
+                            />
+                            <span className="w-12 text-right text-xs tabular-nums text-slate-400">{logoSize}px</span>
+                        </span>
+                    </label>
+                </div>
+            )}
         </ControlSection>
     );
 }

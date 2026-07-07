@@ -14,11 +14,12 @@ export const Route = createFileRoute('/doctor/prescription-header/')({
 
 function EditorSkeleton() {
   return (
-    <div className="container mx-auto max-w-6xl px-4 py-6">
-      <div className="mb-6 h-10 w-64 animate-pulse rounded-lg bg-slate-100" />
-      <div className="grid gap-6 lg:grid-cols-[1fr_minmax(0,520px)]">
-        <div className="h-96 animate-pulse rounded-xl bg-slate-100" />
-        <div className="h-96 animate-pulse rounded-xl bg-slate-100" />
+    <div className="mx-auto max-w-[860px] px-4 py-6">
+      <div className="mb-4 h-10 w-64 animate-pulse rounded-lg bg-slate-100" />
+      <div className="mb-5 h-48 animate-pulse rounded-xl bg-slate-100" />
+      <div className="flex flex-col gap-3">
+        <div className="h-44 animate-pulse rounded-xl bg-slate-100" />
+        <div className="h-44 animate-pulse rounded-xl bg-slate-100" />
       </div>
     </div>
   )

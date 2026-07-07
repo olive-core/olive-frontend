@@ -3,13 +3,13 @@ import type { ReactNode } from "react";
 import { getHeaderPalette, type DoctorIdentity, type HeaderConfig, type HeaderPreset } from "@/lib/header-config";
 import type { HeaderRenderProps } from "./header-render-props";
 import ClassicSplitHeader from "./presets/classic-split-header";
-import CenteredFormalHeader from "./presets/centered-formal-header";
-import ModernMinimalHeader from "./presets/modern-minimal-header";
+import ElegantCenterHeader from "./presets/elegant-center-header";
+import AccentBarHeader from "./presets/accent-bar-header";
 
 const PRESET_RENDERERS: Record<HeaderPreset, (props: HeaderRenderProps) => ReactNode> = {
-    "classic-split":   ClassicSplitHeader,
-    "centered-formal": CenteredFormalHeader,
-    "modern-minimal":  ModernMinimalHeader,
+    "classic-split":  ClassicSplitHeader,
+    "elegant-center": ElegantCenterHeader,
+    "accent-bar":     AccentBarHeader,
 };
 
 interface PrescriptionHeaderProps {

@@ -2,9 +2,11 @@ import { create } from "zustand";
 
 import {
     DEFAULT_HEADER_CONFIG,
+    newContactLine,
+    type ContactLine,
+    type ContactLineKind,
     type EditableIdentity,
     type HeaderConfig,
-    type HeaderCustomField,
 } from "@/lib/header-config";
 
 // The doctor's identity is edited here too (name/qualification/BMDC live on the profile,
@@ -23,17 +25,10 @@ interface HeaderConfigStore {
     setIdentity: (changes: Partial<EditableIdentity>) => void;
     patch:       (changes: Partial<HeaderConfig>) => void;
 
-    addPhone:    () => void;
-    updatePhone: (index: number, value: string) => void;
-    removePhone: (index: number) => void;
-
-    addCustomField:    () => void;
-    updateCustomField: (id: string, changes: Partial<HeaderCustomField>) => void;
-    removeCustomField: (id: string) => void;
-}
-
-function createCustomField(): HeaderCustomField {
-    return { id: crypto.randomUUID(), label: "", value: "" };
+    addContactLine:     (kind: ContactLineKind) => void;
+    updateContactLine:  (id: string, changes: Partial<ContactLine>) => void;
+    removeContactLine:  (id: string) => void;
+    reorderContactLines: (lines: ContactLine[]) => void;
 }
 
 export const useHeaderConfigStore = create<HeaderConfigStore>((set) => ({
@@ -48,41 +43,27 @@ export const useHeaderConfigStore = create<HeaderConfigStore>((set) => ({
 
     patch: (changes) => set((state) => ({ config: { ...state.config, ...changes } })),
 
-    addPhone: () => set((state) => ({
-        config: { ...state.config, phones: [...state.config.phones, ""] },
+    addContactLine: (kind) => set((state) => ({
+        config: { ...state.config, contactLines: [...state.config.contactLines, newContactLine(kind)] },
     })),
 
-    updatePhone: (index, value) => set((state) => ({
+    updateContactLine: (id, changes) => set((state) => ({
         config: {
             ...state.config,
-            phones: state.config.phones.map((phone, i) => (i === index ? value : phone)),
-        },
-    })),
-
-    removePhone: (index) => set((state) => ({
-        config: {
-            ...state.config,
-            phones: state.config.phones.filter((_, i) => i !== index),
-        },
-    })),
-
-    addCustomField: () => set((state) => ({
-        config: { ...state.config, customFields: [...state.config.customFields, createCustomField()] },
-    })),
-
-    updateCustomField: (id, changes) => set((state) => ({
-        config: {
-            ...state.config,
-            customFields: state.config.customFields.map((field) =>
-                field.id === id ? { ...field, ...changes } : field,
+            contactLines: state.config.contactLines.map((line) =>
+                line.id === id ? { ...line, ...changes } : line,
             ),
         },
     })),
 
-    removeCustomField: (id) => set((state) => ({
+    removeContactLine: (id) => set((state) => ({
         config: {
             ...state.config,
-            customFields: state.config.customFields.filter((field) => field.id !== id),
+            contactLines: state.config.contactLines.filter((line) => line.id !== id),
         },
+    })),
+
+    reorderContactLines: (lines) => set((state) => ({
+        config: { ...state.config, contactLines: lines },
     })),
 }));

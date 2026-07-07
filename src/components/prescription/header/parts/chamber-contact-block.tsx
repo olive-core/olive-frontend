@@ -1,102 +1,44 @@
-import type { ReactNode } from "react";
-import { Building2, Clock, Hash, MapPin, Phone } from "lucide-react";
+import { Building2 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import type { HeaderConfig } from "@/lib/header-config";
+import { contactLineText, visibleContactLines, type HeaderConfig } from "@/lib/header-config";
+import ContactLineIcon from "./contact-line-icon";
 
 interface ChamberContactBlockProps {
     config:  HeaderConfig;
-    align?:  "left" | "right" | "center";
-    layout?: "stacked" | "inline";
+    align?:  "left" | "right";
+    showChamberName?: boolean;
     className?: string;
 }
 
-interface ContactLine {
-    key:  string;
-    icon: ReactNode;
-    text: string;
-}
+const ICON_CLASS = "size-3 shrink-0 text-slate-400";
 
-const ICON_CLASS = "size-3.5 shrink-0 text-slate-400";
+export default function ChamberContactBlock({ config, align = "left", showChamberName = true, className }: ChamberContactBlockProps) {
+    const lines = visibleContactLines(config);
+    const showName = showChamberName && Boolean(config.chamberName.trim());
+    if (!showName && lines.length === 0) return null;
 
-function customFieldText(label: string, value: string): string {
-    if (label && value) return `${label}: ${value}`;
-    return value || label;
-}
-
-// The chamber name is emphasised on its own; everything else becomes an icon + text line.
-function buildContactLines(config: HeaderConfig): ContactLine[] {
-    const lines: ContactLine[] = [];
-
-    if (config.chamberAddress.trim()) {
-        lines.push({ key: "address", icon: <MapPin className={ICON_CLASS} />, text: config.chamberAddress });
-    }
-    config.phones.filter(phone => phone.trim()).forEach((phone, index) => {
-        lines.push({ key: `phone-${index}`, icon: <Phone className={ICON_CLASS} />, text: phone });
-    });
-    if (config.visitingHours.trim()) {
-        lines.push({ key: "hours", icon: <Clock className={ICON_CLASS} />, text: config.visitingHours });
-    }
-    if (config.serial.trim()) {
-        lines.push({ key: "serial", icon: <Hash className={ICON_CLASS} />, text: config.serial });
-    }
-    config.customFields.forEach(field => {
-        const text = customFieldText(field.label.trim(), field.value.trim());
-        if (text) {
-            lines.push({ key: field.id, icon: <span className="size-1.5 shrink-0 rounded-full bg-slate-300" />, text });
-        }
-    });
-
-    return lines;
-}
-
-export default function ChamberContactBlock({ config, align = "left", layout = "stacked", className }: ChamberContactBlockProps) {
-    const lines = buildContactLines(config);
-    if (!config.chamberName.trim() && lines.length === 0) return null;
-
-    if (layout === "inline") {
-        return (
-            <div
-                className={cn(
-                    "flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-slate-600",
-                    align === "center" && "justify-center text-center",
-                    align === "right" && "justify-end",
-                    className,
-                )}
-            >
-                {config.chamberName.trim() && (
-                    <span className="font-semibold text-slate-800">{config.chamberName}</span>
-                )}
-                {lines.map(line => (
-                    <span key={line.key} className="flex items-center gap-1.5">
-                        {line.icon}
-                        <span>{line.text}</span>
-                    </span>
-                ))}
-            </div>
-        );
-    }
+    const isRight = align === "right";
 
     return (
         <div
             className={cn(
-                "flex flex-col gap-0.5",
-                align === "right" && "items-start md:items-end md:text-right",
-                align === "center" && "items-center text-center",
+                "flex flex-col gap-[3px] text-[12.5px] leading-snug text-slate-600",
+                isRight && "items-end text-right",
                 className,
             )}
         >
-            {config.chamberName.trim() && (
-                <p className="flex items-center gap-1.5 text-sm font-semibold text-slate-800">
+            {showName && (
+                <span data-focus="chamberName" className={cn("flex items-center gap-1.5 text-[13px] font-semibold text-slate-800", isRight && "flex-row-reverse")}>
                     <Building2 className={ICON_CLASS} />
                     {config.chamberName}
-                </p>
+                </span>
             )}
-            {lines.map(line => (
-                <p key={line.key} className="flex items-center gap-1.5 text-sm text-slate-600">
-                    {line.icon}
-                    <span>{line.text}</span>
-                </p>
+            {lines.map((line) => (
+                <span key={line.id} data-focus={`contact-${line.id}`} className={cn("flex items-start gap-1.5", isRight && "flex-row-reverse")}>
+                    <ContactLineIcon kind={line.kind} className={cn(ICON_CLASS, "mt-[3px]")} />
+                    <span className="whitespace-pre-line">{contactLineText(line)}</span>
+                </span>
             ))}
         </div>
     );
