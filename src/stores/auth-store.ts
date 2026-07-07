@@ -14,6 +14,11 @@ type PendingPatient = {
     sex?: string;
 };
 
+type PendingAttendant = {
+    firstName: string;
+    lastName: string;
+};
+
 interface AuthStoreType {
     isLoggedIn: boolean;
     phoneNumber: string;
@@ -23,6 +28,7 @@ interface AuthStoreType {
     role?: UserRole;
     clinician?: ClinicianType;
     pendingPatient?: PendingPatient;
+    pendingAttendant?: PendingAttendant;
 
     logout: () => void;
     doesUserExist: (phone: string) => Promise<{ exists: boolean; role?: UserRole }>;
@@ -34,6 +40,9 @@ interface AuthStoreType {
 
     storePendingPatient: (data: PendingPatient) => void;
     createPatientProfile: (phone: string, otp: string) => Promise<void>;
+
+    storePendingAttendant: (data: PendingAttendant) => void;
+    createAttendantProfile: (phone: string, otp: string) => Promise<void>;
 }
 
 export const useAuthStore = create<AuthStoreType>()(
@@ -49,6 +58,7 @@ export const useAuthStore = create<AuthStoreType>()(
                 role: undefined,
                 clinician: undefined,
                 pendingPatient: undefined,
+                pendingAttendant: undefined,
 
                 doesUserExist: async (phone: string) => {
                     const response = await api.post<DoesUserExistResponse>(`/auth/check-user`, { phone });
@@ -130,6 +140,26 @@ export const useAuthStore = create<AuthStoreType>()(
                     });
                 },
 
+                storePendingAttendant: (data: PendingAttendant) => set({ pendingAttendant: data }),
+
+                createAttendantProfile: async (phone: string, otp: string) => {
+                    const pendingAttendant = useAuthStore.getState().pendingAttendant;
+                    const response = await api.post('/attendant/register', {
+                        first_name: pendingAttendant?.firstName,
+                        last_name: pendingAttendant?.lastName,
+                        phone,
+                        otp,
+                    });
+                    set({
+                        isLoggedIn: true,
+                        accessToken: response.data.access_token,
+                        refreshToken: response.data.refresh_token,
+                        userId: response.data.user_id,
+                        role: 'attendant',
+                        pendingAttendant: undefined,
+                    });
+                },
+
                 logout: () => set({
                     isLoggedIn: false,
                     accessToken: undefined,
@@ -138,6 +168,7 @@ export const useAuthStore = create<AuthStoreType>()(
                     role: undefined,
                     clinician: undefined,
                     pendingPatient: undefined,
+                    pendingAttendant: undefined,
                 }),
             })
         },

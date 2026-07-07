@@ -3,14 +3,14 @@ import EnterOtpForm from "@/components/auth/enter-otp-form";
 
 type EnterOtpSearch = {
     exists: 1 | 0;
-    role_intent?: 'patient' | 'clinician';
+    role_intent?: 'patient' | 'clinician' | 'attendant';
 }
 
 export const Route = createFileRoute('/(auth)/enter-otp')({
     validateSearch: (search: Record<string, unknown>): EnterOtpSearch => {
         return {
             exists: search.exists === 1 ? 1 : 0,
-            role_intent: (search.role_intent === 'patient' || search.role_intent === 'clinician')
+            role_intent: (search.role_intent === 'patient' || search.role_intent === 'clinician' || search.role_intent === 'attendant')
                 ? search.role_intent
                 : undefined,
         }

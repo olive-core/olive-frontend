@@ -4,12 +4,13 @@ import { AnimatePresence, motion } from "motion/react";
 import PatientInfo from "./patient/patient-info";
 import api from "@/lib/axios";
 import axios from "axios";
-import { handleError } from "@/lib/utils";
+import { cn, handleError } from "@/lib/utils";
 import NumberGroupInputMemo from "./number-group-input";
 import PatientSkeleton from "./patient/skeleton";
 import NewPatient from "./patient/new-patient";
 import type { ShowContentStatus } from "@/types/patient";
 import { useAuthStore } from "@/stores/auth-store";
+import DoctorQueuePanel from "./queue/doctor-queue-panel";
 
 export default function WelcomeScreen() {
 
@@ -17,6 +18,11 @@ export default function WelcomeScreen() {
 
     const [showContent, setShowContent] = useState<ShowContentStatus>({ status: "NOTHING" });
     const [phoneNumber, setPhoneNumber] = useState<string[]>(["0", "1"].concat(Array(9).fill("")));
+    const [queueState, setQueueState] = useState({ ready: false, hasWaiting: false });
+
+    // Wait until the queue is known before offering manual entry, then hide it
+    // whenever a patient is waiting — one action on screen, no refresh flicker.
+    const showManualEntry = queueState.ready && !queueState.hasWaiting;
 
     const handlePhoneComplete = useCallback(async (isComplete: boolean) => {
 
@@ -49,30 +55,40 @@ export default function WelcomeScreen() {
 
     return (
         <div className="">
-            <motion.div
-                initial={{ marginTop: "30%" }}
-                animate={{ marginTop: showContent.status !== "NOTHING" ? "0%" : "15%" }}
-                key="phone-input"
-            />
+            {/* With the phone entry hidden, the live queue becomes the focal point,
+                so it drops toward the vertical center like the phone entry does. */}
+            <div className={cn(queueState.hasWaiting && "mt-[12vh]")}>
+                <DoctorQueuePanel onStateChange={setQueueState} />
+            </div>
 
-            <motion.div className="flex flex-col items-center justify-center mb-10">
-                <p className="mb-6 text-lg text-center text-gray-500 font-light">
-                    {clinician?.firstName
-                        ? `Dr. ${clinician.firstName}, enter your patient's phone number`
-                        : "Enter your patient's phone number"}
-                </p>
-                <div className="w-full max-w-md">
-                    <NumberGroupInputMemo
-                        onComplete={handlePhoneComplete}
-                        numberInput={phoneNumber}
-                        setNumberInput={setPhoneNumber}
+            {showManualEntry && (
+                <>
+                    <motion.div
+                        initial={{ marginTop: "30%" }}
+                        animate={{ marginTop: showContent.status !== "NOTHING" ? "0%" : "15%" }}
+                        key="phone-input"
                     />
-                </div>
-            </motion.div>
+
+                    <motion.div className="flex flex-col items-center justify-center mb-10">
+                        <p className="mb-6 text-lg text-center text-gray-500 font-light">
+                            {clinician?.firstName
+                                ? `Dr. ${clinician.firstName}, enter your patient's phone number`
+                                : "Enter your patient's phone number"}
+                        </p>
+                        <div className="w-full max-w-md">
+                            <NumberGroupInputMemo
+                                onComplete={handlePhoneComplete}
+                                numberInput={phoneNumber}
+                                setNumberInput={setPhoneNumber}
+                            />
+                        </div>
+                    </motion.div>
+                </>
+            )}
 
 
             <AnimatePresence initial={false}>
-                {showContent.status !== "NOTHING" && (
+                {showManualEntry && showContent.status !== "NOTHING" && (
                     <motion.div
                         key={showContent.status}
                         initial={{ opacity: 0 }}

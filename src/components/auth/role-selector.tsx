@@ -1,8 +1,8 @@
-import { UserIcon, StethoscopeIcon } from "lucide-react";
+import { UserIcon, StethoscopeIcon, ClipboardListIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface RoleSelectorProps {
-    onSelect: (role: 'patient' | 'clinician') => void;
+    onSelect: (role: 'patient' | 'clinician' | 'attendant') => void;
 }
 
 const ROLES = [
@@ -20,6 +20,13 @@ const ROLES = [
         className: "border-emerald-200 hover:border-emerald-400 hover:bg-emerald-50",
         iconClassName: "text-emerald-600",
     },
+    {
+        value: 'attendant' as const,
+        label: "I'm an Attendant",
+        icon: ClipboardListIcon,
+        className: "border-amber-200 hover:border-amber-400 hover:bg-amber-50",
+        iconClassName: "text-amber-600",
+    },
 ];
 
 export default function RoleSelector({ onSelect }: RoleSelectorProps) {
@@ -32,7 +39,7 @@ export default function RoleSelector({ onSelect }: RoleSelectorProps) {
                     type="button"
                     onClick={() => onSelect(role.value)}
                     className={cn(
-                        "flex items-center gap-4 w-full px-5 py-4 rounded-xl border-2 bg-white transition-colors text-left",
+                        "flex items-center gap-4 w-full px-5 py-4 rounded-xl border-2 bg-white transition-colors text-left cursor-pointer",
                         role.className,
                     )}
                 >
