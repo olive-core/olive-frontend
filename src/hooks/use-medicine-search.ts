@@ -52,7 +52,7 @@ export function useMedicineSearch() {
 
     const search = useCallback(async (query: string): Promise<Option[]> => {
         if (isMedicineIndexReady()) {
-            return searchMedicineIndex(query, RESULT_LIMIT).map(result => toOption(result.item.record));
+            return searchMedicineIndex(query, RESULT_LIMIT).map(hit => toOption(hit.record));
         }
         return searchOnServer(query);
     }, []);

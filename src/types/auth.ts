@@ -1,4 +1,4 @@
-export type UserRole = 'patient' | 'clinician';
+export type UserRole = 'patient' | 'clinician' | 'attendant';
 
 export type DoesUserExistResponse = {
     exists: boolean;

@@ -1,4 +1,4 @@
-import { BookMarked, ClipboardListIcon, EllipsisIcon, HandCoinsIcon, House, LogOutIcon, MenuIcon, StampIcon, UserIcon, XIcon } from "lucide-react";
+import { BookMarked, ClipboardListIcon, DoorOpenIcon, EllipsisIcon, HandCoinsIcon, House, LogOutIcon, MenuIcon, StampIcon, UserIcon, XIcon } from "lucide-react";
 import { useState } from "react";
 import NavbarContainer from "../shared/navbar-container";
 import SubscriptionStatusPill from "./subscription/status-pill";
@@ -55,6 +55,11 @@ const MENU_ITEMS: MenuItemType[] = [
     //     icon: <HistoryIcon />,
     //     href: "/doctor/history",
     // },
+    {
+        label: "Chambers",
+        icon: <DoorOpenIcon />,
+        href: "/doctor/chambers",
+    },
     {
         label: "Profile",
         icon: <UserIcon />,
@@ -124,7 +129,7 @@ export default function DashboardNavbar() {
     const renderDropdownMenuItem = (menu: MenuItemType) => {
         if (menu.href) {
             return (
-                <Link to={menu.href} className="flex items-center gap-2 w-full">
+                <Link to={menu.href} className="flex items-center gap-2 w-full cursor-pointer">
                     {menu.icon}
                     {menu.label}
                 </Link>

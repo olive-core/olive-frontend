@@ -5,18 +5,24 @@ entirely in the browser against a cached snapshot of the medicine directory; the
 server endpoint (`GET /medicine/search`) is only a fallback for a user's first visit
 before the snapshot finishes downloading.
 
+The matching/ranking/caching mechanics live in the shared engine `src/lib/search-core/`
+(`rank.ts`, `normalize.ts`, `distance.ts`, `snapshot-cache.ts`, `index-store.ts`). This
+folder is just the medicine *configuration* of that engine — investigation search
+(`src/lib/investigation-search/`) is a second configuration of the same engine.
+
 ## Data flow
 
-1. `index-store.ensureMedicineIndex()` loads the snapshot (`snapshot.ts`): served from
-   the IndexedDB cache, re-downloaded from `GET /medicine/snapshot` only when
-   `GET /medicine/snapshot/version` reports a new version.
-2. Each record is normalized once (`rank.indexMedicine`) into separator-insensitive keys.
-3. `rank.rankMedicines()` ranks matches per keystroke.
+1. `index-store.ensureMedicineIndex()` (a `createSearchIndex` from the shared engine) loads
+   the snapshot from the IndexedDB cache, re-downloaded from `GET /medicine/snapshot` only
+   when `GET /medicine/snapshot/version` reports a new version.
+2. `config.ts` declares the searchable fields (brand = prefix, generic = substring); the
+   engine normalizes each into separator-insensitive keys once at build time.
+3. The engine ranks matches per keystroke via the shared ladder below.
 4. `useMedicineSearch()` exposes `search()`, falling back to the server until the index is ready.
 
 ## Ranking ladder — single source of truth
 
-This ladder is mirrored by the backend tiered query
+This ladder (in `src/lib/search-core/rank.ts`) is mirrored by the backend tiered query
 (`olive-backend/app/services/medicine_search.py`). Keep the two in sync; changing one
 without the other breaks parity between the local index and the fallback.
 

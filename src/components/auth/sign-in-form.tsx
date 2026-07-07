@@ -8,9 +8,16 @@ import NumberGroupInputMemo from "../dashboard/number-group-input";
 import PatientSkeleton from "../dashboard/patient/skeleton";
 import CreateDoctorForm from "./create-doctor-form";
 import CreatePatientForm from "./create-patient-form";
+import CreateAttendantForm from "./create-attendant-form";
 import RoleSelector from "./role-selector";
 
-type ShowPanel = null | "role-select" | "doctor-form" | "patient-form" | "otp" | "error";
+type ShowPanel = null | "role-select" | "doctor-form" | "patient-form" | "attendant-form" | "otp" | "error";
+
+const ROLE_TO_PANEL: Record<'patient' | 'clinician' | 'attendant', ShowPanel> = {
+    patient: "patient-form",
+    clinician: "doctor-form",
+    attendant: "attendant-form",
+};
 
 export default function SignInForm() {
 
@@ -75,7 +82,7 @@ export default function SignInForm() {
             {isChecking && <PatientSkeleton />}
 
             {showPanel === "role-select" && (
-                <RoleSelector onSelect={(role) => setShowPanel(role === 'patient' ? 'patient-form' : 'doctor-form')} />
+                <RoleSelector onSelect={(role) => setShowPanel(ROLE_TO_PANEL[role])} />
             )}
 
             {showPanel === "doctor-form" && (
@@ -84,6 +91,10 @@ export default function SignInForm() {
 
             {showPanel === "patient-form" && (
                 <CreatePatientForm phoneNumber={phoneNumber} />
+            )}
+
+            {showPanel === "attendant-form" && (
+                <CreateAttendantForm phoneNumber={phoneNumber} />
             )}
 
             {showPanel === "otp" && (

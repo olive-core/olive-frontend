@@ -14,10 +14,12 @@ import { Route as ComingSoonRouteImport } from './routes/coming-soon'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as PatientRouteRouteImport } from './routes/patient/route'
 import { Route as DoctorRouteRouteImport } from './routes/doctor/route'
+import { Route as AttendantRouteRouteImport } from './routes/attendant/route'
 import { Route as authRouteRouteImport } from './routes/(auth)/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PatientIndexRouteImport } from './routes/patient/index'
 import { Route as DoctorIndexRouteImport } from './routes/doctor/index'
+import { Route as AttendantIndexRouteImport } from './routes/attendant/index'
 import { Route as PCodeRouteImport } from './routes/p.$code'
 import { Route as authSignInRouteImport } from './routes/(auth)/sign-in'
 import { Route as authEnterOtpRouteImport } from './routes/(auth)/enter-otp'
@@ -26,6 +28,7 @@ import { Route as DoctorRxMemoryIndexRouteImport } from './routes/doctor/rx-memo
 import { Route as DoctorProfileIndexRouteImport } from './routes/doctor/profile/index'
 import { Route as DoctorPrescriptionHeaderIndexRouteImport } from './routes/doctor/prescription-header/index'
 import { Route as DoctorConsultationsIndexRouteImport } from './routes/doctor/consultations/index'
+import { Route as DoctorChambersIndexRouteImport } from './routes/doctor/chambers/index'
 import { Route as DoctorBillingIndexRouteImport } from './routes/doctor/billing/index'
 import { Route as PatientProfileEditRouteImport } from './routes/patient/profile/edit'
 import { Route as PatientPrescriptionsPrescriptionIdRouteImport } from './routes/patient/prescriptions.$prescriptionId'
@@ -60,6 +63,11 @@ const DoctorRouteRoute = DoctorRouteRouteImport.update({
   path: '/doctor',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AttendantRouteRoute = AttendantRouteRouteImport.update({
+  id: '/attendant',
+  path: '/attendant',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const authRouteRoute = authRouteRouteImport.update({
   id: '/(auth)',
   getParentRoute: () => rootRouteImport,
@@ -78,6 +86,11 @@ const DoctorIndexRoute = DoctorIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => DoctorRouteRoute,
+} as any)
+const AttendantIndexRoute = AttendantIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AttendantRouteRoute,
 } as any)
 const PCodeRoute = PCodeRouteImport.update({
   id: '/p/$code',
@@ -121,6 +134,11 @@ const DoctorConsultationsIndexRoute =
     path: '/consultations/',
     getParentRoute: () => DoctorRouteRoute,
   } as any)
+const DoctorChambersIndexRoute = DoctorChambersIndexRouteImport.update({
+  id: '/chambers/',
+  path: '/chambers/',
+  getParentRoute: () => DoctorRouteRoute,
+} as any)
 const DoctorBillingIndexRoute = DoctorBillingIndexRouteImport.update({
   id: '/billing/',
   path: '/billing/',
@@ -170,6 +188,7 @@ const DoctorConsultationUserIdConsultationIdRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/attendant': typeof AttendantRouteRouteWithChildren
   '/doctor': typeof DoctorRouteRouteWithChildren
   '/patient': typeof PatientRouteRouteWithChildren
   '/about': typeof AboutRoute
@@ -178,6 +197,7 @@ export interface FileRoutesByFullPath {
   '/enter-otp': typeof authEnterOtpRoute
   '/sign-in': typeof authSignInRoute
   '/p/$code': typeof PCodeRoute
+  '/attendant/': typeof AttendantIndexRoute
   '/doctor/': typeof DoctorIndexRoute
   '/patient/': typeof PatientIndexRoute
   '/doctor/consultations/$prescriptionId': typeof DoctorConsultationsPrescriptionIdRoute
@@ -185,6 +205,7 @@ export interface FileRoutesByFullPath {
   '/patient/prescriptions/$prescriptionId': typeof PatientPrescriptionsPrescriptionIdRoute
   '/patient/profile/edit': typeof PatientProfileEditRoute
   '/doctor/billing': typeof DoctorBillingIndexRoute
+  '/doctor/chambers': typeof DoctorChambersIndexRoute
   '/doctor/consultations': typeof DoctorConsultationsIndexRoute
   '/doctor/prescription-header': typeof DoctorPrescriptionHeaderIndexRoute
   '/doctor/profile': typeof DoctorProfileIndexRoute
@@ -202,6 +223,7 @@ export interface FileRoutesByTo {
   '/enter-otp': typeof authEnterOtpRoute
   '/sign-in': typeof authSignInRoute
   '/p/$code': typeof PCodeRoute
+  '/attendant': typeof AttendantIndexRoute
   '/doctor': typeof DoctorIndexRoute
   '/patient': typeof PatientIndexRoute
   '/doctor/consultations/$prescriptionId': typeof DoctorConsultationsPrescriptionIdRoute
@@ -209,6 +231,7 @@ export interface FileRoutesByTo {
   '/patient/prescriptions/$prescriptionId': typeof PatientPrescriptionsPrescriptionIdRoute
   '/patient/profile/edit': typeof PatientProfileEditRoute
   '/doctor/billing': typeof DoctorBillingIndexRoute
+  '/doctor/chambers': typeof DoctorChambersIndexRoute
   '/doctor/consultations': typeof DoctorConsultationsIndexRoute
   '/doctor/prescription-header': typeof DoctorPrescriptionHeaderIndexRoute
   '/doctor/profile': typeof DoctorProfileIndexRoute
@@ -222,6 +245,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/(auth)': typeof authRouteRouteWithChildren
+  '/attendant': typeof AttendantRouteRouteWithChildren
   '/doctor': typeof DoctorRouteRouteWithChildren
   '/patient': typeof PatientRouteRouteWithChildren
   '/about': typeof AboutRoute
@@ -230,6 +254,7 @@ export interface FileRoutesById {
   '/(auth)/enter-otp': typeof authEnterOtpRoute
   '/(auth)/sign-in': typeof authSignInRoute
   '/p/$code': typeof PCodeRoute
+  '/attendant/': typeof AttendantIndexRoute
   '/doctor/': typeof DoctorIndexRoute
   '/patient/': typeof PatientIndexRoute
   '/doctor/consultations/$prescriptionId': typeof DoctorConsultationsPrescriptionIdRoute
@@ -237,6 +262,7 @@ export interface FileRoutesById {
   '/patient/prescriptions/$prescriptionId': typeof PatientPrescriptionsPrescriptionIdRoute
   '/patient/profile/edit': typeof PatientProfileEditRoute
   '/doctor/billing/': typeof DoctorBillingIndexRoute
+  '/doctor/chambers/': typeof DoctorChambersIndexRoute
   '/doctor/consultations/': typeof DoctorConsultationsIndexRoute
   '/doctor/prescription-header/': typeof DoctorPrescriptionHeaderIndexRoute
   '/doctor/profile/': typeof DoctorProfileIndexRoute
@@ -250,6 +276,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/attendant'
     | '/doctor'
     | '/patient'
     | '/about'
@@ -258,6 +285,7 @@ export interface FileRouteTypes {
     | '/enter-otp'
     | '/sign-in'
     | '/p/$code'
+    | '/attendant/'
     | '/doctor/'
     | '/patient/'
     | '/doctor/consultations/$prescriptionId'
@@ -265,6 +293,7 @@ export interface FileRouteTypes {
     | '/patient/prescriptions/$prescriptionId'
     | '/patient/profile/edit'
     | '/doctor/billing'
+    | '/doctor/chambers'
     | '/doctor/consultations'
     | '/doctor/prescription-header'
     | '/doctor/profile'
@@ -282,6 +311,7 @@ export interface FileRouteTypes {
     | '/enter-otp'
     | '/sign-in'
     | '/p/$code'
+    | '/attendant'
     | '/doctor'
     | '/patient'
     | '/doctor/consultations/$prescriptionId'
@@ -289,6 +319,7 @@ export interface FileRouteTypes {
     | '/patient/prescriptions/$prescriptionId'
     | '/patient/profile/edit'
     | '/doctor/billing'
+    | '/doctor/chambers'
     | '/doctor/consultations'
     | '/doctor/prescription-header'
     | '/doctor/profile'
@@ -301,6 +332,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/(auth)'
+    | '/attendant'
     | '/doctor'
     | '/patient'
     | '/about'
@@ -309,6 +341,7 @@ export interface FileRouteTypes {
     | '/(auth)/enter-otp'
     | '/(auth)/sign-in'
     | '/p/$code'
+    | '/attendant/'
     | '/doctor/'
     | '/patient/'
     | '/doctor/consultations/$prescriptionId'
@@ -316,6 +349,7 @@ export interface FileRouteTypes {
     | '/patient/prescriptions/$prescriptionId'
     | '/patient/profile/edit'
     | '/doctor/billing/'
+    | '/doctor/chambers/'
     | '/doctor/consultations/'
     | '/doctor/prescription-header/'
     | '/doctor/profile/'
@@ -329,6 +363,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   authRouteRoute: typeof authRouteRouteWithChildren
+  AttendantRouteRoute: typeof AttendantRouteRouteWithChildren
   DoctorRouteRoute: typeof DoctorRouteRouteWithChildren
   PatientRouteRoute: typeof PatientRouteRouteWithChildren
   AboutRoute: typeof AboutRoute
@@ -374,6 +409,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DoctorRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/attendant': {
+      id: '/attendant'
+      path: '/attendant'
+      fullPath: '/attendant'
+      preLoaderRoute: typeof AttendantRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/(auth)': {
       id: '/(auth)'
       path: ''
@@ -401,6 +443,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/doctor/'
       preLoaderRoute: typeof DoctorIndexRouteImport
       parentRoute: typeof DoctorRouteRoute
+    }
+    '/attendant/': {
+      id: '/attendant/'
+      path: '/'
+      fullPath: '/attendant/'
+      preLoaderRoute: typeof AttendantIndexRouteImport
+      parentRoute: typeof AttendantRouteRoute
     }
     '/p/$code': {
       id: '/p/$code'
@@ -456,6 +505,13 @@ declare module '@tanstack/react-router' {
       path: '/consultations'
       fullPath: '/doctor/consultations'
       preLoaderRoute: typeof DoctorConsultationsIndexRouteImport
+      parentRoute: typeof DoctorRouteRoute
+    }
+    '/doctor/chambers/': {
+      id: '/doctor/chambers/'
+      path: '/chambers'
+      fullPath: '/doctor/chambers'
+      preLoaderRoute: typeof DoctorChambersIndexRouteImport
       parentRoute: typeof DoctorRouteRoute
     }
     '/doctor/billing/': {
@@ -531,11 +587,24 @@ const authRouteRouteWithChildren = authRouteRoute._addFileChildren(
   authRouteRouteChildren,
 )
 
+interface AttendantRouteRouteChildren {
+  AttendantIndexRoute: typeof AttendantIndexRoute
+}
+
+const AttendantRouteRouteChildren: AttendantRouteRouteChildren = {
+  AttendantIndexRoute: AttendantIndexRoute,
+}
+
+const AttendantRouteRouteWithChildren = AttendantRouteRoute._addFileChildren(
+  AttendantRouteRouteChildren,
+)
+
 interface DoctorRouteRouteChildren {
   DoctorIndexRoute: typeof DoctorIndexRoute
   DoctorConsultationsPrescriptionIdRoute: typeof DoctorConsultationsPrescriptionIdRoute
   DoctorPrescribeConsultationIdRoute: typeof DoctorPrescribeConsultationIdRoute
   DoctorBillingIndexRoute: typeof DoctorBillingIndexRoute
+  DoctorChambersIndexRoute: typeof DoctorChambersIndexRoute
   DoctorConsultationsIndexRoute: typeof DoctorConsultationsIndexRoute
   DoctorPrescriptionHeaderIndexRoute: typeof DoctorPrescriptionHeaderIndexRoute
   DoctorProfileIndexRoute: typeof DoctorProfileIndexRoute
@@ -551,6 +620,7 @@ const DoctorRouteRouteChildren: DoctorRouteRouteChildren = {
     DoctorConsultationsPrescriptionIdRoute,
   DoctorPrescribeConsultationIdRoute: DoctorPrescribeConsultationIdRoute,
   DoctorBillingIndexRoute: DoctorBillingIndexRoute,
+  DoctorChambersIndexRoute: DoctorChambersIndexRoute,
   DoctorConsultationsIndexRoute: DoctorConsultationsIndexRoute,
   DoctorPrescriptionHeaderIndexRoute: DoctorPrescriptionHeaderIndexRoute,
   DoctorProfileIndexRoute: DoctorProfileIndexRoute,
@@ -587,6 +657,7 @@ const PatientRouteRouteWithChildren = PatientRouteRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   authRouteRoute: authRouteRouteWithChildren,
+  AttendantRouteRoute: AttendantRouteRouteWithChildren,
   DoctorRouteRoute: DoctorRouteRouteWithChildren,
   PatientRouteRoute: PatientRouteRouteWithChildren,
   AboutRoute: AboutRoute,

@@ -5,6 +5,7 @@ import SubscriptionBlockedDialog from "@/components/dashboard/subscription/subsc
 import AppFooter from "@/components/shared/app-footer";
 import { useAuthStore } from "@/stores/auth-store";
 import { ensureMedicineIndex } from "@/lib/medicine-search/index-store";
+import { ensureInvestigationIndex } from "@/lib/investigation-search/index-store";
 import { useEffect } from "react";
 
 export const Route = createFileRoute('/doctor')({
@@ -25,12 +26,13 @@ function DashboardLayout() {
     }
   }, [isLoggedIn, role, navigate]);
 
-  // Warm the local medicine index as soon as a doctor lands in the dashboard, so
+  // Warm the local search indexes as soon as a doctor lands in the dashboard, so
   // search is instant by the time they open the prescription editor. Cheap when
-  // the cached snapshot is current (just a version check).
+  // the cached snapshots are current (just a version check).
   useEffect(() => {
     if (isLoggedIn && role === "clinician") {
       ensureMedicineIndex().catch(() => undefined);
+      ensureInvestigationIndex().catch(() => undefined);
     }
   }, [isLoggedIn, role]);
 
