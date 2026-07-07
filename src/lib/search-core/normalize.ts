@@ -1,5 +1,5 @@
-// Normalization is separator-insensitive and must stay identical to the backend
-// (olive-backend/app/services/medicine_search.py) so ranking matches on both sides.
+// Separator-insensitive normalization shared by every local search index. Kept
+// identical to the backend so a keyword ranks the same locally and on the server.
 // "napa extra", "napa-extra" and "napaextra" all collapse to the same key.
 
 const NON_ALPHANUMERIC = /[^a-z0-9]+/g;

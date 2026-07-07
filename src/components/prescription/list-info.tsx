@@ -13,6 +13,7 @@ import type {
 } from "@/types/prescription";
 import DebouncedSearchSelect from "./debounced-search-select";
 import api from "@/lib/axios";
+import { useInvestigationSearch } from "@/hooks/use-investigation-search";
 import SectionItem, { type SectionItemProps } from "./paper/section-item";
 
 interface ListInfoProps {
@@ -190,7 +191,12 @@ const EditingItem = ({ item, index, setIsEditing, onUpdate, onRemove, editingIte
     // DiagnosisType strictly has no notes in your definition
     const hasNotes = "notes" in localItem;
 
-    const fetchOptions = async (query: string) => {
+    // Investigation runs on the client-side local index (instant, offline); the other
+    // fields still search server-side.
+    const isInvestigation = fieldName === "investigation";
+    const { search: searchInvestigations, ready: investigationReady } = useInvestigationSearch();
+
+    const fetchFromServer = async (query: string) => {
         const res = await api.get<{ name: string }[]>(
             `${FETCH_OPTION_ENDPOINTS[fieldName]}?q=${query}`
         )
@@ -200,6 +206,8 @@ const EditingItem = ({ item, index, setIsEditing, onUpdate, onRemove, editingIte
             value: item.name,
         }))
     }
+
+    const fetchOptions = isInvestigation ? searchInvestigations : fetchFromServer;
 
     return (
         <div className="w-full space-y-4" onClick={(e) => e.stopPropagation()}>
@@ -221,7 +229,9 @@ const EditingItem = ({ item, index, setIsEditing, onUpdate, onRemove, editingIte
                             })
                         }}
                         fetchOptions={fetchOptions}
-                        queryKeyBase={`${fieldName}-search`}
+                        minLength={isInvestigation ? 1 : undefined}
+                        debounceTime={isInvestigation ? 120 : undefined}
+                        queryKeyBase={isInvestigation ? [`${fieldName}-search`, investigationReady] : `${fieldName}-search`}
                     />
                 </div>
 

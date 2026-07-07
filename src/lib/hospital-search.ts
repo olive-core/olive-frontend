@@ -1,8 +1,8 @@
 // Client-side hospital search using the same mechanism as the medicine search:
 // identical normalization and ranking ladder (exact -> first word -> prefix ->
 // word boundary -> substring -> fuzzy), over a full list fetched once.
-// See src/lib/medicine-search/rank.ts for the reference implementation.
-import { toKey, toNorm } from "@/lib/medicine-search/normalize";
+// See src/lib/search-core/rank.ts for the reference implementation.
+import { toKey, toNorm } from "@/lib/search-core/normalize";
 import type { Hospital } from "@/types/attendant-queue";
 
 const FUZZY_TIER = 5;
