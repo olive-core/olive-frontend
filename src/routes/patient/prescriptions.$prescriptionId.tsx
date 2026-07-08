@@ -125,7 +125,7 @@ function PrescriptionDetailPage() {
 
   return (
     <>
-      <div className="hidden print:block">
+      <div className="rx-print-mount" aria-hidden>
         <PrescriptionPrintView
           consultation={consultation}
           clinician={clinician}

@@ -1,5 +1,6 @@
 import { usePrescriptionStore } from "@/stores/prescription-store";
 import DoctorInfo from "./doctor-info";
+import PrescriptionActions from "./prescription-actions";
 import ListInfo from "./list-info";
 import PatientInfo from "./patient-info";
 import { MedicineContainer } from "./medicine-container";
@@ -86,13 +87,7 @@ export default function Prescription({ onGenerate, onCancel, hasBeenGenerated }:
 
     const prescriptionPaper = (
         <PrescriptionPaper
-            header={
-                <DoctorInfo
-                    onGenerate={onGenerate}
-                    onCancel={onCancel}
-                    hasBeenGenerated={hasBeenGenerated}
-                />
-            }
+            header={<DoctorInfo sessionId={consultationId} />}
             patientStrip={<PatientInfo sessionId={consultationId} />}
             vitalsBar={<VitalsBar vitals={vitals} onChange={setVitals} />}
             leftColumn={
@@ -146,20 +141,23 @@ export default function Prescription({ onGenerate, onCancel, hasBeenGenerated }:
                 </>
             }
             footer={
-                <Button
-                    onClick={() => confirmMutation.mutate()}
-                    isLoading={confirmMutation.isPending}
-                    className="px-8 font-bold shadow-md"
-                >
-                    Save &amp; Print
-                </Button>
+                <>
+                    <PrescriptionActions onGenerate={onGenerate} onCancel={onCancel} hasBeenGenerated={hasBeenGenerated} />
+                    <Button
+                        onClick={() => confirmMutation.mutate()}
+                        isLoading={confirmMutation.isPending}
+                        className="px-8 font-bold shadow-md"
+                    >
+                        Save &amp; Print
+                    </Button>
+                </>
             }
         />
     );
 
     return (
         <>
-            <div className="hidden print:block pb-8">
+            <div className="rx-print-mount" aria-hidden>
                 <PrescriptionView />
             </div>
 

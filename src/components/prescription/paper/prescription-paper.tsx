@@ -6,10 +6,13 @@ interface PrescriptionPaperProps {
     vitalsBar?:   ReactNode;
     leftColumn:   ReactNode;
     rightColumn:  ReactNode;
+    /** The printed prescription's own footer (other chambers + Olive mark). */
+    paperFooter?: ReactNode;
+    /** Sticky action bar (save & print buttons); never printed. */
     footer?:      ReactNode;
 }
 
-export default function PrescriptionPaper({ header, patientStrip, vitalsBar, leftColumn, rightColumn, footer }: PrescriptionPaperProps) {
+export default function PrescriptionPaper({ header, patientStrip, vitalsBar, leftColumn, rightColumn, paperFooter, footer }: PrescriptionPaperProps) {
     return (
         <div className="container rounded-xl border flex flex-col mt-4 mb-12 overflow-hidden">
             <div className="m-3 sm:m-4">
@@ -26,6 +29,8 @@ export default function PrescriptionPaper({ header, patientStrip, vitalsBar, lef
                         {rightColumn}
                     </div>
                 </div>
+
+                {paperFooter}
             </div>
 
             {footer && (
@@ -33,7 +38,7 @@ export default function PrescriptionPaper({ header, patientStrip, vitalsBar, lef
                     <span className="hidden text-xs text-slate-400 sm:block">
                         Review everything, then save &amp; print.
                     </span>
-                    {footer}
+                    <div className="flex flex-wrap items-center justify-end gap-3">{footer}</div>
                 </div>
             )}
         </div>

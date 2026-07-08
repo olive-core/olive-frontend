@@ -21,7 +21,10 @@ function scrollFieldBelowStickyPreview(anchor: HTMLElement): void {
     window.scrollTo({ top: Math.max(targetTop, 0), behavior: "smooth" });
 }
 
-export function focusControl(focusKey: string): void {
+// Scrolls to, focuses and flashes the control for a focus key. Assumes the control is
+// mounted — when controls live behind tabs/accordions, go through `focusControl`, which
+// lets the editor switch context first.
+export function focusField(focusKey: string): void {
     const input = document.getElementById(controlId(focusKey));
     if (!input) return;
 
@@ -32,6 +35,28 @@ export function focusControl(focusKey: string): void {
     const ringTarget = input.closest("[data-contact-row]") ?? input;
     ringTarget.classList.add("ring-2", "ring-emerald-400");
     window.setTimeout(() => ringTarget.classList.remove("ring-2", "ring-emerald-400"), 1200);
+}
+
+// The editor registers a resolver that knows which tab/accordion hosts each key; it
+// activates that context, then calls focusField once the control is mounted. Without a
+// resolver (or for keys it doesn't remap) we fall back to focusing directly.
+type FocusResolver = (focusKey: string) => void;
+
+let focusResolver: FocusResolver | null = null;
+
+export function registerFocusResolver(resolver: FocusResolver): () => void {
+    focusResolver = resolver;
+    return () => {
+        if (focusResolver === resolver) focusResolver = null;
+    };
+}
+
+export function focusControl(focusKey: string): void {
+    if (focusResolver) {
+        focusResolver(focusKey);
+        return;
+    }
+    focusField(focusKey);
 }
 
 export function focusKeyFromEvent(target: EventTarget | null): string | null {

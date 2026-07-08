@@ -11,6 +11,7 @@ import { useGraceGuard } from '@/hooks/use-grace-guard'
 import { useNavigate } from '@tanstack/react-router'
 import api from '@/lib/axios'
 import { useAuthStore } from '@/stores/auth-store'
+import { useDefaultChamberId } from '@/stores/active-chamber-store'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 const patientSchema = z.object({
@@ -41,6 +42,7 @@ export default function NewPatient({ phone, name, age, sex, userId }: NewPatient
 
     const navigate = useNavigate();
     const { userId: clinicianId } = useAuthStore();
+    const defaultChamberId = useDefaultChamberId(clinicianId);
     const showSubscriptionGate = useSubscriptionGate((s) => s.show);
     const { guardStart, dialog: graceDialog } = useGraceGuard();
     const queryClient = useQueryClient();
@@ -112,9 +114,12 @@ export default function NewPatient({ phone, name, age, sex, userId }: NewPatient
             // TODO: need testing for edit
             const patientId = await mutation.mutateAsync(values);
 
+            // Walk-ins default to the doctor's last-used chamber pad; the compose
+            // screen has a switcher if today's chamber is different.
             const sessionCreateResponse = await api.post("/session", {
                 patient_id: patientId,
                 clinician_id: clinicianId,
+                ...(defaultChamberId ? { chamber_id: defaultChamberId } : {}),
             });
 
             const sessionId = sessionCreateResponse.data.session_id;

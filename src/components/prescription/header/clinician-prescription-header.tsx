@@ -1,38 +1,46 @@
 import ClinicianHeader from "../paper/clinician-header";
+import MobilePrescriptionHeader from "./mobile-prescription-header";
 import PrescriptionHeader from "./prescription-header";
-import {
-    hasHeaderContent,
-    headerConfigFromApi,
-    type DoctorIdentity,
-    type HeaderConfigApi,
-} from "@/lib/header-config";
+import { hasHeaderContent, type ResolvedLetterhead } from "@/lib/header-config";
 
-interface ClinicianPrescriptionHeaderProps extends DoctorIdentity {
-    headerConfig?: HeaderConfigApi | null;
-}
-
-// The drop-in header for the real prescription views. Renders the customized letterhead when
-// the doctor has set one up; otherwise falls back to the plain name/qualification/BMDC header
-// so existing prescriptions and un-customized doctors look exactly as before.
-export default function ClinicianPrescriptionHeader({
-    firstName,
-    lastName,
-    qualification,
-    bmdcNo,
-    headerConfig,
-}: ClinicianPrescriptionHeaderProps) {
-    const config = headerConfigFromApi(headerConfig);
+// The drop-in header for the real prescription views, fed by resolveLetterhead (or the
+// compose screen's live resolution) so the chamber-resolved snapshot wins over the
+// clinician's live config. Doctors who never customized a letterhead fall back to the
+// plain name/qualification/BMDC header, exactly as before. With `responsive`, phones
+// get the collapsible identity-first header instead of the full letterhead; print
+// always renders the full letterhead (the print view has its own DOM).
+export function ResolvedPrescriptionHeader({
+    letterhead,
+    responsive = false,
+}: {
+    letterhead:  ResolvedLetterhead;
+    responsive?: boolean;
+}) {
+    const { identity, config } = letterhead;
 
     if (!hasHeaderContent(config)) {
         return (
             <ClinicianHeader
-                firstName={firstName}
-                lastName={lastName}
-                qualification={qualification}
-                bmdcNo={bmdcNo}
+                firstName={identity.firstName}
+                lastName={identity.lastName}
+                qualification={identity.qualification}
+                bmdcNo={identity.bmdcNo}
             />
         );
     }
 
-    return <PrescriptionHeader identity={{ firstName, lastName, qualification, bmdcNo }} config={config} />;
+    if (!responsive) {
+        return <PrescriptionHeader identity={identity} config={config} />;
+    }
+
+    return (
+        <>
+            <div className="hidden sm:block print:block">
+                <PrescriptionHeader identity={identity} config={config} />
+            </div>
+            <div className="sm:hidden print:hidden">
+                <MobilePrescriptionHeader identity={identity} config={config} />
+            </div>
+        </>
+    );
 }

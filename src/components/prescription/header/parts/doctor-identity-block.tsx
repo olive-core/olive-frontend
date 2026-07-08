@@ -22,6 +22,16 @@ export default function DoctorIdentityBlock({ identity, config, palette, align =
             >
                 {name || "Doctor name"}
             </h2>
+            {config.nameBn.trim() && (
+                <p
+                    data-focus="nameBn"
+                    lang="bn"
+                    className="text-[1.05rem] font-medium leading-tight"
+                    style={{ color: palette.nameColor }}
+                >
+                    {config.nameBn}
+                </p>
+            )}
             {identity.qualification && (
                 <p data-focus="qualification" className="whitespace-pre-line text-[13px] leading-snug text-slate-600">
                     {identity.qualification}

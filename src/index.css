@@ -175,10 +175,13 @@ html::-webkit-scrollbar {
 }
 
 @media print {
-  /* Matches react-to-print's default: full-bleed page so the prescription's own
-     padding provides the margin and the browser's URL/date headers are suppressed. */
+  /* The prescription sheet is laid out for A4 (PrintSheet reserves its height from it),
+     so pin the page box to A4 — `size: auto` let a Letter-default printer hand us a
+     shorter page and spill every prescription onto a second sheet. Full bleed: the
+     sheet's own padding provides the margin and the browser's URL/date headers are
+     suppressed. */
   @page {
-    size: auto;
+    size: A4 portrait;
     margin: 0;
   }
 
@@ -190,6 +193,21 @@ html::-webkit-scrollbar {
 
   main {
     padding-top: 0 !important;
+  }
+}
+
+/* Print-only prescription mounts: laid out but invisible on screen (height 0), so
+   PrintSheet can measure the letterhead/footer heights before the print dialog opens;
+   print reveals them. */
+.rx-print-mount {
+  height: 0;
+  overflow: hidden;
+}
+
+@media print {
+  .rx-print-mount {
+    height: auto;
+    overflow: visible;
   }
 }
 

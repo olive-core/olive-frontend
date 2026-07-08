@@ -12,6 +12,7 @@ export type Chamber = {
     room_no?: string | null;
     active_count?: number;
     is_active?: boolean;
+    pad_config?: import("@/lib/chamber-pad").PadConfigApi | null;
     created_at?: string;
     updated_at?: string;
 };

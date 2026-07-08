@@ -1,16 +1,16 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
 import toast from "react-hot-toast";
-import { PenIcon, PlusIcon, Trash2Icon } from "lucide-react";
+import { Link } from "@tanstack/react-router";
+import { Building2Icon, PenIcon, PlusIcon, Trash2Icon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import NumberGroupInputMemo from "@/components/dashboard/number-group-input";
 import { useAuthStore } from "@/stores/auth-store";
 import {
     addChamberAttendant,
-    createChamber,
     deleteChamber,
     listChamberAttendants,
     listChambers,
@@ -19,7 +19,10 @@ import {
 } from "@/lib/attendant-queue";
 import { chamberLabel, chamberRoom, type Chamber, type Hospital } from "@/types/attendant-queue";
 import { handleError } from "@/lib/utils";
+import { padFromApi, padHasContent, padToApi, type ChamberPad } from "@/lib/chamber-pad";
+import ChamberPadFields from "@/components/prescription/chamber-pad-fields";
 import HospitalSelect from "./hospital-select";
+import NewChamberForm from "./new-chamber-form";
 
 const emptyPhone = () => ["0", "1"].concat(Array(9).fill(""));
 const isPhoneComplete = (phone: string[]) =>
@@ -39,7 +42,8 @@ export default function ChambersManager() {
             <div>
                 <h1 className="text-xl font-medium mb-1">Chambers &amp; Attendants</h1>
                 <p className="text-sm text-muted-foreground">
-                    Add attendants to a chamber by phone so they can register your queue.
+                    Each chamber carries its own prescription pad (logo, address, serial, phone) and its
+                    attendants, added by phone so they can register your queue.
                 </p>
             </div>
 
@@ -62,75 +66,49 @@ export default function ChambersManager() {
     );
 }
 
-function NewChamberForm({
-    clinicianId,
-    onDone,
-    onCancel,
-}: {
-    clinicianId: string;
-    onDone: () => void;
-    onCancel?: () => void;
-}) {
+// The chamber's printed identity: name, logo, address/phone/hours — the exact same
+// pad_config the pad editor's Chambers tab edits, so either page always shows the
+// other's latest save.
+function ChamberPadSection({ chamber }: { chamber: Chamber }) {
     const queryClient = useQueryClient();
-    const [hospital, setHospital] = useState<Hospital | null>(null);
-    const [room, setRoom] = useState("");
-    const [duplicateName, setDuplicateName] = useState<string | null>(null);
+    const [pad, setPad] = useState<ChamberPad>(() => padFromApi(chamber.pad_config));
+    const [dirty, setDirty] = useState(false);
 
-    const createMutation = useMutation({
-        mutationFn: () =>
-            createChamber({ clinician_id: clinicianId, hospital_id: hospital!.hospital_id, room_no: room.trim() }),
+    useEffect(() => {
+        if (!dirty) setPad(padFromApi(chamber.pad_config));
+    }, [chamber.pad_config, dirty]);
+
+    const saveMutation = useMutation({
+        mutationFn: () => updateChamber(chamber.chamber_id, { pad_config: padToApi(pad) }),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["chambers"] });
-            toast.success("Chamber created");
-            onDone();
+            setDirty(false);
+            toast.success("Prescription pad saved");
         },
-        onError: (error) => {
-            if (axios.isAxiosError(error) && error.response?.status === 409) {
-                setDuplicateName(hospital?.name_en ?? "this hospital");
-                return;
-            }
-            handleError(error, "Could not create chamber");
-        },
+        onError: (error) => handleError(error, "Could not save prescription pad"),
     });
 
     return (
-        <div className="border rounded-xl p-4 space-y-3">
-            <p className="font-medium">New chamber</p>
-            <div>
-                <label className="text-sm text-muted-foreground">Hospital / chamber</label>
-                <HospitalSelect selected={hospital} onSelect={setHospital} />
-            </div>
-            <Input placeholder="Room / chamber no." value={room} onChange={(e) => setRoom(e.target.value)} />
-            <p className="text-xs text-muted-foreground -mt-1">
-                The room number is how your attendant tells your chambers apart when you share a hospital.
+        <div className="space-y-3">
+            <p className="text-xs text-muted-foreground">
+                What prints at the top of prescriptions written at this chamber.{" "}
+                <Link to="/doctor/prescription-header" className="text-emerald-600 underline-offset-2 hover:underline">
+                    Preview it in the pad designer
+                </Link>
+                .
             </p>
-            <div className="flex gap-2">
-                <Button
-                    onClick={() => createMutation.mutate()}
-                    isLoading={createMutation.isPending}
-                    disabled={!hospital || !room.trim()}
-                >
-                    Create chamber
-                </Button>
-                {onCancel && (
-                    <Button variant="ghost" onClick={onCancel}>
-                        Cancel
-                    </Button>
-                )}
-            </div>
-
-            <Dialog open={!!duplicateName} onOpenChange={(next) => !next && setDuplicateName(null)}>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>You already have a chamber here</DialogTitle>
-                    </DialogHeader>
-                    <p className="text-sm text-muted-foreground">
-                        You already have a chamber at {duplicateName}. A doctor keeps one chamber per hospital, so
-                        there's nothing more to add — you can manage it in the list.
-                    </p>
-                    <Button onClick={() => setDuplicateName(null)}>Got it</Button>
-                </DialogContent>
-            </Dialog>
+            <ChamberPadFields
+                chamberId={chamber.chamber_id}
+                chamberLabel={chamberLabel(chamber)}
+                pad={pad}
+                onChange={(patch) => {
+                    setPad((prev) => ({ ...prev, ...patch }));
+                    setDirty(true);
+                }}
+            />
+            <Button size="sm" onClick={() => saveMutation.mutate()} isLoading={saveMutation.isPending} disabled={!dirty}>
+                Save pad
+            </Button>
         </div>
     );
 }
@@ -196,6 +174,30 @@ function ChamberRow({ chamber }: { chamber: Chamber }) {
                     </Button>
                 </div>
             </div>
+
+            <Accordion type="single" collapsible className="rounded-lg border">
+                <AccordionItem value="pad" className="border-b-0 px-3">
+                    <AccordionTrigger className="py-2.5 hover:no-underline">
+                        <span className="flex items-start gap-2">
+                            <Building2Icon className="mt-0.5 size-4 shrink-0 text-emerald-600" />
+                            <span className="flex flex-col items-start gap-0.5">
+                                <span className="flex items-center gap-2 text-sm font-medium">
+                                    Prescription pad
+                                    {padHasContent(chamber.pad_config) && (
+                                        <span className="size-1.5 rounded-full bg-emerald-500" title="Configured" />
+                                    )}
+                                </span>
+                                <span className="text-xs font-normal text-muted-foreground">
+                                    Name, logo, address, phone &amp; hours printed at this chamber
+                                </span>
+                            </span>
+                        </span>
+                    </AccordionTrigger>
+                    <AccordionContent className="pb-3">
+                        <ChamberPadSection chamber={chamber} />
+                    </AccordionContent>
+                </AccordionItem>
+            </Accordion>
 
             <div>
                 <p className="text-sm text-muted-foreground mb-1">Attendants</p>

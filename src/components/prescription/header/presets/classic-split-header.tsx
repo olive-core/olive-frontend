@@ -5,32 +5,28 @@ import ChamberContactBlock from "../parts/chamber-contact-block";
 import HeaderAccentRule from "../parts/header-accent-rule";
 import HeaderLogo from "../parts/header-logo";
 import MedicalSymbol from "../parts/medical-symbol";
-import OliveBrandMark from "../parts/olive-brand-mark";
 
-// The familiar Bangladeshi letterhead: medical symbol + doctor on the left, both brand
-// marks (center logo above the Olive tag) in the middle, chamber/contact on the right
-// behind a hairline divider.
+// The familiar Bangladeshi letterhead: medical symbol + doctor on the left, the chamber
+// logo sitting right beside the chamber/contact block on the right (behind a hairline
+// divider), so the logo reads as part of the chamber's identity. The Olive brand mark
+// lives in the prescription footer, not here.
 export default function ClassicSplitHeader({ identity, config, palette }: HeaderRenderProps) {
     const logoUrl = config.showLogo ? config.logoUrl : null;
     const showContact = hasContactContent(config);
-    const showBrandColumn = Boolean(logoUrl) || config.showOliveBrand;
 
     return (
         <div>
-            <div className="flex items-stretch justify-between gap-4">
-                <div className="flex min-w-0 items-center gap-3">
+            <div className="flex items-stretch gap-4">
+                <div className="flex min-w-0 flex-1 items-center gap-3">
                     {config.showMedicalSymbol && (
                         <MedicalSymbol width={config.medicalSymbolWidth} height={config.medicalSymbolHeight} />
                     )}
                     <DoctorIdentityBlock identity={identity} config={config} palette={palette} />
                 </div>
 
-                {showBrandColumn && (
-                    <div className="flex shrink-0 flex-col items-center justify-center gap-1.5">
-                        {logoUrl && (
-                            <HeaderLogo url={logoUrl} isMono={palette.isMono} shape={config.logoShape} size={config.logoSize} />
-                        )}
-                        {config.showOliveBrand && <OliveBrandMark isMono={palette.isMono} />}
+                {logoUrl && (
+                    <div className="flex shrink-0 flex-col items-center justify-center">
+                        <HeaderLogo url={logoUrl} isMono={palette.isMono} shape={config.logoShape} size={config.logoSize} />
                     </div>
                 )}
 

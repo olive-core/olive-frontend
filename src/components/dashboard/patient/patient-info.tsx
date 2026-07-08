@@ -17,6 +17,7 @@ import { useSubscriptionGate } from "@/stores/subscription-gate-store";
 import { useGraceGuard } from "@/hooks/use-grace-guard";
 import PatientSkeleton from "./skeleton";
 import { useAuthStore } from "@/stores/auth-store";
+import { useDefaultChamberId } from "@/stores/active-chamber-store";
 import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 
@@ -41,6 +42,7 @@ export default function PatientInfo({ userId: patientId, setShowContent }: Patie
     });
 
     const { userId: clinicianId } = useAuthStore();
+    const defaultChamberId = useDefaultChamberId(clinicianId);
     const showSubscriptionGate = useSubscriptionGate((s) => s.show);
     const { guardStart, dialog: graceDialog } = useGraceGuard();
     const queryClient = useQueryClient();
@@ -55,9 +57,12 @@ export default function PatientInfo({ userId: patientId, setShowContent }: Patie
             //  create consultation -> navigate to consultation page
             setIsCreatingConsultation(true);
 
+            // Walk-ins default to the doctor's last-used chamber pad; the compose
+            // screen has a switcher if today's chamber is different.
             const sessionCreateResponse = await api.post("/session", {
                 patient_id: patientId,
                 clinician_id: clinicianId,
+                ...(defaultChamberId ? { chamber_id: defaultChamberId } : {}),
             });
 
             const sessionId = sessionCreateResponse.data.session_id;

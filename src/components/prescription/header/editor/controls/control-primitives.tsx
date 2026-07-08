@@ -34,17 +34,18 @@ export function ControlSection({ title, description, icon: Icon, action, childre
     );
 }
 
-export function LabeledInput({ id, label, value, onChange, placeholder }: {
+export function LabeledInput({ id, label, value, onChange, placeholder, lang }: {
     id?:          string;
     label:        string;
     value:        string;
     onChange:     (value: string) => void;
     placeholder?: string;
+    lang?:        string;
 }) {
     return (
         <label className="flex flex-col gap-1">
             <span className="text-xs font-medium text-slate-500">{label}</span>
-            <Input id={id} value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} />
+            <Input id={id} lang={lang} value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} />
         </label>
     );
 }

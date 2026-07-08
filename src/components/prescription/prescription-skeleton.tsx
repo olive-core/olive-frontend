@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { SparklesIcon, LockIcon } from "lucide-react";
 import DoctorInfo from "./doctor-info";
+import PrescriptionActions from "./prescription-actions";
 import PatientInfo from "./patient-info";
 import { usePrescriptionStore } from "@/stores/prescription-store";
 import { hasAnyVital } from "@/lib/vitals";
@@ -227,7 +228,7 @@ export default function PrescriptionSkeleton({
     <div className="container rounded-xl border flex flex-col mt-4 mb-12 overflow-hidden">
       <div className="m-4">
         {/* ── Real Doctor & Patient info ─────────────────────────── */}
-        <DoctorInfo onCancel={onCancel} />
+        <DoctorInfo sessionId={sessionId} />
         <PatientInfo sessionId={sessionId} />
 
         {/* ── Vitals (real once streamed, skeleton until then) ───── */}
@@ -330,9 +331,14 @@ export default function PrescriptionSkeleton({
         </div>
       </div>
 
-      {/* Footer skeleton */}
-      <div className="p-4 border-t flex justify-end bg-slate-50 rounded-b-xl">
-        <div className="h-9 w-28 rounded-lg bg-slate-200 animate-pulse" />
+      {/* Session actions — Cancel is real (generation is in flight); Save & Print's spot
+          is a shimmer placeholder so there's no layout jump once generation finishes. */}
+      <div className="sticky bottom-0 z-20 flex items-center justify-end gap-4 rounded-b-xl border-t bg-white/85 px-4 py-3 backdrop-blur sm:justify-between">
+        <span className="hidden text-xs text-slate-400 sm:block">Generating your draft...</span>
+        <div className="flex flex-wrap items-center justify-end gap-3">
+          <PrescriptionActions onCancel={onCancel} hasBeenGenerated={false} />
+          <div className="h-9 w-28 rounded-lg bg-slate-200 animate-pulse" />
+        </div>
       </div>
 
       <style>{`

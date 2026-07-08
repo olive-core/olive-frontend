@@ -5,15 +5,15 @@ import ChamberContactBlock from "../parts/chamber-contact-block";
 import HeaderAccentRule from "../parts/header-accent-rule";
 import HeaderLogo from "../parts/header-logo";
 import MedicalSymbol from "../parts/medical-symbol";
-import OliveBrandMark from "../parts/olive-brand-mark";
 
 // Modern letterhead: a slim vertical accent bar flanks the doctor block (printing as a
-// crisp black bar in mono), both brand marks sit centered in the middle, and the chamber
-// reads as a small-caps line above the right-aligned contact over a quiet hairline.
+// crisp black bar in mono), the chamber logo sits on the right next to the chamber
+// block — a small-caps line above the right-aligned contact over a quiet hairline. The
+// Olive brand mark lives in the prescription footer, not here.
 export default function AccentBarHeader({ identity, config, palette }: HeaderRenderProps) {
     const logoUrl = config.showLogo ? config.logoUrl : null;
     const showContact = hasContactContent(config);
-    const showBrandColumn = Boolean(logoUrl) || config.showOliveBrand;
+    const showBrandColumn = Boolean(logoUrl);
 
     return (
         <div>
@@ -28,11 +28,10 @@ export default function AccentBarHeader({ identity, config, palette }: HeaderRen
                 </div>
 
                 {showBrandColumn && (
-                    <div className="mx-auto flex shrink-0 flex-col items-center justify-center gap-1.5 px-3">
+                    <div className="ml-auto flex shrink-0 flex-col items-center justify-center px-3">
                         {logoUrl && (
                             <HeaderLogo url={logoUrl} isMono={palette.isMono} shape={config.logoShape} size={config.logoSize} />
                         )}
-                        {config.showOliveBrand && <OliveBrandMark isMono={palette.isMono} />}
                     </div>
                 )}
 

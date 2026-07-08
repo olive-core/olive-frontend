@@ -41,7 +41,7 @@ const MENU_ITEMS: MenuItemType[] = [
         href: "/doctor/rx-memory",
     },
     {
-        label: "Prescription Header",
+        label: "Prescription Pad",
         icon: <StampIcon />,
         href: "/doctor/prescription-header",
     },

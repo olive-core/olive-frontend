@@ -40,9 +40,9 @@ function PrescriptionHeaderPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clinician', userId] })
       queryClient.invalidateQueries({ queryKey: ['clinician-profile', userId] })
-      toast.success('Prescription header saved')
+      toast.success('Prescription pad saved')
     },
-    onError: (error) => handleError(error, 'Failed to save header'),
+    onError: (error) => handleError(error, 'Failed to save prescription pad'),
   })
 
   if (!userId || isLoading || !profile) {
@@ -51,7 +51,6 @@ function PrescriptionHeaderPage() {
 
   return (
     <HeaderEditor
-      userId={userId}
       initialProfile={profile}
       isSaving={saveMutation.isPending}
       onSave={(payload) => saveMutation.mutate(payload)}

@@ -1,5 +1,5 @@
 import { Reorder, useDragControls } from "motion/react";
-import { ContactIcon, GripVerticalIcon, PlusIcon, XIcon } from "lucide-react";
+import { GripVerticalIcon, PlusIcon, XIcon } from "lucide-react";
 
 import {
     CONTACT_LINE_KIND_META,
@@ -7,14 +7,24 @@ import {
     type ContactLine,
     type ContactLineKind,
 } from "@/lib/header-config";
-import { useHeaderConfigStore } from "@/stores/header-config-store";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import ContactLineIcon from "../../parts/contact-line-icon";
 import { controlId } from "../focus-field";
-import { ControlSection, LabeledInput } from "./control-primitives";
 
-function LineValueField({ line, update }: { line: ContactLine; update: (id: string, changes: Partial<ContactLine>) => void }) {
+// The reusable drag-reorderable contact-line list, shared by every chamber pad editor
+// (the header editor's Chambers tab and the profile's chamber page). Line ids are
+// globally unique (crypto.randomUUID), so `contact-<id>` focus keys stay unambiguous.
+
+export interface ContactLinesEditorProps {
+    lines:     ContactLine[];
+    onAdd:     (kind: ContactLineKind) => void;
+    onUpdate:  (id: string, changes: Partial<ContactLine>) => void;
+    onRemove:  (id: string) => void;
+    onReorder: (lines: ContactLine[]) => void;
+}
+
+function LineValueField({ line, update }: { line: ContactLine; update: ContactLinesEditorProps["onUpdate"] }) {
     const meta = CONTACT_LINE_KIND_META[line.kind];
 
     if (line.kind === "address") {
@@ -42,8 +52,8 @@ function LineValueField({ line, update }: { line: ContactLine; update: (id: stri
 
 interface ContactLineRowProps {
     line:   ContactLine;
-    update: (id: string, changes: Partial<ContactLine>) => void;
-    remove: (id: string) => void;
+    update: ContactLinesEditorProps["onUpdate"];
+    remove: ContactLinesEditorProps["onRemove"];
 }
 
 // A draggable contact row. Drag is bound to the grip handle only (dragListener=false) so the
@@ -93,45 +103,25 @@ function ContactLineRow({ line, update, remove }: ContactLineRowProps) {
     );
 }
 
-export default function ContactLinesControls() {
-    const chamberName = useHeaderConfigStore((state) => state.config.chamberName);
-    const contactLines = useHeaderConfigStore((state) => state.config.contactLines);
-    const patch = useHeaderConfigStore((state) => state.patch);
-    const addContactLine = useHeaderConfigStore((state) => state.addContactLine);
-    const updateContactLine = useHeaderConfigStore((state) => state.updateContactLine);
-    const removeContactLine = useHeaderConfigStore((state) => state.removeContactLine);
-    const reorderContactLines = useHeaderConfigStore((state) => state.reorderContactLines);
-
+export default function ContactLinesEditor({ lines, onAdd, onUpdate, onRemove, onReorder }: ContactLinesEditorProps) {
     return (
-        <ControlSection
-            title="Chamber & contact"
-            description="Drag the handles to reorder. Add any line you need."
-            icon={ContactIcon}
-        >
-            <LabeledInput
-                id={controlId("chamberName")}
-                label="Chamber / center name"
-                value={chamberName}
-                onChange={(value) => patch({ chamberName: value })}
-                placeholder="Green Life Medical Center"
-            />
-
-            {contactLines.length > 0 && (
-                <Reorder.Group as="div" axis="y" values={contactLines} onReorder={reorderContactLines} className="flex flex-col gap-1.5">
-                    {contactLines.map((line) => (
-                        <ContactLineRow key={line.id} line={line} update={updateContactLine} remove={removeContactLine} />
+        <>
+            {lines.length > 0 && (
+                <Reorder.Group as="div" axis="y" values={lines} onReorder={onReorder} className="flex flex-col gap-1.5">
+                    {lines.map((line) => (
+                        <ContactLineRow key={line.id} line={line} update={onUpdate} remove={onRemove} />
                     ))}
                 </Reorder.Group>
             )}
 
             <div className="flex flex-wrap gap-1.5">
                 {CONTACT_LINE_KINDS.map((kind: ContactLineKind) => (
-                    <Button key={kind} type="button" variant="outline" size="sm" onClick={() => addContactLine(kind)}>
+                    <Button key={kind} type="button" variant="outline" size="sm" onClick={() => onAdd(kind)}>
                         <PlusIcon className="size-3.5" />
                         {CONTACT_LINE_KIND_META[kind].label}
                     </Button>
                 ))}
             </div>
-        </ControlSection>
+        </>
     );
 }

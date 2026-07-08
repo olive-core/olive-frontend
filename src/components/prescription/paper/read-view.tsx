@@ -2,7 +2,8 @@ import type { ConsultationDetail } from "@/types/consultation";
 import type { PatientInfoType } from "@/types/patient";
 
 import PrescriptionPaper from "./prescription-paper";
-import ClinicianPrescriptionHeader from "../header/clinician-prescription-header";
+import { ResolvedPrescriptionHeader } from "../header/clinician-prescription-header";
+import PrescriptionFooter from "../footer/prescription-footer";
 import PatientStrip from "./patient-strip";
 import SectionList from "./section-list";
 import MedicineList from "./medicine-list";
@@ -10,7 +11,7 @@ import AdviceList from "./advice-list";
 import VitalsBar from "./vitals-bar";
 import FollowUpBlock from "./follow-up-block";
 import { vitalsFromOnExaminations } from "@/lib/vitals";
-import type { HeaderConfigApi } from "@/lib/header-config";
+import { resolveLetterhead, type HeaderConfigApi } from "@/lib/header-config";
 import {
     mapChiefComplaintsToSectionItems,
     mapDiagnosesToSectionItems,
@@ -38,16 +39,13 @@ export default function PrescriptionReadView({ consultation, clinician, patient 
     const vitals = vitalsFromOnExaminations(data.on_examinations);
     const followUp = { follow_up_days: data.follow_up_days ?? null, follow_up_notes: data.follow_up_notes ?? null };
 
+    const letterhead = resolveLetterhead(consultation, clinician);
+
     return (
         <PrescriptionPaper
-            header={
-                <ClinicianPrescriptionHeader
-                    firstName={clinician?.first_name ?? consultation.clinician_first_name}
-                    lastName={clinician?.last_name ?? consultation.clinician_last_name}
-                    qualification={clinician?.qualification}
-                    bmdcNo={clinician?.bmdc_no}
-                    headerConfig={clinician?.header_config}
-                />
+            header={<ResolvedPrescriptionHeader letterhead={letterhead} responsive />}
+            paperFooter={
+                <PrescriptionFooter footer={letterhead.footer} config={letterhead.config} collapsible className="mt-2" />
             }
             patientStrip={
                 <PatientStrip

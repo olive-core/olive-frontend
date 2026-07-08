@@ -15,6 +15,8 @@ import {
 import { applyOptimisticReorder } from "@/lib/queue-reorder";
 import { useQueueStream } from "@/hooks/use-queue-stream";
 import { chamberLabel, chamberRoom, type QueueEntry } from "@/types/attendant-queue";
+import { useActiveChamberStore, useLastChamberId } from "@/stores/active-chamber-store";
+import { useAuthStore } from "@/stores/auth-store";
 import { cn, handleError } from "@/lib/utils";
 
 interface DoctorQueuePanelProps {
@@ -34,18 +36,33 @@ interface DoctorQueuePanelProps {
 export default function DoctorQueuePanel({ onStateChange }: DoctorQueuePanelProps) {
     const navigate = useNavigate();
     const queryClient = useQueryClient();
+    const { userId } = useAuthStore();
+    const setLastChamber = useActiveChamberStore((state) => state.setLastChamber);
 
     const chambersQuery = useQuery({ queryKey: ["chambers"], queryFn: listChambers });
     const chambers = chambersQuery.data ?? [];
+    const storedChamberId = useLastChamberId(userId ?? undefined);
     const [chamberId, setChamberId] = useState<string | null>(null);
     const [starting, setStarting] = useState(false);
     const [pendingRemove, setPendingRemove] = useState<QueueEntry | null>(null);
 
-    // Default to the chamber that actually has patients today, so a doctor with
-    // several chambers lands on the busy one. They can still switch manually.
-    const preferredChamberId = (chambers.find((c) => (c.active_count ?? 0) > 0) ?? chambers[0])?.chamber_id;
+    // The panel's selection is the doctor's "I'm sitting here now" — remember it so
+    // walk-in sessions started from this page print on the same chamber's pad without
+    // the doctor picking again on the prescription screen.
+    const selectChamber = (nextChamberId: string) => {
+        setChamberId(nextChamberId);
+        if (userId) setLastChamber(userId, nextChamberId);
+    };
+
+    // Default to the chamber that actually has patients today, then the remembered
+    // one, so a doctor with several chambers lands on the right pad without a click.
+    const preferredChamberId = (
+        chambers.find((c) => (c.active_count ?? 0) > 0)
+        ?? chambers.find((c) => c.chamber_id === storedChamberId)
+        ?? chambers[0]
+    )?.chamber_id;
     useEffect(() => {
-        if (!chamberId && preferredChamberId) setChamberId(preferredChamberId);
+        if (!chamberId && preferredChamberId) selectChamber(preferredChamberId);
     }, [preferredChamberId, chamberId]);
 
     const queueQuery = useQuery({
@@ -98,6 +115,8 @@ export default function DoctorQueuePanel({ onStateChange }: DoctorQueuePanelProp
         setStarting(true);
         try {
             const { session_id } = await startConsultation(entry.queue_entry_id);
+            // Remember the chamber so later walk-ins default to today's pad.
+            if (userId) setLastChamber(userId, entry.chamber_id);
             navigate({
                 to: "/doctor/consultation/$userId/$consultationId",
                 params: { userId: entry.patient_id, consultationId: session_id },
@@ -122,7 +141,7 @@ export default function DoctorQueuePanel({ onStateChange }: DoctorQueuePanelProp
                         return (
                             <button
                                 key={chamber.chamber_id}
-                                onClick={() => setChamberId(chamber.chamber_id)}
+                                onClick={() => selectChamber(chamber.chamber_id)}
                                 className={cn(
                                     "flex-1 min-w-0 rounded-lg px-3 py-2 cursor-pointer transition-colors",
                                     selected ? "bg-white shadow-sm" : "hover:bg-white/60",

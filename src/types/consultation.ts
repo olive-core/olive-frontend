@@ -1,4 +1,5 @@
 import type { ChiefComplaintItem, DiagnosisItem, RxItem } from "./patient";
+import type { HeaderConfigApi, RenderConfigApi } from "@/lib/header-config";
 import type { VitalsType } from "./prescription";
 
 export type PatientSex = 'male' | 'female' | 'non_binary';
@@ -55,4 +56,11 @@ export type ConsultationDetail = {
     prescription_data?:    ConsultationPrescriptionData | null;
     created_at:            string;
     updated_at:            string;
+    // Letterhead: render_config is the snapshot frozen at save time; the
+    // clinician_* fields back-fill legacy prescriptions saved before snapshots.
+    chamber_id?:              string | null;
+    render_config?:           RenderConfigApi | null;
+    qualification?:           string | null;
+    bmdc_no?:                 string | null;
+    clinician_header_config?: HeaderConfigApi | null;
 }

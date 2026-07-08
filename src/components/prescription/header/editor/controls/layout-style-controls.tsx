@@ -3,12 +3,16 @@ import { PaletteIcon } from "lucide-react";
 import { useHeaderConfigStore } from "@/stores/header-config-store";
 import {
     ACCENT_SWATCHES,
+    clampLogoSize,
     clampSymbolSize,
     HEADER_PRESETS,
+    MAX_LOGO_SIZE,
     MAX_SYMBOL_SIZE,
+    MIN_LOGO_SIZE,
     MIN_SYMBOL_SIZE,
     type HeaderColorMode,
     type HeaderPreset,
+    type LogoShape,
 } from "@/lib/header-config";
 import { cn } from "@/lib/utils";
 import { ColorPicker } from "@/components/ui/color-picker";
@@ -44,6 +48,36 @@ const COLOR_MODE_OPTIONS: { value: HeaderColorMode; label: string }[] = [
     { value: "mono",  label: "Black & white" },
 ];
 
+const LOGO_SHAPES: { value: LogoShape; label: string; frameClass: string }[] = [
+    { value: "circle",  label: "Circle",  frameClass: "rounded-full" },
+    { value: "rounded", label: "Rounded", frameClass: "rounded-md" },
+    { value: "square",  label: "Square",  frameClass: "rounded-none" },
+];
+
+function LogoShapePicker({ value, onChange }: { value: LogoShape; onChange: (shape: LogoShape) => void }) {
+    return (
+        <div className="flex items-center gap-1.5">
+            {LOGO_SHAPES.map((shape) => (
+                <button
+                    key={shape.value}
+                    type="button"
+                    title={shape.label}
+                    aria-label={`${shape.label} logo frame`}
+                    onClick={() => onChange(shape.value)}
+                    className={cn(
+                        "flex size-9 items-center justify-center rounded-lg border transition-colors",
+                        value === shape.value
+                            ? "border-emerald-500 bg-emerald-50/60 ring-1 ring-emerald-500/30"
+                            : "border-slate-200 hover:border-slate-300",
+                    )}
+                >
+                    <span className={cn("size-5 border-[1.5px] border-slate-400", shape.frameClass)} />
+                </button>
+            ))}
+        </div>
+    );
+}
+
 function ThumbLine({ width, muted }: { width: string; muted?: boolean }) {
     return <div className={cn("h-1 rounded-full", muted ? "bg-slate-200" : "bg-slate-300")} style={{ width }} />;
 }
@@ -66,20 +100,6 @@ function PresetThumb({ preset, accent }: { preset: HeaderPreset; accent: string 
                     </div>
                 </div>
                 <div className="h-[3px] rounded-full" style={{ backgroundColor: accent }} />
-            </div>
-        );
-    }
-
-    if (preset === "elegant-center") {
-        return (
-            <div className="flex h-11 flex-col items-center justify-center gap-1">
-                <ThumbLine width="50%" />
-                <ThumbLine width="70%" muted />
-                <ThumbLine width="60%" muted />
-                <div className="mt-auto w-full">
-                    <div className="h-[3px] w-full rounded-full" style={{ backgroundColor: accent }} />
-                    <div className="mt-[2px] h-px w-full bg-slate-300" />
-                </div>
             </div>
         );
     }
@@ -108,7 +128,7 @@ export default function LayoutStyleControls() {
 
     return (
         <ControlSection title="Layout & style" description="Pick a layout and the brand look." icon={PaletteIcon}>
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 {HEADER_PRESETS.map((preset) => (
                     <button
                         key={preset.value}
@@ -151,10 +171,35 @@ export default function LayoutStyleControls() {
             </div>
 
             <ToggleRow
-                label="Show center logo"
+                label="Show chamber logo"
+                description="Each chamber's logo is uploaded on its pad, in the Chambers tab."
                 checked={config.showLogo}
                 onChange={(showLogo) => patch({ showLogo })}
             />
+            {config.showLogo && (
+                <div className="flex flex-wrap items-center gap-x-6 gap-y-2 pl-4">
+                    <div className="flex flex-col gap-1.5">
+                        <span className="text-xs font-medium text-slate-500">Frame</span>
+                        <LogoShapePicker value={config.logoShape} onChange={(logoShape) => patch({ logoShape })} />
+                    </div>
+                    <label className="flex min-w-44 flex-1 flex-col gap-1.5">
+                        <span className="text-xs font-medium text-slate-500">Size</span>
+                        <span className="flex items-center gap-3">
+                            <input
+                                id={controlId("logo")}
+                                type="range"
+                                min={MIN_LOGO_SIZE}
+                                max={MAX_LOGO_SIZE}
+                                step={2}
+                                value={config.logoSize}
+                                onChange={(event) => patch({ logoSize: clampLogoSize(Number(event.target.value)) })}
+                                className="h-1.5 flex-1 cursor-pointer appearance-none rounded-full bg-slate-200 accent-emerald-500"
+                            />
+                            <span className="w-12 text-right text-xs tabular-nums text-slate-400">{config.logoSize}px</span>
+                        </span>
+                    </label>
+                </div>
+            )}
             <ToggleRow
                 label="Show medical symbol"
                 description="The caduceus mark beside the doctor's name."
@@ -176,13 +221,6 @@ export default function LayoutStyleControls() {
                     />
                 </div>
             )}
-            <ToggleRow
-                id={controlId("oliveBrand")}
-                label="Show Olive brand mark"
-                description="A subtle 'Powered by Olive' tag."
-                checked={config.showOliveBrand}
-                onChange={(showOliveBrand) => patch({ showOliveBrand })}
-            />
         </ControlSection>
     );
 }
