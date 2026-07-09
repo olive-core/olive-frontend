@@ -25,7 +25,12 @@ function AuthLayout() {
       <div className="mb-8">
         <NavbarLogo />
       </div>
-      <Outlet />
+      {/* Concrete-width wrapper: the auth pages use w-full internally, which needs a
+          real parent width to resolve against — without this the phone/OTP cells
+          collapse to their intrinsic (near-zero) size and squeeze together. */}
+      <div className="w-full max-w-xl px-4">
+        <Outlet />
+      </div>
       <Link to="/">
         <Button variant="link" className="mt-8">
           Back to Home

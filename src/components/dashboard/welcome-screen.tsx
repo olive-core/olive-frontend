@@ -74,7 +74,7 @@ export default function WelcomeScreen() {
                                 ? `Dr. ${clinician.firstName}, enter your patient's phone number`
                                 : "Enter your patient's phone number"}
                         </p>
-                        <div className="w-full max-w-md">
+                        <div className="w-full max-w-md px-4 sm:px-0">
                             <NumberGroupInputMemo
                                 onComplete={handlePhoneComplete}
                                 numberInput={phoneNumber}
