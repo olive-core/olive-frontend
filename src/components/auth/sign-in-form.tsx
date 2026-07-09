@@ -22,7 +22,7 @@ const ROLE_TO_PANEL: Record<'patient' | 'clinician' | 'attendant', ShowPanel> = 
 export default function SignInForm() {
 
     const navigate = useNavigate();
-    const { sendOtp, doesUserExist } = useAuthStore();
+    const { sendOtp, checkUser } = useAuthStore();
 
     const [isLoading, setIsLoading] = useState(false);
     const [isChecking, setIsChecking] = useState(false);
@@ -39,7 +39,7 @@ export default function SignInForm() {
             try {
                 setIsChecking(true);
                 setShowPanel(null);
-                const { exists } = await doesUserExist("+88".concat(phoneNumber.join("").trim()));
+                const { exists } = await checkUser("+88".concat(phoneNumber.join("").trim()));
 
                 setDoesExist(exists ? 1 : 0);
 
@@ -56,7 +56,7 @@ export default function SignInForm() {
                 setIsChecking(false);
             }
         }
-    }, [doesUserExist, phoneNumber])
+    }, [checkUser, phoneNumber])
 
     async function handleSubmit() {
         setIsLoading(true);
@@ -98,9 +98,14 @@ export default function SignInForm() {
             )}
 
             {showPanel === "otp" && (
-                <Button ref={submitButtonRef} onClick={handleSubmit} isLoading={isLoading}>
-                    Send OTP
-                </Button>
+                <div className="flex flex-col gap-3">
+                    <Button ref={submitButtonRef} onClick={handleSubmit} isLoading={isLoading}>
+                        Send OTP
+                    </Button>
+                    <Button variant="ghost" onClick={() => setShowPanel("role-select")}>
+                        Add another account
+                    </Button>
+                </div>
             )}
 
             {showPanel === "error" && (

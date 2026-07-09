@@ -11,14 +11,14 @@ export const Route = createFileRoute('/(auth)')({
 function AuthLayout() {
 
   const navigate = useNavigate();
-  const { isLoggedIn, role } = useAuthStore();
+  const { isLoggedIn, activeView } = useAuthStore();
 
   useEffect(() => {
     if (isLoggedIn) {
-      const target = role === "patient" ? "/patient" : role === "attendant" ? "/attendant" : "/doctor";
+      const target = activeView === "patient" ? "/patient" : activeView === "attendant" ? "/attendant" : "/doctor";
       navigate({ to: target });
     }
-  }, [isLoggedIn, role, navigate]);
+  }, [isLoggedIn, activeView, navigate]);
 
   return (
     <div className="flex flex-col items-center justify-center w-full min-h-svh">

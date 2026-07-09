@@ -15,26 +15,28 @@ export const Route = createFileRoute('/doctor')({
 
 function DashboardLayout() {
 
-  const { isLoggedIn, role } = useAuthStore();
+  const { isLoggedIn, activeView } = useAuthStore();
   const navigate = useNavigate()
 
   useEffect(() => {
     if (!isLoggedIn) {
       navigate({ to: "/sign-in" });
-    } else if (role === "patient") {
+    } else if (activeView === "patient") {
       navigate({ to: "/patient" });
+    } else if (activeView === "attendant") {
+      navigate({ to: "/attendant" });
     }
-  }, [isLoggedIn, role, navigate]);
+  }, [isLoggedIn, activeView, navigate]);
 
   // Warm the local search indexes as soon as a doctor lands in the dashboard, so
   // search is instant by the time they open the prescription editor. Cheap when
   // the cached snapshots are current (just a version check).
   useEffect(() => {
-    if (isLoggedIn && role === "clinician") {
+    if (isLoggedIn && activeView === "doctor") {
       ensureMedicineIndex().catch(() => undefined);
       ensureInvestigationIndex().catch(() => undefined);
     }
-  }, [isLoggedIn, role]);
+  }, [isLoggedIn, activeView]);
 
   return (
     <div className="">

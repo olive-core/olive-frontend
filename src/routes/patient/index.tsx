@@ -19,25 +19,27 @@ export const Route = createFileRoute('/patient/')({
 
 const PAGE_SIZE = 10
 
-function useAllPatientPrescriptions(userId: string | undefined) {
+function useAllPatientPrescriptions(patientId: string | undefined) {
   return useQuery<PatientPrescriptionListItem[]>({
-    queryKey: ['patient-prescriptions', userId],
+    queryKey: ['patient-prescriptions', patientId],
     queryFn:  async () => {
-      const response = await api.get(`/prescription/patient/${userId}`)
+      const response = await api.get(`/prescription/patient/${patientId}`)
       return response.data
     },
-    enabled: !!userId,
+    enabled: !!patientId,
   })
 }
 
 function PatientPrescriptionsPage() {
-  const userId = useAuthStore((state) => state.userId)
+  const patients = useAuthStore((state) => state.accounts.patients)
+  const activePatientId = useAuthStore((state) => state.activePatientId)
+  const setActivePatientId = useAuthStore((state) => state.setActivePatientId)
 
   const [page, setPage]             = useState(1)
   const [searchTerm, setSearchTerm] = useState('')
   const [period, setPeriod]         = useState<Period>('all')
 
-  const { data, isLoading, isError } = useAllPatientPrescriptions(userId)
+  const { data, isLoading, isError } = useAllPatientPrescriptions(activePatientId)
 
   const allPrescriptions = data ?? []
   const filtered         = applyFilters(allPrescriptions, searchTerm, period)
@@ -63,6 +65,26 @@ function PatientPrescriptionsPage() {
           Every prescription from your past consultations.
         </p>
       </header>
+
+      {patients.length > 1 && (
+        <div className="mb-6 flex flex-wrap gap-2">
+          {patients.map((patient) => (
+            <button
+              key={patient.patientId}
+              type="button"
+              onClick={() => setActivePatientId(patient.patientId)}
+              className={
+                patient.patientId === activePatientId
+                  ? "rounded-full border-2 border-primary bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary"
+                  : "rounded-full border-2 border-slate-200 bg-white px-4 py-1.5 text-sm text-slate-600 hover:border-slate-300"
+              }
+            >
+              {patient.firstName} {patient.lastName}
+              {patient.isSelf && " (You)"}
+            </button>
+          ))}
+        </div>
+      )}
 
       <PrescriptionsFilters
         searchTerm={searchTerm}

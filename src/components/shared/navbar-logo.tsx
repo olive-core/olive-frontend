@@ -3,11 +3,11 @@ import { Link } from "@tanstack/react-router";
 
 export default function NavbarLogo() {
 
-    const { isLoggedIn, role } = useAuthStore();
+    const { isLoggedIn, activeView } = useAuthStore();
 
     function getHref() {
         if (!isLoggedIn) return "/";
-        return role === "patient" ? "/patient" : "/doctor";
+        return activeView === "patient" ? "/patient" : activeView === "attendant" ? "/attendant" : "/doctor";
     }
 
     return (

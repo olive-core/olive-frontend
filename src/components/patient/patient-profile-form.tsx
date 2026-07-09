@@ -47,7 +47,7 @@ interface PatientProfileFormProps {
 export function PatientProfileForm({ patientData }: PatientProfileFormProps) {
 
     const [isLoading, setIsLoading] = useState(false)
-    const userId = useAuthStore((state) => state.userId)
+    const activePatientId = useAuthStore((state) => state.activePatientId)
     const navigate = useNavigate()
     const queryClient = useQueryClient()
 
@@ -64,13 +64,13 @@ export function PatientProfileForm({ patientData }: PatientProfileFormProps) {
     async function onSubmit(data: z.infer<typeof formSchema>) {
         try {
             setIsLoading(true)
-            await api.put(`/patient/${userId}`, {
+            await api.put(`/patient/${activePatientId}`, {
                 first_name:    data.firstName,
                 last_name:     data.lastName,
                 date_of_birth: data.dateOfBirth,
                 sex:           data.sex,
             })
-            await queryClient.invalidateQueries({ queryKey: ["patient", userId] })
+            await queryClient.invalidateQueries({ queryKey: ["patient", activePatientId] })
             toast.success("Profile updated successfully")
             navigate({ to: "/patient/profile" })
         } catch (error) {

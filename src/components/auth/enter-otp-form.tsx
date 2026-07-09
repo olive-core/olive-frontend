@@ -13,9 +13,9 @@ const RESEND_OTP_TIME = 30; // seconds
 export default function EnterOtpForm() {
 
     const navigate = useNavigate();
-    const { verifyOtp, phoneNumber, sendOtp, createClinicianProfile, createPatientProfile, createAttendantProfile, role } = useAuthStore();
+    const { verifyOtp, phoneNumber, sendOtp, createClinicianProfile, createPatientProfile, createAttendantProfile } = useAuthStore();
 
-    const { exists, role_intent } = useSearch({ from: '/(auth)/enter-otp' });
+    const { role_intent } = useSearch({ from: '/(auth)/enter-otp' });
 
     const [isLoading, setIsLoading] = useState(false);
 
@@ -52,21 +52,22 @@ export default function EnterOtpForm() {
         e.preventDefault();
         setIsLoading(true);
         try {
-            if (exists === 0) {
-                if (role_intent === 'patient') {
-                    await createPatientProfile(phoneNumber, otp.join("").trim());
-                    navigate({ to: "/patient" });
-                } else if (role_intent === 'attendant') {
-                    await createAttendantProfile(phoneNumber, otp.join("").trim());
-                    navigate({ to: "/attendant" });
-                } else {
-                    await createClinicianProfile(phoneNumber, otp.join("").trim());
-                    navigate({ to: "/doctor/profile" });
-                }
+            // A chosen role_intent means "create this account" — which also lets an
+            // existing phone add a new account type. No intent means a plain sign-in.
+            if (role_intent === 'patient') {
+                await createPatientProfile(phoneNumber, otp.join("").trim());
+                navigate({ to: "/patient" });
+            } else if (role_intent === 'attendant') {
+                await createAttendantProfile(phoneNumber, otp.join("").trim());
+                navigate({ to: "/attendant" });
+            } else if (role_intent === 'clinician') {
+                await createClinicianProfile(phoneNumber, otp.join("").trim());
+                navigate({ to: "/doctor/profile" });
             } else {
                 await verifyOtp(phoneNumber, otp.join("").trim());
                 toast.success("OTP verified successfully!");
-                const target = role === "patient" ? "/patient" : role === "attendant" ? "/attendant" : "/doctor";
+                const view = useAuthStore.getState().activeView;
+                const target = view === "patient" ? "/patient" : view === "attendant" ? "/attendant" : "/doctor";
                 navigate({ to: target });
             }
 

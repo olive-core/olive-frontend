@@ -24,10 +24,11 @@ import { useNavigate } from "@tanstack/react-router";
 
 interface PatientInfoProps {
     userId: string;
+    phone?: string;
     setShowContent: React.Dispatch<React.SetStateAction<ShowContentStatus>>;
 }
 
-export default function PatientInfo({ userId: patientId, setShowContent }: PatientInfoProps) {
+export default function PatientInfo({ userId: patientId, phone, setShowContent }: PatientInfoProps) {
 
     const [isCreatingConsultation, setIsCreatingConsultation] = useState(false);
     const navigate = useNavigate();
@@ -63,6 +64,7 @@ export default function PatientInfo({ userId: patientId, setShowContent }: Patie
                 patient_id: patientId,
                 clinician_id: clinicianId,
                 ...(defaultChamberId ? { chamber_id: defaultChamberId } : {}),
+                ...(phone ? { contact_phone: `+88${phone}` } : {}),
             });
 
             const sessionId = sessionCreateResponse.data.session_id;

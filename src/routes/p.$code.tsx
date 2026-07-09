@@ -10,6 +10,7 @@ type PortalAccessResponse = {
     expires_in: number;
     user: { id: string };
     prescription_id: string;
+    patient_id: string | null;
 };
 
 export const Route = createFileRoute("/p/$code")({
@@ -34,7 +35,8 @@ function PrescriptionLinkRedeem() {
                     accessToken: response.data.access_token,
                     refreshToken: response.data.refresh_token,
                     userId: response.data.user.id,
-                    role: "patient",
+                    activeView: "patient",
+                    activePatientId: response.data.patient_id ?? undefined,
                 });
 
                 navigate({

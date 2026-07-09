@@ -24,15 +24,15 @@ function FormSkeleton() {
 }
 
 function PatientProfileEditPage() {
-  const userId = useAuthStore((state) => state.userId)
+  const activePatientId = useAuthStore((state) => state.activePatientId)
 
   const { data: patient, isLoading } = useQuery<PatientInfoType>({
-    queryKey: ['patient', userId],
+    queryKey: ['patient', activePatientId],
     queryFn:  async () => {
-      const response = await api.get(`/patient/${userId}`)
+      const response = await api.get(`/patient/${activePatientId}`)
       return response.data
     },
-    enabled: !!userId,
+    enabled: !!activePatientId,
   })
 
   return (

@@ -2,12 +2,12 @@
 import { useCallback, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import PatientInfo from "./patient/patient-info";
-import api from "@/lib/axios";
-import axios from "axios";
 import { cn, handleError } from "@/lib/utils";
+import { lookupByPhone } from "@/lib/patient";
 import NumberGroupInputMemo from "./number-group-input";
 import PatientSkeleton from "./patient/skeleton";
 import NewPatient from "./patient/new-patient";
+import PatientPicker from "@/components/shared/patient-picker";
 import type { ShowContentStatus } from "@/types/patient";
 import { useAuthStore } from "@/stores/auth-store";
 import DoctorQueuePanel from "./queue/doctor-queue-panel";
@@ -33,18 +33,15 @@ export default function WelcomeScreen() {
 
         try {
             setShowContent({ status: "LOADING" });
-            const response = await api.post("/patient/by-phone", { phone: "+88" + phoneNumber.join("").trim() });
-            setShowContent({ status: "PATIENT_INFO", userId: response.data.user_id });
-        } catch (error) {
-            if (axios.isAxiosError(error)) {
-                if (error.response) {
-                    if (error.response.status === 404) {
-                        setShowContent({ status: "PATIENT_CREATE", initialValues: { name: "", age: "", sex: "male" } });
-                        return;
-                    }
-                }
+            const found = await lookupByPhone("+88" + phoneNumber.join("").trim());
+            if (found.length === 0) {
+                setShowContent({ status: "PATIENT_CREATE", initialValues: { name: "", age: "", sex: "male" } });
+            } else if (found.length === 1) {
+                setShowContent({ status: "PATIENT_INFO", userId: found[0].patient_id });
+            } else {
+                setShowContent({ status: "PATIENT_PICK", candidates: found });
             }
-
+        } catch (error) {
             setShowContent({ status: "ERROR", message: "An error occurred while fetching patient data." });
             handleError(error, "An error occurred while fetching patient data.");
             return;
@@ -102,7 +99,17 @@ export default function WelcomeScreen() {
                                     return (
                                         <PatientInfo
                                             userId={showContent.userId}
+                                            phone={phoneNumber.join("").trim()}
                                             setShowContent={setShowContent}
+                                        />
+                                    );
+
+                                case "PATIENT_PICK":
+                                    return (
+                                        <PatientPicker
+                                            candidates={showContent.candidates}
+                                            onSelect={(patient) => setShowContent({ status: "PATIENT_INFO", userId: patient.patient_id })}
+                                            onNew={() => setShowContent({ status: "PATIENT_CREATE", initialValues: { name: "", age: "", sex: "male" } })}
                                         />
                                     );
 

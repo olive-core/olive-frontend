@@ -4,6 +4,7 @@ import api from '@/lib/axios'
 import { useAuthStore } from '@/stores/auth-store'
 import type { PatientInfoType } from '@/types/patient'
 import { PatientProfileCard } from '@/components/patient/patient-profile-card'
+import NumbersManager from '@/components/patient/numbers-manager'
 import { Card, CardContent } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 
@@ -31,15 +32,15 @@ function ProfileSkeleton() {
 }
 
 function PatientProfilePage() {
-  const { userId, phoneNumber } = useAuthStore()
+  const { activePatientId, phoneNumber } = useAuthStore()
 
   const { data: patient, isLoading } = useQuery<PatientInfoType>({
-    queryKey: ['patient', userId],
+    queryKey: ['patient', activePatientId],
     queryFn:  async () => {
-      const response = await api.get(`/patient/${userId}`)
+      const response = await api.get(`/patient/${activePatientId}`)
       return response.data
     },
-    enabled: !!userId,
+    enabled: !!activePatientId,
   })
 
   return (
@@ -49,7 +50,10 @@ function PatientProfilePage() {
       {isLoading || !patient ? (
         <ProfileSkeleton />
       ) : (
-        <PatientProfileCard patient={patient} phone={phoneNumber} />
+        <>
+          <PatientProfileCard patient={patient} phone={phoneNumber} />
+          {activePatientId && <NumbersManager patientId={activePatientId} />}
+        </>
       )}
     </div>
   )

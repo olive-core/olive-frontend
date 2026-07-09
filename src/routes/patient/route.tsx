@@ -10,16 +10,16 @@ export const Route = createFileRoute('/patient')({
 
 function PatientLayout() {
 
-  const { isLoggedIn, role } = useAuthStore();
+  const { isLoggedIn, activeView } = useAuthStore();
   const navigate = useNavigate()
 
   useEffect(() => {
     if (!isLoggedIn) {
       navigate({ to: "/sign-in" });
-    } else if (role !== "patient") {
-      navigate({ to: "/doctor" });
+    } else if (activeView && activeView !== "patient") {
+      navigate({ to: activeView === "attendant" ? "/attendant" : "/doctor" });
     }
-  }, [isLoggedIn, role, navigate]);
+  }, [isLoggedIn, activeView, navigate]);
 
   return (
     <div className="">

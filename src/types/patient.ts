@@ -1,10 +1,8 @@
-export type PatientByPhoneResponse = {
-    user_id: string;
-}
+import type { PatientSummary } from "@/lib/patient";
 
 export type PatientInfoType = {
     date_of_birth: string;
-    user_id: string;
+    patient_id: string;
     first_name: string;
     last_name: string;
     sex?: 'male' | 'female' | 'non_binary';
@@ -17,9 +15,12 @@ export type PatientUpdatePayload = {
     sex?: 'male' | 'female' | 'non_binary';
 }
 
+// `userId` on PATIENT_INFO/PATIENT_CREATE is the route-facing patient identifier
+// (a patient_id) — the name is kept only to match the existing route param.
 export type ShowContentStatus =
     | { status: "NOTHING" }
     | { status: "PATIENT_INFO", userId: string }
+    | { status: "PATIENT_PICK", candidates: PatientSummary[] }
     | { status: "PATIENT_CREATE", initialValues: { name?: string, age?: string, sex?: 'male' | 'female' | 'non_binary' }, userId?: string }
     | { status: "LOADING" }
     | { status: "ERROR", message: string }

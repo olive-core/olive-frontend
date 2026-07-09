@@ -8,16 +8,16 @@ export const Route = createFileRoute("/attendant")({
 });
 
 function AttendantLayout() {
-    const { isLoggedIn, role } = useAuthStore();
+    const { isLoggedIn, activeView } = useAuthStore();
     const navigate = useNavigate();
 
     useEffect(() => {
         if (!isLoggedIn) {
             navigate({ to: "/sign-in" });
-        } else if (role && role !== "attendant") {
-            navigate({ to: role === "patient" ? "/patient" : "/doctor" });
+        } else if (activeView && activeView !== "attendant") {
+            navigate({ to: activeView === "patient" ? "/patient" : "/doctor" });
         }
-    }, [isLoggedIn, role, navigate]);
+    }, [isLoggedIn, activeView, navigate]);
 
     return (
         <main className="w-full min-h-svh pt-16 flex flex-col">

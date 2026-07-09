@@ -2,21 +2,22 @@ import { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
+import { useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
-import { CalendarIcon, MarsIcon, PenIcon, TransgenderIcon, VenusIcon } from "lucide-react";
+import { CalendarIcon, MarsIcon, TransgenderIcon, VenusIcon } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Item, ItemContent, ItemDescription, ItemTitle } from "@/components/ui/item";
 import MultiStepForm from "@/components/shared/multi-step-form";
 import NumberGroupInputMemo from "@/components/dashboard/number-group-input";
+import PatientPicker from "@/components/shared/patient-picker";
+import DuplicateGate from "@/components/shared/duplicate-gate";
 import type { MultiStepFormSteps } from "@/types/shared";
-import api from "@/lib/axios";
 import { addToQueue } from "@/lib/attendant-queue";
+import { createPatient, findSimilar, getPatient, linkPhone, lookupByPhone, type PatientSummary, type SimilarMatch } from "@/lib/patient";
 import { getAgeFromDOB, handleError } from "@/lib/utils";
 
-type Step = "phone" | "form" | "confirm";
+type Step = "phone" | "pick" | "form" | "gate" | "confirm";
 
 interface AddPatientDialogProps {
     chamberId: string;
@@ -51,11 +52,22 @@ const FORM_STEPS: MultiStepFormSteps<PatientFormValues> = [
     },
 ];
 
+function splitName(name: string) {
+    const [firstName, ...rest] = name.trim().split(" ");
+    return { firstName, lastName: rest.join(" ") };
+}
+
+function dobFromAge(age: string) {
+    return new Date(new Date().getFullYear() - parseInt(age, 10), 0, 1).toISOString().split("T")[0];
+}
+
 export default function AddPatientDialog({ chamberId, open, onClose }: AddPatientDialogProps) {
     const queryClient = useQueryClient();
     const [phone, setPhone] = useState<string[]>(emptyPhone);
     const [step, setStep] = useState<Step>("phone");
-    const [patientId, setPatientId] = useState<string | null>(null);
+    const [candidates, setCandidates] = useState<PatientSummary[]>([]);
+    const [matches, setMatches] = useState<SimilarMatch[]>([]);
+    const [selected, setSelected] = useState<PatientSummary | null>(null);
     const [busy, setBusy] = useState(false);
 
     const form = useForm<PatientFormValues>({
@@ -63,31 +75,36 @@ export default function AddPatientDialog({ chamberId, open, onClose }: AddPatien
         defaultValues: { name: "", age: "", sex: "male" },
     });
 
+    const fullPhone = () => "+88" + phone.join("").trim();
+
     const close = () => {
         onClose();
         setTimeout(() => {
             setPhone(emptyPhone());
             setStep("phone");
-            setPatientId(null);
+            setCandidates([]);
+            setMatches([]);
+            setSelected(null);
             form.reset({ name: "", age: "", sex: "male" });
         }, 200);
     };
-
-    const fullPhone = () => "+88" + phone.join("").trim();
 
     const lookup = useCallback(async (isComplete: boolean) => {
         if (!isComplete) return;
         setBusy(true);
         try {
-            const { data } = await api.post("/patient/by-phone", { phone: "+88" + phone.join("").trim() });
-            setPatientId(data.user_id);
-            setStep("confirm");
-        } catch (error) {
-            if (axios.isAxiosError(error) && error.response?.status === 404) {
+            const found = await lookupByPhone("+88" + phone.join("").trim());
+            if (found.length === 0) {
                 form.reset({ name: "", age: "", sex: "male" });
                 setStep("form");
-                return;
+            } else if (found.length === 1) {
+                setSelected(found[0]);
+                setStep("confirm");
+            } else {
+                setCandidates(found);
+                setStep("pick");
             }
+        } catch (error) {
             handleError(error, "Could not look up this number");
         } finally {
             setBusy(false);
@@ -95,33 +112,54 @@ export default function AddPatientDialog({ chamberId, open, onClose }: AddPatien
     }, [phone, form]);
 
     const savePatient = async (values: PatientFormValues) => {
-        const [firstName, ...rest] = values.name.trim().split(" ");
-        const dob = new Date(new Date().getFullYear() - parseInt(values.age, 10), 0, 1);
-        const payload = {
-            first_name: firstName,
-            last_name: rest.join(" "),
-            date_of_birth: dob.toISOString().split("T")[0],
-            sex: values.sex,
-        };
+        const { firstName, lastName } = splitName(values.name);
+        setBusy(true);
         try {
-            if (patientId) {
-                await api.put(`/patient/${patientId}`, payload);
-            } else {
-                const { data } = await api.post("/patient/by-clinician", { ...payload, phone: fullPhone() });
-                setPatientId(data.user_id);
+            const similar = await findSimilar({ first_name: firstName, last_name: lastName, sex: values.sex, age: parseInt(values.age, 10) });
+            if (similar.length > 0) {
+                setMatches(similar);
+                setStep("gate");
+                return;
             }
-            queryClient.invalidateQueries({ queryKey: ["patient-info", patientId] });
-            setStep("confirm");
+            await createAndSelect(values);
         } catch (error) {
             handleError(error, "Could not save this patient");
+        } finally {
+            setBusy(false);
+        }
+    };
+
+    const createAndSelect = async (values: PatientFormValues) => {
+        const { firstName, lastName } = splitName(values.name);
+        const patient = await createPatient({
+            first_name: firstName,
+            last_name: lastName,
+            date_of_birth: dobFromAge(values.age),
+            sex: values.sex,
+            phone: fullPhone(),
+        });
+        setSelected(patient);
+        setStep("confirm");
+    };
+
+    const linkExisting = async (patientId: string) => {
+        setBusy(true);
+        try {
+            await linkPhone(patientId, fullPhone());
+            setSelected(await getPatient(patientId));
+            setStep("confirm");
+        } catch (error) {
+            handleError(error, "Could not link this number");
+        } finally {
+            setBusy(false);
         }
     };
 
     const enqueue = async () => {
-        if (!patientId) return;
+        if (!selected) return;
         setBusy(true);
         try {
-            await addToQueue(chamberId, patientId);
+            await addToQueue(chamberId, selected.patient_id, fullPhone());
             queryClient.invalidateQueries({ queryKey: ["queue", chamberId] });
             toast.success("Added to queue");
             close();
@@ -147,52 +185,65 @@ export default function AddPatientDialog({ chamberId, open, onClose }: AddPatien
                     </>
                 )}
 
-                {step === "form" && (
-                    <MultiStepForm
-                        title={patientId ? "Edit patient" : "New patient"}
-                        steps={FORM_STEPS}
-                        onSubmit={savePatient}
-                        form={form}
-                    />
+                {step === "pick" && (
+                    <>
+                        <DialogHeader>
+                            <DialogTitle>Who's the patient?</DialogTitle>
+                        </DialogHeader>
+                        <PatientPicker
+                            candidates={candidates}
+                            title=""
+                            onSelect={(patient) => { setSelected(patient); setStep("confirm"); }}
+                            onNew={() => { form.reset({ name: "", age: "", sex: "male" }); setStep("form"); }}
+                        />
+                    </>
                 )}
 
-                {step === "confirm" && patientId && (
-                    <ConfirmCard
-                        patientId={patientId}
-                        busy={busy}
-                        onEdit={(values) => {
-                            form.reset(values);
-                            setStep("form");
-                        }}
-                        onAdd={enqueue}
-                    />
+                {step === "form" && (
+                    <MultiStepForm title="New patient" steps={FORM_STEPS} onSubmit={savePatient} form={form} />
+                )}
+
+                {step === "gate" && (
+                    <>
+                        <DialogHeader>
+                            <DialogTitle>Possible match</DialogTitle>
+                        </DialogHeader>
+                        <DuplicateGate
+                            matches={matches}
+                            busy={busy}
+                            onLink={linkExisting}
+                            onCreateNew={() => savePatientCreateOnly()}
+                        />
+                    </>
+                )}
+
+                {step === "confirm" && selected && (
+                    <ConfirmCard patient={selected} busy={busy} onAdd={enqueue} />
                 )}
             </DialogContent>
         </Dialog>
     );
+
+    async function savePatientCreateOnly() {
+        setBusy(true);
+        try {
+            await createAndSelect(form.getValues());
+        } catch (error) {
+            handleError(error, "Could not save this patient");
+        } finally {
+            setBusy(false);
+        }
+    }
 }
 
 interface ConfirmCardProps {
-    patientId: string;
+    patient: PatientSummary;
     busy: boolean;
-    onEdit: (values: PatientFormValues) => void;
     onAdd: () => void;
 }
 
-function ConfirmCard({ patientId, busy, onEdit, onAdd }: ConfirmCardProps) {
-    const { data: patient, isLoading } = useQuery({
-        queryKey: ["patient-info", patientId],
-        queryFn: () => api.get(`/patient/${patientId}`).then((r) => r.data),
-    });
-
-    if (isLoading || !patient) {
-        return <p className="text-sm text-muted-foreground text-center py-8">Loading…</p>;
-    }
-
-    const age = getAgeFromDOB(patient.date_of_birth).years;
-    const normalizedSex: PatientFormValues["sex"] =
-        patient.sex === "female" ? "female" : patient.sex === "non_binary" ? "non_binary" : "male";
-
+function ConfirmCard({ patient, busy, onAdd }: ConfirmCardProps) {
+    const age = patient.date_of_birth ? getAgeFromDOB(patient.date_of_birth).years : null;
     return (
         <>
             <DialogHeader>
@@ -205,24 +256,11 @@ function ConfirmCard({ patientId, busy, onEdit, onAdd }: ConfirmCardProps) {
                     </ItemTitle>
                     <ItemDescription>
                         <span className="flex items-center gap-1 text-slate-600 text-sm">
-                            <CalendarIcon className="size-4" /> {age}y
-                            <span className="capitalize ml-2">· {patient.sex}</span>
+                            <CalendarIcon className="size-4" /> {age != null ? `${age}y` : ""}
+                            {patient.sex && <span className="capitalize ml-2">· {patient.sex}</span>}
                         </span>
                     </ItemDescription>
                 </ItemContent>
-                <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() =>
-                        onEdit({
-                            name: `${patient.first_name} ${patient.last_name}`.trim(),
-                            age: String(age),
-                            sex: normalizedSex,
-                        })
-                    }
-                >
-                    <PenIcon className="size-3" /> Edit
-                </Button>
                 <Button className="w-full" onClick={onAdd} isLoading={busy}>
                     Add to Queue
                 </Button>

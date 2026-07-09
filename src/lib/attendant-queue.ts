@@ -57,8 +57,12 @@ export const declineInvite = (chamberId: string) =>
 export const listQueue = (chamberId: string) =>
     api.get<QueueEntry[]>(`/queue/chamber/${chamberId}`).then((r) => r.data);
 
-export const addToQueue = (chamberId: string, patientId: string) =>
-    api.post<QueueEntry>("/queue", { chamber_id: chamberId, patient_id: patientId }).then((r) => r.data);
+export const addToQueue = (chamberId: string, patientId: string, contactPhone?: string) =>
+    api.post<QueueEntry>("/queue", {
+        chamber_id: chamberId,
+        patient_id: patientId,
+        ...(contactPhone ? { contact_phone: contactPhone } : {}),
+    }).then((r) => r.data);
 
 export const reorderQueue = (chamberId: string, orderedIds: string[]) =>
     api.put<QueueEntry[]>("/queue/reorder", { chamber_id: chamberId, ordered_ids: orderedIds }).then((r) => r.data);
