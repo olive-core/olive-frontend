@@ -23,10 +23,9 @@ type DoctorFormValues = z.infer<typeof doctorSchema>
 
 interface CreateDoctorFormProps {
     phoneNumber: string[],
-    doesExist: 0 | 1,
 }
 
-export default function CreateDoctorForm({ phoneNumber, doesExist }: CreateDoctorFormProps) {
+export default function CreateDoctorForm({ phoneNumber }: CreateDoctorFormProps) {
 
     const navigate = useNavigate();
 
@@ -56,7 +55,7 @@ export default function CreateDoctorForm({ phoneNumber, doesExist }: CreateDocto
         try {
             await sendOtp("+88".concat(phoneNumber.join("").trim()));
             toast.success("OTP sent successfully!");
-            navigate({ to: "/enter-otp", search: { exists: doesExist, role_intent: 'clinician' } });
+            navigate({ to: "/enter-otp", search: { exists: 0, role_intent: 'clinician' } });
         } catch (error) {
             handleError(error, "Failed to send OTP. Please try again.");
         }

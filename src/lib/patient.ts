@@ -7,7 +7,6 @@ export type PatientSummary = {
     last_name?: string;
     date_of_birth?: string;
     sex?: "male" | "female" | "non_binary";
-    is_self?: boolean;
 };
 
 // A possible duplicate surfaced by the gate, with its numbers masked.
@@ -23,8 +22,14 @@ export type SimilarMatch = {
 export type PatientNumber = {
     user_id: string;
     phone?: string;
-    is_self: boolean;
 };
+
+// Age in whole years -> an approximate date of birth (Jan 1 of the birth year).
+// Age is collected instead of an exact date to keep entry fast at the desk and sign-up.
+// Built as a plain string, not via Date/toISOString, which would shift to the previous
+// day (and year) once serialized to UTC from a +6 timezone.
+export const dobFromAge = (age: string) =>
+    `${new Date().getFullYear() - parseInt(age, 10)}-01-01`;
 
 export const lookupByPhone = (phone: string) =>
     api.post<PatientSummary[]>("/patient/lookup-by-phone", { phone }).then((r) => r.data);
@@ -52,8 +57,8 @@ export const myProfiles = () =>
 export const listNumbers = (patientId: string) =>
     api.get<PatientNumber[]>(`/patient/${patientId}/numbers`).then((r) => r.data);
 
-export const addNumber = (patientId: string, phone: string) =>
-    api.post(`/patient/${patientId}/numbers`, { phone });
+export const addNumber = (patientId: string, phone: string, otp: string) =>
+    api.post(`/patient/${patientId}/numbers`, { phone, otp });
 
 export const removeNumber = (patientId: string, targetUserId: string) =>
     api.delete(`/patient/${patientId}/numbers/${targetUserId}`);

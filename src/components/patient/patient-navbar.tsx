@@ -8,6 +8,7 @@ import {
     TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useAuthStore } from "@/stores/auth-store";
+import PatientProfileSwitcher from "./patient-profile-switcher";
 
 export default function PatientNavbar() {
 
@@ -15,7 +16,9 @@ export default function PatientNavbar() {
 
     return (
         <NavbarContainer className="border-none print:hidden">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 sm:gap-4">
+
+                <PatientProfileSwitcher />
 
                 <Tooltip>
                     <TooltipTrigger asChild>

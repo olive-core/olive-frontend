@@ -15,7 +15,7 @@ export default function EnterOtpForm() {
     const navigate = useNavigate();
     const { verifyOtp, phoneNumber, sendOtp, createClinicianProfile, createPatientProfile, createAttendantProfile } = useAuthStore();
 
-    const { role_intent } = useSearch({ from: '/(auth)/enter-otp' });
+    const { role_intent, view, patient_id } = useSearch({ from: '/(auth)/enter-otp' });
 
     const [isLoading, setIsLoading] = useState(false);
 
@@ -64,15 +64,17 @@ export default function EnterOtpForm() {
                 await createClinicianProfile(phoneNumber, otp.join("").trim());
                 navigate({ to: "/doctor/profile" });
             } else {
-                await verifyOtp(phoneNumber, otp.join("").trim());
+                await verifyOtp(phoneNumber, otp.join("").trim(), view, patient_id);
                 toast.success("OTP verified successfully!");
-                const view = useAuthStore.getState().activeView;
-                const target = view === "patient" ? "/patient" : view === "attendant" ? "/attendant" : "/doctor";
+                const activeView = useAuthStore.getState().activeView;
+                const target = activeView === "patient" ? "/patient" : activeView === "attendant" ? "/attendant" : "/doctor";
                 navigate({ to: target });
             }
 
         } catch (error) {
-            handleError(error, "Failed to verify OTP. Please try again.");
+            // The backend's own message (invalid OTP, role conflict, etc.) is surfaced by
+            // handleError; this fallback only covers truly unknown failures.
+            handleError(error, "Something went wrong. Please try again.");
         } finally {
             setIsLoading(false);
         }

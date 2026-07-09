@@ -10,11 +10,13 @@ import NewPatient from "./patient/new-patient";
 import PatientPicker from "@/components/shared/patient-picker";
 import type { ShowContentStatus } from "@/types/patient";
 import { useAuthStore } from "@/stores/auth-store";
+import { useStartConsultation } from "@/hooks/use-start-consultation";
 import DoctorQueuePanel from "./queue/doctor-queue-panel";
 
 export default function WelcomeScreen() {
 
     const clinician = useAuthStore(state => state.clinician);
+    const { start, startingId, graceDialog } = useStartConsultation();
 
     const [showContent, setShowContent] = useState<ShowContentStatus>({ status: "NOTHING" });
     const [phoneNumber, setPhoneNumber] = useState<string[]>(["0", "1"].concat(Array(9).fill("")));
@@ -34,10 +36,10 @@ export default function WelcomeScreen() {
         try {
             setShowContent({ status: "LOADING" });
             const found = await lookupByPhone("+88" + phoneNumber.join("").trim());
+            // A phone may already reach one or more patients; always show the picker so
+            // "New patient" stays available even when there's exactly one.
             if (found.length === 0) {
                 setShowContent({ status: "PATIENT_CREATE", initialValues: { name: "", age: "", sex: "male" } });
-            } else if (found.length === 1) {
-                setShowContent({ status: "PATIENT_INFO", userId: found[0].patient_id });
             } else {
                 setShowContent({ status: "PATIENT_PICK", candidates: found });
             }
@@ -108,6 +110,9 @@ export default function WelcomeScreen() {
                                     return (
                                         <PatientPicker
                                             candidates={showContent.candidates}
+                                            actionLabel="Start Consultation"
+                                            onAction={(patient) => start(patient.patient_id, "+88" + phoneNumber.join("").trim())}
+                                            busyPatientId={startingId}
                                             onSelect={(patient) => setShowContent({ status: "PATIENT_INFO", userId: patient.patient_id })}
                                             onNew={() => setShowContent({ status: "PATIENT_CREATE", initialValues: { name: "", age: "", sex: "male" } })}
                                         />
@@ -142,6 +147,7 @@ export default function WelcomeScreen() {
                 )}
             </AnimatePresence>
 
+            {graceDialog}
         </div>
     )
 }

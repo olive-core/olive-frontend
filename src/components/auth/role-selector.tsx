@@ -1,8 +1,12 @@
 import { UserIcon, StethoscopeIcon, ClipboardListIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import type { Accounts } from "@/types/auth";
 
 interface RoleSelectorProps {
     onSelect: (role: 'patient' | 'clinician' | 'attendant') => void;
+    // When adding to an existing number, the accounts it already holds. A number can
+    // hold only one desk role, so a doctor/attendant number can only add patients.
+    accounts?: Accounts;
 }
 
 const ROLES = [
@@ -29,11 +33,20 @@ const ROLES = [
     },
 ];
 
-export default function RoleSelector({ onSelect }: RoleSelectorProps) {
+export default function RoleSelector({ onSelect, accounts }: RoleSelectorProps) {
+    const existingDeskRole = accounts?.isClinician ? "doctor" : accounts?.isAttendant ? "attendant" : null;
+    const roles = existingDeskRole ? ROLES.filter((role) => role.value === "patient") : ROLES;
+
     return (
         <div className="flex flex-col gap-3 w-full">
-            <p className="text-sm text-slate-500 text-center">How would you like to register?</p>
-            {ROLES.map((role) => (
+            {existingDeskRole ? (
+                <p className="text-sm text-slate-500 text-center">
+                    This number already has a {existingDeskRole} account, so you can only add patient profiles.
+                </p>
+            ) : (
+                <p className="text-sm text-slate-500 text-center">How would you like to register?</p>
+            )}
+            {roles.map((role) => (
                 <button
                     key={role.value}
                     type="button"

@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { CalendarIcon, MarsIcon, MicIcon, PenIcon, TransgenderIcon, VenusIcon } from "lucide-react";
 import {
     Item,
@@ -11,15 +11,9 @@ import {
 import { format } from "date-fns";
 import api from "@/lib/axios";
 import type { PatientInfoType, ShowContentStatus } from "@/types/patient";
-import { getAgeFromDOB, handleError } from "@/lib/utils";
-import { getSubscriptionStatusFromError, isSubscriptionBlocked } from "@/lib/subscription";
-import { useSubscriptionGate } from "@/stores/subscription-gate-store";
-import { useGraceGuard } from "@/hooks/use-grace-guard";
+import { getAgeFromDOB } from "@/lib/utils";
+import { useStartConsultation } from "@/hooks/use-start-consultation";
 import PatientSkeleton from "./skeleton";
-import { useAuthStore } from "@/stores/auth-store";
-import { useDefaultChamberId } from "@/stores/active-chamber-store";
-import { useState } from "react";
-import { useNavigate } from "@tanstack/react-router";
 
 
 interface PatientInfoProps {
@@ -30,9 +24,7 @@ interface PatientInfoProps {
 
 export default function PatientInfo({ userId: patientId, phone, setShowContent }: PatientInfoProps) {
 
-    const [isCreatingConsultation, setIsCreatingConsultation] = useState(false);
-    const navigate = useNavigate();
-
+    const { start, startingId, graceDialog } = useStartConsultation();
 
     const { data: patientData, isLoading, isError } = useQuery({
         queryKey: ['patient-info', patientId],
@@ -42,50 +34,11 @@ export default function PatientInfo({ userId: patientId, phone, setShowContent }
         }
     });
 
-    const { userId: clinicianId } = useAuthStore();
-    const defaultChamberId = useDefaultChamberId(clinicianId);
-    const showSubscriptionGate = useSubscriptionGate((s) => s.show);
-    const { guardStart, dialog: graceDialog } = useGraceGuard();
-    const queryClient = useQueryClient();
-
-
     if (isLoading) {
         return <PatientSkeleton />;
     }
 
-    const createConsultation = async () => {
-        try {
-            //  create consultation -> navigate to consultation page
-            setIsCreatingConsultation(true);
-
-            // Walk-ins default to the doctor's last-used chamber pad; the compose
-            // screen has a switcher if today's chamber is different.
-            const sessionCreateResponse = await api.post("/session", {
-                patient_id: patientId,
-                clinician_id: clinicianId,
-                ...(defaultChamberId ? { chamber_id: defaultChamberId } : {}),
-                ...(phone ? { contact_phone: `+88${phone}` } : {}),
-            });
-
-            const sessionId = sessionCreateResponse.data.session_id;
-
-            // The session is the unit we meter, so refresh the cached status the navbar reads.
-            queryClient.invalidateQueries({ queryKey: ["subscription"] });
-
-            navigate({ to: "/doctor/consultation/$userId/$consultationId", params: { userId: patientId, consultationId: sessionId } });
-
-        } catch (error) {
-            if (isSubscriptionBlocked(error)) {
-                showSubscriptionGate(getSubscriptionStatusFromError(error));
-                return;
-            }
-            handleError(error, "An error occurred while creating the patient.");
-        } finally {
-            setIsCreatingConsultation(false);
-        }
-    }
-
-    const handleStartConsultation = () => guardStart(createConsultation);
+    const handleStartConsultation = () => start(patientId, phone ? `+88${phone}` : undefined);
 
     if (isError || !patientData) {
         return <div className="py-4 px-6 bg-rose-100 text-rose-500 rounded-lg border-rose-300 border-2">Error loading patient info.</div>;
@@ -146,7 +99,7 @@ export default function PatientInfo({ userId: patientId, phone, setShowContent }
                     </Button>
                 </ItemActions>
 
-                <Button className="w-full" onClick={handleStartConsultation} isLoading={isCreatingConsultation} disabled={isCreatingConsultation}>
+                <Button className="w-full" onClick={handleStartConsultation} isLoading={startingId === patientId} disabled={startingId === patientId}>
                     <MicIcon className="inline-block size-4" />
                     Start Consultation
                 </Button>

@@ -32,11 +32,12 @@ function mapAccounts(api?: ApiCheckUserResponse["accounts"]): Accounts {
     return {
         isClinician: api?.is_clinician ?? false,
         isAttendant: api?.is_attendant ?? false,
+        clinicianName: api?.clinician_name ?? null,
+        attendantName: api?.attendant_name ?? null,
         patients: (api?.patients ?? []).map((p) => ({
             patientId: p.patient_id,
             firstName: p.first_name,
             lastName: p.last_name,
-            isSelf: p.is_self,
         })),
     };
 }
@@ -50,8 +51,7 @@ function defaultView(accounts: Accounts): ActiveView {
 }
 
 function firstPatientId(accounts: Accounts): string | undefined {
-    const self = accounts.patients.find((p) => p.isSelf);
-    return (self ?? accounts.patients[0])?.patientId;
+    return accounts.patients[0]?.patientId;
 }
 
 interface AuthStoreType {
@@ -70,7 +70,7 @@ interface AuthStoreType {
     logout: () => void;
     checkUser: (phone: string) => Promise<CheckUserResponse>;
     sendOtp: (phone: string) => Promise<void>;
-    verifyOtp: (phone: string, otp: string, view?: ActiveView) => Promise<void>;
+    verifyOtp: (phone: string, otp: string, view?: ActiveView, patientId?: string) => Promise<void>;
 
     setActiveView: (view: ActiveView) => void;
     setActivePatientId: (patientId?: string) => void;
@@ -112,7 +112,7 @@ export const useAuthStore = create<AuthStoreType>()(
                 set({ phoneNumber: phone, userId: res.data?.user_id });
             },
 
-            verifyOtp: async (phone: string, otp: string, view?: ActiveView) => {
+            verifyOtp: async (phone: string, otp: string, view?: ActiveView, patientId?: string) => {
                 const response = await api.post<VerifyOtpResponse>(`/auth/verify-otp`, { phone, otp });
                 const accounts = get().accounts;
                 const activeView = view ?? defaultView(accounts);
@@ -122,7 +122,7 @@ export const useAuthStore = create<AuthStoreType>()(
                     refreshToken: response.data.refresh_token,
                     userId: response.data.user.id,
                     activeView,
-                    activePatientId: activeView === "patient" ? firstPatientId(accounts) : undefined,
+                    activePatientId: activeView === "patient" ? (patientId ?? firstPatientId(accounts)) : undefined,
                 });
             },
 
@@ -191,7 +191,7 @@ export const useAuthStore = create<AuthStoreType>()(
                         ...state.accounts,
                         patients: [
                             ...state.accounts.patients,
-                            { patientId, firstName: pendingPatient?.firstName || "", lastName: pendingPatient?.lastName, isSelf: true },
+                            { patientId, firstName: pendingPatient?.firstName || "", lastName: pendingPatient?.lastName },
                         ],
                     },
                     activeView: "patient",

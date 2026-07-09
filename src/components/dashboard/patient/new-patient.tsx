@@ -5,14 +5,16 @@ import * as z from 'zod'
 import MultiStepForm from '@/components/shared/multi-step-form'
 import DuplicateGate from '@/components/shared/duplicate-gate'
 import type { MultiStepFormSteps } from '@/types/shared'
-import { MarsIcon, TransgenderIcon, VenusIcon } from 'lucide-react'
+import { MarsIcon, MicIcon, TransgenderIcon, VenusIcon } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Item, ItemContent, ItemDescription, ItemTitle } from '@/components/ui/item'
 import { handleError } from '@/lib/utils'
 import { getSubscriptionStatusFromError, isSubscriptionBlocked } from '@/lib/subscription'
 import { useSubscriptionGate } from '@/stores/subscription-gate-store'
 import { useGraceGuard } from '@/hooks/use-grace-guard'
 import { useNavigate } from '@tanstack/react-router'
 import api from '@/lib/axios'
-import { createPatient, findSimilar, linkPhone, type SimilarMatch } from '@/lib/patient'
+import { createPatient, dobFromAge, findSimilar, linkPhone, type SimilarMatch } from '@/lib/patient'
 import { useAuthStore } from '@/stores/auth-store'
 import { useDefaultChamberId } from '@/stores/active-chamber-store'
 import { useQueryClient } from '@tanstack/react-query'
@@ -43,10 +45,6 @@ function splitName(name: string) {
     return { firstName, lastName: rest.join(" ") };
 }
 
-function dobFromAge(age: string) {
-    return new Date(new Date().getFullYear() - parseInt(age, 10), 0, 1).toISOString().split("T")[0];
-}
-
 export default function NewPatient({ phone, name, age, sex, userId }: NewPatientProps) {
 
     const navigate = useNavigate();
@@ -56,9 +54,9 @@ export default function NewPatient({ phone, name, age, sex, userId }: NewPatient
     const { guardStart, dialog: graceDialog } = useGraceGuard();
     const queryClient = useQueryClient();
 
-    const [step, setStep] = useState<"form" | "gate">("form");
+    const [step, setStep] = useState<"form" | "gate" | "review">("form");
     const [matches, setMatches] = useState<SimilarMatch[]>([]);
-    const [busy, setBusy] = useState(false);
+    const [starting, setStarting] = useState(false);
 
     const form = useForm<PatientFormValues>({
         resolver: zodResolver(patientSchema),
@@ -77,13 +75,15 @@ export default function NewPatient({ phone, name, age, sex, userId }: NewPatient
         });
         const sessionId = sessionCreateResponse.data.session_id;
         queryClient.invalidateQueries({ queryKey: ["subscription"] });
-        form.reset();
         navigate({ to: "/doctor/consultation/$userId/$consultationId", params: { userId: patientId, consultationId: sessionId } });
     }
 
-    // Resolve a patient then start the (metered) consultation, grace-guarded.
+    // Resolve a patient (creating them only now) then start the metered consultation,
+    // grace-guarded. Creation is deferred to here so nothing is written until the doctor
+    // commits by pressing Start Consultation.
     function resolveAndStart(resolvePatient: () => Promise<string>) {
         guardStart(async () => {
+            setStarting(true);
             try {
                 await startConsultation(await resolvePatient());
             } catch (error) {
@@ -92,9 +92,14 @@ export default function NewPatient({ phone, name, age, sex, userId }: NewPatient
                     return;
                 }
                 handleError(error, "An error occurred while creating the patient.");
+            } finally {
+                setStarting(false);
             }
         });
     }
+
+    const proceed = () =>
+        resolveAndStart(() => (userId ? updateExisting(form.getValues()) : createNew(form.getValues())));
 
     async function createNew(values: PatientFormValues): Promise<string> {
         const { firstName, lastName } = splitName(values.name);
@@ -120,13 +125,13 @@ export default function NewPatient({ phone, name, age, sex, userId }: NewPatient
     }
 
     async function onSubmit(values: PatientFormValues) {
-        // Editing a known patient skips the duplicate gate.
+        // Editing a known patient skips the duplicate gate — straight to review.
         if (userId) {
-            resolveAndStart(() => updateExisting(values));
+            setStep("review");
             return;
         }
-        // A new patient passes through the gate first.
-        setBusy(true);
+        // A new patient passes through the gate first; with no match it goes to review,
+        // where the record is created only on Start Consultation.
         try {
             const { firstName, lastName } = splitName(values.name);
             const similar = await findSimilar({ first_name: firstName, last_name: lastName, sex: values.sex, age: parseInt(values.age, 10) });
@@ -135,11 +140,9 @@ export default function NewPatient({ phone, name, age, sex, userId }: NewPatient
                 setStep("gate");
                 return;
             }
-            resolveAndStart(() => createNew(values));
+            setStep("review");
         } catch (error) {
             handleError(error, "An error occurred while creating the patient.");
-        } finally {
-            setBusy(false);
         }
     }
 
@@ -163,10 +166,35 @@ export default function NewPatient({ phone, name, age, sex, userId }: NewPatient
             <>
                 <DuplicateGate
                     matches={matches}
-                    busy={busy}
+                    busy={starting}
                     onLink={(patientId) => resolveAndStart(async () => { await linkPhone(patientId, fullPhone); return patientId; })}
-                    onCreateNew={() => resolveAndStart(() => createNew(form.getValues()))}
+                    onCreateNew={() => setStep("review")}
                 />
+                {graceDialog}
+            </>
+        );
+    }
+
+    if (step === "review") {
+        const values = form.getValues();
+        return (
+            <>
+                <div className="flex w-full max-w-md flex-col gap-3 mx-auto">
+                    <Item variant="outline">
+                        <ItemContent>
+                            <ItemTitle className="text-lg">{values.name}</ItemTitle>
+                            <ItemDescription>
+                                <span className="text-sm text-slate-600 capitalize">{values.age}y · {values.sex}</span>
+                            </ItemDescription>
+                        </ItemContent>
+                        <Button className="w-full" onClick={proceed} isLoading={starting} disabled={starting}>
+                            <MicIcon className="size-4" /> Start Consultation
+                        </Button>
+                    </Item>
+                    <Button variant="ghost" size="sm" className="self-center" onClick={() => setStep("form")} disabled={starting}>
+                        Back
+                    </Button>
+                </div>
                 {graceDialog}
             </>
         );

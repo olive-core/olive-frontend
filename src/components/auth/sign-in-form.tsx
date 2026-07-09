@@ -4,14 +4,16 @@ import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/stores/auth-store";
 import { handleError } from "@/lib/utils";
 import { useNavigate } from "@tanstack/react-router";
+import type { ActiveView } from "@/types/auth";
 import NumberGroupInputMemo from "../dashboard/number-group-input";
 import PatientSkeleton from "../dashboard/patient/skeleton";
 import CreateDoctorForm from "./create-doctor-form";
 import CreatePatientForm from "./create-patient-form";
 import CreateAttendantForm from "./create-attendant-form";
 import RoleSelector from "./role-selector";
+import AccountSelector from "./account-selector";
 
-type ShowPanel = null | "role-select" | "doctor-form" | "patient-form" | "attendant-form" | "otp" | "error";
+type ShowPanel = null | "accounts" | "role-select" | "doctor-form" | "patient-form" | "attendant-form" | "error";
 
 const ROLE_TO_PANEL: Record<'patient' | 'clinician' | 'attendant', ShowPanel> = {
     patient: "patient-form",
@@ -22,11 +24,10 @@ const ROLE_TO_PANEL: Record<'patient' | 'clinician' | 'attendant', ShowPanel> = 
 export default function SignInForm() {
 
     const navigate = useNavigate();
-    const { sendOtp, checkUser } = useAuthStore();
+    const { sendOtp, checkUser, accounts } = useAuthStore();
 
     const [isLoading, setIsLoading] = useState(false);
     const [isChecking, setIsChecking] = useState(false);
-    const [doesExist, setDoesExist] = useState<0 | 1>(1);
 
     const [phoneNumber, setPhoneNumber] = useState<string[]>(["0", "1"].concat(Array(9).fill("")));
 
@@ -40,15 +41,7 @@ export default function SignInForm() {
                 setIsChecking(true);
                 setShowPanel(null);
                 const { exists } = await checkUser("+88".concat(phoneNumber.join("").trim()));
-
-                setDoesExist(exists ? 1 : 0);
-
-                if (exists) {
-                    setShowPanel("otp");
-                    submitButtonRef.current?.focus();
-                } else {
-                    setShowPanel("role-select");
-                }
+                setShowPanel(exists ? "accounts" : "role-select");
             } catch (error) {
                 console.error(error)
                 setShowPanel("error");
@@ -58,12 +51,13 @@ export default function SignInForm() {
         }
     }, [checkUser, phoneNumber])
 
-    async function handleSubmit() {
+    // Verify against the identity the person picked, then land them there.
+    async function continueAs(view: ActiveView, patientId?: string) {
         setIsLoading(true);
         try {
             await sendOtp("+88".concat(phoneNumber.join("").trim()));
             toast.success("OTP sent successfully!");
-            navigate({ to: "/enter-otp", search: { exists: doesExist } });
+            navigate({ to: "/enter-otp", search: { exists: 1, view, patient_id: patientId } });
         } catch (error) {
             handleError(error, "Failed to send OTP. Please try again.");
         } finally {
@@ -81,12 +75,21 @@ export default function SignInForm() {
 
             {isChecking && <PatientSkeleton />}
 
+            {showPanel === "accounts" && (
+                <div className="flex flex-col gap-3">
+                    <AccountSelector accounts={accounts} onSelect={continueAs} busy={isLoading} />
+                    <Button ref={submitButtonRef} variant="ghost" disabled={isLoading} onClick={() => setShowPanel("role-select")}>
+                        Add another account
+                    </Button>
+                </div>
+            )}
+
             {showPanel === "role-select" && (
-                <RoleSelector onSelect={(role) => setShowPanel(ROLE_TO_PANEL[role])} />
+                <RoleSelector accounts={accounts} onSelect={(role) => setShowPanel(ROLE_TO_PANEL[role])} />
             )}
 
             {showPanel === "doctor-form" && (
-                <CreateDoctorForm phoneNumber={phoneNumber} doesExist={doesExist} />
+                <CreateDoctorForm phoneNumber={phoneNumber} />
             )}
 
             {showPanel === "patient-form" && (
@@ -95,17 +98,6 @@ export default function SignInForm() {
 
             {showPanel === "attendant-form" && (
                 <CreateAttendantForm phoneNumber={phoneNumber} />
-            )}
-
-            {showPanel === "otp" && (
-                <div className="flex flex-col gap-3">
-                    <Button ref={submitButtonRef} onClick={handleSubmit} isLoading={isLoading}>
-                        Send OTP
-                    </Button>
-                    <Button variant="ghost" onClick={() => setShowPanel("role-select")}>
-                        Add another account
-                    </Button>
-                </div>
             )}
 
             {showPanel === "error" && (

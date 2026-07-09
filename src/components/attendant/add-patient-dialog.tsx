@@ -14,7 +14,7 @@ import PatientPicker from "@/components/shared/patient-picker";
 import DuplicateGate from "@/components/shared/duplicate-gate";
 import type { MultiStepFormSteps } from "@/types/shared";
 import { addToQueue } from "@/lib/attendant-queue";
-import { createPatient, findSimilar, getPatient, linkPhone, lookupByPhone, type PatientSummary, type SimilarMatch } from "@/lib/patient";
+import { createPatient, dobFromAge, findSimilar, getPatient, linkPhone, lookupByPhone, type PatientSummary, type SimilarMatch } from "@/lib/patient";
 import { getAgeFromDOB, handleError } from "@/lib/utils";
 
 type Step = "phone" | "pick" | "form" | "gate" | "confirm";
@@ -57,18 +57,18 @@ function splitName(name: string) {
     return { firstName, lastName: rest.join(" ") };
 }
 
-function dobFromAge(age: string) {
-    return new Date(new Date().getFullYear() - parseInt(age, 10), 0, 1).toISOString().split("T")[0];
-}
-
 export default function AddPatientDialog({ chamberId, open, onClose }: AddPatientDialogProps) {
     const queryClient = useQueryClient();
     const [phone, setPhone] = useState<string[]>(emptyPhone);
     const [step, setStep] = useState<Step>("phone");
     const [candidates, setCandidates] = useState<PatientSummary[]>([]);
     const [matches, setMatches] = useState<SimilarMatch[]>([]);
+    // The confirm card is reached either with an existing patient (linked from the gate) or
+    // a new-patient draft that is created only when "Add to Queue" is pressed.
     const [selected, setSelected] = useState<PatientSummary | null>(null);
+    const [draft, setDraft] = useState<PatientFormValues | null>(null);
     const [busy, setBusy] = useState(false);
+    const [enqueuingId, setEnqueuingId] = useState<string | null>(null);
 
     const form = useForm<PatientFormValues>({
         resolver: zodResolver(patientSchema),
@@ -85,6 +85,7 @@ export default function AddPatientDialog({ chamberId, open, onClose }: AddPatien
             setCandidates([]);
             setMatches([]);
             setSelected(null);
+            setDraft(null);
             form.reset({ name: "", age: "", sex: "male" });
         }, 200);
     };
@@ -94,12 +95,11 @@ export default function AddPatientDialog({ chamberId, open, onClose }: AddPatien
         setBusy(true);
         try {
             const found = await lookupByPhone("+88" + phone.join("").trim());
+            // A phone may already reach one or more patients; always show the picker so
+            // "New patient" stays available even when there's exactly one.
             if (found.length === 0) {
                 form.reset({ name: "", age: "", sex: "male" });
                 setStep("form");
-            } else if (found.length === 1) {
-                setSelected(found[0]);
-                setStep("confirm");
             } else {
                 setCandidates(found);
                 setStep("pick");
@@ -121,7 +121,10 @@ export default function AddPatientDialog({ chamberId, open, onClose }: AddPatien
                 setStep("gate");
                 return;
             }
-            await createAndSelect(values);
+            // No match — review before creating anything.
+            setSelected(null);
+            setDraft(values);
+            setStep("confirm");
         } catch (error) {
             handleError(error, "Could not save this patient");
         } finally {
@@ -129,23 +132,11 @@ export default function AddPatientDialog({ chamberId, open, onClose }: AddPatien
         }
     };
 
-    const createAndSelect = async (values: PatientFormValues) => {
-        const { firstName, lastName } = splitName(values.name);
-        const patient = await createPatient({
-            first_name: firstName,
-            last_name: lastName,
-            date_of_birth: dobFromAge(values.age),
-            sex: values.sex,
-            phone: fullPhone(),
-        });
-        setSelected(patient);
-        setStep("confirm");
-    };
-
     const linkExisting = async (patientId: string) => {
         setBusy(true);
         try {
             await linkPhone(patientId, fullPhone());
+            setDraft(null);
             setSelected(await getPatient(patientId));
             setStep("confirm");
         } catch (error) {
@@ -155,11 +146,40 @@ export default function AddPatientDialog({ chamberId, open, onClose }: AddPatien
         }
     };
 
-    const enqueue = async () => {
-        if (!selected) return;
+    // Enqueue an already-existing patient straight from the picker.
+    const enqueue = async (patient: PatientSummary) => {
+        setEnqueuingId(patient.patient_id);
+        try {
+            await addToQueue(chamberId, patient.patient_id, fullPhone());
+            queryClient.invalidateQueries({ queryKey: ["queue", chamberId] });
+            toast.success("Added to queue");
+            close();
+        } catch (error) {
+            handleError(error, "Could not add to queue");
+        } finally {
+            setEnqueuingId(null);
+        }
+    };
+
+    // Confirm card action: create the drafted patient if there is one (so nothing is
+    // written until now), then add whoever we resolved to the queue.
+    const confirmAndQueue = async () => {
         setBusy(true);
         try {
-            await addToQueue(chamberId, selected.patient_id, fullPhone());
+            let patientId = selected?.patient_id;
+            if (!patientId && draft) {
+                const { firstName, lastName } = splitName(draft.name);
+                const created = await createPatient({
+                    first_name: firstName,
+                    last_name: lastName,
+                    date_of_birth: dobFromAge(draft.age),
+                    sex: draft.sex,
+                    phone: fullPhone(),
+                });
+                patientId = created.patient_id;
+            }
+            if (!patientId) return;
+            await addToQueue(chamberId, patientId, fullPhone());
             queryClient.invalidateQueries({ queryKey: ["queue", chamberId] });
             toast.success("Added to queue");
             close();
@@ -193,7 +213,9 @@ export default function AddPatientDialog({ chamberId, open, onClose }: AddPatien
                         <PatientPicker
                             candidates={candidates}
                             title=""
-                            onSelect={(patient) => { setSelected(patient); setStep("confirm"); }}
+                            actionLabel="Add to Queue"
+                            onAction={enqueue}
+                            busyPatientId={enqueuingId}
                             onNew={() => { form.reset({ name: "", age: "", sex: "male" }); setStep("form"); }}
                         />
                     </>
@@ -212,38 +234,37 @@ export default function AddPatientDialog({ chamberId, open, onClose }: AddPatien
                             matches={matches}
                             busy={busy}
                             onLink={linkExisting}
-                            onCreateNew={() => savePatientCreateOnly()}
+                            onCreateNew={() => { setSelected(null); setDraft(form.getValues()); setStep("confirm"); }}
                         />
                     </>
                 )}
 
-                {step === "confirm" && selected && (
-                    <ConfirmCard patient={selected} busy={busy} onAdd={enqueue} />
+                {step === "confirm" && (selected || draft) && (
+                    <ConfirmCard
+                        name={selected ? `${selected.first_name} ${selected.last_name ?? ""}`.trim() : draft!.name}
+                        detail={selected ? confirmDetail(selected) : `${draft!.age}y · ${draft!.sex}`}
+                        busy={busy}
+                        onAdd={confirmAndQueue}
+                    />
                 )}
             </DialogContent>
         </Dialog>
     );
+}
 
-    async function savePatientCreateOnly() {
-        setBusy(true);
-        try {
-            await createAndSelect(form.getValues());
-        } catch (error) {
-            handleError(error, "Could not save this patient");
-        } finally {
-            setBusy(false);
-        }
-    }
+function confirmDetail(patient: PatientSummary): string {
+    const age = patient.date_of_birth ? `${getAgeFromDOB(patient.date_of_birth).years}y` : "";
+    return [age, patient.sex].filter(Boolean).join(" · ");
 }
 
 interface ConfirmCardProps {
-    patient: PatientSummary;
+    name: string;
+    detail: string;
     busy: boolean;
     onAdd: () => void;
 }
 
-function ConfirmCard({ patient, busy, onAdd }: ConfirmCardProps) {
-    const age = patient.date_of_birth ? getAgeFromDOB(patient.date_of_birth).years : null;
+function ConfirmCard({ name, detail, busy, onAdd }: ConfirmCardProps) {
     return (
         <>
             <DialogHeader>
@@ -251,13 +272,10 @@ function ConfirmCard({ patient, busy, onAdd }: ConfirmCardProps) {
             </DialogHeader>
             <Item variant="outline">
                 <ItemContent>
-                    <ItemTitle className="text-lg">
-                        {patient.first_name} {patient.last_name}
-                    </ItemTitle>
+                    <ItemTitle className="text-lg">{name}</ItemTitle>
                     <ItemDescription>
-                        <span className="flex items-center gap-1 text-slate-600 text-sm">
-                            <CalendarIcon className="size-4" /> {age != null ? `${age}y` : ""}
-                            {patient.sex && <span className="capitalize ml-2">· {patient.sex}</span>}
+                        <span className="flex items-center gap-1 text-slate-600 text-sm capitalize">
+                            <CalendarIcon className="size-4" /> {detail}
                         </span>
                     </ItemDescription>
                 </ItemContent>

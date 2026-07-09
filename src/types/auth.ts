@@ -9,12 +9,13 @@ export type PatientProfile = {
     patientId: string;
     firstName: string;
     lastName?: string;
-    isSelf: boolean;
 };
 
 export type Accounts = {
     isClinician: boolean;
     isAttendant: boolean;
+    clinicianName?: string | null;
+    attendantName?: string | null;
     patients: PatientProfile[];
 };
 
@@ -24,8 +25,14 @@ export type CheckUserResponse = {
 };
 
 // Raw API shapes (snake_case) mapped into the camelCase types above.
-export type ApiPatientProfile = { patient_id: string; first_name: string; last_name?: string; is_self: boolean };
-export type ApiAccounts = { is_clinician: boolean; is_attendant: boolean; patients: ApiPatientProfile[] };
+export type ApiPatientProfile = { patient_id: string; first_name: string; last_name?: string };
+export type ApiAccounts = {
+    is_clinician: boolean;
+    is_attendant: boolean;
+    clinician_name?: string | null;
+    attendant_name?: string | null;
+    patients: ApiPatientProfile[];
+};
 export type ApiCheckUserResponse = { exists: boolean; accounts: ApiAccounts };
 
 export type SendOtpResponse = {

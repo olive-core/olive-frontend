@@ -1,3 +1,4 @@
+import { PhoneIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { SimilarMatch } from "@/lib/patient";
 
@@ -25,16 +26,26 @@ export default function DuplicateGate({ matches, busy, onLink, onCreateNew }: Du
                         type="button"
                         disabled={busy}
                         onClick={() => onLink(match.patient_id)}
-                        className="flex items-center justify-between gap-3 rounded-xl border-2 border-amber-200 bg-amber-50/60 px-4 py-3 text-left transition-colors hover:border-amber-400 disabled:opacity-50"
+                        className="flex flex-col gap-1.5 rounded-xl border-2 border-amber-200 bg-amber-50/60 px-4 py-3 text-left transition-colors cursor-pointer hover:border-amber-400 disabled:cursor-default disabled:opacity-50"
                     >
-                        <span>
-                            <span className="block font-semibold">{match.first_name} {match.last_name}</span>
+                        <span className="flex items-baseline justify-between gap-3">
+                            <span className="font-semibold">{match.first_name} {match.last_name}</span>
                             <span className="text-sm text-muted-foreground capitalize">
                                 {match.age != null ? `${match.age}y` : ""}
                                 {match.sex ? ` · ${match.sex}` : ""}
                             </span>
                         </span>
-                        <span className="font-mono text-sm text-slate-600">{match.masked_numbers[0] ?? ""}</span>
+                        {match.masked_numbers.length > 0 ? (
+                            <span className="flex flex-wrap gap-x-4 gap-y-1">
+                                {match.masked_numbers.map((number, index) => (
+                                    <span key={index} className="flex items-center gap-1.5 font-mono text-sm text-slate-700">
+                                        <PhoneIcon className="size-3.5 text-slate-400" /> {number}
+                                    </span>
+                                ))}
+                            </span>
+                        ) : (
+                            <span className="text-xs text-muted-foreground">No number on file</span>
+                        )}
                     </button>
                 ))}
             </div>

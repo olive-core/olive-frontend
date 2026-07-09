@@ -7,17 +7,29 @@ import { handleError } from "@/lib/utils";
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { MarsIcon, TransgenderIcon, VenusIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Field, FieldLabel, FieldError } from "@/components/ui/field";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
+import { dobFromAge } from "@/lib/patient";
+
+const SEX_OPTIONS = [
+    { value: "male", label: "Male", icon: MarsIcon, iconClassName: "text-blue-500" },
+    { value: "female", label: "Female", icon: VenusIcon, iconClassName: "text-pink-500" },
+    { value: "non_binary", label: "Non-binary", icon: TransgenderIcon, iconClassName: "text-purple-500" },
+] as const;
 
 const patientSchema = z.object({
     firstName: z.string().trim().min(1, "First name is required"),
     lastName: z.string().trim().min(1, "Last name is required"),
-    dateOfBirth: z.string().min(1, "Date of birth is required").refine(
-        (val) => new Date(val) <= new Date(),
-        "Date of birth cannot be in the future"
+    age: z.string().min(1, "Age is required").refine(
+        (val) => {
+            const age = parseInt(val, 10);
+            return age >= 0 && age <= 120;
+        },
+        "Enter a valid age between 0 and 120"
     ),
     sex: z.string().min(1, "Sex is required"),
 });
@@ -39,10 +51,11 @@ export default function CreatePatientForm({ phoneNumber }: CreatePatientFormProp
 
     const form = useForm<PatientFormValues>({
         resolver: zodResolver(patientSchema),
-        defaultValues: { firstName: "", lastName: "", dateOfBirth: "", sex: "" },
+        defaultValues: { firstName: "", lastName: "", age: "", sex: "male" },
     });
 
-    const { register, trigger, formState: { errors }, getValues } = form;
+    const { register, trigger, formState: { errors }, getValues, watch, setValue } = form;
+    const selectedSex = watch("sex");
 
     const direction = prevStep < step ? 1 : -1;
 
@@ -62,7 +75,7 @@ export default function CreatePatientForm({ phoneNumber }: CreatePatientFormProp
     }
 
     async function submit() {
-        const isValid = await trigger(['dateOfBirth', 'sex']);
+        const isValid = await trigger(['age', 'sex']);
         if (!isValid) return;
 
         setIsSubmitting(true);
@@ -70,7 +83,7 @@ export default function CreatePatientForm({ phoneNumber }: CreatePatientFormProp
         storePendingPatient({
             firstName: values.firstName,
             lastName: values.lastName,
-            dateOfBirth: values.dateOfBirth,
+            dateOfBirth: dobFromAge(values.age),
             sex: values.sex,
         });
         try {
@@ -127,35 +140,44 @@ export default function CreatePatientForm({ phoneNumber }: CreatePatientFormProp
                         )}
                         {step === 2 && (
                             <div className="space-y-4">
-                                <Field data-invalid={!!errors.dateOfBirth}>
-                                    <FieldLabel htmlFor="dateOfBirth" className="text-center text-muted-foreground block">Date of Birth</FieldLabel>
+                                <Field data-invalid={!!errors.age}>
+                                    <FieldLabel htmlFor="age" className="text-center text-muted-foreground block">Age</FieldLabel>
                                     <Input
-                                        {...register('dateOfBirth')}
-                                        id="dateOfBirth"
-                                        type="date"
-                                        max={new Date().toISOString().split('T')[0]}
-                                        autoComplete="bday"
-                                        aria-invalid={!!errors.dateOfBirth}
-                                        aria-describedby={errors.dateOfBirth ? "dateOfBirth-error" : undefined}
+                                        {...register('age')}
+                                        id="age"
+                                        type="number"
+                                        inputMode="numeric"
+                                        min={0}
+                                        max={120}
+                                        placeholder="e.g., 30"
+                                        aria-invalid={!!errors.age}
+                                        aria-describedby={errors.age ? "age-error" : undefined}
                                         autoFocus
                                     />
-                                    {errors.dateOfBirth && <FieldError id="dateOfBirth-error" errors={[errors.dateOfBirth]} />}
+                                    {errors.age && <FieldError id="age-error" errors={[errors.age]} />}
                                 </Field>
                                 <Field data-invalid={!!errors.sex}>
-                                    <FieldLabel htmlFor="sex" className="text-center text-muted-foreground block">Sex</FieldLabel>
-                                    <select
-                                        {...register('sex')}
-                                        id="sex"
-                                        aria-invalid={!!errors.sex}
-                                        aria-describedby={errors.sex ? "sex-error" : undefined}
-                                        className="w-full h-11 sm:h-9 rounded-md border border-input bg-white px-3 py-1 text-base sm:text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                                    >
-                                        <option value="" disabled>Select sex</option>
-                                        <option value="prefer_not_to_say">Prefer not to say</option>
-                                        <option value="male">Male</option>
-                                        <option value="female">Female</option>
-                                        <option value="non_binary">Non-binary</option>
-                                    </select>
+                                    <FieldLabel className="text-center text-muted-foreground block">Sex</FieldLabel>
+                                    <input type="hidden" {...register('sex')} />
+                                    <div className="grid grid-cols-3 gap-2">
+                                        {SEX_OPTIONS.map((option) => (
+                                            <button
+                                                key={option.value}
+                                                type="button"
+                                                onClick={() => setValue('sex', option.value, { shouldValidate: true })}
+                                                aria-pressed={selectedSex === option.value}
+                                                className={cn(
+                                                    "flex flex-col items-center gap-1.5 rounded-xl border-2 px-2 py-3 transition-colors cursor-pointer",
+                                                    selectedSex === option.value
+                                                        ? "border-primary bg-primary/5"
+                                                        : "border-slate-200 hover:border-slate-300",
+                                                )}
+                                            >
+                                                <option.icon className={cn("size-5", option.iconClassName)} />
+                                                <span className="text-sm font-medium text-slate-700">{option.label}</span>
+                                            </button>
+                                        ))}
+                                    </div>
                                     {errors.sex && <FieldError id="sex-error" errors={[errors.sex]} />}
                                 </Field>
                             </div>
