@@ -235,20 +235,31 @@ export function clinicianStyleConfig(api?: HeaderConfigApi | null): HeaderConfig
 // The clinician PUT body the header editor sends: identity fields (which live on the
 // profile) plus the serialized header_config.
 export interface ClinicianHeaderUpdate {
-    first_name:    string;
-    last_name:     string;
-    qualification: string;
-    bmdc_no:       string;
-    header_config: HeaderConfigApi;
+    first_name:      string;
+    last_name:       string;
+    qualification:   string;
+    specializations: string[];
+    bmdc_no:         string;
+    header_config:   HeaderConfigApi;
+}
+
+// The pad's designation IS the doctor's specialization — the profile displays it and
+// the AI draft pipeline reads it — so every pad save keeps the two in lockstep.
+export function specializationsFromDesignation(designation: string): string[] {
+    return designation
+        .split(",")
+        .map((part) => part.trim())
+        .filter(Boolean);
 }
 
 export function buildHeaderUpdatePayload(identity: EditableIdentity, config: HeaderConfig): ClinicianHeaderUpdate {
     return {
-        first_name:    identity.firstName.trim(),
-        last_name:     identity.lastName.trim(),
-        qualification: identity.qualification.trim(),
-        bmdc_no:       identity.bmdcNo.trim(),
-        header_config: headerConfigToApi(config),
+        first_name:      identity.firstName.trim(),
+        last_name:       identity.lastName.trim(),
+        qualification:   identity.qualification.trim(),
+        specializations: specializationsFromDesignation(config.designation),
+        bmdc_no:         identity.bmdcNo.trim(),
+        header_config:   headerConfigToApi(config),
     };
 }
 

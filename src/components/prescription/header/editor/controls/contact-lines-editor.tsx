@@ -35,7 +35,7 @@ function LineValueField({ line, update }: { line: ContactLine; update: ContactLi
                 onChange={(event) => update(line.id, { value: event.target.value })}
                 placeholder={meta.placeholder}
                 rows={1}
-                className="min-h-9 w-full resize-y rounded-md border border-input bg-transparent px-3 py-1.5 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
+                className="min-h-9 w-full resize-y rounded-md border border-input bg-transparent px-3 py-1.5 text-base shadow-xs outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] md:text-sm"
             />
         );
     }

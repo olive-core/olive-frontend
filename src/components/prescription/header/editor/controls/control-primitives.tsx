@@ -70,7 +70,7 @@ export function LabeledTextarea({ id, label, value, onChange, placeholder, rows 
                 onChange={(event) => onChange(event.target.value)}
                 placeholder={placeholder}
                 rows={rows}
-                className="w-full resize-y rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
+                className="w-full resize-y rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] md:text-sm"
             />
         </label>
     );

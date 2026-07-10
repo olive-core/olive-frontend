@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import { ArrowLeftIcon, SaveIcon } from "lucide-react";
+import { ArrowLeftIcon, ChevronDownIcon, SaveIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 import api from "@/lib/axios";
 import { handleError } from "@/lib/utils";
@@ -25,11 +26,12 @@ import HeaderLivePreview from "./header-live-preview";
 import { focusField, registerFocusResolver } from "./focus-field";
 
 export interface HeaderEditorProfile {
-    first_name?:    string | null;
-    last_name?:     string | null;
-    qualification?: string | null;
-    bmdc_no?:       string | null;
-    header_config?: HeaderConfigApi | null;
+    first_name?:      string | null;
+    last_name?:       string | null;
+    qualification?:   string | null;
+    specializations?: string[] | null;
+    bmdc_no?:         string | null;
+    header_config?:   HeaderConfigApi | null;
 }
 
 interface HeaderEditorProps {
@@ -119,9 +121,15 @@ export default function HeaderEditor({ initialProfile, isSaving, onSave }: Heade
     const chambersQuery = useQuery({ queryKey: ["chambers"], queryFn: listChambers });
 
     // Populate the store from the loaded profile once, then reset on unmount so the
-    // letterhead never bleeds into another page.
+    // letterhead never bleeds into another page. Designation and the profile's
+    // specializations are the same field: profiles from before that merge get their
+    // specializations offered as the designation, and every save re-syncs both.
     useEffect(() => {
         if (initialized.current) return;
+        const config = clinicianStyleConfig(initialProfile.header_config);
+        if (!config.designation.trim()) {
+            config.designation = (initialProfile.specializations ?? []).join(", ");
+        }
         hydrate(
             {
                 firstName:     initialProfile.first_name ?? "",
@@ -129,7 +137,7 @@ export default function HeaderEditor({ initialProfile, isSaving, onSave }: Heade
                 qualification: initialProfile.qualification ?? "",
                 bmdcNo:        initialProfile.bmdc_no ?? "",
             },
-            clinicianStyleConfig(initialProfile.header_config),
+            config,
         );
         initialized.current = true;
     }, [initialProfile, hydrate]);
@@ -177,33 +185,34 @@ export default function HeaderEditor({ initialProfile, isSaving, onSave }: Heade
         onSave(buildHeaderUpdatePayload(identity, config));
     };
 
-    const topBar = (
-        <div className="sticky top-0 z-30 -mx-4 flex items-center justify-between gap-3 border-b bg-white/95 px-4 py-2.5 backdrop-blur">
-            <div className="flex items-center gap-2.5">
-                <button
-                    onClick={() => navigate({ to: "/doctor/profile" })}
-                    className="cursor-pointer rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-100"
-                    aria-label="Back to profile"
-                >
-                    <ArrowLeftIcon className="size-4" />
-                </button>
-                <div>
-                    <h1 className="text-base font-bold leading-tight text-slate-900">Prescription pad</h1>
-                    <p className="text-[11px] text-slate-400">Header, footer and every chamber's pad.</p>
-                </div>
+    const heading = (
+        <div className="flex items-center gap-2.5">
+            <button
+                onClick={() => navigate({ to: "/doctor/profile" })}
+                className="cursor-pointer rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-100"
+                aria-label="Back to profile"
+            >
+                <ArrowLeftIcon className="size-4" />
+            </button>
+            <div>
+                <h1 className="text-base font-bold leading-tight text-slate-900">Prescription pad</h1>
+                <p className="text-[11px] text-slate-400">Header, footer and every chamber's pad.</p>
             </div>
-
-            <Button onClick={handleSave} isLoading={isSaving} className="px-5 font-bold shadow-sm">
-                <SaveIcon className="size-4" />
-                Save{dirtyPadCount > 0 ? ` (${dirtyPadCount + 1})` : ""}
-            </Button>
         </div>
     );
+
+    const saveLabel = `Save${dirtyPadCount > 0 ? ` (${dirtyPadCount + 1})` : ""}`;
 
     if (isWide) {
         return (
             <div className="mx-auto max-w-[1400px] px-4 pb-24">
-                {topBar}
+                <div className="sticky top-0 z-30 -mx-4 flex items-center justify-between gap-3 border-b bg-white/95 px-4 py-2.5 backdrop-blur">
+                    {heading}
+                    <Button onClick={handleSave} isLoading={isSaving} className="px-5 font-bold shadow-sm">
+                        <SaveIcon className="size-4" />
+                        {saveLabel}
+                    </Button>
+                </div>
                 <ResizablePanelGroup
                     direction="horizontal"
                     autoSaveId="rx-header-editor-panes"
@@ -224,14 +233,49 @@ export default function HeaderEditor({ initialProfile, isSaving, onSave }: Heade
     }
 
     return (
-        <div className="mx-auto max-w-[860px] px-4 pb-24">
-            {topBar}
-            <div data-sticky-preview className="sticky top-[53px] z-20 -mx-4 bg-gradient-to-b from-slate-50 via-slate-50 to-slate-50/0 px-4 pb-4 pt-3">
-                <HeaderLivePreview />
-            </div>
+        <div className="mx-auto max-w-[860px] px-4 pb-32">
+            <div className="-mx-4 flex items-center border-b bg-white px-4 py-2.5">{heading}</div>
+            <CollapsiblePreview />
             <div className="mt-2">
                 <ControlTabs />
             </div>
+
+            {/* The fixed navbar owns the top of a phone screen, so Save lives in its own
+                bottom bar — always reachable, even mid-form with the keyboard open. */}
+            <div
+                className="fixed inset-x-0 bottom-0 z-40 border-t bg-white/95 px-4 pt-3 backdrop-blur"
+                style={{ paddingBottom: "calc(0.75rem + env(safe-area-inset-bottom))" }}
+            >
+                <Button onClick={handleSave} isLoading={isSaving} className="w-full font-bold shadow-sm">
+                    <SaveIcon className="size-4" />
+                    {saveLabel}
+                </Button>
+            </div>
+        </div>
+    );
+}
+
+// On narrow screens the live preview stays pinned below the app navbar but can be
+// collapsed to a slim bar, giving the form (and the keyboard) the rest of the screen.
+// 57px matches the dashboard navbar's height (see navbar.tsx's mobile menu offset).
+function CollapsiblePreview() {
+    const [isOpen, setIsOpen] = useState(true);
+
+    return (
+        <div
+            data-sticky-preview
+            className="sticky top-[calc(57px+env(safe-area-inset-top))] z-20 -mx-4 bg-gradient-to-b from-slate-50 via-slate-50 to-slate-50/0 px-4 pb-3 pt-2"
+        >
+            <button
+                type="button"
+                aria-expanded={isOpen}
+                onClick={() => setIsOpen((open) => !open)}
+                className="mb-1.5 flex w-full items-center justify-between rounded-lg border bg-white px-3 py-2 text-xs font-medium text-slate-600 shadow-xs"
+            >
+                Live preview
+                <ChevronDownIcon className={cn("size-4 text-slate-400 transition-transform", isOpen && "rotate-180")} />
+            </button>
+            {isOpen && <HeaderLivePreview />}
         </div>
     );
 }

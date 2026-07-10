@@ -141,16 +141,13 @@ export default function Prescription({ onGenerate, onCancel, hasBeenGenerated }:
                 </>
             }
             footer={
-                <>
-                    <PrescriptionActions onGenerate={onGenerate} onCancel={onCancel} hasBeenGenerated={hasBeenGenerated} />
-                    <Button
-                        onClick={() => confirmMutation.mutate()}
-                        isLoading={confirmMutation.isPending}
-                        className="px-8 font-bold shadow-md"
-                    >
-                        Save &amp; Print
-                    </Button>
-                </>
+                <Button
+                    onClick={() => confirmMutation.mutate()}
+                    isLoading={confirmMutation.isPending}
+                    className="px-8 font-bold shadow-md"
+                >
+                    Save &amp; Print
+                </Button>
             }
         />
     );
@@ -166,6 +163,13 @@ export default function Prescription({ onGenerate, onCancel, hasBeenGenerated }:
                     value={activeDocument}
                     onValueChange={setActiveDocument}
                     notesHasContent={!!summary?.trim() || safetyNet.length > 0}
+                    actions={
+                        <PrescriptionActions
+                            onGenerate={onGenerate}
+                            onCancel={onCancel}
+                            hasBeenGenerated={hasBeenGenerated}
+                        />
+                    }
                     prescription={prescriptionPaper}
                     notes={<ClinicalNotesPanel notes={summary} safetyNet={safetyNet} onChange={setSummary} />}
                 />

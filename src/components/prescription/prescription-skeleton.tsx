@@ -331,14 +331,11 @@ export default function PrescriptionSkeleton({
         </div>
       </div>
 
-      {/* Session actions — Cancel is real (generation is in flight); Save & Print's spot
-          is a shimmer placeholder so there's no layout jump once generation finishes. */}
+      {/* Save & Print's spot is a shimmer placeholder so there's no layout jump once
+          generation finishes; the session actions (Cancel) sit under the document tabs. */}
       <div className="sticky bottom-0 z-20 flex items-center justify-end gap-4 rounded-b-xl border-t bg-white/85 px-4 py-3 backdrop-blur sm:justify-between">
         <span className="hidden text-xs text-slate-400 sm:block">Generating your draft...</span>
-        <div className="flex flex-wrap items-center justify-end gap-3">
-          <PrescriptionActions onCancel={onCancel} hasBeenGenerated={false} />
-          <div className="h-9 w-28 rounded-lg bg-slate-200 animate-pulse" />
-        </div>
+        <div className="h-9 w-28 rounded-lg bg-slate-200 animate-pulse" />
       </div>
 
       <style>{`
@@ -354,6 +351,7 @@ export default function PrescriptionSkeleton({
       value={activeDocument}
       onValueChange={setActiveDocument}
       notesHasContent={hasNotesContent}
+      actions={<PrescriptionActions onCancel={onCancel} hasBeenGenerated={false} />}
       prescription={prescriptionContent}
       notes={notesContent}
     />

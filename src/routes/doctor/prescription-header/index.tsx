@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
@@ -5,10 +6,23 @@ import toast from 'react-hot-toast'
 import api from '@/lib/axios'
 import { handleError } from '@/lib/utils'
 import { useAuthStore } from '@/stores/auth-store'
+import { useHeaderConfigStore, type EditorTab } from '@/stores/header-config-store'
 import type { ClinicianHeaderUpdate } from '@/lib/header-config'
 import HeaderEditor, { type HeaderEditorProfile } from '@/components/prescription/header/editor/header-editor'
 
+const EDITOR_TABS: EditorTab[] = ['style', 'doctor', 'chambers', 'footer']
+
+interface PadEditorSearch {
+  tab?:     EditorTab
+  chamber?: string
+}
+
+// Other pages deep-link here (e.g. the Chambers page opens a specific chamber's pad).
 export const Route = createFileRoute('/doctor/prescription-header/')({
+  validateSearch: (search: Record<string, unknown>): PadEditorSearch => ({
+    tab:     EDITOR_TABS.includes(search.tab as EditorTab) ? (search.tab as EditorTab) : undefined,
+    chamber: typeof search.chamber === 'string' ? search.chamber : undefined,
+  }),
   component: PrescriptionHeaderPage,
 })
 
@@ -28,6 +42,18 @@ function EditorSkeleton() {
 function PrescriptionHeaderPage() {
   const userId = useAuthStore((state) => state.userId)
   const queryClient = useQueryClient()
+  const { tab, chamber } = Route.useSearch()
+
+  // Applies the deep-link target: switch to the requested tab and, for a chamber link,
+  // open that chamber's pad accordion and preview the letterhead as that chamber.
+  useEffect(() => {
+    const store = useHeaderConfigStore.getState()
+    if (tab) store.setActiveTab(tab)
+    if (chamber) {
+      store.setOpenPadId(chamber)
+      store.setPreviewChamber(chamber)
+    }
+  }, [tab, chamber])
 
   const { data: profile, isLoading } = useQuery<HeaderEditorProfile>({
     queryKey: ['clinician', userId],

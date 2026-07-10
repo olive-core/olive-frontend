@@ -11,6 +11,8 @@ interface DocumentSwitcherProps {
     prescription:     ReactNode;
     notes:            ReactNode;
     notesHasContent?: boolean;
+    /** Session controls (Generate Draft, RxMemory) pinned right under the tab bar. */
+    actions?:         ReactNode;
 }
 
 interface SegmentLabelProps {
@@ -39,6 +41,7 @@ export default function DocumentSwitcher({
     prescription,
     notes,
     notesHasContent,
+    actions,
 }: DocumentSwitcherProps) {
     return (
         <Tabs
@@ -62,6 +65,8 @@ export default function DocumentSwitcher({
                     />
                 </TabsTrigger>
             </TabsList>
+
+            {actions && <div className="container mt-3 flex justify-center print:hidden">{actions}</div>}
 
             <TabsContent value="prescription">{prescription}</TabsContent>
             <TabsContent value="notes">{notes}</TabsContent>

@@ -26,7 +26,7 @@ export default function DoctorControls() {
                 lang="bn"
             />
             <LabeledTextarea id={controlId("qualification")} label="Qualification" value={identity.qualification} onChange={(qualification) => setIdentity({ qualification })} placeholder="MBBS, FCPS (Medicine)" />
-            <LabeledTextarea id={controlId("designation")} label="Designation / title" value={designation} onChange={(designation) => patch({ designation })} placeholder="Consultant — Internal Medicine" />
+            <LabeledTextarea id={controlId("designation")} label="Designation / specialization" value={designation} onChange={(designation) => patch({ designation })} placeholder="Consultant — Internal Medicine" />
             <LabeledInput id={controlId("bmdcNo")} label="BMDC registration no." value={identity.bmdcNo} onChange={(bmdcNo) => setIdentity({ bmdcNo })} placeholder="A-12345" />
         </ControlSection>
     );

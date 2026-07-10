@@ -20,14 +20,12 @@ import api from "@/lib/axios"
 import toast from "react-hot-toast"
 import { AxiosError } from "axios"
 import { useQueryClient } from "@tanstack/react-query"
-import { XIcon } from "lucide-react"
+import { Link } from "@tanstack/react-router"
 
 const formSchema = z.object({
     firstName: z.string().trim().min(1, "First name is required"),
     lastName: z.string().trim().min(1, "Last name is required"),
     bmdcNo: z.string().regex(/^\d+$/, "BMDC number must contain only numbers"),
-    qualification: z.string(),
-    specializations: z.array(z.string()).optional(),
     defaultGeneration: z.boolean().optional(),
 })
 
@@ -54,66 +52,6 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
     );
 }
 
-function SpecializationsInput({
-    value,
-    onChange,
-}: {
-    value: string[];
-    onChange: (next: string[]) => void;
-}) {
-    const [input, setInput] = useState("");
-
-    const addTag = (raw: string) => {
-        const tag = raw.trim();
-        if (!tag || value.includes(tag)) return;
-        onChange([...value, tag]);
-        setInput("");
-    };
-
-    const removeTag = (tag: string) => onChange(value.filter((t) => t !== tag));
-
-    return (
-        <div className="flex flex-wrap gap-2 rounded-xl border px-2 py-2 focus-within:ring-2 focus-within:ring-emerald-500">
-            {value.map((tag) => (
-                <span
-                    key={tag}
-                    className="flex items-center gap-1 rounded-lg bg-emerald-100 px-2 py-1 text-xs text-emerald-700"
-                >
-                    {tag}
-                    <button
-                        type="button"
-                        onClick={() => removeTag(tag)}
-                        aria-label={`Remove ${tag}`}
-                        className="text-emerald-500 hover:text-emerald-700"
-                    >
-                        <XIcon className="size-3" />
-                    </button>
-                </span>
-            ))}
-
-            <input
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                        e.preventDefault();
-                        addTag(input);
-                    }
-                    if (e.key === "Backspace" && !input && value.length) {
-                        removeTag(value[value.length - 1]);
-                    }
-                }}
-                placeholder="Type and press Enter"
-                className="min-w-[120px] flex-1 bg-transparent text-base outline-none sm:text-sm"
-            />
-
-            <Button type="button" size="sm" onClick={() => addTag(input)}>
-                + Add
-            </Button>
-        </div>
-    );
-}
-
 export function ProfileForm({ clinicianData }: ProfileFormProps) {
 
     const [isLoading, setIsLoading] = useState(false)
@@ -127,8 +65,6 @@ export function ProfileForm({ clinicianData }: ProfileFormProps) {
             firstName: clinicianData?.first_name || "",
             lastName: clinicianData?.last_name || "",
             bmdcNo: clinicianData?.bmdc_no || "",
-            qualification: clinicianData?.qualification || "",
-            specializations: clinicianData?.specializations || [],
             defaultGeneration: clinicianData?.generate_ai_draft ?? true,
         },
     })
@@ -141,8 +77,6 @@ export function ProfileForm({ clinicianData }: ProfileFormProps) {
                 first_name: data.firstName,
                 last_name: data.lastName,
                 bmdc_no: data.bmdcNo,
-                qualification: data.qualification,
-                specializations: data.specializations,
                 generate_ai_draft: data.defaultGeneration,
             }
 
@@ -152,8 +86,8 @@ export function ProfileForm({ clinicianData }: ProfileFormProps) {
                 bmdcNo: payload.bmdc_no,
                 firstName: payload.first_name,
                 lastName: payload.last_name,
-                qualification: payload.qualification,
-                specializations: payload.specializations,
+                qualification: clinicianData?.qualification,
+                specializations: clinicianData?.specializations,
                 generate_ai_draft: payload.generate_ai_draft,
             })
             queryClient.invalidateQueries({ queryKey: ["clinician", userId] })
@@ -215,34 +149,17 @@ export function ProfileForm({ clinicianData }: ProfileFormProps) {
                                     </Field>
                                 )}
                             />
-                            <Controller
-                                name="qualification"
-                                control={form.control}
-                                render={({ field, fieldState }) => (
-                                    <Field data-invalid={fieldState.invalid}>
-                                        <FieldLabel>Qualification</FieldLabel>
-                                        <Input {...field} placeholder="MBBS, FCPS" />
-                                        {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                                    </Field>
-                                )}
-                            />
-                            <Controller
-                                name="specializations"
-                                control={form.control}
-                                render={({ field, fieldState }) => (
-                                    <Field data-invalid={fieldState.invalid}>
-                                        <FieldLabel>Specializations</FieldLabel>
-                                        <SpecializationsInput
-                                            value={field.value ?? []}
-                                            onChange={field.onChange}
-                                        />
-                                        <FieldDescription>
-                                            Press Enter or click + to add a specialization.
-                                        </FieldDescription>
-                                        {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                                    </Field>
-                                )}
-                            />
+                            <FieldDescription>
+                                Qualification and designation / specialization are edited on your{" "}
+                                <Link
+                                    to="/doctor/prescription-header"
+                                    search={{ tab: "doctor" }}
+                                    className="font-medium text-emerald-600 underline-offset-2 hover:underline"
+                                >
+                                    Prescription pad
+                                </Link>
+                                , so your profile and printed pads always match.
+                            </FieldDescription>
                         </div>
 
                         {/* Preferences */}

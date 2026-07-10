@@ -1,12 +1,11 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { Link } from "@tanstack/react-router";
-import { Building2Icon, PenIcon, PlusIcon, Trash2Icon } from "lucide-react";
+import { Building2Icon, ChevronRightIcon, PenIcon, PlusIcon, Trash2Icon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import NumberGroupInputMemo from "@/components/dashboard/number-group-input";
 import { useAuthStore } from "@/stores/auth-store";
 import {
@@ -19,8 +18,7 @@ import {
 } from "@/lib/attendant-queue";
 import { chamberLabel, chamberRoom, type Chamber, type Hospital } from "@/types/attendant-queue";
 import { handleError } from "@/lib/utils";
-import { padFromApi, padHasContent, padToApi, type ChamberPad } from "@/lib/chamber-pad";
-import ChamberPadFields from "@/components/prescription/chamber-pad-fields";
+import { padHasContent } from "@/lib/chamber-pad";
 import HospitalSelect from "./hospital-select";
 import NewChamberForm from "./new-chamber-form";
 
@@ -66,50 +64,29 @@ export default function ChambersManager() {
     );
 }
 
-// The chamber's printed identity: name, logo, address/phone/hours — the exact same
-// pad_config the pad editor's Chambers tab edits, so either page always shows the
-// other's latest save.
-function ChamberPadSection({ chamber }: { chamber: Chamber }) {
-    const queryClient = useQueryClient();
-    const [pad, setPad] = useState<ChamberPad>(() => padFromApi(chamber.pad_config));
-    const [dirty, setDirty] = useState(false);
-
-    useEffect(() => {
-        if (!dirty) setPad(padFromApi(chamber.pad_config));
-    }, [chamber.pad_config, dirty]);
-
-    const saveMutation = useMutation({
-        mutationFn: () => updateChamber(chamber.chamber_id, { pad_config: padToApi(pad) }),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["chambers"] });
-            setDirty(false);
-            toast.success("Prescription pad saved");
-        },
-        onError: (error) => handleError(error, "Could not save prescription pad"),
-    });
-
+// The chamber's printed identity is edited on the pad editor; this row deep-links
+// straight to that chamber's pad section there.
+function ChamberPadLink({ chamber }: { chamber: Chamber }) {
     return (
-        <div className="space-y-3">
-            <p className="text-xs text-muted-foreground">
-                What prints at the top of prescriptions written at this chamber.{" "}
-                <Link to="/doctor/prescription-header" className="text-emerald-600 underline-offset-2 hover:underline">
-                    Preview it in the pad designer
-                </Link>
-                .
-            </p>
-            <ChamberPadFields
-                chamberId={chamber.chamber_id}
-                chamberLabel={chamberLabel(chamber)}
-                pad={pad}
-                onChange={(patch) => {
-                    setPad((prev) => ({ ...prev, ...patch }));
-                    setDirty(true);
-                }}
-            />
-            <Button size="sm" onClick={() => saveMutation.mutate()} isLoading={saveMutation.isPending} disabled={!dirty}>
-                Save pad
-            </Button>
-        </div>
+        <Link
+            to="/doctor/prescription-header"
+            search={{ tab: "chambers", chamber: chamber.chamber_id }}
+            className="flex items-center gap-2 rounded-lg border px-3 py-2.5 transition-colors hover:bg-slate-50"
+        >
+            <Building2Icon className="size-4 shrink-0 text-emerald-600" />
+            <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+                <span className="flex items-center gap-2 text-sm font-medium">
+                    Prescription pad
+                    {padHasContent(chamber.pad_config) && (
+                        <span className="size-1.5 rounded-full bg-emerald-500" title="Configured" />
+                    )}
+                </span>
+                <span className="text-xs text-muted-foreground">
+                    Name, logo, address, phone &amp; hours printed at this chamber
+                </span>
+            </span>
+            <ChevronRightIcon className="size-4 shrink-0 text-slate-400" />
+        </Link>
     );
 }
 
@@ -175,29 +152,7 @@ function ChamberRow({ chamber }: { chamber: Chamber }) {
                 </div>
             </div>
 
-            <Accordion type="single" collapsible className="rounded-lg border">
-                <AccordionItem value="pad" className="border-b-0 px-3">
-                    <AccordionTrigger className="py-2.5 hover:no-underline">
-                        <span className="flex items-start gap-2">
-                            <Building2Icon className="mt-0.5 size-4 shrink-0 text-emerald-600" />
-                            <span className="flex flex-col items-start gap-0.5">
-                                <span className="flex items-center gap-2 text-sm font-medium">
-                                    Prescription pad
-                                    {padHasContent(chamber.pad_config) && (
-                                        <span className="size-1.5 rounded-full bg-emerald-500" title="Configured" />
-                                    )}
-                                </span>
-                                <span className="text-xs font-normal text-muted-foreground">
-                                    Name, logo, address, phone &amp; hours printed at this chamber
-                                </span>
-                            </span>
-                        </span>
-                    </AccordionTrigger>
-                    <AccordionContent className="pb-3">
-                        <ChamberPadSection chamber={chamber} />
-                    </AccordionContent>
-                </AccordionItem>
-            </Accordion>
+            <ChamberPadLink chamber={chamber} />
 
             <div>
                 <p className="text-sm text-muted-foreground mb-1">Attendants</p>

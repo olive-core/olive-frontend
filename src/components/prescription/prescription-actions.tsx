@@ -8,9 +8,9 @@ import { usePrescriptionStore } from "@/stores/prescription-store";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-// The session-level controls (AI draft generation, RxMemory templates) that live
-// alongside the letterhead's own Save & Print action, kept separate from `DoctorInfo`
-// so the letterhead can always render at the paper's full width.
+// The session-level controls (AI draft generation, RxMemory templates), shown right
+// under the document tabs — kept separate from `DoctorInfo` so the letterhead can
+// always render at the paper's full width.
 export default function PrescriptionActions({
     onGenerate,
     onCancel,
@@ -68,7 +68,7 @@ export default function PrescriptionActions({
     };
 
     return (
-        <div className="flex flex-wrap items-center justify-end gap-3">
+        <div className="flex w-full flex-wrap items-center justify-center gap-3">
             {isGenerating ? (
                 <Button variant="destructive" onClick={onCancel}>
                     Cancel

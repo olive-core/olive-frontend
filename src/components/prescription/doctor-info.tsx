@@ -2,15 +2,14 @@ import { useEffect } from "react";
 import { useAuthStore } from "@/stores/auth-store";
 import { useComposeLetterhead } from "@/hooks/use-compose-letterhead";
 import { ResolvedPrescriptionHeader } from "./header/clinician-prescription-header";
-import ChamberSwitcher from "./chamber-switcher";
 
-// The letterhead for an active session: chamber switcher (when the doctor has more than
-// one chamber) plus the resolved header. Always a full-width column on its own — never a
-// flex-row sibling of other controls — so the preset's internal layout gets the paper's
-// true width to lay out against (see PrescriptionActions for the session's other controls).
+// The resolved letterhead for an active session. The chamber is picked automatically
+// (queue start / last-used chamber), so there is no selector here. Always a full-width
+// column on its own — never a flex-row sibling of other controls — so the preset's
+// internal layout gets the paper's true width to lay out against.
 export default function DoctorInfo({ sessionId }: { sessionId: string }) {
     const { storeClinicianInfo } = useAuthStore();
-    const { letterhead, clinician, chambers, activeChamberId, isLoading } = useComposeLetterhead(sessionId);
+    const { letterhead, clinician, isLoading } = useComposeLetterhead(sessionId);
 
     useEffect(() => {
         storeClinicianInfo({
@@ -26,13 +25,6 @@ export default function DoctorInfo({ sessionId }: { sessionId: string }) {
 
     return (
         <div className="flex w-full flex-col gap-2">
-            {chambers.length > 0 && (
-                <ChamberSwitcher
-                    sessionId={sessionId}
-                    chambers={chambers}
-                    activeChamberId={activeChamberId}
-                />
-            )}
             <ResolvedPrescriptionHeader letterhead={letterhead} />
         </div>
     )
