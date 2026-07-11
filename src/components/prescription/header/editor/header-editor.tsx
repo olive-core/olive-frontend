@@ -23,6 +23,7 @@ import DoctorControls from "./controls/doctor-controls";
 import ChambersTab from "./controls/chambers-tab";
 import FooterTab from "./controls/footer-tab";
 import HeaderLivePreview from "./header-live-preview";
+import PadSetupChecklist from "./pad-setup-checklist";
 import { focusField, registerFocusResolver } from "./focus-field";
 
 export interface HeaderEditorProfile {
@@ -213,6 +214,9 @@ export default function HeaderEditor({ initialProfile, isSaving, onSave }: Heade
                         {saveLabel}
                     </Button>
                 </div>
+                <div className="mt-3">
+                    <PadSetupChecklist />
+                </div>
                 <ResizablePanelGroup
                     direction="horizontal"
                     autoSaveId="rx-header-editor-panes"
@@ -235,6 +239,9 @@ export default function HeaderEditor({ initialProfile, isSaving, onSave }: Heade
     return (
         <div className="mx-auto max-w-[860px] px-4 pb-32">
             <div className="-mx-4 flex items-center border-b bg-white px-4 py-2.5">{heading}</div>
+            <div className="mt-3">
+                <PadSetupChecklist />
+            </div>
             <CollapsiblePreview />
             <div className="mt-2">
                 <ControlTabs />

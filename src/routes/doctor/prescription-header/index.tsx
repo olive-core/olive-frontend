@@ -41,6 +41,7 @@ function EditorSkeleton() {
 
 function PrescriptionHeaderPage() {
   const userId = useAuthStore((state) => state.userId)
+  const storeClinicianInfo = useAuthStore((state) => state.storeClinicianInfo)
   const queryClient = useQueryClient()
   const { tab, chamber } = Route.useSearch()
 
@@ -63,7 +64,16 @@ function PrescriptionHeaderPage() {
 
   const saveMutation = useMutation({
     mutationFn: (payload: ClinicianHeaderUpdate) => api.put(`/clinician/${userId}`, payload),
-    onSuccess: () => {
+    onSuccess: (_response, payload) => {
+      // The session is never re-fetched on its own (doctors stay logged in), so the
+      // cached identity in auth-store is refreshed here to match what was just saved.
+      storeClinicianInfo({
+        firstName: payload.first_name,
+        lastName: payload.last_name,
+        qualification: payload.qualification,
+        specializations: payload.specializations,
+        bmdcNo: payload.bmdc_no,
+      })
       queryClient.invalidateQueries({ queryKey: ['clinician', userId] })
       queryClient.invalidateQueries({ queryKey: ['clinician-profile', userId] })
       toast.success('Prescription pad saved')

@@ -75,7 +75,7 @@ interface AuthStoreType {
     setActiveView: (view: ActiveView) => void;
     setActivePatientId: (patientId?: string) => void;
 
-    storeClinicianInfo: (data: ClinicianType) => void;
+    storeClinicianInfo: (data: Partial<ClinicianType>) => void;
     createClinicianProfile: (phone: string, otp: string) => Promise<void>;
 
     storePendingPatient: (data: PendingPatient) => void;
@@ -134,25 +134,16 @@ export const useAuthStore = create<AuthStoreType>()(
 
             setActivePatientId: (patientId?: string) => set({ activePatientId: patientId }),
 
-            storeClinicianInfo: (data: ClinicianType) => {
-                set({
-                    clinician: {
-                        bmdcNo: data.bmdcNo,
-                        firstName: data.firstName,
-                        lastName: data.lastName,
-                        generate_ai_draft: data.generate_ai_draft,
-                        specializations: data.specializations,
-                        qualification: data.qualification,
-                    }
-                })
+            storeClinicianInfo: (data: Partial<ClinicianType>) => {
+                set((state) => ({
+                    clinician: { ...state.clinician, ...data } as ClinicianType,
+                }))
             },
 
             createClinicianProfile: async (phone: string, otp: string) => {
                 const clinician = get().clinician;
                 const response = await api.post(`/clinician`, {
                     bmdc_no: clinician?.bmdcNo,
-                    qualification: clinician?.qualification || undefined,
-                    specializations: clinician?.specializations?.length ? clinician.specializations : undefined,
                     first_name: clinician?.firstName || "",
                     last_name: clinician?.lastName || "",
                     phone: phone,

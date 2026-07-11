@@ -62,7 +62,7 @@ export default function EnterOtpForm() {
                 navigate({ to: "/attendant" });
             } else if (role_intent === 'clinician') {
                 await createClinicianProfile(phoneNumber, otp.join("").trim());
-                navigate({ to: "/doctor/profile" });
+                navigate({ to: "/doctor" });
             } else {
                 await verifyOtp(phoneNumber, otp.join("").trim(), view, patient_id);
                 toast.success("OTP verified successfully!");

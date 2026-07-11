@@ -6,7 +6,7 @@ interface ProfileSummaryProps {
     firstName: string;
     lastName: string;
     qualification?: string;
-    specializations?: string[];
+    specializations?: string[] | null;
     bmdcNo?: string;
     phone?: string;
 }
@@ -16,10 +16,11 @@ export function ProfileSummary({
     firstName,
     lastName,
     qualification,
-    specializations = [],
+    specializations,
     bmdcNo,
     phone,
 }: ProfileSummaryProps) {
+    const tags = specializations ?? [];
     const fullName = `${firstName} ${lastName}`.trim();
     const initials = `${firstName?.[0] ?? ""}${lastName?.[0] ?? ""}`.toUpperCase();
 
@@ -39,9 +40,9 @@ export function ProfileSummary({
                     )}
                 </div>
 
-                {specializations.length > 0 && (
+                {tags.length > 0 && (
                     <div className="flex flex-wrap justify-center gap-1.5">
-                        {specializations.map((s) => (
+                        {tags.map((s) => (
                             <span
                                 key={s}
                                 className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-700"

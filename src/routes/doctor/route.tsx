@@ -2,6 +2,7 @@ import { createFileRoute, Outlet, useNavigate } from '@tanstack/react-router'
 import DashboardNavbar from "@/components/dashboard/navbar";
 import SubscriptionBanner from "@/components/dashboard/subscription/subscription-banner";
 import SubscriptionBlockedDialog from "@/components/dashboard/subscription/subscription-blocked-dialog";
+import LetterheadInviteDialog from "@/components/dashboard/letterhead-invite-dialog";
 import AppFooter from "@/components/shared/app-footer";
 import { useAuthStore } from "@/stores/auth-store";
 import { ensureMedicineIndex } from "@/lib/medicine-search/index-store";
@@ -50,6 +51,7 @@ function DashboardLayout() {
         <AppFooter />
       </main>
       <SubscriptionBlockedDialog />
+      <LetterheadInviteDialog />
     </div>
   )
 
