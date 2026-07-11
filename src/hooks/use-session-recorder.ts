@@ -17,7 +17,7 @@ interface UseSessionRecorderReturn {
     pauseRecording: () => void;
     resumeRecording: () => void;
     stopRecording: () => Promise<void>;
-    discardRecording: () => void;
+    discardRecording: () => Promise<void>;
     stream: MediaStream | null;
 }
 
@@ -28,6 +28,10 @@ interface RecordingWindow {
     recorder: MediaRecorder;
     closeTimer: PausableTimeout;
 }
+
+// Identifies the chunking algorithm the stored chunks were captured with, so they can be
+// merged into a continuous recording later. Bump the version if the algorithm changes.
+const CHUNKING_SCHEME = "listen-v1";
 
 export default function useSessionRecorder({
     consultationId,
@@ -41,7 +45,6 @@ export default function useSessionRecorder({
     const streamRef = useRef<MediaStream | null>(null);
     const activeWindowsRef = useRef<RecordingWindow[]>([]); // capturing now (briefly two, during an overlap)
     const openWindowTimerRef = useRef<PausableTimeout | null>(null); // fires every chunkSizeInMs to open the next window
-    const finalRecorderRef = useRef<MediaRecorder | null>(null); // the recorder whose chunk closes the session
     const startTimeRef = useRef<number>(0);       // start of the current running segment; 0 while paused/stopped
     const accumulatedMsRef = useRef<number>(0);   // elapsed time banked from previous running segments
     const durationIntervalRef = useRef<number | null>(null);
@@ -59,7 +62,7 @@ export default function useSessionRecorder({
         }, 250);
     };
 
-    const sendAudioChunk = useCallback((chunk: Blob, isLastChunk: boolean = false): Promise<void> => {
+    const sendAudioChunk = useCallback((chunk: Blob): Promise<void> => {
         const chunkIndex = chunkIndexRef.current;
         chunkIndexRef.current += 1;
 
@@ -69,7 +72,9 @@ export default function useSessionRecorder({
                 formData.append('file', chunk, `chunk-${Date.now()}.webm`);
                 formData.append("session_id", consultationId);
                 formData.append('chunk_index', chunkIndex.toString());
-                formData.append('is_last_chunk', isLastChunk.toString());
+                formData.append('chunking_scheme', CHUNKING_SCHEME);
+                formData.append('chunk_size_ms', chunkSizeInMs.toString());
+                formData.append('overlap_ms', overlapMs.toString());
                 await api.post('/conversation/chunk', formData);
             } catch (error) {
                 console.error("Error sending audio chunk:", error);
@@ -78,7 +83,7 @@ export default function useSessionRecorder({
 
         pendingUploadsRef.current.push(upload);
         return upload;
-    }, [consultationId]);
+    }, [consultationId, chunkSizeInMs, overlapMs]);
 
     const closeWindow = useEffectEvent((recorder: MediaRecorder) => {
         activeWindowsRef.current = activeWindowsRef.current.filter((window) => {
@@ -100,7 +105,7 @@ export default function useSessionRecorder({
         recorder.onstop = () => {
             if (isDiscardingRef.current || parts.length === 0) return;
             const chunk = new Blob(parts, { type: 'audio/webm' });
-            sendAudioChunk(chunk, recorder === finalRecorderRef.current);
+            sendAudioChunk(chunk);
         };
         recorder.start();
 
@@ -154,7 +159,6 @@ export default function useSessionRecorder({
         }
 
         pendingUploadsRef.current = [];
-        finalRecorderRef.current = null;
         startTimeRef.current = 0;
         accumulatedMsRef.current = 0;
         setIsRecording(false);
@@ -219,10 +223,8 @@ export default function useSessionRecorder({
         const windows = activeWindowsRef.current;
         activeWindowsRef.current = [];
         const finalRecorder = windows[windows.length - 1]?.recorder ?? null;
-        finalRecorderRef.current = finalRecorder;
 
-        // Close earlier overlapping windows first; the newest carries is_last_chunk so the server
-        // finalizes the session only after every window has been sent.
+        // Close earlier overlapping windows first, then the newest, so chunks upload in order.
         const earlierRecorders = windows.slice(0, -1).map(window => window.recorder);
         await Promise.all(earlierRecorders.map(stopAndFlush));
         if (finalRecorder) await stopAndFlush(finalRecorder);
@@ -233,10 +235,14 @@ export default function useSessionRecorder({
         streamRef.current = null;
     }, [cancelTimers, stopAndFlush]);
 
-    const discardRecording = useCallback(() => {
+    // Resolves once in-flight uploads have settled, so the caller can safely delete
+    // the session and its audio without a late chunk racing the delete.
+    const discardRecording = useCallback((): Promise<void> => {
         isDiscardingRef.current = true;
+        const inFlightUploads = pendingUploadsRef.current;
         cleanup();
         setIsRecording(false);
+        return Promise.allSettled(inFlightUploads).then(() => undefined);
     }, [cleanup]);
 
     const startRecording = useEffectEvent(async () => {
@@ -247,7 +253,6 @@ export default function useSessionRecorder({
             isFinalizingRef.current = false;
             isDiscardingRef.current = false;
             chunkIndexRef.current = 0;
-            finalRecorderRef.current = null;
             openWindowTimerRef.current = null;
             activeWindowsRef.current = [];
             pendingUploadsRef.current = [];

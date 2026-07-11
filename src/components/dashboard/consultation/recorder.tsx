@@ -4,6 +4,7 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { trackRecordingFinalization } from "@/lib/recording-finalization";
 import { releaseQueueSession } from "@/lib/attendant-queue";
+import { deleteSession } from "@/lib/session";
 // import { AudioVisualizerMemo } from "./visualizer"; // disabled — see waveform block below
 import RecordingStatus, { type RecorderStatus } from "./recording-status";
 import DiscardSessionDialog from "./discard-session-dialog";
@@ -37,7 +38,9 @@ export default function Recorder() {
     }
 
     const handleDiscard = () => {
-        discardRecording();
+        // Once in-flight uploads settle, delete the abandoned session and its audio.
+        // Fire-and-forget so the exit stays instant.
+        discardRecording().then(() => deleteSession(consultationId)).catch(() => {});
         // Drop this patient from the queue (no-op for walk-ins). The queue panel
         // reconciles live via SSE, so we don't block the exit on the response.
         releaseQueueSession(consultationId).catch(() => {});
