@@ -1,4 +1,5 @@
 import api from "@/lib/axios";
+import { PausableTimeout } from "@/lib/pausable-timeout";
 import { useCallback, useEffect, useEffectEvent, useRef, useState } from "react";
 import { useSilenceDetection } from "./use-silence-detection";
 
@@ -20,20 +21,27 @@ interface UseSessionRecorderReturn {
     stream: MediaStream | null;
 }
 
+// A window is one MediaRecorder plus the timer that closes it. Windows open on a steady
+// chunkSizeInMs cadence and each records for chunkSizeInMs + overlapMs, so every consecutive
+// pair shares an overlapMs tail and no word is split at a seam.
+interface RecordingWindow {
+    recorder: MediaRecorder;
+    closeTimer: PausableTimeout;
+}
+
 export default function useSessionRecorder({
     consultationId,
-    chunkSizeInMs = 30 * 1000, // each window is ~30s — the window transcription models expect
-    overlapMs = 2 * 1000,      // consecutive windows share this tail so no word is split at a seam
+    chunkSizeInMs = 30 * 1000, // the cadence at which a new window opens
+    overlapMs = 2 * 1000,      // extra tail each window records past the next window's start
 }: UseSessionRecorderProps): UseSessionRecorderReturn {
     const [duration, setDuration] = useState<number>(0);
     const [isRecording, setIsRecording] = useState<boolean>(false);
     const [isPaused, setIsPaused] = useState<boolean>(false);
 
     const streamRef = useRef<MediaStream | null>(null);
-    const activeRecordersRef = useRef<MediaRecorder[]>([]); // windows currently capturing (briefly two, during an overlap)
+    const activeWindowsRef = useRef<RecordingWindow[]>([]); // capturing now (briefly two, during an overlap)
+    const openWindowTimerRef = useRef<PausableTimeout | null>(null); // fires every chunkSizeInMs to open the next window
     const finalRecorderRef = useRef<MediaRecorder | null>(null); // the recorder whose chunk closes the session
-    const overlapTimerRef = useRef<number | null>(null); // starts the next window before the current one closes
-    const cutTimerRef = useRef<number | null>(null);     // closes the oldest window at the 30s boundary
     const startTimeRef = useRef<number>(0);       // start of the current running segment; 0 while paused/stopped
     const accumulatedMsRef = useRef<number>(0);   // elapsed time banked from previous running segments
     const durationIntervalRef = useRef<number | null>(null);
@@ -72,8 +80,17 @@ export default function useSessionRecorder({
         return upload;
     }, [consultationId]);
 
+    const closeWindow = useEffectEvent((recorder: MediaRecorder) => {
+        activeWindowsRef.current = activeWindowsRef.current.filter((window) => {
+            if (window.recorder !== recorder) return true;
+            window.closeTimer.cancel();
+            return false;
+        });
+        if (recorder.state !== 'inactive') recorder.stop();
+    });
+
     // Each window records into its own buffer and uploads once on stop, so overlapping windows never mix data.
-    const startChunkRecorder = useEffectEvent(() => {
+    const openWindow = useEffectEvent(() => {
         if (!streamRef.current) return;
         const recorder = new MediaRecorder(streamRef.current, { mimeType: 'audio/webm;codecs=opus' });
         const parts: Blob[] = [];
@@ -86,46 +103,50 @@ export default function useSessionRecorder({
             sendAudioChunk(chunk, recorder === finalRecorderRef.current);
         };
         recorder.start();
-        activeRecordersRef.current.push(recorder);
+
+        const closeTimer = new PausableTimeout(chunkSizeInMs + overlapMs, () => closeWindow(recorder));
+        closeTimer.start();
+        activeWindowsRef.current.push({ recorder, closeTimer });
     });
 
-    const closeOldestWindow = useEffectEvent(() => {
-        const recorder = activeRecordersRef.current.shift();
-        if (recorder && recorder.state !== 'inactive') recorder.stop();
+    const scheduleNextWindow = useEffectEvent(() => {
+        openWindowTimerRef.current = new PausableTimeout(chunkSizeInMs, () => {
+            openWindow();
+            scheduleNextWindow();
+        });
+        openWindowTimerRef.current.start();
     });
 
-    const clearWindowTimers = useEffectEvent(() => {
-        if (overlapTimerRef.current) {
-            clearTimeout(overlapTimerRef.current);
-            overlapTimerRef.current = null;
-        }
-        if (cutTimerRef.current) {
-            clearTimeout(cutTimerRef.current);
-            cutTimerRef.current = null;
-        }
+    // Pause/resume/cancel every live timer together: the opener and each open window's close timer.
+    // Pausing preserves each timer's remaining time, so a chunk paused mid-window still records its
+    // full length once resumed — never ballooning past chunkSizeInMs + overlapMs.
+    const pauseTimers = useEffectEvent(() => {
+        openWindowTimerRef.current?.pause();
+        activeWindowsRef.current.forEach((window) => window.closeTimer.pause());
     });
 
-    // Open the next window `overlapMs` before closing the current one, so the two share that tail of
-    // audio: a word landing on the boundary is captured whole in at least one window, and nothing is lost.
-    const scheduleWindowCycle = useEffectEvent(() => {
-        overlapTimerRef.current = setTimeout(startChunkRecorder, chunkSizeInMs - overlapMs);
-        cutTimerRef.current = setTimeout(() => {
-            closeOldestWindow();
-            scheduleWindowCycle();
-        }, chunkSizeInMs);
+    const resumeTimers = useEffectEvent(() => {
+        openWindowTimerRef.current?.start();
+        activeWindowsRef.current.forEach((window) => window.closeTimer.start());
+    });
+
+    const cancelTimers = useEffectEvent(() => {
+        openWindowTimerRef.current?.cancel();
+        openWindowTimerRef.current = null;
+        activeWindowsRef.current.forEach((window) => window.closeTimer.cancel());
     });
 
     const cleanup = useEffectEvent(() => {
-        clearWindowTimers();
+        cancelTimers();
         if (durationIntervalRef.current) {
             clearInterval(durationIntervalRef.current);
             durationIntervalRef.current = null;
         }
 
-        activeRecordersRef.current.forEach((recorder) => {
-            if (recorder.state !== 'inactive') recorder.stop();
+        activeWindowsRef.current.forEach((window) => {
+            if (window.recorder.state !== 'inactive') window.recorder.stop();
         });
-        activeRecordersRef.current = [];
+        activeWindowsRef.current = [];
 
         if (streamRef.current) {
             streamRef.current.getTracks().forEach(track => track.stop());
@@ -142,12 +163,11 @@ export default function useSessionRecorder({
     });
 
     const pauseRecording = useCallback(() => {
-        const recording = activeRecordersRef.current.filter(recorder => recorder.state === 'recording');
+        const recording = activeWindowsRef.current.filter(window => window.recorder.state === 'recording');
         if (recording.length === 0) return;
-        recording.forEach(recorder => recorder.pause());
+        recording.forEach(window => window.recorder.pause());
 
-        // Suspend window rotation while paused; the timer banks the running segment and stops.
-        clearWindowTimers();
+        pauseTimers();
         if (startTimeRef.current) {
             accumulatedMsRef.current += Date.now() - startTimeRef.current;
             startTimeRef.current = 0;
@@ -157,18 +177,18 @@ export default function useSessionRecorder({
             durationIntervalRef.current = null;
         }
         setIsPaused(true);
-    }, [clearWindowTimers]);
+    }, [pauseTimers]);
 
     const resumeRecording = useCallback(() => {
-        const paused = activeRecordersRef.current.filter(recorder => recorder.state === 'paused');
+        const paused = activeWindowsRef.current.filter(window => window.recorder.state === 'paused');
         if (paused.length === 0) return;
-        paused.forEach(recorder => recorder.resume());
+        paused.forEach(window => window.recorder.resume());
 
-        scheduleWindowCycle();
+        resumeTimers();
         startTimeRef.current = Date.now();
         startDurationTimer();
         setIsPaused(false);
-    }, [scheduleWindowCycle]);
+    }, [resumeTimers]);
 
     const stopAndFlush = useEffectEvent((recorder: MediaRecorder): Promise<void> =>
         new Promise((resolve) => {
@@ -190,20 +210,20 @@ export default function useSessionRecorder({
         setIsRecording(false);
 
         // Stop the rotation so no new window spins up while we finish.
-        clearWindowTimers();
+        cancelTimers();
         if (durationIntervalRef.current) {
             clearInterval(durationIntervalRef.current);
             durationIntervalRef.current = null;
         }
 
-        const recorders = activeRecordersRef.current;
-        activeRecordersRef.current = [];
-        const finalRecorder = recorders[recorders.length - 1] ?? null;
+        const windows = activeWindowsRef.current;
+        activeWindowsRef.current = [];
+        const finalRecorder = windows[windows.length - 1]?.recorder ?? null;
         finalRecorderRef.current = finalRecorder;
 
         // Close earlier overlapping windows first; the newest carries is_last_chunk so the server
         // finalizes the session only after every window has been sent.
-        const earlierRecorders = recorders.slice(0, -1);
+        const earlierRecorders = windows.slice(0, -1).map(window => window.recorder);
         await Promise.all(earlierRecorders.map(stopAndFlush));
         if (finalRecorder) await stopAndFlush(finalRecorder);
 
@@ -211,7 +231,7 @@ export default function useSessionRecorder({
         await Promise.allSettled(pendingUploadsRef.current);
         streamRef.current?.getTracks().forEach(track => track.stop());
         streamRef.current = null;
-    }, [clearWindowTimers, stopAndFlush]);
+    }, [cancelTimers, stopAndFlush]);
 
     const discardRecording = useCallback(() => {
         isDiscardingRef.current = true;
@@ -228,7 +248,8 @@ export default function useSessionRecorder({
             isDiscardingRef.current = false;
             chunkIndexRef.current = 0;
             finalRecorderRef.current = null;
-            activeRecordersRef.current = [];
+            openWindowTimerRef.current = null;
+            activeWindowsRef.current = [];
             pendingUploadsRef.current = [];
 
             // Request microphone access
@@ -248,8 +269,8 @@ export default function useSessionRecorder({
             startTimeRef.current = Date.now();
             accumulatedMsRef.current = 0;
 
-            startChunkRecorder();  // first window: [0, chunkSizeInMs]
-            scheduleWindowCycle(); // every later window opens overlapMs before the previous one closes
+            openWindow();          // first window: [0, chunkSizeInMs + overlapMs]
+            scheduleNextWindow();  // every later window opens one chunkSizeInMs after the last
             startDurationTimer();
         } catch (error) {
             console.error("Error starting recording:", error);
