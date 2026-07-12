@@ -10,10 +10,7 @@ export function filterConsultationsByName(
     if (!normalizedTerm) return consultations;
 
     return consultations.filter((consultation) => {
-        const fullName = getFullName(
-            consultation.patient_first_name,
-            consultation.patient_last_name,
-        ).toLowerCase();
+        const fullName = getFullName(consultation.patient_name).toLowerCase();
         return fullName.includes(normalizedTerm);
     });
 }

@@ -13,7 +13,7 @@ import type { Chamber } from "@/types/attendant-queue";
 
 // The doctor's identity is edited here too (name/qualification/BMDC live on the profile,
 // not in header_config) so the live preview reacts to those edits as well.
-const EMPTY_IDENTITY: EditableIdentity = { firstName: "", lastName: "", qualification: "", bmdcNo: "" };
+const EMPTY_IDENTITY: EditableIdentity = { name: "", qualification: "", bmdcNo: "" };
 
 export type EditorTab = "style" | "doctor" | "chambers" | "footer";
 

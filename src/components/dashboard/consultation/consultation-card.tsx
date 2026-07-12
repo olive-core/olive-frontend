@@ -134,7 +134,7 @@ function ConsultationCard({
         );
     }
 
-    const { prescription_data, created_at, clinician_first_name, clinician_last_name } = prescription;
+    const { prescription_data, created_at, clinician_name } = prescription;
     const chief_complaints = prescription_data?.chief_complaints ?? [];
     const diagnoses = prescription_data?.diagnoses ?? [];
     const rx_list = prescription_data?.rx_list ?? [];
@@ -147,7 +147,7 @@ function ConsultationCard({
                 <div className="flex items-start justify-between gap-2">
                     <div>
                         <h2 className="text-lg font-semibold text-slate-800">
-                            Dr. {clinician_first_name} {clinician_last_name}
+                            Dr. {clinician_name}
                         </h2>
                         <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-0.5">
                             <CalendarDays className="w-3.5 h-3.5" />

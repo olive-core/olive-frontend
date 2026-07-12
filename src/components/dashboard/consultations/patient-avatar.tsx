@@ -3,13 +3,12 @@ import type { PatientSex } from "@/types/consultation";
 import { getInitials, getSexAvatarClasses } from "./helpers";
 
 interface PatientAvatarProps {
-    firstName?: string | null;
-    lastName?:  string | null;
+    name?:      string | null;
     sex?:       PatientSex | null;
     className?: string;
 }
 
-export default function PatientAvatar({ firstName, lastName, sex, className }: PatientAvatarProps) {
+export default function PatientAvatar({ name, sex, className }: PatientAvatarProps) {
     return (
         <div
             className={cn(
@@ -18,7 +17,7 @@ export default function PatientAvatar({ firstName, lastName, sex, className }: P
                 className,
             )}
         >
-            {getInitials(firstName, lastName)}
+            {getInitials(name)}
         </div>
     );
 }

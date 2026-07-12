@@ -7,8 +7,7 @@ type SessionType = {
 };
 
 type PatientInfoType = {
-    first_name:    string;
-    last_name:     string;
+    name:          string;
     date_of_birth: string;
     sex:           string;
 };
@@ -38,8 +37,7 @@ export default function PatientInfo({ sessionId }: { sessionId: string }) {
 
     return (
         <PatientStrip
-            firstName={patient.first_name}
-            lastName={patient.last_name}
+            name={patient.name}
             dateOfBirth={patient.date_of_birth}
             sex={patient.sex}
             dateTime={new Date()}

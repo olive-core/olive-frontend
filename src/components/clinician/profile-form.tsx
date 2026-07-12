@@ -23,9 +23,8 @@ import { useQueryClient } from "@tanstack/react-query"
 import { Link } from "@tanstack/react-router"
 
 const formSchema = z.object({
-    firstName: z.string().trim().min(1, "First name is required"),
-    lastName: z.string().trim().min(1, "Last name is required"),
-    bmdcNo: z.string().regex(/^\d+$/, "BMDC number must contain only numbers"),
+    name: z.string().trim().min(1, "Name is required"),
+    bmdcNo: z.string().trim().min(1, "BMDC number is required").regex(/^[A-Za-z0-9-]+$/, "Enter a valid BMDC number (e.g. A-53127)"),
     defaultGeneration: z.boolean().optional(),
 })
 
@@ -34,8 +33,7 @@ type FormValues = z.infer<typeof formSchema>
 interface ProfileFormProps {
     clinicianData: {
         "user_id": string;
-        "first_name": string;
-        "last_name": string;
+        "name": string;
         "bmdc_no": string;
         "qualification": string;
         "specializations": string[];
@@ -62,8 +60,7 @@ export function ProfileForm({ clinicianData }: ProfileFormProps) {
     const form = useForm<FormValues>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            firstName: clinicianData?.first_name || "",
-            lastName: clinicianData?.last_name || "",
+            name: clinicianData?.name || "",
             bmdcNo: clinicianData?.bmdc_no || "",
             defaultGeneration: clinicianData?.generate_ai_draft ?? true,
         },
@@ -74,8 +71,7 @@ export function ProfileForm({ clinicianData }: ProfileFormProps) {
     async function onSubmit(data: FormValues) {
         try {
             const payload = {
-                first_name: data.firstName,
-                last_name: data.lastName,
+                name: data.name,
                 bmdc_no: data.bmdcNo,
                 generate_ai_draft: data.defaultGeneration,
             }
@@ -84,8 +80,7 @@ export function ProfileForm({ clinicianData }: ProfileFormProps) {
             await api.put(`/clinician/${userId}`, payload)
             storeClinicianInfo({
                 bmdcNo: payload.bmdc_no,
-                firstName: payload.first_name,
-                lastName: payload.last_name,
+                name: payload.name,
                 qualification: clinicianData?.qualification,
                 specializations: clinicianData?.specializations,
                 generate_ai_draft: payload.generate_ai_draft,
@@ -109,30 +104,17 @@ export function ProfileForm({ clinicianData }: ProfileFormProps) {
                         {/* Personal */}
                         <div className="flex flex-col gap-4">
                             <SectionTitle>Personal</SectionTitle>
-                            <div className="grid gap-4 sm:grid-cols-2">
-                                <Controller
-                                    name="firstName"
-                                    control={form.control}
-                                    render={({ field, fieldState }) => (
-                                        <Field data-invalid={fieldState.invalid}>
-                                            <FieldLabel>First name</FieldLabel>
-                                            <Input {...field} placeholder="John" />
-                                            {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                                        </Field>
-                                    )}
-                                />
-                                <Controller
-                                    name="lastName"
-                                    control={form.control}
-                                    render={({ field, fieldState }) => (
-                                        <Field data-invalid={fieldState.invalid}>
-                                            <FieldLabel>Last name</FieldLabel>
-                                            <Input {...field} placeholder="Doe" />
-                                            {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                                        </Field>
-                                    )}
-                                />
-                            </div>
+                            <Controller
+                                name="name"
+                                control={form.control}
+                                render={({ field, fieldState }) => (
+                                    <Field data-invalid={fieldState.invalid}>
+                                        <FieldLabel>Name</FieldLabel>
+                                        <Input {...field} placeholder="Full name" />
+                                        {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                                    </Field>
+                                )}
+                            />
                         </div>
 
                         {/* Professional */}
@@ -144,7 +126,7 @@ export function ProfileForm({ clinicianData }: ProfileFormProps) {
                                 render={({ field, fieldState }) => (
                                     <Field data-invalid={fieldState.invalid}>
                                         <FieldLabel>BMDC registration no.</FieldLabel>
-                                        <Input {...field} placeholder="123456" inputMode="numeric" />
+                                        <Input {...field} placeholder="A-53127" />
                                         {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                                     </Field>
                                 )}

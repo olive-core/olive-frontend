@@ -68,8 +68,7 @@ function PrescriptionHeaderPage() {
       // The session is never re-fetched on its own (doctors stay logged in), so the
       // cached identity in auth-store is refreshed here to match what was just saved.
       storeClinicianInfo({
-        firstName: payload.first_name,
-        lastName: payload.last_name,
+        name: payload.name,
         qualification: payload.qualification,
         specializations: payload.specializations,
         bmdcNo: payload.bmdc_no,

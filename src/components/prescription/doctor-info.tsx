@@ -13,8 +13,7 @@ export default function DoctorInfo({ sessionId }: { sessionId: string }) {
 
     useEffect(() => {
         storeClinicianInfo({
-            firstName: clinician?.first_name ?? "",
-            lastName: clinician?.last_name ?? "",
+            name: clinician?.name ?? "",
             bmdcNo: clinician?.bmdc_no ?? "",
             qualification: clinician?.qualification ?? "",
             generate_ai_draft: clinician?.generate_ai_draft ?? true

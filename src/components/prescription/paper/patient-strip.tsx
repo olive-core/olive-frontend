@@ -7,8 +7,7 @@ const SEX_LABELS: Record<string, string> = {
 };
 
 interface PatientStripProps {
-    firstName?:    string | null;
-    lastName?:     string | null;
+    name?:         string | null;
     dateOfBirth?:  string | null;
     sex?:          string | null;
     dateTime:      string | Date;
@@ -26,18 +25,14 @@ function calculateAge(dateOfBirth: string): number {
     return isBeforeBirthdayThisYear ? yearsDifference - 1 : yearsDifference;
 }
 
-function joinName(firstName?: string | null, lastName?: string | null): string {
-    return `${firstName ?? ""} ${lastName ?? ""}`.trim();
-}
-
-export default function PatientStrip({ firstName, lastName, dateOfBirth, sex, dateTime }: PatientStripProps) {
+export default function PatientStrip({ name, dateOfBirth, sex, dateTime }: PatientStripProps) {
     const date = typeof dateTime === "string" ? new Date(dateTime) : dateTime;
 
     return (
         <div className="border-y py-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 text-sm mt-5">
             <div className="flex gap-4">
                 <p className="text-slate-500">
-                    Name: <span className="font-semibold">{joinName(firstName, lastName)}</span>
+                    Name: <span className="font-semibold">{(name ?? "").trim()}</span>
                 </p>
 
                 {dateOfBirth && (

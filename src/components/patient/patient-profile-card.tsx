@@ -42,8 +42,8 @@ interface PatientProfileCardProps {
 }
 
 export function PatientProfileCard({ patient, phone }: PatientProfileCardProps) {
-    const fullName = `${patient.first_name} ${patient.last_name}`.trim();
-    const initials = `${patient.first_name?.[0] ?? ""}${patient.last_name?.[0] ?? ""}`.toUpperCase();
+    const fullName = (patient.name ?? "").trim();
+    const initials = fullName.split(/\s+/).map((w) => w[0] ?? "").slice(0, 2).join("").toUpperCase();
     const age = getAgeFromDOB(patient.date_of_birth).years;
     const sexLabel = patient.sex ? SEX_LABELS[patient.sex] : undefined;
     const dateOfBirth = format(new Date(patient.date_of_birth), "d MMM yyyy");

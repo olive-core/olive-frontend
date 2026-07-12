@@ -9,9 +9,8 @@ import { handleError } from "@/lib/utils";
 import { useNavigate } from "@tanstack/react-router";
 
 const doctorSchema = z.object({
-    firstName: z.string().trim().min(1, "First name is required"),
-    lastName: z.string().trim().min(1, "Last name is required"),
-    bmdcNo: z.string().regex(/^\d+$/, "BMDC number must contain only numbers"),
+    name: z.string().trim().min(1, "Name is required"),
+    bmdcNo: z.string().trim().min(1, "BMDC number is required").regex(/^[A-Za-z0-9-]+$/, "Enter a valid BMDC number (e.g. A-53127)"),
     termsAccepted: z.boolean().refine((accepted) => accepted, {
         message: "You must accept the Terms and Conditions to continue",
     }),
@@ -32,8 +31,7 @@ export default function CreateDoctorForm({ phoneNumber }: CreateDoctorFormProps)
     const form = useForm<DoctorFormValues>({
         resolver: zodResolver(doctorSchema),
         defaultValues: {
-            firstName: "",
-            lastName: "",
+            name: "",
             bmdcNo: "",
             termsAccepted: false,
         }
@@ -42,8 +40,7 @@ export default function CreateDoctorForm({ phoneNumber }: CreateDoctorFormProps)
     async function onSubmit(value: DoctorFormValues) {
         storeClinicianInfo({
             bmdcNo: value.bmdcNo,
-            firstName: value.firstName,
-            lastName: value.lastName,
+            name: value.name,
         })
 
         try {
@@ -56,8 +53,7 @@ export default function CreateDoctorForm({ phoneNumber }: CreateDoctorFormProps)
     }
 
     const steps: MultiStepFormSteps<DoctorFormValues> = [
-        { def: "input", id: "firstName", label: "First Name", type: "text", placeholder: "First Name" },
-        { def: "input", id: "lastName", label: "Last Name", type: "text", placeholder: "Last Name" },
+        { def: "input", id: "name", label: "Name", type: "text", placeholder: "Full name" },
         { def: "input", id: "bmdcNo", label: "BMDC No", type: "text", placeholder: "BMDC No" },
         { def: "termsAcceptance", id: "termsAccepted", label: "Terms and Conditions" },
     ]

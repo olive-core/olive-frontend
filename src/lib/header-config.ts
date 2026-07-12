@@ -36,16 +36,14 @@ export interface HeaderConfig {
 // The doctor's identity stays authoritative on the clinician profile; the header only
 // styles it and adds chamber/contact details around it.
 export interface DoctorIdentity {
-    firstName?:     string | null;
-    lastName?:      string | null;
+    name?:          string | null;
     qualification?: string | null;
     bmdcNo?:        string | null;
 }
 
 // The editable (always-string) form of the identity, used by the editor store and inputs.
 export interface EditableIdentity {
-    firstName:     string;
-    lastName:      string;
+    name:          string;
     qualification: string;
     bmdcNo:        string;
 }
@@ -235,8 +233,7 @@ export function clinicianStyleConfig(api?: HeaderConfigApi | null): HeaderConfig
 // The clinician PUT body the header editor sends: identity fields (which live on the
 // profile) plus the serialized header_config.
 export interface ClinicianHeaderUpdate {
-    first_name:      string;
-    last_name:       string;
+    name:            string;
     qualification:   string;
     specializations: string[];
     bmdc_no:         string;
@@ -254,8 +251,7 @@ export function specializationsFromDesignation(designation: string): string[] {
 
 export function buildHeaderUpdatePayload(identity: EditableIdentity, config: HeaderConfig): ClinicianHeaderUpdate {
     return {
-        first_name:      identity.firstName.trim(),
-        last_name:       identity.lastName.trim(),
+        name:            identity.name.trim(),
         qualification:   identity.qualification.trim(),
         specializations: specializationsFromDesignation(config.designation),
         bmdc_no:         identity.bmdcNo.trim(),
@@ -304,7 +300,7 @@ export function getHeaderPalette(config: HeaderConfig): HeaderPalette {
 }
 
 export function joinDoctorName(identity: DoctorIdentity): string {
-    return `${identity.firstName ?? ""} ${identity.lastName ?? ""}`.trim();
+    return (identity.name ?? "").trim();
 }
 
 export function visibleContactLines(config: HeaderConfig): ContactLine[] {
@@ -356,6 +352,8 @@ export interface FooterModel {
 export interface RenderConfigApi {
     version?:  number;
     identity?: {
+        name?:          string | null;
+        // legacy snapshots (pre single-name) carried split fields
         first_name?:    string | null;
         last_name?:     string | null;
         name_bn?:       string | null;
@@ -390,8 +388,7 @@ function footerFromApi(api: RenderConfigApi["footer"]): FooterModel {
 // plus live-clinician fields for legacy rows saved before snapshots existed.
 export interface LetterheadSource {
     render_config?:           RenderConfigApi | null;
-    clinician_first_name?:    string | null;
-    clinician_last_name?:     string | null;
+    clinician_name?:          string | null;
     qualification?:           string | null;
     bmdc_no?:                 string | null;
     clinician_header_config?: HeaderConfigApi | null;
@@ -403,14 +400,21 @@ export interface ResolvedLetterhead {
     footer:   FooterModel;
 }
 
+// Legacy snapshots (pre single-name) stored first_name/last_name; new ones store name.
+function snapshotIdentityName(identity: RenderConfigApi["identity"]): string | null | undefined {
+    if (!identity) return undefined;
+    if (identity.name) return identity.name;
+    const legacy = `${identity.first_name ?? ""} ${identity.last_name ?? ""}`.trim();
+    return legacy || undefined;
+}
+
 // Snapshot-first: an issued prescription renders exactly what it was saved with.
 // The optional live clinician profile only backfills legacy rows (and the compose
 // screen, which has no snapshot yet).
 export function resolveLetterhead(
     detail: LetterheadSource,
     liveClinician?: {
-        first_name?:    string | null;
-        last_name?:     string | null;
+        name?:          string | null;
         qualification?: string | null;
         bmdc_no?:       string | null;
         header_config?: HeaderConfigApi | null;
@@ -421,8 +425,7 @@ export function resolveLetterhead(
         const config = headerConfigFromApi(snapshot.header);
         return {
             identity: {
-                firstName:     snapshot.identity?.first_name,
-                lastName:      snapshot.identity?.last_name,
+                name:          snapshotIdentityName(snapshot.identity),
                 qualification: snapshot.identity?.qualification,
                 bmdcNo:        snapshot.identity?.bmdc_no,
             },
@@ -435,8 +438,7 @@ export function resolveLetterhead(
     const config = headerConfigFromApi(headerConfigApi);
     return {
         identity: {
-            firstName:     liveClinician?.first_name ?? detail.clinician_first_name,
-            lastName:      liveClinician?.last_name ?? detail.clinician_last_name,
+            name:          liveClinician?.name ?? detail.clinician_name,
             qualification: detail.qualification ?? liveClinician?.qualification,
             bmdcNo:        detail.bmdc_no ?? liveClinician?.bmdc_no,
         },

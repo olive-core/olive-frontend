@@ -29,7 +29,7 @@ export default function ChamberCard({ chamber, onOpen, onAdd }: ChamberCardProps
     const next = waiting[0];
     const afterNext = waiting[1];
 
-    const doctorName = [chamber.clinician_first_name, chamber.clinician_last_name].filter(Boolean).join(" ");
+    const doctorName = (chamber.clinician_name ?? "");
     const room = chamberRoom(chamber);
     const initials = (doctorName || "Dr")
         .split(" ")
@@ -62,7 +62,7 @@ export default function ChamberCard({ chamber, onOpen, onAdd }: ChamberCardProps
                     {inside ? (
                         <span className="truncate">
                             <span className="font-medium">
-                                {inside.first_name} {inside.last_name}
+                                {inside.name}
                             </span>
                             <span className="text-muted-foreground"> · in room</span>
                         </span>
@@ -76,10 +76,10 @@ export default function ChamberCard({ chamber, onOpen, onAdd }: ChamberCardProps
                     {next ? (
                         <span className="truncate">
                             <span className="font-medium">
-                                {next.first_name} {next.last_name}
+                                {next.name}
                             </span>
                             {afterNext && (
-                                <span className="text-muted-foreground"> • {afterNext.first_name}</span>
+                                <span className="text-muted-foreground"> • {afterNext.name}</span>
                             )}
                             {waiting.length > 2 && (
                                 <span className="text-muted-foreground"> +{waiting.length - 2}</span>
@@ -92,7 +92,7 @@ export default function ChamberCard({ chamber, onOpen, onAdd }: ChamberCardProps
             </div>
 
             <Button className="w-full mt-3" onClick={onAdd}>
-                <PlusIcon className="size-4" /> Add to Dr. {chamber.clinician_first_name || ""}
+                <PlusIcon className="size-4" /> Add to Dr. {chamber.clinician_name || ""}
             </Button>
         </div>
     );

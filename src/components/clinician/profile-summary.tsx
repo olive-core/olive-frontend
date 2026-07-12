@@ -3,8 +3,7 @@ import { Separator } from "@/components/ui/separator";
 import { IdCardIcon, PhoneIcon } from "lucide-react";
 
 interface ProfileSummaryProps {
-    firstName: string;
-    lastName: string;
+    name?: string;
     qualification?: string;
     specializations?: string[] | null;
     bmdcNo?: string;
@@ -13,16 +12,15 @@ interface ProfileSummaryProps {
 
 // Read-only identity panel: who the doctor is, at a glance, beside the editable form.
 export function ProfileSummary({
-    firstName,
-    lastName,
+    name,
     qualification,
     specializations,
     bmdcNo,
     phone,
 }: ProfileSummaryProps) {
     const tags = specializations ?? [];
-    const fullName = `${firstName} ${lastName}`.trim();
-    const initials = `${firstName?.[0] ?? ""}${lastName?.[0] ?? ""}`.toUpperCase();
+    const fullName = (name ?? "").trim();
+    const initials = fullName.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join("").toUpperCase();
 
     return (
         <Card className="md:sticky md:top-24">

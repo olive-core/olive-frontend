@@ -13,10 +13,7 @@ export default function DoctorControls() {
 
     return (
         <ControlSection title="Doctor" description="Shown at the top of every prescription." icon={UserRoundIcon}>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <LabeledInput id={controlId("firstName")} label="First name" value={identity.firstName} onChange={(firstName) => setIdentity({ firstName })} placeholder="Ahsan" />
-                <LabeledInput label="Last name" value={identity.lastName} onChange={(lastName) => setIdentity({ lastName })} placeholder="Habib" />
-            </div>
+            <LabeledInput id={controlId("name")} label="Name" value={identity.name} onChange={(name) => setIdentity({ name })} placeholder="Dr. Ahsan Habib" />
             <LabeledInput
                 id={controlId("nameBn")}
                 label="Name in Bangla (optional)"

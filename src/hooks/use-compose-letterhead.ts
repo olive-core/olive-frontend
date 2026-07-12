@@ -13,8 +13,7 @@ interface SessionDetail {
 }
 
 interface ClinicianProfile {
-    first_name?:    string | null;
-    last_name?:     string | null;
+    name?:          string | null;
     qualification?: string | null;
     bmdc_no?:       string | null;
     header_config?: HeaderConfigApi | null;
@@ -61,8 +60,7 @@ export function useComposeLetterhead(sessionId: string): ComposeLetterhead {
         if (activeChamber) config = applyChamberPad(config, activeChamber);
         letterhead = {
             identity: {
-                firstName:     clinician.first_name,
-                lastName:      clinician.last_name,
+                name:          clinician.name,
                 qualification: clinician.qualification,
                 bmdcNo:        clinician.bmdc_no,
             },

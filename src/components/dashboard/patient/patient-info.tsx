@@ -48,7 +48,7 @@ export default function PatientInfo({ userId: patientId, phone, setShowContent }
         setShowContent({
             status: "PATIENT_CREATE",
             initialValues: {
-                name: patientData.first_name + " " + patientData.last_name,
+                name: patientData.name,
                 age: getAgeFromDOB(patientData.date_of_birth).years.toString(),
                 sex: patientData.sex
             },
@@ -79,7 +79,7 @@ export default function PatientInfo({ userId: patientId, phone, setShowContent }
             <Item variant="outline">
                 <ItemContent>
                     {/* TODO: fetch and display real data */}
-                    <ItemTitle className="text-lg">{patientData.first_name + " " + patientData.last_name}</ItemTitle>
+                    <ItemTitle className="text-lg">{patientData.name}</ItemTitle>
                     <ItemDescription>
                         <div className="flex flex-col space-y-1 text-slate-600 text-sm">
                             <div className="flex">

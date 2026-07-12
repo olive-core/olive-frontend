@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useAuthStore } from "@/stores/auth-store";
 
-const displayName = (firstName: string, lastName?: string) => `${firstName} ${lastName ?? ""}`.trim();
+const displayName = (name?: string) => (name ?? "").trim();
 
 // One phone can reach several patients, so the patient area needs a way to switch
 // between them. Hidden when there's only one profile — nothing to switch to.
@@ -25,7 +25,7 @@ export default function PatientProfileSwitcher() {
         <DropdownMenu>
             <DropdownMenuTrigger className="flex max-w-[60vw] cursor-pointer items-center gap-2 rounded-full border-2 border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition-colors hover:border-slate-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 sm:max-w-[16rem]">
                 <UserIcon className="size-4 shrink-0 text-emerald-600" />
-                <span className="min-w-0 flex-1 truncate">{displayName(active.firstName, active.lastName)}</span>
+                <span className="min-w-0 flex-1 truncate">{displayName(active.name)}</span>
                 <ChevronDownIcon className="size-4 shrink-0 text-slate-400" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="min-w-52">
@@ -36,7 +36,7 @@ export default function PatientProfileSwitcher() {
                         onSelect={() => setActivePatientId(patient.patientId)}
                         className="flex cursor-pointer items-center justify-between gap-3"
                     >
-                        <span className="truncate">{displayName(patient.firstName, patient.lastName)}</span>
+                        <span className="truncate">{displayName(patient.name)}</span>
                         {patient.patientId === active.patientId && <CheckIcon className="size-4 text-emerald-600" />}
                     </DropdownMenuItem>
                 ))}

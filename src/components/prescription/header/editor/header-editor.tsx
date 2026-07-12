@@ -27,8 +27,7 @@ import PadSetupChecklist from "./pad-setup-checklist";
 import { focusField, registerFocusResolver } from "./focus-field";
 
 export interface HeaderEditorProfile {
-    first_name?:      string | null;
-    last_name?:       string | null;
+    name?:            string | null;
     qualification?:   string | null;
     specializations?: string[] | null;
     bmdc_no?:         string | null;
@@ -77,7 +76,7 @@ function resolveFocusTarget(key: string, previewChamberId: string | null): {
     if (key === "medicalSymbol" || key === "logo") {
         return { tab: "style", targetKey: key };
     }
-    // firstName, nameBn, qualification, designation, bmdcNo
+    // name, nameBn, qualification, designation, bmdcNo
     return { tab: "doctor", targetKey: key };
 }
 
@@ -133,8 +132,7 @@ export default function HeaderEditor({ initialProfile, isSaving, onSave }: Heade
         }
         hydrate(
             {
-                firstName:     initialProfile.first_name ?? "",
-                lastName:      initialProfile.last_name ?? "",
+                name:          initialProfile.name ?? "",
                 qualification: initialProfile.qualification ?? "",
                 bmdcNo:        initialProfile.bmdc_no ?? "",
             },

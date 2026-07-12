@@ -70,8 +70,8 @@ export default function WelcomeScreen() {
 
                     <motion.div className="flex flex-col items-center justify-center mb-10">
                         <p className="mb-6 text-lg text-center text-gray-500 font-light">
-                            {clinician?.firstName
-                                ? `Dr. ${clinician.firstName}, enter your patient's phone number`
+                            {clinician?.name
+                                ? `Dr. ${clinician.name}, enter your patient's phone number`
                                 : "Enter your patient's phone number"}
                         </p>
                         <div className="w-full max-w-md px-4 sm:px-0">

@@ -15,15 +15,13 @@ import { persist } from "zustand/middleware";
 
 
 type PendingPatient = {
-    firstName: string;
-    lastName: string;
+    name: string;
     dateOfBirth?: string;
     sex?: string;
 };
 
 type PendingAttendant = {
-    firstName: string;
-    lastName: string;
+    name: string;
 };
 
 const emptyAccounts = (): Accounts => ({ isClinician: false, isAttendant: false, patients: [] });
@@ -36,8 +34,7 @@ function mapAccounts(api?: ApiCheckUserResponse["accounts"]): Accounts {
         attendantName: api?.attendant_name ?? null,
         patients: (api?.patients ?? []).map((p) => ({
             patientId: p.patient_id,
-            firstName: p.first_name,
-            lastName: p.last_name,
+            name: p.name,
         })),
     };
 }
@@ -144,8 +141,7 @@ export const useAuthStore = create<AuthStoreType>()(
                 const clinician = get().clinician;
                 const response = await api.post(`/clinician`, {
                     bmdc_no: clinician?.bmdcNo,
-                    first_name: clinician?.firstName || "",
-                    last_name: clinician?.lastName || "",
+                    name: clinician?.name || "",
                     phone: phone,
                     otp: otp,
                     terms_version: TERMS_VERSION,
@@ -165,8 +161,7 @@ export const useAuthStore = create<AuthStoreType>()(
             createPatientProfile: async (phone: string, otp: string) => {
                 const pendingPatient = get().pendingPatient;
                 const response = await api.post('/patient/register', {
-                    first_name: pendingPatient?.firstName,
-                    last_name: pendingPatient?.lastName,
+                    name: pendingPatient?.name,
                     phone,
                     otp,
                     date_of_birth: pendingPatient?.dateOfBirth || undefined,
@@ -182,7 +177,7 @@ export const useAuthStore = create<AuthStoreType>()(
                         ...state.accounts,
                         patients: [
                             ...state.accounts.patients,
-                            { patientId, firstName: pendingPatient?.firstName || "", lastName: pendingPatient?.lastName },
+                            { patientId, name: pendingPatient?.name || "" },
                         ],
                     },
                     activeView: "patient",
@@ -196,8 +191,7 @@ export const useAuthStore = create<AuthStoreType>()(
             createAttendantProfile: async (phone: string, otp: string) => {
                 const pendingAttendant = get().pendingAttendant;
                 const response = await api.post('/attendant/register', {
-                    first_name: pendingAttendant?.firstName,
-                    last_name: pendingAttendant?.lastName,
+                    name: pendingAttendant?.name,
                     phone,
                     otp,
                 });

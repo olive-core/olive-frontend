@@ -19,7 +19,7 @@ export default function PendingInvites() {
     if (invites.length === 0) return null;
 
     const doctorName = (invite: AttendantChamber) =>
-        [invite.clinician_first_name, invite.clinician_last_name].filter(Boolean).join(" ");
+        (invite.clinician_name ?? "");
 
     return (
         <div className="max-w-md mx-auto mb-6">

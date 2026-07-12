@@ -22,8 +22,7 @@ export type ChamberAttendant = {
     chamber_id: string;
     attendant_user_id: string;
     status: string;
-    first_name?: string;
-    last_name?: string;
+    name?: string;
     phone?: string;
 };
 
@@ -32,8 +31,7 @@ export type AttendantChamber = {
     room_no?: string | null;
     hospital_id?: string | null;
     hospital_name?: string | null;
-    clinician_first_name?: string | null;
-    clinician_last_name?: string | null;
+    clinician_name?: string | null;
 };
 
 /** A chamber is displayed by its hospital's name (private chambers have their own hospital row). */
@@ -53,8 +51,7 @@ export type QueueEntry = {
     session_id?: string | null;
     status: QueueStatus;
     position: number;
-    first_name?: string;
-    last_name?: string;
+    name?: string;
     sex?: string;
     age?: number;
 };

@@ -15,14 +15,13 @@ export default function CreateAttendantForm({ phoneNumber }: CreateAttendantForm
     const navigate = useNavigate();
     const { storePendingAttendant, sendOtp } = useAuthStore();
 
-    const [firstName, setFirstName] = useState("");
-    const [lastName, setLastName] = useState("");
+    const [name, setName] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     async function submit() {
-        if (!firstName.trim() || !lastName.trim()) return;
+        if (!name.trim()) return;
         setIsSubmitting(true);
-        storePendingAttendant({ firstName: firstName.trim(), lastName: lastName.trim() });
+        storePendingAttendant({ name: name.trim() });
         try {
             await sendOtp("+88".concat(phoneNumber.join("").trim()));
             toast.success("OTP sent successfully!");
@@ -40,13 +39,12 @@ export default function CreateAttendantForm({ phoneNumber }: CreateAttendantForm
                 <CardTitle className="text-center">Create Attendant Profile</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-                <Input placeholder="First name" value={firstName} onChange={(e) => setFirstName(e.target.value)} autoFocus />
-                <Input placeholder="Last name" value={lastName} onChange={(e) => setLastName(e.target.value)} />
+                <Input placeholder="Full name" value={name} onChange={(e) => setName(e.target.value)} autoFocus />
                 <Button
                     className="w-full"
                     onClick={submit}
                     isLoading={isSubmitting}
-                    disabled={!firstName.trim() || !lastName.trim()}
+                    disabled={!name.trim()}
                 >
                     Continue
                 </Button>

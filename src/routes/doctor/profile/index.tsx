@@ -56,8 +56,7 @@ function RouteComponent() {
         <div className="grid grid-cols-1 items-start gap-6 md:grid-cols-3">
           <div className="md:col-span-1">
             <ProfileSummary
-              firstName={clinicianData.first_name}
-              lastName={clinicianData.last_name}
+              name={clinicianData.name}
               qualification={clinicianData.qualification}
               specializations={clinicianData.specializations}
               bmdcNo={clinicianData.bmdc_no}

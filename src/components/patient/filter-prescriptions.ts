@@ -8,7 +8,7 @@ export function isFiltersActive(searchTerm: string, period: Period): boolean {
 }
 
 function clinicianFullName(item: PatientPrescriptionListItem): string {
-    return `${item.clinician_first_name ?? ""} ${item.clinician_last_name ?? ""}`.toLowerCase();
+    return (item.clinician_name ?? "").toLowerCase();
 }
 
 function matchesSearchTerm(item: PatientPrescriptionListItem, normalizedTerm: string): boolean {

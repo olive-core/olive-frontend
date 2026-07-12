@@ -20,7 +20,7 @@ export default function ConsultationCard({ consultation }: ConsultationCardProps
         });
     };
 
-    const fullName = getFullName(consultation.patient_first_name, consultation.patient_last_name);
+    const fullName = getFullName(consultation.patient_name);
     const timeOfDay = getTimeOfDay(consultation.created_at);
 
     return (
@@ -30,8 +30,7 @@ export default function ConsultationCard({ consultation }: ConsultationCardProps
         >
             <div className="flex items-center gap-4 md:contents">
                 <PatientAvatar
-                    firstName={consultation.patient_first_name}
-                    lastName={consultation.patient_last_name}
+                    name={consultation.patient_name}
                     sex={consultation.patient_sex}
                     className="w-11 h-11 text-sm"
                 />

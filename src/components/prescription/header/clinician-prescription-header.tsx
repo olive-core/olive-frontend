@@ -21,8 +21,7 @@ export function ResolvedPrescriptionHeader({
     if (!hasHeaderContent(config)) {
         return (
             <ClinicianHeader
-                firstName={identity.firstName}
-                lastName={identity.lastName}
+                name={identity.name}
                 qualification={identity.qualification}
                 bmdcNo={identity.bmdcNo}
             />

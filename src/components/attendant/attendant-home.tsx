@@ -8,7 +8,7 @@ import AddPatientDialog from "./add-patient-dialog";
 import PendingInvites from "./pending-invites";
 
 const doctorLabel = (chamber: AttendantChamber) =>
-    `Dr. ${[chamber.clinician_first_name, chamber.clinician_last_name].filter(Boolean).join(" ")}`.trim();
+    `Dr. ${(chamber.clinician_name ?? "")}`.trim();
 
 export default function AttendantHome() {
     const { data: chambers = [], isLoading } = useQuery({

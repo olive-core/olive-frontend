@@ -1,15 +1,13 @@
 import { isToday, isYesterday, format } from "date-fns";
 import type { PatientSex } from "@/types/consultation";
 
-export function getInitials(firstName?: string | null, lastName?: string | null): string {
-    const first = firstName?.trim()?.[0] ?? "";
-    const last = lastName?.trim()?.[0] ?? "";
-    const initials = `${first}${last}`.toUpperCase();
+export function getInitials(name?: string | null): string {
+    const initials = (name ?? "").trim().split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join("").toUpperCase();
     return initials || "?";
 }
 
-export function getFullName(firstName?: string | null, lastName?: string | null): string {
-    return `${firstName ?? ""} ${lastName ?? ""}`.trim() || "Unknown patient";
+export function getFullName(name?: string | null): string {
+    return (name ?? "").trim() || "Unknown patient";
 }
 
 export function getDayKey(isoDate: string): string {

@@ -52,7 +52,7 @@ function buildCards(accounts: Accounts): AccountCard[] {
     }
 
     for (const patient of accounts.patients) {
-        const name = `${patient.firstName} ${patient.lastName ?? ""}`.trim();
+        const name = (patient.name ?? "").trim();
         cards.push({
             key: `patient-${patient.patientId}`,
             view: "patient",

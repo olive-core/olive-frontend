@@ -131,7 +131,7 @@ function QueueRow({ entry, position, inside, onUp, onDown, onRemove }: QueueRowP
             </span>
             <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium truncate">
-                    {entry.first_name} {entry.last_name}
+                    {entry.name}
                 </p>
                 <p className="text-xs text-muted-foreground capitalize">
                     {inside ? (

@@ -21,8 +21,7 @@ import {
 } from "./mappers";
 
 export interface ClinicianProfile {
-    first_name?:    string | null;
-    last_name?:     string | null;
+    name?:          string | null;
     qualification?: string | null;
     bmdc_no?:       string | null;
     header_config?: HeaderConfigApi | null;
@@ -49,8 +48,7 @@ export default function PrescriptionReadView({ consultation, clinician, patient 
             }
             patientStrip={
                 <PatientStrip
-                    firstName={consultation.patient_first_name}
-                    lastName={consultation.patient_last_name}
+                    name={consultation.patient_name}
                     dateOfBirth={patient?.date_of_birth}
                     sex={patient?.sex}
                     dateTime={consultation.created_at}

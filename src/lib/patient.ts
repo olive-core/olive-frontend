@@ -3,8 +3,7 @@ import api from "@/lib/axios";
 // A patient reachable behind a phone (point-of-care picker / profile list).
 export type PatientSummary = {
     patient_id: string;
-    first_name: string;
-    last_name?: string;
+    name: string;
     date_of_birth?: string;
     sex?: "male" | "female" | "non_binary";
 };
@@ -12,8 +11,7 @@ export type PatientSummary = {
 // A possible duplicate surfaced by the gate, with its numbers masked.
 export type SimilarMatch = {
     patient_id: string;
-    first_name: string;
-    last_name?: string;
+    name: string;
     sex?: string;
     age?: number;
     masked_numbers: string[];
@@ -34,12 +32,11 @@ export const dobFromAge = (age: string) =>
 export const lookupByPhone = (phone: string) =>
     api.post<PatientSummary[]>("/patient/lookup-by-phone", { phone }).then((r) => r.data);
 
-export const findSimilar = (payload: { first_name: string; last_name?: string; sex: string; age: number }) =>
+export const findSimilar = (payload: { name: string; sex: string; age: number }) =>
     api.post<SimilarMatch[]>("/patient/find-similar", payload).then((r) => r.data);
 
 export const createPatient = (payload: {
-    first_name: string;
-    last_name?: string;
+    name: string;
     phone: string;
     date_of_birth?: string;
     sex?: string;

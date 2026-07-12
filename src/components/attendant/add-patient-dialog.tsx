@@ -52,11 +52,6 @@ const FORM_STEPS: MultiStepFormSteps<PatientFormValues> = [
     },
 ];
 
-function splitName(name: string) {
-    const [firstName, ...rest] = name.trim().split(" ");
-    return { firstName, lastName: rest.join(" ") };
-}
-
 export default function AddPatientDialog({ chamberId, open, onClose }: AddPatientDialogProps) {
     const queryClient = useQueryClient();
     const [phone, setPhone] = useState<string[]>(emptyPhone);
@@ -112,10 +107,9 @@ export default function AddPatientDialog({ chamberId, open, onClose }: AddPatien
     }, [phone, form]);
 
     const savePatient = async (values: PatientFormValues) => {
-        const { firstName, lastName } = splitName(values.name);
         setBusy(true);
         try {
-            const similar = await findSimilar({ first_name: firstName, last_name: lastName, sex: values.sex, age: parseInt(values.age, 10) });
+            const similar = await findSimilar({ name: values.name, sex: values.sex, age: parseInt(values.age, 10) });
             if (similar.length > 0) {
                 setMatches(similar);
                 setStep("gate");
@@ -168,10 +162,8 @@ export default function AddPatientDialog({ chamberId, open, onClose }: AddPatien
         try {
             let patientId = selected?.patient_id;
             if (!patientId && draft) {
-                const { firstName, lastName } = splitName(draft.name);
                 const created = await createPatient({
-                    first_name: firstName,
-                    last_name: lastName,
+                    name: draft.name,
                     date_of_birth: dobFromAge(draft.age),
                     sex: draft.sex,
                     phone: fullPhone(),
@@ -241,7 +233,7 @@ export default function AddPatientDialog({ chamberId, open, onClose }: AddPatien
 
                 {step === "confirm" && (selected || draft) && (
                     <ConfirmCard
-                        name={selected ? `${selected.first_name} ${selected.last_name ?? ""}`.trim() : draft!.name}
+                        name={selected ? selected.name : draft!.name}
                         detail={selected ? confirmDetail(selected) : `${draft!.age}y · ${draft!.sex}`}
                         busy={busy}
                         onAdd={confirmAndQueue}

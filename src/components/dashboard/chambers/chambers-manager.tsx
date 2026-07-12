@@ -160,7 +160,7 @@ function ChamberRow({ chamber }: { chamber: Chamber }) {
                 {attendants.map((attendant) => (
                     <div key={attendant.id} className="flex items-center justify-between py-1">
                         <span className="text-sm">
-                            {attendant.first_name} {attendant.last_name} · {attendant.phone}
+                            {attendant.name} · {attendant.phone}
                             {attendant.status === "pending" && (
                                 <span className="ml-2 text-xs text-amber-600">Pending</span>
                             )}

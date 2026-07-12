@@ -29,7 +29,7 @@ export default function DuplicateGate({ matches, busy, onLink, onCreateNew }: Du
                         className="flex flex-col gap-1.5 rounded-xl border-2 border-amber-200 bg-amber-50/60 px-4 py-3 text-left transition-colors cursor-pointer hover:border-amber-400 disabled:cursor-default disabled:opacity-50"
                     >
                         <span className="flex items-baseline justify-between gap-3">
-                            <span className="font-semibold">{match.first_name} {match.last_name}</span>
+                            <span className="font-semibold">{match.name}</span>
                             <span className="text-sm text-muted-foreground capitalize">
                                 {match.age != null ? `${match.age}y` : ""}
                                 {match.sex ? ` · ${match.sex}` : ""}

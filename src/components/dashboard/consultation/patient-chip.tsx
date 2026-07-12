@@ -35,8 +35,8 @@ export default function PatientChip({ userId }: { userId: string }) {
 
     if (!data) return null;
 
-    const fullName = `${data.first_name} ${data.last_name}`.trim();
-    const initials = `${data.first_name?.[0] ?? ""}${data.last_name?.[0] ?? ""}`;
+    const fullName = (data.name ?? "").trim();
+    const initials = fullName.split(/\s+/).map((w) => w[0] ?? "").slice(0, 2).join("");
     const age = getAgeFromDOB(data.date_of_birth).years;
     const sexLabel = data.sex ? SEX_LABEL[data.sex] : undefined;
 

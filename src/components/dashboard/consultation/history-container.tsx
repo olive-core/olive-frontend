@@ -114,7 +114,7 @@ export default function HistoryContainer({
                                     {summary}
                                 </p>
                                 <p className="text-xs text-slate-400 mt-0.5">
-                                    Dr. {history.clinician_first_name} {history.clinician_last_name}
+                                    Dr. {history.clinician_name}
                                 </p>
                             </div>
                         </button>

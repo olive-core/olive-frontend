@@ -22,8 +22,7 @@ const SEX_OPTIONS = [
 ] as const;
 
 const patientSchema = z.object({
-    firstName: z.string().trim().min(1, "First name is required"),
-    lastName: z.string().trim().min(1, "Last name is required"),
+    name: z.string().trim().min(1, "Name is required"),
     age: z.string().min(1, "Age is required").refine(
         (val) => {
             const age = parseInt(val, 10);
@@ -40,7 +39,7 @@ interface CreatePatientFormProps {
     phoneNumber: string[];
 }
 
-const TOTAL_STEPS = 3;
+const TOTAL_STEPS = 2;
 
 export default function CreatePatientForm({ phoneNumber }: CreatePatientFormProps) {
     const navigate = useNavigate();
@@ -51,7 +50,7 @@ export default function CreatePatientForm({ phoneNumber }: CreatePatientFormProp
 
     const form = useForm<PatientFormValues>({
         resolver: zodResolver(patientSchema),
-        defaultValues: { firstName: "", lastName: "", age: "", sex: "male" },
+        defaultValues: { name: "", age: "", sex: "male" },
     });
 
     const { register, trigger, formState: { errors }, getValues, watch, setValue } = form;
@@ -60,9 +59,8 @@ export default function CreatePatientForm({ phoneNumber }: CreatePatientFormProp
     const direction = prevStep < step ? 1 : -1;
 
     async function goNext() {
-        const fields: (keyof PatientFormValues)[] = ['firstName', 'lastName'];
-        if (step < fields.length) {
-            const valid = await trigger(fields[step]);
+        if (step === 0) {
+            const valid = await trigger("name");
             if (!valid) return;
         }
         setPrevStep(step);
@@ -81,8 +79,7 @@ export default function CreatePatientForm({ phoneNumber }: CreatePatientFormProp
         setIsSubmitting(true);
         const values = getValues();
         storePendingPatient({
-            firstName: values.firstName,
-            lastName: values.lastName,
+            name: values.name,
             dateOfBirth: dobFromAge(values.age),
             sex: values.sex,
         });
@@ -125,20 +122,13 @@ export default function CreatePatientForm({ phoneNumber }: CreatePatientFormProp
                         className="space-y-4"
                     >
                         {step === 0 && (
-                            <Field data-invalid={!!errors.firstName}>
-                                <FieldLabel htmlFor="firstName" className="text-center text-muted-foreground block">First Name</FieldLabel>
-                                <Input {...register('firstName')} id="firstName" placeholder="First Name" autoFocus autoComplete="given-name" aria-invalid={!!errors.firstName} aria-describedby={errors.firstName ? "firstName-error" : undefined} />
-                                {errors.firstName && <FieldError id="firstName-error" errors={[errors.firstName]} />}
+                            <Field data-invalid={!!errors.name}>
+                                <FieldLabel htmlFor="name" className="text-center text-muted-foreground block">Name</FieldLabel>
+                                <Input {...register('name')} id="name" placeholder="Full name" autoFocus autoComplete="name" aria-invalid={!!errors.name} aria-describedby={errors.name ? "name-error" : undefined} />
+                                {errors.name && <FieldError id="name-error" errors={[errors.name]} />}
                             </Field>
                         )}
                         {step === 1 && (
-                            <Field data-invalid={!!errors.lastName}>
-                                <FieldLabel htmlFor="lastName" className="text-center text-muted-foreground block">Last Name</FieldLabel>
-                                <Input {...register('lastName')} id="lastName" placeholder="Last Name" autoFocus autoComplete="family-name" aria-invalid={!!errors.lastName} aria-describedby={errors.lastName ? "lastName-error" : undefined} />
-                                {errors.lastName && <FieldError id="lastName-error" errors={[errors.lastName]} />}
-                            </Field>
-                        )}
-                        {step === 2 && (
                             <div className="space-y-4">
                                 <Field data-invalid={!!errors.age}>
                                     <FieldLabel htmlFor="age" className="text-center text-muted-foreground block">Age</FieldLabel>

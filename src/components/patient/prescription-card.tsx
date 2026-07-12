@@ -8,9 +8,9 @@ interface PrescriptionCardProps {
     prescription: PatientPrescriptionListItem;
 }
 
-function getClinicianName(firstName?: string | null, lastName?: string | null): string {
-    const name = `${firstName ?? ""} ${lastName ?? ""}`.trim();
-    return name ? `Dr. ${name}` : "Unknown clinician";
+function getClinicianName(name?: string | null): string {
+    const n = (name ?? "").trim();
+    return n ? `Dr. ${n}` : "Unknown clinician";
 }
 
 export default function PrescriptionCard({ prescription }: PrescriptionCardProps) {
@@ -23,10 +23,7 @@ export default function PrescriptionCard({ prescription }: PrescriptionCardProps
         });
     };
 
-    const clinicianName = getClinicianName(
-        prescription.clinician_first_name,
-        prescription.clinician_last_name,
-    );
+    const clinicianName = getClinicianName(prescription.clinician_name);
 
     return (
         <button

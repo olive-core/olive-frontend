@@ -3,14 +3,12 @@ import type { PatientSummary } from "@/lib/patient";
 export type PatientInfoType = {
     date_of_birth: string;
     patient_id: string;
-    first_name: string;
-    last_name: string;
+    name: string;
     sex?: 'male' | 'female' | 'non_binary';
 }
 
 export type PatientUpdatePayload = {
-    first_name?: string;
-    last_name?: string;
+    name?: string;
     date_of_birth?: string;
     sex?: 'male' | 'female' | 'non_binary';
 }
@@ -32,8 +30,7 @@ export type HistoryType = {
     created_at: string;
     diagnoses_summary: string[];
     clinician_id: string;
-    clinician_first_name: string;
-    clinician_last_name: string;
+    clinician_name: string;
 }
 
 export type PatientPrescriptionListItem = HistoryType;
@@ -105,11 +102,9 @@ export type PrescriptionType = {
     prescription_id: string;
     session_id: string;
     clinician_id: string;
-    clinician_first_name: string;
-    clinician_last_name: string;
+    clinician_name: string;
     patient_id: string;
-    patient_first_name: string;
-    patient_last_name: string;
+    patient_name: string;
     prescription_data: PrescriptionData;
     created_at: string;
     updated_at: string;

@@ -34,8 +34,7 @@ import { useAuthStore } from "@/stores/auth-store"
 import type { PatientInfoType } from "@/types/patient"
 
 const formSchema = z.object({
-    firstName:   z.string().trim().min(1, "First name is required"),
-    lastName:    z.string().trim().min(1, "Last name is required"),
+    name:        z.string().trim().min(1, "Name is required"),
     dateOfBirth: z.string().trim().min(1, "Date of birth is required"),
     sex:         z.enum(["male", "female", "non_binary"]).optional(),
 })
@@ -54,8 +53,7 @@ export function PatientProfileForm({ patientData }: PatientProfileFormProps) {
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            firstName:   patientData?.first_name || "",
-            lastName:    patientData?.last_name || "",
+            name:        patientData?.name || "",
             dateOfBirth: patientData?.date_of_birth || "",
             sex:         patientData?.sex,
         },
@@ -65,8 +63,7 @@ export function PatientProfileForm({ patientData }: PatientProfileFormProps) {
         try {
             setIsLoading(true)
             await api.put(`/patient/${activePatientId}`, {
-                first_name:    data.firstName,
-                last_name:     data.lastName,
+                name:          data.name,
                 date_of_birth: data.dateOfBirth,
                 sex:           data.sex,
             })
@@ -86,34 +83,19 @@ export function PatientProfileForm({ patientData }: PatientProfileFormProps) {
             <CardContent>
                 <form id="patient-profile-form" onSubmit={form.handleSubmit(onSubmit)}>
                     <FieldGroup className="gap-6">
-                        <div className="grid gap-4 sm:grid-cols-2">
-                            <Controller
-                                name="firstName"
-                                control={form.control}
-                                render={({ field, fieldState }) => (
-                                    <Field data-invalid={fieldState.invalid}>
-                                        <FieldLabel>First name</FieldLabel>
-                                        <Input {...field} placeholder="John" />
-                                        {fieldState.invalid && (
-                                            <FieldError errors={[fieldState.error]} />
-                                        )}
-                                    </Field>
-                                )}
-                            />
-                            <Controller
-                                name="lastName"
-                                control={form.control}
-                                render={({ field, fieldState }) => (
-                                    <Field data-invalid={fieldState.invalid}>
-                                        <FieldLabel>Last name</FieldLabel>
-                                        <Input {...field} placeholder="Doe" />
-                                        {fieldState.invalid && (
-                                            <FieldError errors={[fieldState.error]} />
-                                        )}
-                                    </Field>
-                                )}
-                            />
-                        </div>
+                        <Controller
+                            name="name"
+                            control={form.control}
+                            render={({ field, fieldState }) => (
+                                <Field data-invalid={fieldState.invalid}>
+                                    <FieldLabel>Name</FieldLabel>
+                                    <Input {...field} placeholder="Full name" />
+                                    {fieldState.invalid && (
+                                        <FieldError errors={[fieldState.error]} />
+                                    )}
+                                </Field>
+                            )}
+                        />
 
                         <div className="grid gap-4 sm:grid-cols-2">
                             <Controller

@@ -40,7 +40,7 @@ export default function PatientPicker({ candidates, onNew, title = "Who's the pa
                             className="flex flex-col items-start text-left enabled:cursor-pointer disabled:cursor-default"
                         >
                             <span className="text-base font-semibold">
-                                {patient.first_name} {patient.last_name}
+                                {patient.name}
                             </span>
                             <span className="text-sm text-muted-foreground capitalize">{meta(patient)}</span>
                         </button>

@@ -36,18 +36,22 @@ export default function SignInForm() {
     const submitButtonRef = useRef<HTMLButtonElement>(null);
 
     const handlePhoneComplete = useCallback(async (isComplete: boolean) => {
-        if (isComplete) {
-            try {
-                setIsChecking(true);
-                setShowPanel(null);
-                const { exists } = await checkUser("+88".concat(phoneNumber.join("").trim()));
-                setShowPanel(exists ? "accounts" : "role-select");
-            } catch (error) {
-                console.error(error)
-                setShowPanel("error");
-            } finally {
-                setIsChecking(false);
-            }
+        // An incomplete number (e.g. after the reset button) must clear whatever panel is
+        // showing — those account/role/form cards belong to the previous number.
+        if (!isComplete) {
+            setShowPanel(null);
+            return;
+        }
+        try {
+            setIsChecking(true);
+            setShowPanel(null);
+            const { exists } = await checkUser("+88".concat(phoneNumber.join("").trim()));
+            setShowPanel(exists ? "accounts" : "role-select");
+        } catch (error) {
+            console.error(error)
+            setShowPanel("error");
+        } finally {
+            setIsChecking(false);
         }
     }, [checkUser, phoneNumber])
 

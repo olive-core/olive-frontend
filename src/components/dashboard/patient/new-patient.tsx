@@ -40,11 +40,6 @@ interface NewPatientProps {
     userId?: string;
 }
 
-function splitName(name: string) {
-    const [firstName, ...rest] = name.trim().split(" ");
-    return { firstName, lastName: rest.join(" ") };
-}
-
 export default function NewPatient({ phone, name, age, sex, userId }: NewPatientProps) {
 
     const navigate = useNavigate();
@@ -102,10 +97,8 @@ export default function NewPatient({ phone, name, age, sex, userId }: NewPatient
         resolveAndStart(() => (userId ? updateExisting(form.getValues()) : createNew(form.getValues())));
 
     async function createNew(values: PatientFormValues): Promise<string> {
-        const { firstName, lastName } = splitName(values.name);
         const patient = await createPatient({
-            first_name: firstName,
-            last_name: lastName,
+            name: values.name,
             date_of_birth: dobFromAge(values.age),
             sex: values.sex,
             phone: fullPhone,
@@ -114,10 +107,8 @@ export default function NewPatient({ phone, name, age, sex, userId }: NewPatient
     }
 
     async function updateExisting(values: PatientFormValues): Promise<string> {
-        const { firstName, lastName } = splitName(values.name);
         await api.put(`/patient/${userId}`, {
-            first_name: firstName,
-            last_name: lastName,
+            name: values.name,
             date_of_birth: dobFromAge(values.age),
             sex: values.sex,
         });
@@ -133,8 +124,7 @@ export default function NewPatient({ phone, name, age, sex, userId }: NewPatient
         // A new patient passes through the gate first; with no match it goes to review,
         // where the record is created only on Start Consultation.
         try {
-            const { firstName, lastName } = splitName(values.name);
-            const similar = await findSimilar({ first_name: firstName, last_name: lastName, sex: values.sex, age: parseInt(values.age, 10) });
+            const similar = await findSimilar({ name: values.name, sex: values.sex, age: parseInt(values.age, 10) });
             if (similar.length > 0) {
                 setMatches(similar);
                 setStep("gate");

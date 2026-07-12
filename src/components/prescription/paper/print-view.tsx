@@ -20,8 +20,7 @@ export default function PrescriptionPrintView({ consultation, clinician, patient
             data={consultation.prescription_data ?? {}}
             patientSlot={
                 <PatientStrip
-                    firstName={consultation.patient_first_name}
-                    lastName={consultation.patient_last_name}
+                    name={consultation.patient_name}
                     dateOfBirth={patient?.date_of_birth}
                     sex={patient?.sex}
                     dateTime={consultation.created_at}

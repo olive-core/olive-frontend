@@ -180,7 +180,7 @@ export default function DoctorQueuePanel({ onStateChange }: DoctorQueuePanelProp
 
             {inside && (
                 <p className="text-sm text-emerald-600 mb-2">
-                    ● {inside.first_name} {inside.last_name} inside
+                    ● {inside.name} inside
                 </p>
             )}
 
@@ -194,7 +194,7 @@ export default function DoctorQueuePanel({ onStateChange }: DoctorQueuePanelProp
                     <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0">
                             <p className="font-medium text-lg truncate">
-                                {next.first_name} {next.last_name}
+                                {next.name}
                             </p>
                             <p className="text-sm text-muted-foreground capitalize">
                                 {[next.age != null ? `${next.age}y` : null, next.sex].filter(Boolean).join(" · ")}
@@ -244,7 +244,7 @@ export default function DoctorQueuePanel({ onStateChange }: DoctorQueuePanelProp
                                 >
                                     <div className="flex-1 min-w-0">
                                         <p className="text-sm font-medium truncate">
-                                            {entry.first_name} {entry.last_name}
+                                            {entry.name}
                                         </p>
                                         <p className="text-xs text-muted-foreground capitalize">
                                             {[entry.age != null ? `${entry.age}y` : null, entry.sex]
@@ -292,7 +292,7 @@ export default function DoctorQueuePanel({ onStateChange }: DoctorQueuePanelProp
                         <DialogTitle>Remove from queue?</DialogTitle>
                     </DialogHeader>
                     <p className="text-sm text-muted-foreground">
-                        Remove {pendingRemove?.first_name} {pendingRemove?.last_name} from today's queue? This
+                        Remove {pendingRemove?.name} from today's queue? This
                         can't be undone.
                     </p>
                     <div className="flex justify-end gap-2">

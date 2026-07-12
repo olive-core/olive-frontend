@@ -7,8 +7,7 @@ export type ActiveView = 'doctor' | 'attendant' | 'patient';
 
 export type PatientProfile = {
     patientId: string;
-    firstName: string;
-    lastName?: string;
+    name: string;
 };
 
 export type Accounts = {
@@ -25,7 +24,7 @@ export type CheckUserResponse = {
 };
 
 // Raw API shapes (snake_case) mapped into the camelCase types above.
-export type ApiPatientProfile = { patient_id: string; first_name: string; last_name?: string };
+export type ApiPatientProfile = { patient_id: string; name: string };
 export type ApiAccounts = {
     is_clinician: boolean;
     is_attendant: boolean;

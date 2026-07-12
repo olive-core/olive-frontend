@@ -6,8 +6,7 @@ export type ClinicianType = {
     bmdcNo: string;
     qualification?: string;
     specializations?: string[];
-    firstName?: string;
-    lastName?: string;
+    name?: string;
     generate_ai_draft?: boolean;
 }
 
