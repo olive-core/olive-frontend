@@ -4,6 +4,7 @@ import ScrollFade from "@/components/shared/scroll-fade";
 import { cn, formatRelativeVisit } from "@/lib/utils";
 import type { HistoryType } from "@/types/patient";
 import { AlertCircle, ClipboardList } from "lucide-react";
+import { withDoctorPrefix } from "@/lib/clinician";
 
 interface HistoryContainerProps {
     histories?: HistoryType[];
@@ -114,7 +115,7 @@ export default function HistoryContainer({
                                     {summary}
                                 </p>
                                 <p className="text-xs text-slate-400 mt-0.5">
-                                    Dr. {history.clinician_name}
+                                    {withDoctorPrefix(history.clinician_name)}
                                 </p>
                             </div>
                         </button>

@@ -1,4 +1,5 @@
 import api from "@/lib/axios";
+import { queryClient } from "@/lib/query-client";
 
 import { TERMS_VERSION } from "@/lib/terms";
 import type { ClinicianType } from "@/types/shared";
@@ -206,18 +207,24 @@ export const useAuthStore = create<AuthStoreType>()(
                 }));
             },
 
-            logout: () => set({
-                isLoggedIn: false,
-                accessToken: undefined,
-                refreshToken: undefined,
-                userId: undefined,
-                accounts: emptyAccounts(),
-                activeView: undefined,
-                activePatientId: undefined,
-                clinician: undefined,
-                pendingPatient: undefined,
-                pendingAttendant: undefined,
-            }),
+            logout: () => {
+                // Drop every cached query so the next user on this device (shared attendant
+                // desk, shared patient phone) never sees the previous user's data flash in
+                // before their own fetch resolves.
+                queryClient.clear();
+                set({
+                    isLoggedIn: false,
+                    accessToken: undefined,
+                    refreshToken: undefined,
+                    userId: undefined,
+                    accounts: emptyAccounts(),
+                    activeView: undefined,
+                    activePatientId: undefined,
+                    clinician: undefined,
+                    pendingPatient: undefined,
+                    pendingAttendant: undefined,
+                });
+            },
         }),
         { name: "auth-store" }
     )

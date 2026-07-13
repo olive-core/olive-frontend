@@ -2,13 +2,12 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import { RouterProvider, createRouter } from '@tanstack/react-router'
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { Toaster } from "react-hot-toast";
 
 import { routeTree } from './routeTree.gen'
-
-const queryClient = new QueryClient()
+import { queryClient } from './lib/query-client'
 
 // Create a new router instance
 

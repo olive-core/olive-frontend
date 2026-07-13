@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { acceptInvite, declineInvite, listMyInvites } from "@/lib/attendant-queue";
 import { chamberLabel, type AttendantChamber } from "@/types/attendant-queue";
 import { handleError } from "@/lib/utils";
+import { withDoctorPrefix } from "@/lib/clinician";
 
 export default function PendingInvites() {
     const queryClient = useQueryClient();
@@ -18,15 +19,14 @@ export default function PendingInvites() {
 
     if (invites.length === 0) return null;
 
-    const doctorName = (invite: AttendantChamber) =>
-        (invite.clinician_name ?? "");
+    const doctorName = (invite: AttendantChamber) => withDoctorPrefix(invite.clinician_name);
 
     return (
         <div className="max-w-md mx-auto mb-6">
             <p className="text-sm font-medium mb-2">Invitations</p>
             {invites.map((invite) => (
                 <div key={invite.chamber_id} className="border rounded-xl p-4 mb-2">
-                    <p className="font-medium">Dr. {doctorName(invite)}</p>
+                    <p className="font-medium">{doctorName(invite)}</p>
                     <p className="text-sm text-muted-foreground mb-3">{chamberLabel(invite)}</p>
                     <div className="flex gap-2">
                         <Button

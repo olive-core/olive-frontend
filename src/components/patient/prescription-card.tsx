@@ -3,14 +3,14 @@ import { ChevronRightIcon } from "lucide-react";
 import type { PatientPrescriptionListItem } from "@/types/patient";
 import DiagnosisPills from "@/components/dashboard/consultations/diagnosis-pills";
 import { getDayLabel, getTimeOfDay } from "@/components/dashboard/consultations/helpers";
+import { withDoctorPrefix } from "@/lib/clinician";
 
 interface PrescriptionCardProps {
     prescription: PatientPrescriptionListItem;
 }
 
 function getClinicianName(name?: string | null): string {
-    const n = (name ?? "").trim();
-    return n ? `Dr. ${n}` : "Unknown clinician";
+    return withDoctorPrefix(name) || "Unknown clinician";
 }
 
 export default function PrescriptionCard({ prescription }: PrescriptionCardProps) {

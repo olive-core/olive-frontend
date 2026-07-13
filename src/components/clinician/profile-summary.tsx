@@ -1,6 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { IdCardIcon, PhoneIcon } from "lucide-react";
+import { withDoctorPrefix } from "@/lib/clinician";
 
 interface ProfileSummaryProps {
     name?: string;
@@ -31,7 +32,7 @@ export function ProfileSummary({
 
                 <div>
                     <h2 className="text-lg font-semibold text-slate-800">
-                        {fullName ? `Dr. ${fullName}` : "Your profile"}
+                        {fullName ? withDoctorPrefix(fullName) : "Your profile"}
                     </h2>
                     {qualification && (
                         <p className="mt-0.5 text-sm text-slate-500">{qualification}</p>

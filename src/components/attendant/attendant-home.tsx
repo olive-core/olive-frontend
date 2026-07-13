@@ -6,9 +6,9 @@ import QueueView from "./queue-view";
 import ChamberCard from "./chamber-card";
 import AddPatientDialog from "./add-patient-dialog";
 import PendingInvites from "./pending-invites";
+import { withDoctorPrefix } from "@/lib/clinician";
 
-const doctorLabel = (chamber: AttendantChamber) =>
-    `Dr. ${(chamber.clinician_name ?? "")}`.trim();
+const doctorLabel = (chamber: AttendantChamber) => withDoctorPrefix(chamber.clinician_name);
 
 export default function AttendantHome() {
     const { data: chambers = [], isLoading } = useQuery({

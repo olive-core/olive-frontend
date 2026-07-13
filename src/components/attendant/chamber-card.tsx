@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { listQueue } from "@/lib/attendant-queue";
 import { useQueueStream } from "@/hooks/use-queue-stream";
 import { chamberLabel, chamberRoom, type AttendantChamber } from "@/types/attendant-queue";
+import { withDoctorPrefix } from "@/lib/clinician";
 
 interface ChamberCardProps {
     chamber: AttendantChamber;
@@ -45,7 +46,7 @@ export default function ChamberCard({ chamber, onOpen, onAdd }: ChamberCardProps
                     {initials}
                 </span>
                 <div className="flex-1 min-w-0">
-                    <p className="font-medium truncate">Dr. {doctorName || chamberLabel(chamber)}</p>
+                    <p className="font-medium truncate">{doctorName ? withDoctorPrefix(doctorName) : chamberLabel(chamber)}</p>
                     {room && <p className="text-sm font-medium text-slate-700 truncate">{room}</p>}
                     <p className="text-xs text-muted-foreground truncate">{chamberLabel(chamber)}</p>
                 </div>
@@ -92,7 +93,7 @@ export default function ChamberCard({ chamber, onOpen, onAdd }: ChamberCardProps
             </div>
 
             <Button className="w-full mt-3" onClick={onAdd}>
-                <PlusIcon className="size-4" /> Add to Dr. {chamber.clinician_name || ""}
+                <PlusIcon className="size-4" /> Add to {doctorName ? withDoctorPrefix(doctorName) : chamberLabel(chamber)}
             </Button>
         </div>
     );

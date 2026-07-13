@@ -11,11 +11,18 @@ import PatientPicker from "@/components/shared/patient-picker";
 import type { ShowContentStatus } from "@/types/patient";
 import { useAuthStore } from "@/stores/auth-store";
 import { useStartConsultation } from "@/hooks/use-start-consultation";
+import { withDoctorPrefix } from "@/lib/clinician";
 import DoctorQueuePanel from "./queue/doctor-queue-panel";
 
 export default function WelcomeScreen() {
 
+    // `clinician` is only populated after registration or a profile edit; a plain sign-in
+    // never sets it. Fall back to the name from the accounts payload (set at sign-in and
+    // persisted) so the greeting shows for every logged-in doctor, not just freshly
+    // registered ones.
     const clinician = useAuthStore(state => state.clinician);
+    const clinicianName = useAuthStore(state => state.accounts.clinicianName);
+    const doctorName = withDoctorPrefix(clinician?.name ?? clinicianName);
     const { start, startingId, graceDialog } = useStartConsultation();
 
     const [showContent, setShowContent] = useState<ShowContentStatus>({ status: "NOTHING" });
@@ -70,8 +77,8 @@ export default function WelcomeScreen() {
 
                     <motion.div className="flex flex-col items-center justify-center mb-10">
                         <p className="mb-6 text-lg text-center text-gray-500 font-light">
-                            {clinician?.name
-                                ? `Dr. ${clinician.name}, enter your patient's phone number`
+                            {doctorName
+                                ? `${doctorName}, enter your patient's phone number`
                                 : "Enter your patient's phone number"}
                         </p>
                         <div className="w-full max-w-md px-4 sm:px-0">

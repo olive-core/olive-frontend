@@ -24,7 +24,9 @@ api.interceptors.request.use(
 // concurrent 401s share one refresh call. We deliberately do NOT log the user
 // out on a failed refresh — the product principle is that a user is only signed
 // out when they choose to be (matches how doctors/patients behave), so a stale
-// token just surfaces as a retryable error, never a forced logout.
+// token just surfaces as a retryable error, never a forced logout. Refresh-token
+// rotation is disabled server-side, so the refresh token never expires and this
+// path keeps a session alive indefinitely until the user manually signs out.
 let refreshPromise: Promise<string | null> | null = null;
 
 async function refreshAccessToken(): Promise<string | null> {

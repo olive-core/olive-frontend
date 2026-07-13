@@ -12,6 +12,7 @@ import {
     StethoscopeIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { withDoctorPrefix } from "@/lib/clinician";
 import { memo } from "react";
 
 interface ConsultationCardProps {
@@ -147,7 +148,7 @@ function ConsultationCard({
                 <div className="flex items-start justify-between gap-2">
                     <div>
                         <h2 className="text-lg font-semibold text-slate-800">
-                            Dr. {clinician_name}
+                            {withDoctorPrefix(clinician_name)}
                         </h2>
                         <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-0.5">
                             <CalendarDays className="w-3.5 h-3.5" />

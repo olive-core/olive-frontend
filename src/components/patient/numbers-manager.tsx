@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { PhoneIcon, PlusIcon, Trash2Icon } from "lucide-react";
@@ -11,6 +11,7 @@ import { addNumber, listNumbers, removeNumber } from "@/lib/patient";
 import { handleError } from "@/lib/utils";
 
 const OTP_LENGTH = 6;
+const RESEND_SECONDS = 30;
 const emptyPhone = () => ["0", "1"].concat(Array(9).fill(""));
 const emptyOtp = () => Array(OTP_LENGTH).fill("");
 
@@ -24,16 +25,26 @@ export default function NumbersManager({ patientId }: { patientId: string }) {
     const [phone, setPhone] = useState<string[]>(emptyPhone);
     const [otp, setOtp] = useState<string[]>(emptyOtp);
     const [busy, setBusy] = useState(false);
+    const [resendTimer, setResendTimer] = useState(0);
 
     const { data: numbers = [] } = useQuery({
         queryKey: ["patient-numbers", patientId],
         queryFn: () => listNumbers(patientId),
     });
 
+    // Count down the resend cooldown while the OTP step is open; one interval per visit
+    // to that step, cleared when it closes.
+    useEffect(() => {
+        if (step !== "otp") return;
+        const id = setInterval(() => setResendTimer((t) => (t > 0 ? t - 1 : 0)), 1000);
+        return () => clearInterval(id);
+    }, [step]);
+
     const reset = () => {
         setStep("idle");
         setPhone(emptyPhone());
         setOtp(emptyOtp());
+        setResendTimer(0);
     };
 
     // These are passed as NumberGroupInput's onComplete, which fires from an effect keyed
@@ -46,6 +57,7 @@ export default function NumbersManager({ patientId }: { patientId: string }) {
             await api.post("/auth/send-otp", { phone: "+88" + phone.join("").trim() });
             toast.success("Code sent to that number");
             setOtp(emptyOtp());
+            setResendTimer(RESEND_SECONDS);
             setStep("otp");
         } catch (error) {
             handleError(error, "Could not send a code to this number");
@@ -53,6 +65,21 @@ export default function NumbersManager({ patientId }: { patientId: string }) {
             setBusy(false);
         }
     }, [phone]);
+
+    const resend = async () => {
+        if (resendTimer > 0 || busy) return;
+        setBusy(true);
+        try {
+            await api.post("/auth/send-otp", { phone: "+88" + phone.join("").trim() });
+            toast.success("Code resent");
+            setOtp(emptyOtp());
+            setResendTimer(RESEND_SECONDS);
+        } catch (error) {
+            handleError(error, "Could not resend the code");
+        } finally {
+            setBusy(false);
+        }
+    };
 
     const confirmAndAdd = useCallback(async (isComplete: boolean) => {
         if (!isComplete) return;
@@ -133,7 +160,18 @@ export default function NumbersManager({ patientId }: { patientId: string }) {
                             autoComplete="one-time-code"
                         />
                         {busy && <p className="text-center text-sm text-muted-foreground">Adding…</p>}
-                        <Button variant="ghost" size="sm" className="self-start" onClick={reset} disabled={busy}>Cancel</Button>
+                        <div className="flex items-center gap-2">
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={resend}
+                                disabled={resendTimer > 0 || busy}
+                            >
+                                Resend code{resendTimer > 0 ? ` (${resendTimer}s)` : ""}
+                            </Button>
+                            <Button variant="ghost" size="sm" onClick={reset} disabled={busy}>Cancel</Button>
+                        </div>
                     </div>
                 )}
             </CardContent>
