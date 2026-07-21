@@ -20,12 +20,15 @@ export default function PrescriptionPaper({ header, patientStrip, vitalsBar, lef
                 {patientStrip}
                 {vitalsBar}
 
-                <div className="grid grid-cols-1 md:grid-cols-3">
-                    <div className="min-w-0 h-full md:border-r md:col-span-1 border-b md:border-b-0 py-4 flex flex-col gap-2">
+                {/* The three-column split only has room for the inline editors from `lg` up. At
+                    `md` (tablet portrait) the left column lands around 240px, too narrow for an
+                    editor's own action row, so tablets keep the stacked full-width layout. */}
+                <div className="grid grid-cols-1 lg:grid-cols-3">
+                    <div className="min-w-0 h-full lg:border-r lg:col-span-1 border-b lg:border-b-0 py-4 flex flex-col gap-2">
                         {leftColumn}
                     </div>
 
-                    <div className="min-w-0 h-full col-span-1 md:col-span-2 py-4 md:px-8 flex flex-col justify-between">
+                    <div className="min-w-0 h-full col-span-1 lg:col-span-2 py-4 lg:px-8 flex flex-col justify-between">
                         {rightColumn}
                     </div>
                 </div>

@@ -21,15 +21,36 @@ interface PrescriptionPrintDocumentProps {
     followUpBaseDate?: string;
 }
 
-function PrintSection({ title, items }: { title: string; items: { name_text?: string }[] }) {
+function EmptySectionNote({ children }: { children: ReactNode }) {
+    return <p className="pl-1 text-xs italic text-gray-400">{children}</p>;
+}
+
+// Every heading always prints: the prescription is a standard form, and a reader finding the
+// same landmarks each time is what makes a gap legible as a gap. `emptyText` reads as the
+// clinician's own statement, because an empty section is their decision — each of these
+// sections has an Add control they chose not to use. Nothing here should suggest the record
+// failed to capture something.
+function PrintSection({
+    title,
+    items,
+    emptyText,
+}: {
+    title: string;
+    items: { name_text?: string }[];
+    emptyText: string;
+}) {
     return (
         <div>
             <h3 className="font-semibold text-emerald-600">{title}</h3>
-            <ul className="list-disc pl-4 text-xs">
-                {items.map((item, index) => (
-                    <li key={index}>{item.name_text}</li>
-                ))}
-            </ul>
+            {items.length === 0 ? (
+                <EmptySectionNote>{emptyText}</EmptySectionNote>
+            ) : (
+                <ul className="list-disc pl-4 text-xs">
+                    {items.map((item, index) => (
+                        <li key={index}>{item.name_text}</li>
+                    ))}
+                </ul>
+            )}
         </div>
     );
 }
@@ -74,6 +95,8 @@ export default function PrescriptionPrintDocument({
 }: PrescriptionPrintDocumentProps) {
     const vitals = vitalsFromOnExaminations(data.on_examinations);
     const followUp = { follow_up_days: data.follow_up_days ?? null, follow_up_notes: data.follow_up_notes ?? null };
+    const medicines = data.rx_list ?? [];
+    const adviceList = data.advice_list ?? [];
 
     return (
         <PrintSheet
@@ -91,19 +114,27 @@ export default function PrescriptionPrintDocument({
 
             <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-3">
-                    <PrintSection title="Chief Complaints" items={data.chief_complaints ?? []} />
-                    <PrintSection title="History" items={data.histories ?? []} />
-                    <PrintSection title="Diagnosis" items={data.diagnoses ?? []} />
-                    <PrintSection title="Investigation" items={data.investigations ?? []} />
+                    <PrintSection title="Chief Complaints" items={data.chief_complaints ?? []} emptyText="None reported" />
+                    <PrintSection title="History" items={data.histories ?? []} emptyText="None reported" />
+                    <PrintSection title="Diagnosis" items={data.diagnoses ?? []} emptyText="None specified" />
+                    <PrintSection
+                        title="Investigation"
+                        items={data.investigations ?? []}
+                        emptyText="No investigation advised"
+                    />
                 </div>
 
                 <div className="col-span-2">
                     <h3 className="font-semibold text-emerald-600 mb-2">Rx</h3>
-                    <div className="space-y-2">
-                        {(data.rx_list ?? []).map((medicine: any, index: number) => (
-                            <RxEntry key={index} medicine={medicine} index={index} />
-                        ))}
-                    </div>
+                    {medicines.length === 0 ? (
+                        <EmptySectionNote>No medicine prescribed</EmptySectionNote>
+                    ) : (
+                        <div className="space-y-2">
+                            {medicines.map((medicine: any, index: number) => (
+                                <RxEntry key={index} medicine={medicine} index={index} />
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -111,13 +142,17 @@ export default function PrescriptionPrintDocument({
 
             <div>
                 <h3 className="font-semibold text-emerald-600 mb-1">Advice</h3>
-                <ul className="list-disc pl-5 text-xs space-y-1">
-                    {(data.advice_list ?? []).map((advice: string, index: number) => (
-                        <li key={index} className="break-inside-avoid">
-                            {advice}
-                        </li>
-                    ))}
-                </ul>
+                {adviceList.length === 0 ? (
+                    <EmptySectionNote>No specific advice</EmptySectionNote>
+                ) : (
+                    <ul className="list-disc pl-5 text-xs space-y-1">
+                        {adviceList.map((advice: string, index: number) => (
+                            <li key={index} className="break-inside-avoid">
+                                {advice}
+                            </li>
+                        ))}
+                    </ul>
+                )}
             </div>
 
             <div className="mt-4">

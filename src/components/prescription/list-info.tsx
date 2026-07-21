@@ -1,7 +1,8 @@
 import { PlusCircle, Trash2, XIcon } from "lucide-react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { useCommitOnClickOutside } from "@/hooks/use-commit-on-click-outside";
 
 import type {
     ListInfoFieldName,
@@ -106,6 +107,9 @@ interface InfoItemProps {
 
 const InfoItem = ({ item, index, isDiagnosis, onUpdate, onRemove, editingItemIndex, setEditingItemIndex, editingItemStatus, fieldName }: InfoItemProps) => {
 
+    const isEditingThisItem = editingItemIndex === index;
+    const cardRef = useRef<HTMLDivElement>(null);
+
     const setIsEditing = (value: boolean) => {
         if (value) {
             setEditingItemIndex(index);
@@ -116,20 +120,22 @@ const InfoItem = ({ item, index, isDiagnosis, onUpdate, onRemove, editingItemInd
 
     return (
         <div
-            className={`group relative transition-all duration-200 rounded-lg border 
-                ${editingItemIndex === index
+            ref={cardRef}
+            className={`group relative transition-all duration-200 rounded-lg border
+                ${isEditingThisItem
                     ? "border-emerald-500 bg-white shadow-lg p-4 z-10"
                     : `py-1 px-2 cursor-pointer ${isDiagnosis
                         ? "bg-white/80 border-emerald-100 hover:border-emerald-300"
                         : "bg-muted hover:bg-accent border-border"
                     }`
                 }`}
-            onClick={() => setIsEditing(true)}
+            onClick={() => !isEditingThisItem && setIsEditing(true)}
         >
-            {editingItemIndex === index ? (
+            {isEditingThisItem ? (
                 <EditingItem
                     item={item}
                     index={index}
+                    cardRef={cardRef}
                     setIsEditing={setIsEditing}
                     onUpdate={onUpdate}
                     onRemove={onRemove}
@@ -151,6 +157,8 @@ const InfoItem = ({ item, index, isDiagnosis, onUpdate, onRemove, editingItemInd
 interface EditingItemProps {
     item: ListInfoType;
     index: number;
+    // The editor's own card, so a click anywhere on it (its padding included) is not "outside".
+    cardRef: React.RefObject<HTMLDivElement | null>;
     setIsEditing: (value: boolean) => void;
     onUpdate: (index: number, item: ListInfoType) => void;
     onRemove: (index: number) => void;
@@ -166,7 +174,7 @@ const FETCH_OPTION_ENDPOINTS: Record<ListInfoFieldName, string> = {
 }
 
 
-const EditingItem = ({ item, index, setIsEditing, onUpdate, onRemove, editingItemStatus, fieldName }: EditingItemProps) => {
+const EditingItem = ({ item, index, cardRef, setIsEditing, onUpdate, onRemove, editingItemStatus, fieldName }: EditingItemProps) => {
     // Local state for the form inputs
     const [localItem, setLocalItem] = useState<ListInfoType>(item);
     const handleSave = () => {
@@ -177,6 +185,8 @@ const EditingItem = ({ item, index, setIsEditing, onUpdate, onRemove, editingIte
         }
         setIsEditing(false);
     };
+
+    useCommitOnClickOutside(cardRef, handleSave);
 
     const handleCancel = () => {
         // If adding a new item and canceling, remove it
@@ -271,7 +281,7 @@ const EditingItem = ({ item, index, setIsEditing, onUpdate, onRemove, editingIte
             )}
 
             {/* Action Buttons */}
-            <div className="flex justify-between items-center pt-2 border-t border-slate-50">
+            <div className="flex flex-wrap justify-between items-center gap-2 pt-2 border-t border-slate-50">
                 <Button
                     variant="ghost"
                     size="sm"

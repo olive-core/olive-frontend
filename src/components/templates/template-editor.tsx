@@ -75,6 +75,16 @@ export default function TemplateEditor({
     advice, setAdvice,
   } = usePrescriptionStore()
 
+  // The prescription store is app-wide, so arriving here from a consultation carries that
+  // draft's sections in with it. Clear on the way in as well as out, or a new RxMemory
+  // opens pre-filled with the last patient's medicines. Declared before the populate
+  // effect below so a cached RxMemory being edited isn't wiped on mount.
+  useEffect(() => {
+    const { resetStore } = usePrescriptionStore.getState()
+    resetStore()
+    return resetStore
+  }, [])
+
   // Populate store when initialData is loaded
   useEffect(() => {
     if (!initialData || initialized) return
@@ -110,21 +120,6 @@ export default function TemplateEditor({
 
     setInitialized(true)
   }, [initialData, initialized])
-
-  // Reset store on unmount to avoid data bleeding into other pages
-  useEffect(() => {
-    return () => {
-      usePrescriptionStore.setState({
-        chiefComplaint: [],
-        history: [],
-        diagnosis: [],
-        investigation: [],
-        medicine: [],
-        advice: [],
-        summary: '',
-      })
-    }
-  }, [])
 
   const buildPayload = (): TemplatePayload => ({
     template_name: templateName.trim(),
@@ -234,9 +229,9 @@ export default function TemplateEditor({
 
         {/* Main editor */}
         <div className="m-4">
-          <div className="grid grid-cols-1 md:grid-cols-3">
+          <div className="grid grid-cols-1 lg:grid-cols-3">
             {/* Left column */}
-            <div className="h-full md:border-r md:col-span-1 border-b md:border-b-0 py-4 flex flex-col gap-2">
+            <div className="min-w-0 h-full lg:border-r lg:col-span-1 border-b lg:border-b-0 py-4 flex flex-col gap-2">
               {isRxMemorySection("chief-complaint") && (
                 <ListInfo
                   title="Chief Complaints"
@@ -280,7 +275,7 @@ export default function TemplateEditor({
             </div>
 
             {/* Right column */}
-            <div className="col-span-1 md:col-span-2 py-4 px-4 md:px-8 flex flex-col justify-between gap-4">
+            <div className="min-w-0 col-span-1 lg:col-span-2 py-4 px-4 lg:px-8 flex flex-col justify-between gap-4">
               {isRxMemorySection("medicine") && <MedicineContainer />}
               {isRxMemorySection("advice") && (
                 <div className="mt-auto">

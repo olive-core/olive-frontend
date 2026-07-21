@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Trash2 } from "lucide-react";
 import { Button } from "../ui/button";
 import type { MedicineSchedule, MeedicineType } from "@/types/prescription";
 import { useMedicineSearch } from "@/hooks/use-medicine-search";
+import { useCommitOnClickOutside } from "@/hooks/use-commit-on-click-outside";
 import DebouncedSearchSelect, { type Option } from "./debounced-search-select";
 import RxForm from "./rx/rx-form";
 import Combobox from "./rx/combobox";
@@ -107,11 +108,14 @@ export default function MedicineEdit({ medicine, onRemove, onUpdate, index, setI
     const hasMedicine = Boolean(working.name || working.value);
     const config = RX_TYPE_CONFIG[getRxArchetype(working.type)];
 
+    const cardRef = useRef<HTMLDivElement>(null);
+    useCommitOnClickOutside(cardRef, handleSave);
+
     return (
         // No overflow-hidden: it would clip the medicine search dropdown to the card.
         // The footer rounds its own bottom corners instead, since it is the only child
         // sitting flush against the card edge.
-        <div className="bg-white border border-primary shadow-xl rounded-2xl transition-all duration-200">
+        <div ref={cardRef} className="bg-white border border-primary shadow-xl rounded-2xl transition-all duration-200">
             <div className="p-4 sm:p-5 space-y-3">
                 <div className="space-y-1.5">
                     <label className="text-[11px] font-semibold text-slate-500 ml-1">Medicine</label>
@@ -154,7 +158,7 @@ export default function MedicineEdit({ medicine, onRemove, onUpdate, index, setI
                 )}
             </div>
 
-            <div className="bg-slate-50 px-5 py-3 flex justify-between items-center border-t border-slate-100 rounded-b-2xl">
+            <div className="bg-slate-50 px-5 py-3 flex flex-wrap justify-between items-center gap-2 border-t border-slate-100 rounded-b-2xl">
                 <Button
                     variant="ghost"
                     size="sm"
