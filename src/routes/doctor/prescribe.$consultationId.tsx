@@ -39,6 +39,10 @@ function RouteComponent() {
 
     setIsError(false);
     setIsReady(false);
+    // Generation starts now, not when the server's `accepted` event lands. The wait for
+    // the final audio chunk sits in between, and during it the only honest action to
+    // offer is Cancel.
+    setGenerating(true);
 
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
@@ -63,6 +67,7 @@ function RouteComponent() {
       .then(async (res) => {
         if (!res.ok || !res.body) {
           setIsError(true);
+          setGenerating(false);
           return;
         }
 
@@ -145,6 +150,7 @@ function RouteComponent() {
       .catch((err) => {
         if (err.name !== 'AbortError') {
           setIsError(true);
+          setGenerating(false);
         }
       });
   }

@@ -108,7 +108,10 @@ export default function MedicineEdit({ medicine, onRemove, onUpdate, index, setI
     const config = RX_TYPE_CONFIG[getRxArchetype(working.type)];
 
     return (
-        <div className="bg-white border border-primary shadow-xl rounded-2xl overflow-hidden transition-all duration-200">
+        // No overflow-hidden: it would clip the medicine search dropdown to the card.
+        // The footer rounds its own bottom corners instead, since it is the only child
+        // sitting flush against the card edge.
+        <div className="bg-white border border-primary shadow-xl rounded-2xl transition-all duration-200">
             <div className="p-4 sm:p-5 space-y-3">
                 <div className="space-y-1.5">
                     <label className="text-[11px] font-semibold text-slate-500 ml-1">Medicine</label>
@@ -151,7 +154,7 @@ export default function MedicineEdit({ medicine, onRemove, onUpdate, index, setI
                 )}
             </div>
 
-            <div className="bg-slate-50 px-5 py-3 flex justify-between items-center border-t border-slate-100">
+            <div className="bg-slate-50 px-5 py-3 flex justify-between items-center border-t border-slate-100 rounded-b-2xl">
                 <Button
                     variant="ghost"
                     size="sm"

@@ -3,9 +3,9 @@ import HistoryContainer from '@/components/dashboard/consultation/history-contai
 import PatientChip from '@/components/dashboard/consultation/patient-chip'
 import Recorder from '@/components/dashboard/consultation/recorder'
 import api from '@/lib/axios'
-import { useAuthStore } from '@/stores/auth-store'
+import { useWarmLetterheadCache } from '@/hooks/use-warm-letterhead-cache'
 import type { HistoryType, PrescriptionType } from '@/types/patient'
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 
@@ -17,7 +17,7 @@ export const Route = createFileRoute('/doctor/consultation/$userId/$consultation
 function RouteComponent() {
 
   const { userId, consultationId } = Route.useParams();
-  const clinicianId = useAuthStore(s => s.userId);
+  useWarmLetterheadCache(consultationId);
 
   const [activeHistoryId, setActiveHistoryId] = useState<string | undefined>(undefined);
 
@@ -60,37 +60,6 @@ function RouteComponent() {
     setDidAutoSelect(true);
   }, [historiesData, activeHistoryId, didAutoSelect]);
 
-  // Track which prescription_id is set as follow-up for the current session
-  const [followUpOfPrescriptionId, setFollowUpOfPrescriptionId] = useState<string | undefined>(undefined);
-
-  const { mutate: setFollowUp, isPending: isFollowingUp } = useMutation({
-    mutationFn: async (selectedSessionId: string) => {
-      await api.put(`/session/${consultationId}`, {
-        clinician_id: clinicianId,
-        patient_id: userId,
-        follow_up_of_session_id: selectedSessionId,
-      });
-      return selectedSessionId;
-    },
-    onSuccess: (selectedSessionId) => {
-      // If toggling off the same one, clear; otherwise set new
-      setFollowUpOfPrescriptionId(prev =>
-        prev === activeHistoryId ? undefined : activeHistoryId
-      );
-      console.log('Follow-up set to session:', selectedSessionId);
-    },
-  });
-
-  const handleFollowUp = () => {
-    if (!prescriptionData) return;
-    // Toggle: if this prescription is already the follow-up target, unset it
-    if (followUpOfPrescriptionId === activeHistoryId) {
-      setFollowUpOfPrescriptionId(undefined);
-      return;
-    }
-    setFollowUp(prescriptionData.session_id);
-  };
-
   // -1 when nothing is selected
   const currentIndex = activeHistoryId
     ? histories.findIndex(h => h.prescription_id === activeHistoryId)
@@ -131,9 +100,6 @@ function RouteComponent() {
             prescription={prescriptionData}
             totalHistories={histories.length}
             currentHistoryIndex={currentIndex + 1}
-            onFollowUp={handleFollowUp}
-            isFollowUp={followUpOfPrescriptionId === activeHistoryId}
-            isFollowingUp={isFollowingUp}
             handleNext={handleNext}
             handlePrevious={handlePrevious}
             isFirst={currentIndex <= 0}

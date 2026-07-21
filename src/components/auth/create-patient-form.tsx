@@ -94,7 +94,17 @@ export default function CreatePatientForm({ phoneNumber }: CreatePatientFormProp
         }
     }
 
+    // Enter advances the step, or submits on the last one. The <form> is what makes that
+    // native: the primary button is the only type="submit" here, so implicit submission
+    // finds it and Previous stays out of the way.
+    function onSubmit(e: React.FormEvent) {
+        e.preventDefault();
+        if (isSubmitting) return;
+        if (step < TOTAL_STEPS - 1) goNext(); else submit();
+    }
+
     return (
+        <form onSubmit={onSubmit}>
         <Card className="max-w-xl mx-auto py-10 flex flex-col justify-between items-center h-[400px]">
             <CardHeader className="w-full">
                 <CardTitle className="text-center">Create Patient Profile</CardTitle>
@@ -181,13 +191,14 @@ export default function CreatePatientForm({ phoneNumber }: CreatePatientFormProp
                     Previous
                 </Button>
                 {step < TOTAL_STEPS - 1 ? (
-                    <Button type="button" onClick={goNext} shortCutKey="⏎">Next</Button>
+                    <Button type="submit" shortCutKey="⏎">Next</Button>
                 ) : (
-                    <Button type="button" onClick={submit} isLoading={isSubmitting} shortCutKey="⏎">
+                    <Button type="submit" isLoading={isSubmitting} shortCutKey="⏎">
                         Submit
                     </Button>
                 )}
             </CardFooter>
         </Card>
+        </form>
     );
 }

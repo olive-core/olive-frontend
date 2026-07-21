@@ -1,3 +1,5 @@
+import axios from "axios";
+
 import api from "@/lib/axios";
 import { queryClient } from "@/lib/query-client";
 
@@ -208,6 +210,16 @@ export const useAuthStore = create<AuthStoreType>()(
             },
 
             logout: () => {
+                // Revoke the session server-side too. Refresh tokens no longer expire on
+                // their own, so one abandoned here would stay usable indefinitely.
+                // Fire-and-forget: signing out locally must never depend on the network.
+                // Plain axios rather than the api instance, to stay out of the 401
+                // interceptor — that interceptor calls logout() itself on a dead session,
+                // which would re-enter this.
+                const { refreshToken } = get();
+                if (refreshToken) {
+                    axios.post("/api/v1/auth/logout", { refresh_token: refreshToken }).catch(() => undefined);
+                }
                 // Drop every cached query so the next user on this device (shared attendant
                 // desk, shared patient phone) never sees the previous user's data flash in
                 // before their own fetch resolves.

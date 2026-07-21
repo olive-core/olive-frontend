@@ -46,8 +46,13 @@ export default function NewChamberForm({ clinicianId, onDone, onCancel, onCreate
         },
     });
 
+    function onSubmit(e: React.FormEvent) {
+        e.preventDefault();
+        if (hospital && room.trim() && !createMutation.isPending) createMutation.mutate();
+    }
+
     return (
-        <div className="border rounded-xl p-4 space-y-3">
+        <form onSubmit={onSubmit} className="border rounded-xl p-4 space-y-3">
             <p className="font-medium">New chamber</p>
             <div>
                 <label className="text-sm text-muted-foreground">Hospital / chamber</label>
@@ -59,14 +64,14 @@ export default function NewChamberForm({ clinicianId, onDone, onCancel, onCreate
             </p>
             <div className="flex gap-2">
                 <Button
-                    onClick={() => createMutation.mutate()}
+                    type="submit"
                     isLoading={createMutation.isPending}
                     disabled={!hospital || !room.trim()}
                 >
                     Create chamber
                 </Button>
                 {onCancel && (
-                    <Button variant="ghost" onClick={onCancel}>
+                    <Button type="button" variant="ghost" onClick={onCancel}>
                         Cancel
                     </Button>
                 )}
@@ -81,9 +86,9 @@ export default function NewChamberForm({ clinicianId, onDone, onCancel, onCreate
                         You already have a chamber at {duplicateName}. A doctor keeps one chamber per hospital, so
                         there's nothing more to add — you can manage it in the list.
                     </p>
-                    <Button onClick={() => setDuplicateName(null)}>Got it</Button>
+                    <Button type="button" onClick={() => setDuplicateName(null)}>Got it</Button>
                 </DialogContent>
             </Dialog>
-        </div>
+        </form>
     );
 }

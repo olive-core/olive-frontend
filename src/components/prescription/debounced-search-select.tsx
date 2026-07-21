@@ -162,7 +162,10 @@ export default function DebouncedSearchSelect({
             {isOpen && (
                 <div
                     onScroll={handleScroll}
-                    className="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-auto"
+                    // Roughly ten results, since picking a brand means scanning several at once.
+                    // The vh cap matters because this list only ever opens downwards: on a short
+                    // viewport, or with the input low on screen, a fixed height would run off the page.
+                    className="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-[min(22rem,60vh)] overflow-auto"
                 >
 
 

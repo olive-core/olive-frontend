@@ -12,6 +12,8 @@ interface NumberGroupInputProps {
     dynamicValuesStartIndex?: number;
     groupLabel?: string;
     autoComplete?: string;
+    /** Dims and locks every cell — e.g. an OTP whose validity window has run out. */
+    disabled?: boolean;
 }
 
 const isDigit = (char: string) => char >= "0" && char <= "9";
@@ -36,6 +38,7 @@ function NumberGroupInput({
     dynamicValuesStartIndex = 2,
     groupLabel = "Phone number",
     autoComplete,
+    disabled = false,
 }: NumberGroupInputProps) {
 
     const prefixLength = dynamicValuesStartIndex;        // count of fixed, non-editable cells (e.g. "01")
@@ -159,10 +162,12 @@ function NumberGroupInput({
                                 onChange={(e) => handleChange(editableIndex, e.target.value)}
                                 onKeyDown={(e) => handleKeyDown(editableIndex, e)}
                                 onFocus={(e) => e.target.select()}
+                                disabled={disabled}
                                 className={cn(
                                     cellBase,
                                     "border-gray-300 text-gray-900 caret-primary outline-none",
                                     "focus:border-primary focus:ring-2 focus:ring-primary",
+                                    "disabled:border-gray-200 disabled:bg-slate-100 disabled:text-slate-400",
                                 )}
                             />
                         )}
@@ -178,7 +183,8 @@ function NumberGroupInput({
                 type="button"
                 aria-label="Clear"
                 onClick={handleReset}
-                className="ml-0.5 h-11 w-10 shrink-0 rounded-lg border border-rose-200 bg-rose-100 p-0 text-rose-500 hover:bg-rose-200 sm:ml-1 sm:h-12"
+                disabled={disabled}
+                className="ml-0.5 h-11 w-10 shrink-0 rounded-lg border border-rose-200 bg-rose-100 p-0 text-rose-500 hover:bg-rose-200 disabled:border-gray-200 disabled:bg-slate-100 disabled:text-slate-400 sm:ml-1 sm:h-12"
             >
                 <RotateCcwIcon className="size-5" />
             </Button>

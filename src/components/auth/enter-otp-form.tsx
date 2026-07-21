@@ -1,14 +1,13 @@
 import { useAuthStore } from "@/stores/auth-store";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { Button } from "../ui/button";
 import { RefreshCwIcon } from "lucide-react";
 import { handleError } from "@/lib/utils";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import NumberGroupInputMemo from "../dashboard/number-group-input";
-
-const OTP_LENGTH = 6;
-const RESEND_OTP_TIME = 30; // seconds
+import { useCountdown } from "@/hooks/use-countdown";
+import { OTP_LENGTH, OTP_VALIDITY_SECONDS, formatCountdown } from "@/constants/otp";
 
 export default function EnterOtpForm() {
 
@@ -23,23 +22,9 @@ export default function EnterOtpForm() {
     const [isValidOtp, setIsValidOtp] = useState(false);
     const [resetOtp, setResetOtp] = useState(Math.random());
 
-    const [resendTimer, setResendTimer] = useState(RESEND_OTP_TIME);
+    const { remaining: validitySeconds, hasEnded: isExpired, restart: restartValidity } = useCountdown(OTP_VALIDITY_SECONDS);
 
     const submitButtonRef = useRef<HTMLButtonElement>(null);
-    const timerRef = useRef<number | null>(null);
-
-    useEffect(() => {
-        timerRef.current = setInterval(() => {
-            setResendTimer(prev => prev >= 1 ? prev - 1 : 0);
-        }, 1000);
-
-        return () => {
-            if (timerRef.current) {
-                clearInterval(timerRef.current);
-                timerRef.current = null;
-            }
-        };
-    }, [])
 
     const handleOtpComplete = useCallback((isComplete: boolean) => {
         setIsValidOtp(isComplete);
@@ -82,13 +67,15 @@ export default function EnterOtpForm() {
 
     async function resendOtp(e: React.MouseEvent<HTMLButtonElement>) {
         e.preventDefault();
-        if (resendTimer > 0) return;
+        // A guard, not just UI state: one live code at a time keeps us clear of the 60s window.
+        if (!isExpired) return;
         setIsLoading(true);
         try {
-            toast.success("OTP resent successfully!");
-            setResendTimer(RESEND_OTP_TIME);
             await sendOtp(phoneNumber);
+            restartValidity();
+            setOtp(Array(OTP_LENGTH).fill(""));
             setResetOtp(Math.random());
+            toast.success("New code sent.");
         } catch (error) {
             handleError(error, "Failed to resend OTP. Please try again.");
         } finally {
@@ -108,33 +95,48 @@ export default function EnterOtpForm() {
                 dynamicValuesStartIndex={0}
                 groupLabel="One-time passcode"
                 autoComplete="one-time-code"
+                disabled={isExpired}
                 key={resetOtp}
             />
-            <div className="flex items-center justify-between">
+            {/* Only the expired state is announced; a ticking clock would interrupt screen
+                readers every second. */}
+            {isExpired ? (
+                <p role="status" className="text-sm text-rose-600">
+                    Code expired.
+                </p>
+            ) : (
+                <div className="space-y-0.5">
+                    <p className="text-sm text-gray-600">
+                        Code valid for {formatCountdown(validitySeconds)}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                        Didn't get it? Resend when the timer ends.
+                    </p>
+                </div>
+            )}
+
+            {isExpired ? (
+                <Button
+                    type="button"
+                    isLoading={isLoading}
+                    className="w-full"
+                    onClick={resendOtp}
+                >
+                    <RefreshCwIcon className="mr-1.5 inline-block size-4" />
+                    Resend code
+                </Button>
+            ) : (
                 <Button
                     type="submit"
                     isLoading={isLoading}
-                    className="w-24"
+                    className="w-full"
                     ref={submitButtonRef}
                     disabled={!isValidOtp}
                     onClick={onSubmit}
                 >
                     Verify
                 </Button>
-                <div className="flex items-center gap-px">
-                    <Button
-                        size="icon"
-                        variant="ghost"
-                        disabled={resendTimer > 0}
-                        onClick={resendOtp}
-                        aria-label="Resend OTP"
-                        className="disabled:pointer-events-none"
-                    >
-                        <RefreshCwIcon className="inline-block size-4 cursor-pointer text-gray-600 hover:text-gray-800" />
-                    </Button>
-                    {resendTimer > 0 && <pre className="text-sm text-rose-600">{resendTimer}s</pre>}
-                </div>
-            </div>
+            )}
         </form>
     )
 }

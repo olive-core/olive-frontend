@@ -35,24 +35,33 @@ function PrintSection({ title, items }: { title: string; items: { name_text?: st
 }
 
 function RxEntry({ medicine, index }: { medicine: any; index: number }) {
+    const instructions = medicine.instructions?.trim();
+
     return (
-        <div className="flex justify-between items-start border-b border-dashed pb-2 break-inside-avoid">
-            <div className="flex-1">
-                {categoryLabel(medicine.type) && (
-                    <p className="text-[10px] font-semibold uppercase tracking-wide text-emerald-600">
-                        {categoryLabel(medicine.type)}
+        <div className="border-b border-dashed pb-2 break-inside-avoid">
+            <div className="flex justify-between items-start">
+                <div className="flex-1">
+                    {categoryLabel(medicine.type) && (
+                        <p className="text-[10px] font-semibold uppercase tracking-wide text-emerald-600">
+                            {categoryLabel(medicine.type)}
+                        </p>
+                    )}
+                    <p className="font-semibold">
+                        {index + 1}. {medicine.trade_name}
+                        <span className="text-gray-500 text-xs ml-1">({medicine.generic_name})</span>
                     </p>
-                )}
-                <p className="font-semibold">
-                    {index + 1}. {medicine.trade_name}
-                    <span className="text-gray-500 text-xs ml-1">({medicine.generic_name})</span>
+                    <p className="text-xs text-gray-700">{medicine.dosage}</p>
+                </div>
+                <div className="text-right">
+                    <p className="text-sm font-semibold">{formatStoredFrequency(medicine)}</p>
+                    <p className="text-xs text-gray-600">{formatStoredDuration(medicine)}</p>
+                </div>
+            </div>
+            {instructions && (
+                <p className="mt-1.5 border-l-2 border-emerald-200 pl-2 text-xs italic text-gray-600">
+                    {instructions}
                 </p>
-                <p className="text-xs text-gray-700">{medicine.dosage}</p>
-            </div>
-            <div className="text-right">
-                <p className="text-sm font-semibold">{formatStoredFrequency(medicine)}</p>
-                <p className="text-xs text-gray-600">{formatStoredDuration(medicine)}</p>
-            </div>
+            )}
         </div>
     );
 }

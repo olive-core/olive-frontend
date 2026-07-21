@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Item, ItemContent, ItemDescription, ItemTitle } from '@/components/ui/item'
 import { handleError } from '@/lib/utils'
 import { getSubscriptionStatusFromError, isSubscriptionBlocked } from '@/lib/subscription'
+import type { SubscriptionStatus } from '@/types/subscription'
 import { useSubscriptionGate } from '@/stores/subscription-gate-store'
 import { useGraceGuard } from '@/hooks/use-grace-guard'
 import { useNavigate } from '@tanstack/react-router'
@@ -73,13 +74,28 @@ export default function NewPatient({ phone, name, age, sex, userId }: NewPatient
         navigate({ to: "/doctor/consultation/$userId/$consultationId", params: { userId: patientId, consultationId: sessionId } });
     }
 
+    async function fetchSubscriptionStatus(): Promise<SubscriptionStatus> {
+        const response = await api.get<SubscriptionStatus>(`/subscription/${clinicianId}`);
+        return response.data;
+    }
+
     // Resolve a patient (creating them only now) then start the metered consultation,
     // grace-guarded. Creation is deferred to here so nothing is written until the doctor
     // commits by pressing Start Consultation.
+    //
+    // Subscription is checked before that write, not just via the 402 from /session: the
+    // patient has to exist before a session can reference it, so a blocked start would
+    // otherwise leave a patient behind for a consultation that never happened. The 402
+    // handling below still stands as the authority, covering access that lapses mid-flow.
     function resolveAndStart(resolvePatient: () => Promise<string>) {
         guardStart(async () => {
             setStarting(true);
             try {
+                const subscription = await fetchSubscriptionStatus();
+                if (!subscription.allowed) {
+                    showSubscriptionGate(subscription);
+                    return;
+                }
                 await startConsultation(await resolvePatient());
             } catch (error) {
                 if (isSubscriptionBlocked(error)) {
@@ -177,7 +193,7 @@ export default function NewPatient({ phone, name, age, sex, userId }: NewPatient
                                 <span className="text-sm text-slate-600 capitalize">{values.age}y · {values.sex}</span>
                             </ItemDescription>
                         </ItemContent>
-                        <Button className="w-full" onClick={proceed} isLoading={starting} disabled={starting}>
+                        <Button autoFocus className="w-full" onClick={proceed} isLoading={starting} disabled={starting}>
                             <MicIcon className="size-4" /> Start Consultation
                         </Button>
                     </Item>

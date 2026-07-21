@@ -99,7 +99,10 @@ export default function PatientInfo({ userId: patientId, phone, setShowContent }
                     </Button>
                 </ItemActions>
 
-                <Button className="w-full" onClick={handleStartConsultation} isLoading={startingId === patientId} disabled={startingId === patientId}>
+                {/* Focused on mount so Enter starts the consultation. Deliberately not a
+                    global key listener: starting is metered, and a stray Enter elsewhere on
+                    the page should not spend a consultation. */}
+                <Button autoFocus className="w-full" onClick={handleStartConsultation} isLoading={startingId === patientId} disabled={startingId === patientId}>
                     <MicIcon className="inline-block size-4" />
                     Start Consultation
                 </Button>

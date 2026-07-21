@@ -239,24 +239,31 @@ function EditChamberDialog({ chamber, onClose }: { chamber: Chamber; onClose: ()
         onError: (error) => handleError(error, "Could not update chamber"),
     });
 
+    function onSubmit(e: React.FormEvent) {
+        e.preventDefault();
+        if (hospital && room.trim() && !updateMutation.isPending) updateMutation.mutate();
+    }
+
     return (
         <Dialog open onOpenChange={(next) => !next && onClose()}>
             <DialogContent>
                 <DialogHeader>
                     <DialogTitle>Edit chamber</DialogTitle>
                 </DialogHeader>
-                <div>
-                    <label className="text-sm text-muted-foreground">Hospital / chamber</label>
-                    <HospitalSelect selected={hospital} onSelect={setHospital} />
-                </div>
-                <Input placeholder="Room / chamber no." value={room} onChange={(e) => setRoom(e.target.value)} />
-                <Button
-                    onClick={() => updateMutation.mutate()}
-                    isLoading={updateMutation.isPending}
-                    disabled={!hospital || !room.trim()}
-                >
-                    Save changes
-                </Button>
+                <form onSubmit={onSubmit} className="space-y-4">
+                    <div>
+                        <label className="text-sm text-muted-foreground">Hospital / chamber</label>
+                        <HospitalSelect selected={hospital} onSelect={setHospital} />
+                    </div>
+                    <Input placeholder="Room / chamber no." value={room} onChange={(e) => setRoom(e.target.value)} />
+                    <Button
+                        type="submit"
+                        isLoading={updateMutation.isPending}
+                        disabled={!hospital || !room.trim()}
+                    >
+                        Save changes
+                    </Button>
+                </form>
             </DialogContent>
         </Dialog>
     );

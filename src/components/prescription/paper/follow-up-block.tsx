@@ -92,7 +92,9 @@ function ReadOnlyFollowUp({ value, baseDate }: Omit<FollowUpBlockProps, "onChang
                     {dueDate && <span className="text-slate-400"> · {dueDate}</span>}
                 </p>
             )}
-            {value.follow_up_notes && <p className="text-xs italic text-slate-500">{value.follow_up_notes}</p>}
+            {/* Not italic: the note is Bangla, which has no true italic form, so browsers
+                fake an oblique slant that renders poorly. Advice avoids italic for the same reason. */}
+            {value.follow_up_notes && <p className="text-xs text-slate-500">{value.follow_up_notes}</p>}
         </div>
     );
 }

@@ -1,7 +1,7 @@
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { PrescriptionType, RxItem } from "@/types/patient";
-import { cn, formatRelativeVisit } from "@/lib/utils";
+import { formatRelativeVisit } from "@/lib/utils";
 import {
     AlertCircle,
     ArrowLeftIcon,
@@ -19,9 +19,6 @@ interface ConsultationCardProps {
     prescription?: PrescriptionType;
     totalHistories: number;
     currentHistoryIndex: number;
-    onFollowUp: () => void;
-    isFollowUp?: boolean;
-    isFollowingUp?: boolean;
     handleNext: () => void;
     handlePrevious: () => void;
     isFirst: boolean;
@@ -84,9 +81,6 @@ function ConsultationCard({
     prescription,
     totalHistories,
     currentHistoryIndex,
-    onFollowUp,
-    isFollowUp = false,
-    isFollowingUp = false,
     handleNext,
     handlePrevious,
     isFirst,
@@ -155,24 +149,6 @@ function ConsultationCard({
                             <span>{relative} · {exact}</span>
                         </div>
                     </div>
-                    <Button
-                        size="sm"
-                        disabled={isFollowingUp}
-                        onClick={onFollowUp}
-                        className={cn(
-                            "shrink-0 border border-emerald-600",
-                            isFollowUp
-                                ? "bg-emerald-600 text-white hover:bg-emerald-700"
-                                : "bg-white text-emerald-600 hover:bg-emerald-50"
-                        )}
-                    >
-                        {isFollowingUp ? (
-                            <span className="flex items-center gap-1.5">
-                                <span className="w-3 h-3 rounded-full border-2 border-current border-t-transparent animate-spin" />
-                                Saving…
-                            </span>
-                        ) : isFollowUp ? "✓ Follow Up" : "Follow Up"}
-                    </Button>
                 </div>
 
                 {/* Chief Complaints */}

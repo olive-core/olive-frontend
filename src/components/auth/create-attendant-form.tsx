@@ -18,6 +18,11 @@ export default function CreateAttendantForm({ phoneNumber }: CreateAttendantForm
     const [name, setName] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
 
+    function onSubmit(e: React.FormEvent) {
+        e.preventDefault();
+        if (!isSubmitting) submit();
+    }
+
     async function submit() {
         if (!name.trim()) return;
         setIsSubmitting(true);
@@ -39,15 +44,17 @@ export default function CreateAttendantForm({ phoneNumber }: CreateAttendantForm
                 <CardTitle className="text-center">Create Attendant Profile</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-                <Input placeholder="Full name" value={name} onChange={(e) => setName(e.target.value)} autoFocus />
-                <Button
-                    className="w-full"
-                    onClick={submit}
-                    isLoading={isSubmitting}
-                    disabled={!name.trim()}
-                >
-                    Continue
-                </Button>
+                <form onSubmit={onSubmit} className="space-y-3">
+                    <Input placeholder="Full name" value={name} onChange={(e) => setName(e.target.value)} autoFocus />
+                    <Button
+                        type="submit"
+                        className="w-full"
+                        isLoading={isSubmitting}
+                        disabled={!name.trim()}
+                    >
+                        Continue
+                    </Button>
+                </form>
             </CardContent>
         </Card>
     );
