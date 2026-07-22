@@ -1,5 +1,12 @@
-import { useState } from "react";
-import { CheckIcon, CopyIcon, LockIcon, ShieldAlertIcon } from "lucide-react";
+import { useLayoutEffect, useRef, useState } from "react";
+import { CheckIcon, CopyIcon, LockIcon, PlusIcon, ShieldAlertIcon } from "lucide-react";
+import {
+    SECTION_LABELS,
+    composeSoapNotes,
+    parseSoapSections,
+    withAllSections,
+    type NoteSection,
+} from "@/lib/soap-notes";
 
 interface ClinicalNotesPanelProps {
     notes?:     string | null;
@@ -7,44 +14,38 @@ interface ClinicalNotesPanelProps {
     onChange?:  (value: string) => void;
 }
 
-// The backend composes notes as "S: ...\n\nO: ...\n\nA: ..." (gate.compose_summary).
-// We render those markers as full section headers, and recompose the identical
-// string on edit so the stored format never changes.
-const SECTION_LABELS: Record<string, string> = {
-    S: "Subjective",
-    O: "Objective",
-    A: "Assessment",
-};
+function AutoGrowTextarea({
+    value,
+    placeholder,
+    onChange,
+    minHeightClass,
+    autoFocus,
+}: {
+    value: string;
+    placeholder: string;
+    onChange: (value: string) => void;
+    minHeightClass: string;
+    autoFocus?: boolean;
+}) {
+    const ref = useRef<HTMLTextAreaElement>(null);
 
-const SECTION_ORDER = ["S", "O", "A"];
+    useLayoutEffect(() => {
+        const el = ref.current;
+        if (!el) return;
+        el.style.height = "auto";
+        el.style.height = `${el.scrollHeight}px`;
+    }, [value]);
 
-interface NoteSection {
-    key:  string;
-    text: string;
-}
-
-function parseSoapSections(text: string): NoteSection[] | null {
-    const markers = [...text.matchAll(/^([SOA]):[ \t]*/gm)];
-    if (markers.length === 0) return null;
-    // Anything before the first marker means free-form text — don't force sections on it.
-    if (text.slice(0, markers[0].index).trim() !== "") return null;
-
-    return markers.map((marker, i) => {
-        const start = marker.index! + marker[0].length;
-        const end = i + 1 < markers.length ? markers[i + 1].index! : text.length;
-        return { key: marker[1], text: text.slice(start, end).trim() };
-    });
-}
-
-function composeSoapNotes(sections: NoteSection[]): string {
-    return sections
-        .filter((section) => section.text.trim() !== "")
-        .map((section) => `${section.key}: ${section.text}`)
-        .join("\n\n");
-}
-
-function withAllSections(sections: NoteSection[]): NoteSection[] {
-    return SECTION_ORDER.map((key) => sections.find((s) => s.key === key) ?? { key, text: "" });
+    return (
+        <textarea
+            ref={ref}
+            autoFocus={autoFocus}
+            className={`w-full rounded-xl border border-border bg-white px-4 py-3 text-sm leading-relaxed resize-none overflow-hidden ${minHeightClass} focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500`}
+            value={value}
+            placeholder={placeholder}
+            onChange={(e) => onChange(e.target.value)}
+        />
+    );
 }
 
 function SafetyNetCallout({ items }: { items: string[] }) {
@@ -109,24 +110,46 @@ function SectionedNotesEditor({
     onChange: (value: string) => void;
 }) {
     const editable = withAllSections(sections);
+    // Sections the clinician opened by hand; filled sections are always visible.
+    const [openedKeys, setOpenedKeys] = useState<string[]>([]);
 
     const handleSectionChange = (key: string, text: string) => {
         onChange(composeSoapNotes(editable.map((s) => (s.key === key ? { ...s, text } : s))));
     };
 
+    const visible = editable.filter((s) => s.text.trim() !== "" || openedKeys.includes(s.key));
+    const collapsed = editable.filter((s) => !visible.includes(s));
+
     return (
         <div className="flex flex-col gap-4">
-            {editable.map((section) => (
+            {visible.map((section) => (
                 <div key={section.key} className="flex flex-col gap-1.5">
                     <SectionHeader label={SECTION_LABELS[section.key]} />
-                    <textarea
-                        className="w-full rounded-xl border border-border bg-white px-4 py-3 text-sm leading-relaxed resize-y min-h-[90px] focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                    <AutoGrowTextarea
                         value={section.text}
                         placeholder={`Add ${SECTION_LABELS[section.key].toLowerCase()} notes...`}
-                        onChange={(e) => handleSectionChange(section.key, e.target.value)}
+                        onChange={(text) => handleSectionChange(section.key, text)}
+                        minHeightClass="min-h-[90px]"
+                        autoFocus={openedKeys.includes(section.key) && section.text === ""}
                     />
                 </div>
             ))}
+
+            {collapsed.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                    {collapsed.map((section) => (
+                        <button
+                            key={section.key}
+                            type="button"
+                            onClick={() => setOpenedKeys((keys) => [...keys, section.key])}
+                            className="flex items-center gap-1.5 rounded-lg border border-dashed border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-500 hover:border-emerald-400 hover:text-emerald-700 transition-colors"
+                        >
+                            <PlusIcon className="size-3.5" />
+                            {SECTION_LABELS[section.key]}
+                        </button>
+                    ))}
+                </div>
+            )}
         </div>
     );
 }
@@ -171,11 +194,11 @@ export default function ClinicalNotesPanel({ notes, safetyNet, onChange }: Clini
                 useSections ? (
                     <SectionedNotesEditor sections={sections ?? []} onChange={onChange!} />
                 ) : (
-                    <textarea
-                        className="w-full rounded-xl border border-border bg-white px-4 py-3 text-sm leading-relaxed resize-y min-h-[280px] focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                    <AutoGrowTextarea
                         value={noteText}
                         placeholder="Add your clinical notes..."
-                        onChange={(e) => onChange!(e.target.value)}
+                        onChange={onChange!}
+                        minHeightClass="min-h-[280px]"
                     />
                 )
             ) : sections !== null ? (

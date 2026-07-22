@@ -96,6 +96,8 @@ export type PrescriptionData = {
     follow_up_notes: string | null;
     on_examinations: unknown[];
     chief_complaints: ChiefComplaintItem[];
+    summary?: string | null;
+    safety_net?: string[];
 }
 
 export type PrescriptionType = {

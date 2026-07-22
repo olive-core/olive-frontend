@@ -7,13 +7,17 @@ import {
     ArrowLeftIcon,
     CalendarDays,
     ClipboardList,
+    LockIcon,
     MicroscopeIcon,
+    NotebookPenIcon,
     PillIcon,
+    ShieldAlertIcon,
     StethoscopeIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { withDoctorPrefix } from "@/lib/clinician";
-import { memo } from "react";
+import { memo, useState } from "react";
+import { parseSoapSections, SECTION_LABELS } from "@/lib/soap-notes";
 
 interface ConsultationCardProps {
     prescription?: PrescriptionType;
@@ -77,6 +81,92 @@ function CardSkeleton() {
     );
 }
 
+type CardView = "rx" | "notes";
+
+function CardViewToggle({
+    view,
+    setView,
+    hasSafetyFlag,
+}: {
+    view: CardView;
+    setView: (view: CardView) => void;
+    hasSafetyFlag: boolean;
+}) {
+    const baseClass = "flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors";
+    const activeClass = "bg-white text-slate-800 shadow-sm";
+    const inactiveClass = "text-slate-500 hover:text-slate-700";
+
+    return (
+        <div className="flex flex-none gap-0.5 rounded-lg bg-slate-100 p-0.5">
+            <button
+                type="button"
+                onClick={() => setView("rx")}
+                className={`${baseClass} ${view === "rx" ? activeClass : inactiveClass}`}
+            >
+                <ClipboardList className="w-3.5 h-3.5" />
+                Rx
+            </button>
+            <button
+                type="button"
+                onClick={() => setView("notes")}
+                className={`${baseClass} ${view === "notes" ? activeClass : inactiveClass} relative`}
+            >
+                <NotebookPenIcon className="w-3.5 h-3.5" />
+                Notes
+                {hasSafetyFlag && (
+                    <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-amber-400" />
+                )}
+            </button>
+        </div>
+    );
+}
+
+function CardNotesView({ summary, safetyNet }: { summary: string; safetyNet: string[] }) {
+    const sections = parseSoapSections(summary);
+    const hasNotes = summary.trim() !== "";
+
+    return (
+        <div className="space-y-4">
+            <div className="flex items-center gap-1.5 text-xs text-slate-400">
+                <LockIcon className="w-3.5 h-3.5" />
+                <span>Private · not shared with the patient</span>
+            </div>
+
+            {safetyNet.length > 0 && (
+                <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5 space-y-1.5">
+                    <div className="flex items-center gap-1.5">
+                        <ShieldAlertIcon className="w-3.5 h-3.5 text-amber-600" />
+                        <span className="text-xs font-bold uppercase tracking-widest text-amber-700">Safety Net</span>
+                    </div>
+                    <ul className="list-disc pl-4 text-sm text-amber-900 space-y-1">
+                        {safetyNet.map((item, i) => <li key={i}>{item}</li>)}
+                    </ul>
+                </div>
+            )}
+
+            {!hasNotes && (
+                <p className="text-sm text-slate-400 text-center py-4">
+                    No notes were saved for this visit.
+                </p>
+            )}
+
+            {hasNotes && sections !== null && sections.filter(s => s.text.trim() !== "").map((section) => (
+                <div key={section.key} className="space-y-1.5">
+                    <h3 className="flex items-center gap-2 font-bold text-xs uppercase tracking-widest text-emerald-700">
+                        <span className="h-3 w-1 rounded-full bg-emerald-500" />
+                        {SECTION_LABELS[section.key]}
+                    </h3>
+                    <p className="text-sm leading-relaxed text-muted-foreground whitespace-pre-wrap">{section.text}</p>
+                </div>
+            ))}
+
+            {hasNotes && sections === null && (
+                <p className="text-sm leading-relaxed text-muted-foreground whitespace-pre-wrap">{summary}</p>
+            )}
+        </div>
+    );
+}
+
 function ConsultationCard({
     prescription,
     totalHistories,
@@ -89,6 +179,7 @@ function ConsultationCard({
     isError,
     hasSelection,
 }: ConsultationCardProps) {
+    const [view, setView] = useState<CardView>("rx");
 
     if (isLoading) {
         return <CardSkeleton />;
@@ -133,6 +224,8 @@ function ConsultationCard({
     const chief_complaints = prescription_data?.chief_complaints ?? [];
     const diagnoses = prescription_data?.diagnoses ?? [];
     const rx_list = prescription_data?.rx_list ?? [];
+    const summary = prescription_data?.summary ?? "";
+    const safety_net = prescription_data?.safety_net ?? [];
     const { relative, exact } = formatRelativeVisit(created_at);
 
     return (
@@ -149,8 +242,12 @@ function ConsultationCard({
                             <span>{relative} · {exact}</span>
                         </div>
                     </div>
+                    <CardViewToggle view={view} setView={setView} hasSafetyFlag={safety_net.length > 0} />
                 </div>
 
+                {view === "notes" && <CardNotesView summary={summary} safetyNet={safety_net} />}
+
+                {view === "rx" && <>
                 {/* Chief Complaints */}
                 {chief_complaints.length > 0 && (
                     <div className="space-y-2">
@@ -210,6 +307,7 @@ function ConsultationCard({
                             No prescription details available.
                         </p>
                     )}
+                </>}
             </CardContent>
 
             <CardFooter className="mt-auto border-t pt-4">
