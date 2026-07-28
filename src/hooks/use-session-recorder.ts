@@ -13,6 +13,8 @@ interface UseSessionRecorderReturn {
     isRecording: boolean;
     isPaused: boolean;
     isSilent: boolean;
+    /** Chunks that never reached the server, even after a retry. */
+    failedChunkCount: number;
     duration: number;
     pauseRecording: () => void;
     resumeRecording: () => void;
@@ -41,6 +43,7 @@ export default function useSessionRecorder({
     const [duration, setDuration] = useState<number>(0);
     const [isRecording, setIsRecording] = useState<boolean>(false);
     const [isPaused, setIsPaused] = useState<boolean>(false);
+    const [failedChunkCount, setFailedChunkCount] = useState<number>(0);
 
     const streamRef = useRef<MediaStream | null>(null);
     const activeWindowsRef = useRef<RecordingWindow[]>([]); // capturing now (briefly two, during an overlap)
@@ -62,22 +65,33 @@ export default function useSessionRecorder({
         }, 250);
     };
 
+    // A chunk that never lands is audio the doctor believes was captured, so a failed
+    // upload is retried once and then counted — silence here means silent data loss.
     const sendAudioChunk = useCallback((chunk: Blob): Promise<void> => {
         const chunkIndex = chunkIndexRef.current;
         chunkIndexRef.current += 1;
 
+        const postChunk = () => {
+            const formData = new FormData();
+            formData.append('file', chunk, `chunk-${Date.now()}.webm`);
+            formData.append("session_id", consultationId);
+            formData.append('chunk_index', chunkIndex.toString());
+            formData.append('chunking_scheme', CHUNKING_SCHEME);
+            formData.append('chunk_size_ms', chunkSizeInMs.toString());
+            formData.append('overlap_ms', overlapMs.toString());
+            return api.post('/conversation/chunk', formData);
+        };
+
         const upload = (async () => {
             try {
-                const formData = new FormData();
-                formData.append('file', chunk, `chunk-${Date.now()}.webm`);
-                formData.append("session_id", consultationId);
-                formData.append('chunk_index', chunkIndex.toString());
-                formData.append('chunking_scheme', CHUNKING_SCHEME);
-                formData.append('chunk_size_ms', chunkSizeInMs.toString());
-                formData.append('overlap_ms', overlapMs.toString());
-                await api.post('/conversation/chunk', formData);
-            } catch (error) {
-                console.error("Error sending audio chunk:", error);
+                await postChunk();
+            } catch {
+                try {
+                    await postChunk();
+                } catch (error) {
+                    console.error("Audio chunk failed to upload after retry:", error);
+                    setFailedChunkCount((count) => count + 1);
+                }
             }
         })();
 
@@ -256,6 +270,7 @@ export default function useSessionRecorder({
             openWindowTimerRef.current = null;
             activeWindowsRef.current = [];
             pendingUploadsRef.current = [];
+            setFailedChunkCount(0);
 
             // Request microphone access
             const stream = await navigator.mediaDevices.getUserMedia({
@@ -303,6 +318,7 @@ export default function useSessionRecorder({
         isRecording,
         isPaused,
         isSilent,
+        failedChunkCount,
         duration,
         pauseRecording,
         resumeRecording,

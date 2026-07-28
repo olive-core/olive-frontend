@@ -15,10 +15,13 @@ export default function PrescriptionActions({
     onGenerate,
     onCancel,
     hasBeenGenerated,
+    showTemplates = true,
 }: {
     onGenerate?:       () => void;
     onCancel?:         () => void;
     hasBeenGenerated?: boolean;
+    /** RxMemory fills prescription sections, so it is hidden in note-only consultations. */
+    showTemplates?:    boolean;
 }) {
     const { userId } = useAuthStore();
     const isGenerating = usePrescriptionStore((s) => s.isGenerating);
@@ -79,6 +82,7 @@ export default function PrescriptionActions({
                 </Button>
             )}
 
+            {showTemplates && (
             <Select
                 disabled={isLoadingTemplates || templates.length === 0 || isApplyingTemplate}
                 value={selectedTemplateId ?? ""}
@@ -110,6 +114,7 @@ export default function PrescriptionActions({
                     ))}
                 </SelectContent>
             </Select>
+            )}
         </div>
     );
 }

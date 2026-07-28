@@ -6,7 +6,7 @@ import PatientInfo from "./patient-info";
 import { MedicineContainer } from "./medicine-container";
 import api from "@/lib/axios";
 import { useMutation } from "@tanstack/react-query";
-import { useNavigate, useParams } from "@tanstack/react-router";
+import { Link, useNavigate, useParams } from "@tanstack/react-router";
 import { useState } from "react";
 import AdviceList from "./advice-list";
 import { PrescriptionView } from "./view";
@@ -18,6 +18,7 @@ import VitalsBar from "./paper/vitals-bar";
 import FollowUpBlock from "./paper/follow-up-block";
 import { Button } from "@/components/ui/button";
 import { useTargetedPrint } from "@/hooks/use-targeted-print";
+import { useClinicianProfile } from "@/hooks/use-clinician-profile";
 import { cn } from "@/lib/utils";
 
 interface PrescriptionProps {
@@ -33,6 +34,10 @@ export default function Prescription({ onGenerate, onCancel, hasBeenGenerated }:
     const { consultationId } = useParams({ from: "/doctor/prescribe/$consultationId" });
 
     const [activeDocument, setActiveDocument] = useState<PrescriptionDocument>("prescription");
+
+    // Doctors who prescribe on another system run Olive for the clinical note only.
+    const { data: clinicianProfile } = useClinicianProfile();
+    const prescriptionEnabled = clinicianProfile?.prescription_enabled !== false;
 
     const {
         chiefComplaint,
@@ -85,10 +90,13 @@ export default function Prescription({ onGenerate, onCancel, hasBeenGenerated }:
     const confirmMutation = useMutation({
         mutationFn: async () => {
             const payload = store.getSubmitPayload(consultationId);
-            await api.post("/prescription", payload);
+            await api.post("/prescription", { ...payload, includes_prescription: prescriptionEnabled });
         },
         onSuccess: () => {
-            requestPrint("prescription");
+            // A note-only consultation has nothing to hand the patient, so finishing it
+            // returns to the dashboard instead of opening the print dialog.
+            if (prescriptionEnabled) requestPrint("prescription");
+            else navigate({ to: "/doctor" });
         },
     });
 
@@ -159,38 +167,70 @@ export default function Prescription({ onGenerate, onCancel, hasBeenGenerated }:
         />
     );
 
+    const clinicalNotes = (
+        <ClinicalNotesPanel
+            notes={summary}
+            safetyNet={safetyNet}
+            onChange={setSummary}
+            patientSlot={<PatientInfo sessionId={consultationId} />}
+            onPrint={() => requestPrint("note")}
+        />
+    );
+
+    const sessionActions = (
+        <PrescriptionActions
+            onGenerate={onGenerate}
+            onCancel={onCancel}
+            hasBeenGenerated={hasBeenGenerated}
+            showTemplates={prescriptionEnabled}
+        />
+    );
+
     return (
         <>
-            <div className={cn("rx-print-mount", printTarget !== "prescription" && "print:hidden")} aria-hidden>
-                <PrescriptionView />
-            </div>
+            {prescriptionEnabled && (
+                <div className={cn("rx-print-mount", printTarget !== "prescription" && "print:hidden")} aria-hidden>
+                    <PrescriptionView />
+                </div>
+            )}
             <div className={cn("rx-print-mount", printTarget !== "note" && "print:hidden")} aria-hidden>
                 <ClinicalNoteView />
             </div>
 
             <div className="print:hidden">
-                <DocumentSwitcher
-                    value={activeDocument}
-                    onValueChange={setActiveDocument}
-                    notesHasContent={!!summary?.trim() || safetyNet.length > 0}
-                    actions={
-                        <PrescriptionActions
-                            onGenerate={onGenerate}
-                            onCancel={onCancel}
-                            hasBeenGenerated={hasBeenGenerated}
-                        />
-                    }
-                    prescription={prescriptionPaper}
-                    notes={
-                        <ClinicalNotesPanel
-                            notes={summary}
-                            safetyNet={safetyNet}
-                            onChange={setSummary}
-                            patientSlot={<PatientInfo sessionId={consultationId} />}
-                            onPrint={() => requestPrint("note")}
-                        />
-                    }
-                />
+                {prescriptionEnabled ? (
+                    <DocumentSwitcher
+                        value={activeDocument}
+                        onValueChange={setActiveDocument}
+                        notesHasContent={!!summary?.trim() || safetyNet.length > 0}
+                        actions={sessionActions}
+                        prescription={prescriptionPaper}
+                        notes={clinicalNotes}
+                    />
+                ) : (
+                    <>
+                        <div className="container mt-3 flex justify-center">{sessionActions}</div>
+                        {/* Explains the missing prescription where the doctor would notice it
+                            missing, so the dashboard never has to carry that reminder. */}
+                        <p className="mx-auto w-full max-w-3xl px-4 pt-4 text-xs text-slate-700">
+                            Note-only consultation &middot; prescriptions are off in your{" "}
+                            <Link to="/doctor/profile" className="font-medium text-emerald-700 underline-offset-2 hover:underline">
+                                profile settings
+                            </Link>
+                            .
+                        </p>
+                        {clinicalNotes}
+                        <div className="mx-auto flex w-full max-w-3xl justify-end px-4 pb-12">
+                            <Button
+                                onClick={() => confirmMutation.mutate()}
+                                isLoading={confirmMutation.isPending}
+                                className="px-8 font-bold shadow-md"
+                            >
+                                Save consultation
+                            </Button>
+                        </div>
+                    </>
+                )}
             </div>
         </>
     );

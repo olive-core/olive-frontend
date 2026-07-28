@@ -51,6 +51,8 @@ export type ConsultationDetail = {
     patient_id:            string;
     patient_name?:          string | null;
     prescription_data?:    ConsultationPrescriptionData | null;
+    /** False for note-only consultations; frozen at save time, never recomputed. */
+    includes_prescription?: boolean;
     created_at:            string;
     updated_at:            string;
     // Letterhead: render_config is the snapshot frozen at save time; the

@@ -48,7 +48,7 @@ export default function RecordingStatus({ status }: { status: RecorderStatus }) 
                     {label}
                 </span>
             </div>
-            {hint && <p className="text-xs text-amber-500">{hint}</p>}
+            {hint && <p className="max-w-xs text-center text-xs font-medium text-amber-700">{hint}</p>}
         </div>
     );
 }

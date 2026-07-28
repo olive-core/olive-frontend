@@ -9,9 +9,10 @@ import ListInfo from "./list-info";
 import VitalsBar from "./paper/vitals-bar";
 import ClinicalNotesPanel from "./paper/clinical-notes-panel";
 import DocumentSwitcher, { type PrescriptionDocument } from "./document-switcher";
+import { useClinicianProfile } from "@/hooks/use-clinician-profile";
 
 // ─── Sliding AI text phrases ───────────────────────────────────────────────────
-const AI_PHRASES = [
+const PRESCRIPTION_PHRASES = [
   "Analyzing conversation...",
   "Identifying chief complaints...",
   "Cross-referencing symptoms...",
@@ -24,8 +25,19 @@ const AI_PHRASES = [
   "Finalizing recommendations...",
 ];
 
+// Note-only consultations never draft an Rx, so the status never claims to.
+const NOTE_PHRASES = [
+  "Analyzing conversation...",
+  "Identifying chief complaints...",
+  "Summarizing history...",
+  "Recording examination findings...",
+  "Forming the assessment...",
+  "Flagging safety concerns...",
+  "Finalizing your note...",
+];
+
 // ─── Cycling AI status text ────────────────────────────────────────────────────
-function AiStatusText() {
+function AiStatusText({ phrases }: { phrases: string[] }) {
   const [phraseIndex, setPhraseIndex] = useState(0);
   const [visible, setVisible] = useState(true);
 
@@ -33,21 +45,39 @@ function AiStatusText() {
     const intervalId = setInterval(() => {
       setVisible(false);
       setTimeout(() => {
-        setPhraseIndex((prev) => (prev + 1) % AI_PHRASES.length);
+        setPhraseIndex((prev) => (prev + 1) % phrases.length);
         setVisible(true);
       }, 400);
     }, 2200);
 
     return () => clearInterval(intervalId);
-  }, []);
+  }, [phrases.length]);
 
   return (
     <span
       className="text-emerald-600 text-sm font-semibold tracking-wide transition-all duration-400"
       style={{ opacity: visible ? 1 : 0, transform: visible ? "translateY(0)" : "translateY(6px)" }}
     >
-      {AI_PHRASES[phraseIndex]}
+      {phrases[phraseIndex]}
     </span>
+  );
+}
+
+function AiStatusBlock({ phrases }: { phrases: string[] }) {
+  return (
+    <div className="flex items-center gap-3 py-3 px-4 my-3 rounded-xl bg-gradient-to-r from-emerald-50 to-slate-50 border border-emerald-100">
+      <SparklesIcon className="w-4 h-4 text-emerald-500 animate-pulse shrink-0" />
+      <AiStatusText phrases={phrases} />
+      <span className="flex gap-1 ml-auto">
+        {[0, 1, 2].map((i) => (
+          <span
+            key={i}
+            className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-bounce"
+            style={{ animationDelay: `${i * 0.18}s` }}
+          />
+        ))}
+      </span>
+    </div>
   );
 }
 
@@ -140,8 +170,8 @@ function SkeletonNotes() {
         </div>
         <SparklesIcon className="w-3 h-3 text-emerald-300 animate-pulse" />
       </div>
-      <p className="text-xs text-slate-400">
-        Private &middot; only you can see this. Not shared with the patient and not printed.
+      <p className="text-xs text-slate-700">
+        Private &middot; only you can see this. Never shared with the patient.
       </p>
       <div className="rounded-xl border border-border bg-muted/50 px-4 py-3 min-h-[280px] flex flex-col gap-2.5">
         <ShimmerLine width="90%" />
@@ -173,14 +203,52 @@ function SkeletonMedicineCard({ index }: { index: number }) {
   );
 }
 
+interface SkeletonProps {
+  onCancel?: () => void;
+  sessionId: string;
+}
+
+// ─── Note-only generation ──────────────────────────────────────────────────────
+// Doctors who prescribe elsewhere never see a prescription being drafted: the note
+// is the whole document, so it is the whole loading screen.
+function ClinicalNoteSkeleton({ onCancel, sessionId }: SkeletonProps) {
+  const summary = usePrescriptionStore((s) => s.summary);
+  const safetyNet = usePrescriptionStore((s) => s.safetyNet);
+
+  return (
+    <div className="mx-auto flex w-full max-w-3xl flex-col px-4">
+      <PatientInfo sessionId={sessionId} />
+      <AiStatusBlock phrases={NOTE_PHRASES} />
+
+      {summary.length > 0 || safetyNet.length > 0
+        ? <ClinicalNotesPanel notes={summary} safetyNet={safetyNet} />
+        : <SkeletonNotes />}
+
+      <div className="flex justify-center py-4">
+        <PrescriptionActions onCancel={onCancel} hasBeenGenerated={false} showTemplates={false} />
+      </div>
+
+      <style>{`
+        @keyframes shimmer {
+          100% { transform: translateX(200%); }
+        }
+      `}</style>
+    </div>
+  );
+}
+
 // ─── Main PrescriptionSkeleton ─────────────────────────────────────────────────
-export default function PrescriptionSkeleton({ 
-  onCancel,
-  sessionId 
-}: { 
-  onCancel?: () => void,
-  sessionId: string 
-}) {
+export default function PrescriptionSkeleton({ onCancel, sessionId }: SkeletonProps) {
+  const { data: clinician } = useClinicianProfile();
+
+  if (clinician?.prescription_enabled === false) {
+    return <ClinicalNoteSkeleton onCancel={onCancel} sessionId={sessionId} />;
+  }
+
+  return <FullPrescriptionSkeleton onCancel={onCancel} sessionId={sessionId} />;
+}
+
+function FullPrescriptionSkeleton({ onCancel, sessionId }: SkeletonProps) {
 
   const store = usePrescriptionStore();
   const {
@@ -237,19 +305,7 @@ export default function PrescriptionSkeleton({
           : <SkeletonVitals />}
 
         {/* ── AI Status block ────────────────────────────────────── */}
-        <div className="flex items-center gap-3 py-3 px-4 my-3 rounded-xl bg-gradient-to-r from-emerald-50 to-slate-50 border border-emerald-100">
-          <SparklesIcon className="w-4 h-4 text-emerald-500 animate-pulse shrink-0" />
-          <AiStatusText />
-          <span className="flex gap-1 ml-auto">
-            {[0, 1, 2].map((i) => (
-              <span
-                key={i}
-                className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-bounce"
-                style={{ animationDelay: `${i * 0.18}s` }}
-              />
-            ))}
-          </span>
-        </div>
+        <AiStatusBlock phrases={PRESCRIPTION_PHRASES} />
 
         {/* ── Skeleton clinical content ──────────────────────────── */}
         <div className="grid grid-cols-1 md:grid-cols-3">

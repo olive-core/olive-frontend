@@ -1,4 +1,6 @@
 import { ProfileForm } from '@/components/clinician/profile-form'
+import ConsultationSettingsCard from '@/components/clinician/consultation-settings-card'
+import DeviceCheckCard from '@/components/device/device-check-card'
 import { ProfileSummary } from '@/components/clinician/profile-summary'
 import MembershipBadge from '@/components/dashboard/subscription/membership-badge'
 import { Card, CardContent } from '@/components/ui/card'
@@ -63,8 +65,10 @@ function RouteComponent() {
               phone={phoneNumber}
             />
           </div>
-          <div className="md:col-span-2">
+          <div className="flex flex-col gap-6 md:col-span-2">
             <ProfileForm clinicianData={clinicianData} />
+            <ConsultationSettingsCard clinicianData={clinicianData} />
+            <DeviceCheckCard />
           </div>
         </div>
       )}

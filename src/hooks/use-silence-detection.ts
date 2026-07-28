@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { computeRms } from "@/lib/audio";
+import { SILENT_RMS } from "@/lib/mic-check";
 
 interface SilenceDetectionOptions {
     thresholdRms?: number;
@@ -9,7 +10,7 @@ interface SilenceDetectionOptions {
 
 // Defaults catch a genuinely dead/muted mic, not a quiet room: with autoGainControl on, ambient
 // noise sits above this floor, so a sustained reading below it means no signal at all.
-const DEFAULT_THRESHOLD_RMS = 0.008;
+const DEFAULT_THRESHOLD_RMS = SILENT_RMS;
 const DEFAULT_HOLD_MS = 8000;
 const DEFAULT_SAMPLE_INTERVAL_MS = 500;
 

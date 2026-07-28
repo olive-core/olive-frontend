@@ -20,6 +20,7 @@ export default function Recorder() {
         duration,
         isPaused,
         isSilent,
+        failedChunkCount,
         pauseRecording,
         resumeRecording,
         stopRecording,
@@ -60,6 +61,13 @@ export default function Recorder() {
                 >
                     {formatDuration(duration)}
                 </div>
+
+                {failedChunkCount > 0 && (
+                    <p className="max-w-xs text-center text-xs font-medium text-amber-700">
+                        {failedChunkCount} audio {failedChunkCount === 1 ? "piece" : "pieces"} could not be
+                        uploaded — check your internet connection.
+                    </p>
+                )}
 
                 {/* Live audio waveform — disabled for now: it drew too much attention during the
                     consult. The breathing dot + silence warning already reassure capture. To bring
