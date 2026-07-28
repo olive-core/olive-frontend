@@ -46,7 +46,7 @@ function ConfidenceBar({ confidence }: { confidence: number }) {
                     style={{ width: `${clamped}%` }}
                 />
             </div>
-            <span className="text-[10px] font-bold text-slate-500">{confidence}%</span>
+            <span className="text-[10px] font-bold text-slate-800">{confidence}%</span>
         </div>
     );
 }
@@ -100,7 +100,7 @@ export default function SectionItem({
             </div>
 
             {notes && (
-                <p className="text-[12px] text-slate-500 font-medium leading-relaxed italic">
+                <p className="text-[12px] text-slate-800 font-medium leading-relaxed italic">
                     {notes}
                 </p>
             )}

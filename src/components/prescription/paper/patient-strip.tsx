@@ -31,28 +31,28 @@ export default function PatientStrip({ name, dateOfBirth, sex, dateTime }: Patie
     return (
         <div className="border-y py-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 text-sm mt-5">
             <div className="flex gap-4">
-                <p className="text-slate-500">
+                <p className="text-slate-900">
                     Name: <span className="font-semibold">{(name ?? "").trim()}</span>
                 </p>
 
                 {dateOfBirth && (
-                    <p className="text-slate-500">
+                    <p className="text-slate-900">
                         Age: <span className="font-semibold">{calculateAge(dateOfBirth)}y</span>
                     </p>
                 )}
 
                 {sex && (
-                    <p className="text-slate-500">
+                    <p className="text-slate-900">
                         Sex: <span className="font-semibold">{SEX_LABELS[sex] ?? sex}</span>
                     </p>
                 )}
             </div>
 
             <div className="flex gap-2">
-                <p className="text-slate-500">
+                <p className="text-slate-900">
                     Date: <span className="font-semibold">{format(date, "MMM dd, yyyy")}</span>
                 </p>
-                <p className="text-slate-500">
+                <p className="text-slate-900">
                     <span className="font-semibold">{format(date, "hh:mm a")}</span>
                 </p>
             </div>

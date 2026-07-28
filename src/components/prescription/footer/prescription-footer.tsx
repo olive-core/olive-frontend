@@ -24,9 +24,9 @@ function FooterChamberEntry({ chamber }: { chamber: FooterChamber }) {
     return (
         <div
             data-focus={`footer-chamber-${chamber.id}`}
-            className="min-w-0 max-w-[62mm] text-[9.5px] leading-[1.35] text-slate-600"
+            className="min-w-0 max-w-[62mm] text-[9.5px] leading-[1.35] text-slate-900"
         >
-            <span className="font-semibold text-slate-700">{chamber.name}</span>
+            <span className="font-semibold">{chamber.name}</span>
             {chamber.lines.length > 0 && (
                 <span className="line-clamp-2 block">{chamber.lines.join(" · ")}</span>
             )}

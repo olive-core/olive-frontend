@@ -10,13 +10,14 @@ import { useNavigate, useParams } from "@tanstack/react-router";
 import { useState } from "react";
 import AdviceList from "./advice-list";
 import { PrescriptionView } from "./view";
+import { ClinicalNoteView } from "./note-view";
 import PrescriptionPaper from "./paper/prescription-paper";
 import ClinicalNotesPanel from "./paper/clinical-notes-panel";
 import DocumentSwitcher, { type PrescriptionDocument } from "./document-switcher";
 import VitalsBar from "./paper/vitals-bar";
 import FollowUpBlock from "./paper/follow-up-block";
 import { Button } from "@/components/ui/button";
-import { usePrintDocument } from "@/hooks/use-print-document";
+import { useTargetedPrint } from "@/hooks/use-targeted-print";
 import { cn } from "@/lib/utils";
 
 interface PrescriptionProps {
@@ -69,10 +70,16 @@ export default function Prescription({ onGenerate, onCancel, hasBeenGenerated }:
     } = store;
 
     // Navigate to the dashboard only after printing finishes — doing it immediately would
-    // swap out the DOM before the browser captures the prescription.
-    const handlePrint = usePrintDocument({
-        documentTitle: `Prescription_Report_${consultationId}`,
-        onAfterPrint:  () => navigate({ to: "/doctor" }),
+    // swap out the DOM before the browser captures the prescription. Printing the note is
+    // a side action that keeps the doctor in the session.
+    const { printTarget, requestPrint } = useTargetedPrint({
+        documentTitles: {
+            prescription: `Prescription_Report_${consultationId}`,
+            note:         `Clinical_Note_${consultationId}`,
+        },
+        onAfterPrint: (target) => {
+            if (target === "prescription") navigate({ to: "/doctor" });
+        },
     });
 
     const confirmMutation = useMutation({
@@ -81,7 +88,7 @@ export default function Prescription({ onGenerate, onCancel, hasBeenGenerated }:
             await api.post("/prescription", payload);
         },
         onSuccess: () => {
-            handlePrint();
+            requestPrint("prescription");
         },
     });
 
@@ -154,8 +161,11 @@ export default function Prescription({ onGenerate, onCancel, hasBeenGenerated }:
 
     return (
         <>
-            <div className="rx-print-mount" aria-hidden>
+            <div className={cn("rx-print-mount", printTarget !== "prescription" && "print:hidden")} aria-hidden>
                 <PrescriptionView />
+            </div>
+            <div className={cn("rx-print-mount", printTarget !== "note" && "print:hidden")} aria-hidden>
+                <ClinicalNoteView />
             </div>
 
             <div className="print:hidden">
@@ -171,7 +181,15 @@ export default function Prescription({ onGenerate, onCancel, hasBeenGenerated }:
                         />
                     }
                     prescription={prescriptionPaper}
-                    notes={<ClinicalNotesPanel notes={summary} safetyNet={safetyNet} onChange={setSummary} />}
+                    notes={
+                        <ClinicalNotesPanel
+                            notes={summary}
+                            safetyNet={safetyNet}
+                            onChange={setSummary}
+                            patientSlot={<PatientInfo sessionId={consultationId} />}
+                            onPrint={() => requestPrint("note")}
+                        />
+                    }
                 />
             </div>
         </>

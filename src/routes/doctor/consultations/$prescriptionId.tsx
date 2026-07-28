@@ -5,7 +5,8 @@ import { useState } from 'react'
 import toast from 'react-hot-toast'
 
 import api from '@/lib/axios'
-import { usePrintDocument } from '@/hooks/use-print-document'
+import { useTargetedPrint } from '@/hooks/use-targeted-print'
+import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import type { ConsultationDetail } from '@/types/consultation'
 import type { PatientInfoType } from '@/types/patient'
@@ -13,8 +14,10 @@ import PrescriptionReadView, {
   type ClinicianProfile,
 } from '@/components/prescription/paper/read-view'
 import PrescriptionPrintView from '@/components/prescription/paper/print-view'
+import ClinicalNotePrintView from '@/components/prescription/paper/clinical-note-print-view'
 import ReadSkeleton from '@/components/prescription/paper/read-skeleton'
 import ClinicalNotesPanel from '@/components/prescription/paper/clinical-notes-panel'
+import PatientStrip from '@/components/prescription/paper/patient-strip'
 import DocumentSwitcher, {
   type PrescriptionDocument,
 } from '@/components/prescription/document-switcher'
@@ -66,20 +69,28 @@ function useSaveSummary(prescriptionId: string) {
 }
 
 interface ClinicalNotesTabProps {
-  notes:     string | null
-  safetyNet: string[]
-  onChange:  (value: string) => void
-  onSave:    () => void
-  isDirty:   boolean
-  isSaving:  boolean
+  notes:       string | null
+  safetyNet:   string[]
+  patientSlot: React.ReactNode
+  onChange:    (value: string) => void
+  onPrint:     () => void
+  onSave:      () => void
+  isDirty:     boolean
+  isSaving:    boolean
 }
 
-function ClinicalNotesTab({ notes, safetyNet, onChange, onSave, isDirty, isSaving }: ClinicalNotesTabProps) {
+function ClinicalNotesTab({ notes, safetyNet, patientSlot, onChange, onPrint, onSave, isDirty, isSaving }: ClinicalNotesTabProps) {
   return (
     <>
-      <ClinicalNotesPanel notes={notes} safetyNet={safetyNet} onChange={onChange} />
+      <ClinicalNotesPanel
+        notes={notes}
+        safetyNet={safetyNet}
+        onChange={onChange}
+        patientSlot={patientSlot}
+        onPrint={onPrint}
+      />
       {isDirty && (
-        <div className="container mx-auto flex justify-end mt-2">
+        <div className="mx-auto flex w-full max-w-3xl justify-end px-4 mt-2">
           <Button
             size="sm"
             onClick={onSave}
@@ -157,12 +168,17 @@ function ConsultationDetailPage() {
   const [notesDraft, setNotesDraft] = useState<string | null>(null)
   const saveSummary = useSaveSummary(prescriptionId)
 
-  const handlePrint = usePrintDocument({ documentTitle: `Prescription_${prescriptionId}` })
+  const { printTarget, requestPrint } = useTargetedPrint({
+    documentTitles: {
+      prescription: `Prescription_${prescriptionId}`,
+      note:         `Clinical_Note_${prescriptionId}`,
+    },
+  })
 
   if (isLoading) {
     return (
       <>
-        <DetailToolbar onPrint={handlePrint} printDisabled />
+        <DetailToolbar onPrint={() => requestPrint('prescription')} printDisabled />
         <ReadSkeleton />
       </>
     )
@@ -177,18 +193,35 @@ function ConsultationDetailPage() {
   const currentNotes = notesDraft ?? savedNotes
   const notesDirty = notesDraft !== null && notesDraft !== savedNotes
 
+  const patientStrip = (
+    <PatientStrip
+      name={consultation.patient_name}
+      dateOfBirth={patient?.date_of_birth}
+      sex={patient?.sex}
+      dateTime={consultation.created_at}
+    />
+  )
+
   return (
     <>
-      <div className="rx-print-mount" aria-hidden>
+      <div className={cn('rx-print-mount', printTarget !== 'prescription' && 'print:hidden')} aria-hidden>
         <PrescriptionPrintView
           consultation={consultation}
           clinician={clinician}
           patient={patient}
         />
       </div>
+      <div className={cn('rx-print-mount', printTarget !== 'note' && 'print:hidden')} aria-hidden>
+        <ClinicalNotePrintView
+          consultation={consultation}
+          clinician={clinician}
+          patient={patient}
+          notes={currentNotes}
+        />
+      </div>
 
       <div className="print:hidden">
-        <DetailToolbar onPrint={handlePrint} />
+        <DetailToolbar onPrint={() => requestPrint('prescription')} />
         <DocumentSwitcher
           value={activeDocument}
           onValueChange={setActiveDocument}
@@ -204,7 +237,9 @@ function ConsultationDetailPage() {
             <ClinicalNotesTab
               notes={currentNotes}
               safetyNet={safetyNet}
+              patientSlot={patientStrip}
               onChange={setNotesDraft}
+              onPrint={() => requestPrint('note')}
               onSave={() => saveSummary.mutate(notesDraft ?? '')}
               isDirty={notesDirty}
               isSaving={saveSummary.isPending}

@@ -11,7 +11,7 @@ interface ChamberContactBlockProps {
     className?: string;
 }
 
-const ICON_CLASS = "size-3 shrink-0 text-slate-400";
+const ICON_CLASS = "size-3 shrink-0 text-slate-700";
 
 export default function ChamberContactBlock({ config, align = "left", showChamberName = true, className }: ChamberContactBlockProps) {
     const lines = visibleContactLines(config);
@@ -23,13 +23,13 @@ export default function ChamberContactBlock({ config, align = "left", showChambe
     return (
         <div
             className={cn(
-                "flex flex-col gap-[3px] text-[12.5px] leading-snug text-slate-600",
+                "flex flex-col gap-[3px] text-[12.5px] leading-snug text-slate-900",
                 isRight && "items-end text-right",
                 className,
             )}
         >
             {showName && (
-                <span data-focus="chamberName" className={cn("flex items-center gap-1.5 text-[13px] font-semibold text-slate-800", isRight && "flex-row-reverse")}>
+                <span data-focus="chamberName" className={cn("flex items-center gap-1.5 text-[13px] font-semibold text-slate-900", isRight && "flex-row-reverse")}>
                     <Building2 className={ICON_CLASS} />
                     {config.chamberName}
                 </span>

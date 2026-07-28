@@ -15,7 +15,7 @@ function getContainerClass(isHighlighted: boolean): string {
 function getTitleClass(isHighlighted: boolean): string {
     return isHighlighted
         ? "font-bold text-xs uppercase tracking-widest text-emerald-700"
-        : "font-bold text-xs uppercase tracking-widest text-slate-500";
+        : "font-bold text-xs uppercase tracking-widest text-slate-900";
 }
 
 function getItemClass(isHighlighted: boolean): string {

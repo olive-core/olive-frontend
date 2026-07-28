@@ -26,7 +26,7 @@ function MedicineName({ typeLabel, tradeName, genericName, fallbackName }: Pick<
                     <span className="font-semibold text-base">{fallbackName}</span>
                 )}
             </h3>
-            {genericName && <div className="text-xs text-slate-500 mt-0.5">{genericName}</div>}
+            {genericName && <div className="text-xs text-slate-900 mt-0.5">{genericName}</div>}
         </div>
     );
 }
@@ -43,12 +43,12 @@ export default function MedicineCard({ typeLabel, tradeName, genericName, fallba
                 )}
             </div>
 
-            {detail && <div className="text-sm text-slate-500 mt-1">{detail}</div>}
+            {detail && <div className="text-sm text-slate-900 mt-1">{detail}</div>}
 
             {reasoning && (
                 <div className="mt-2 p-2 rounded-lg bg-emerald-50/50 border border-emerald-100 flex items-start gap-1.5">
                     <Sparkles className="w-3.5 h-3.5 text-emerald-500 mt-0.5 shrink-0" />
-                    <p className="text-xs text-slate-600 italic leading-tight">{reasoning}</p>
+                    <p className="text-xs text-slate-800 italic leading-tight">{reasoning}</p>
                 </div>
             )}
 

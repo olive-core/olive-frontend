@@ -22,7 +22,7 @@ interface PrescriptionPrintDocumentProps {
 }
 
 function EmptySectionNote({ children }: { children: ReactNode }) {
-    return <p className="pl-1 text-xs italic text-gray-400">{children}</p>;
+    return <p className="pl-1 text-xs italic text-gray-700">{children}</p>;
 }
 
 // Every heading always prints: the prescription is a standard form, and a reader finding the
@@ -41,7 +41,7 @@ function PrintSection({
 }) {
     return (
         <div>
-            <h3 className="font-semibold text-emerald-600">{title}</h3>
+            <h3 className="font-semibold text-emerald-900">{title}</h3>
             {items.length === 0 ? (
                 <EmptySectionNote>{emptyText}</EmptySectionNote>
             ) : (
@@ -63,23 +63,23 @@ function RxEntry({ medicine, index }: { medicine: any; index: number }) {
             <div className="flex justify-between items-start">
                 <div className="flex-1">
                     {categoryLabel(medicine.type) && (
-                        <p className="text-[10px] font-semibold uppercase tracking-wide text-emerald-600">
+                        <p className="text-[10px] font-semibold uppercase tracking-wide text-emerald-900">
                             {categoryLabel(medicine.type)}
                         </p>
                     )}
                     <p className="font-semibold">
                         {index + 1}. {medicine.trade_name}
-                        <span className="text-gray-500 text-xs ml-1">({medicine.generic_name})</span>
+                        <span className="text-gray-700 text-xs ml-1">({medicine.generic_name})</span>
                     </p>
-                    <p className="text-xs text-gray-700">{medicine.dosage}</p>
+                    <p className="text-xs text-gray-900">{medicine.dosage}</p>
                 </div>
                 <div className="text-right">
                     <p className="text-sm font-semibold">{formatStoredFrequency(medicine)}</p>
-                    <p className="text-xs text-gray-600">{formatStoredDuration(medicine)}</p>
+                    <p className="text-xs text-gray-800">{formatStoredDuration(medicine)}</p>
                 </div>
             </div>
             {instructions && (
-                <p className="mt-1.5 border-l-2 border-emerald-200 pl-2 text-xs italic text-gray-600">
+                <p className="mt-1.5 border-l-2 border-emerald-200 pl-2 text-xs italic text-gray-800">
                     {instructions}
                 </p>
             )}
@@ -125,7 +125,7 @@ export default function PrescriptionPrintDocument({
                 </div>
 
                 <div className="col-span-2">
-                    <h3 className="font-semibold text-emerald-600 mb-2">Rx</h3>
+                    <h3 className="font-semibold text-emerald-900 mb-2">Rx</h3>
                     {medicines.length === 0 ? (
                         <EmptySectionNote>No medicine prescribed</EmptySectionNote>
                     ) : (
@@ -141,7 +141,7 @@ export default function PrescriptionPrintDocument({
             <div className="border-t border-dashed my-4" />
 
             <div>
-                <h3 className="font-semibold text-emerald-600 mb-1">Advice</h3>
+                <h3 className="font-semibold text-emerald-900 mb-1">Advice</h3>
                 {adviceList.length === 0 ? (
                     <EmptySectionNote>No specific advice</EmptySectionNote>
                 ) : (

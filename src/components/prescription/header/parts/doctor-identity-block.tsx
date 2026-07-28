@@ -7,7 +7,7 @@ interface DoctorIdentityBlockProps extends HeaderRenderProps {
 }
 
 // The doctor's name (branded with the accent) plus designation, qualification and BMDC.
-// Qualification and BMDC stay neutral slate so they read on any printer. `data-focus` marks
+// Qualification and BMDC stay neutral slate so they read on any printer, at full ink `data-focus` marks
 // each field so clicking it in the editor preview jumps to its control; `whitespace-pre-line`
 // honours the line breaks doctors type into multi-line fields.
 export default function DoctorIdentityBlock({ identity, config, palette, align = "left" }: DoctorIdentityBlockProps) {
@@ -33,18 +33,18 @@ export default function DoctorIdentityBlock({ identity, config, palette, align =
                 </p>
             )}
             {identity.qualification && (
-                <p data-focus="qualification" className="whitespace-pre-line text-[13px] leading-snug text-slate-600">
+                <p data-focus="qualification" className="whitespace-pre-line text-[13px] leading-snug text-slate-900">
                     {identity.qualification}
                 </p>
             )}
             {config.designation && (
-                <p data-focus="designation" className="whitespace-pre-line text-[13px] font-medium leading-snug text-slate-700">
+                <p data-focus="designation" className="whitespace-pre-line text-[13px] font-medium leading-snug text-slate-900">
                     {config.designation}
                 </p>
             )}
             {identity.bmdcNo && (
-                <p data-focus="bmdcNo" className="text-[11.5px] leading-snug text-slate-500">
-                    BMDC Reg: <span className="font-semibold text-slate-600">{identity.bmdcNo}</span>
+                <p data-focus="bmdcNo" className="text-[11.5px] leading-snug text-slate-900">
+                    BMDC Reg: <span className="font-semibold">{identity.bmdcNo}</span>
                 </p>
             )}
         </div>

@@ -40,7 +40,7 @@ export default function AccentBarHeader({ identity, config, palette }: HeaderRen
                         {config.chamberName.trim() && (
                             <span
                                 data-focus="chamberName"
-                                className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500"
+                                className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-900"
                             >
                                 {config.chamberName}
                             </span>

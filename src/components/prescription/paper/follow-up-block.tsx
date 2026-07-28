@@ -52,7 +52,7 @@ function EditableFollowUp({ value, onChange }: Required<Omit<FollowUpBlockProps,
                     );
                 })}
 
-                <div className="flex items-center gap-1 text-xs text-slate-400">
+                <div className="flex items-center gap-1 text-xs text-slate-700">
                     <span>or</span>
                     <input
                         type="number"
@@ -87,14 +87,14 @@ function ReadOnlyFollowUp({ value, baseDate }: Omit<FollowUpBlockProps, "onChang
     return (
         <div className="flex flex-col gap-0.5">
             {interval && (
-                <p className="text-sm text-slate-700">
+                <p className="text-sm text-slate-900">
                     After <span className="font-semibold">{interval}</span>
-                    {dueDate && <span className="text-slate-400"> · {dueDate}</span>}
+                    {dueDate && <span> · {dueDate}</span>}
                 </p>
             )}
             {/* Not italic: the note is Bangla, which has no true italic form, so browsers
                 fake an oblique slant that renders poorly. Advice avoids italic for the same reason. */}
-            {value.follow_up_notes && <p className="text-xs text-slate-500">{value.follow_up_notes}</p>}
+            {value.follow_up_notes && <p className="text-xs text-slate-900">{value.follow_up_notes}</p>}
         </div>
     );
 }
@@ -107,7 +107,7 @@ export default function FollowUpBlock({ value, onChange, baseDate }: FollowUpBlo
 
     return (
         <div className="flex flex-col gap-2 rounded-xl border bg-white p-3">
-            <h3 className="font-bold text-xs uppercase tracking-widest text-slate-500">Follow Up</h3>
+            <h3 className="font-bold text-xs uppercase tracking-widest text-slate-900">Follow Up</h3>
             {isEditable ? <EditableFollowUp value={value} onChange={onChange} /> : <ReadOnlyFollowUp value={value} baseDate={baseDate} />}
         </div>
     );

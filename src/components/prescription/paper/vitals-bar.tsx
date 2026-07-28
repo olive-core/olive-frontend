@@ -56,14 +56,14 @@ function CellCard({ label, accent, children }: { label: string; accent?: boolean
                 accent ? "border-emerald-200 bg-emerald-50/40" : "border-slate-200 bg-white"
             )}
         >
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{label}</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-900">{label}</span>
             <div className="flex items-baseline gap-1">{children}</div>
         </div>
     );
 }
 
 function Unit({ children }: { children: ReactNode }) {
-    return <span className="text-[10px] font-medium text-slate-400">{children}</span>;
+    return <span className="text-[10px] font-medium text-slate-900">{children}</span>;
 }
 
 function HeightCell({ cm, onChange }: { cm?: number | null; onChange: (cm: number | null) => void }) {
@@ -193,11 +193,11 @@ function ReadOnlyVitals({ vitals }: { vitals: VitalsType }) {
         <div className="flex flex-wrap gap-x-3 gap-y-0.5">
             {chips.map((chip, i) => (
                 <span key={i} className="inline-flex items-baseline gap-1">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{chip.label}</span>
-                    <span className={cn("text-xs font-semibold", chip.accent ? "text-emerald-600" : "text-slate-700")}>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-900">{chip.label}</span>
+                    <span className={cn("text-xs font-semibold", chip.accent ? "text-emerald-700" : "text-slate-900")}>
                         {chip.value}
                     </span>
-                    {chip.unit && <span className="text-[10px] text-slate-400">{chip.unit}</span>}
+                    {chip.unit && <span className="text-[10px] text-slate-900">{chip.unit}</span>}
                 </span>
             ))}
         </div>
@@ -212,7 +212,7 @@ export default function VitalsBar({ vitals, onChange }: VitalsBarProps) {
     if (isEditable) {
         return (
             <div className="flex flex-col gap-2 border-y py-2.5">
-                <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-400">On Examination</h3>
+                <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-900">On Examination</h3>
                 <EditableVitals vitals={vitals} onChange={onChange} />
             </div>
         );
@@ -220,7 +220,7 @@ export default function VitalsBar({ vitals, onChange }: VitalsBarProps) {
 
     return (
         <div className="flex items-baseline gap-3 border-y py-2">
-            <span className="shrink-0 text-[10px] font-bold uppercase tracking-widest text-slate-400">On Exam</span>
+            <span className="shrink-0 text-[10px] font-bold uppercase tracking-widest text-slate-900">On Exam</span>
             <ReadOnlyVitals vitals={vitals} />
         </div>
     );
