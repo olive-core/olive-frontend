@@ -2,20 +2,26 @@ import api from "@/lib/axios";
 import { PausableTimeout } from "@/lib/pausable-timeout";
 import { useCallback, useEffect, useEffectEvent, useRef, useState } from "react";
 import { useSilenceDetection } from "./use-silence-detection";
+import { useStableCallback } from "./use-stable-callback";
 
 interface UseSessionRecorderProps {
     chunkSizeInMs?: number;
     overlapMs?: number;
-    consultationId: string
 }
 
+// Every function here has a permanent identity (see useStableCallback), so callers can
+// safely list them as effect dependencies. That is load-bearing: the recorder is started
+// from an effect, and an unstable identity there restarts it on every render.
 interface UseSessionRecorderReturn {
     isRecording: boolean;
     isPaused: boolean;
     isSilent: boolean;
+    /** The microphone could not be opened — permission denied, or no input device. */
+    isMicrophoneUnavailable: boolean;
     /** Chunks that never reached the server, even after a retry. */
     failedChunkCount: number;
     duration: number;
+    startRecording: (consultationId: string) => void;
     pauseRecording: () => void;
     resumeRecording: () => void;
     stopRecording: () => Promise<void>;
@@ -35,16 +41,21 @@ interface RecordingWindow {
 // merged into a continuous recording later. Bump the version if the algorithm changes.
 const CHUNKING_SCHEME = "listen-v1";
 
+// Capturing audio is deliberately decoupled from any one screen: the caller starts a
+// recording for a consultation and keeps the hook mounted above the router, so the
+// microphone survives navigation. Nothing here knows which page is on screen.
 export default function useSessionRecorder({
-    consultationId,
     chunkSizeInMs = 30 * 1000, // the cadence at which a new window opens
     overlapMs = 2 * 1000,      // extra tail each window records past the next window's start
-}: UseSessionRecorderProps): UseSessionRecorderReturn {
+}: UseSessionRecorderProps = {}): UseSessionRecorderReturn {
     const [duration, setDuration] = useState<number>(0);
     const [isRecording, setIsRecording] = useState<boolean>(false);
     const [isPaused, setIsPaused] = useState<boolean>(false);
+    const [isMicrophoneUnavailable, setIsMicrophoneUnavailable] = useState<boolean>(false);
     const [failedChunkCount, setFailedChunkCount] = useState<number>(0);
 
+    const consultationIdRef = useRef<string>("");  // the session the current chunks belong to
+    const isStartingRef = useRef<boolean>(false);  // true from the start request until capture is live
     const streamRef = useRef<MediaStream | null>(null);
     const activeWindowsRef = useRef<RecordingWindow[]>([]); // capturing now (briefly two, during an overlap)
     const openWindowTimerRef = useRef<PausableTimeout | null>(null); // fires every chunkSizeInMs to open the next window
@@ -74,7 +85,7 @@ export default function useSessionRecorder({
         const postChunk = () => {
             const formData = new FormData();
             formData.append('file', chunk, `chunk-${Date.now()}.webm`);
-            formData.append("session_id", consultationId);
+            formData.append("session_id", consultationIdRef.current);
             formData.append('chunk_index', chunkIndex.toString());
             formData.append('chunking_scheme', CHUNKING_SCHEME);
             formData.append('chunk_size_ms', chunkSizeInMs.toString());
@@ -97,7 +108,7 @@ export default function useSessionRecorder({
 
         pendingUploadsRef.current.push(upload);
         return upload;
-    }, [consultationId, chunkSizeInMs, overlapMs]);
+    }, [chunkSizeInMs, overlapMs]);
 
     const closeWindow = useEffectEvent((recorder: MediaRecorder) => {
         activeWindowsRef.current = activeWindowsRef.current.filter((window) => {
@@ -180,7 +191,7 @@ export default function useSessionRecorder({
         setDuration(0);
     });
 
-    const pauseRecording = useCallback(() => {
+    const pauseRecording = useStableCallback(() => {
         const recording = activeWindowsRef.current.filter(window => window.recorder.state === 'recording');
         if (recording.length === 0) return;
         recording.forEach(window => window.recorder.pause());
@@ -195,9 +206,9 @@ export default function useSessionRecorder({
             durationIntervalRef.current = null;
         }
         setIsPaused(true);
-    }, [pauseTimers]);
+    });
 
-    const resumeRecording = useCallback(() => {
+    const resumeRecording = useStableCallback(() => {
         const paused = activeWindowsRef.current.filter(window => window.recorder.state === 'paused');
         if (paused.length === 0) return;
         paused.forEach(window => window.recorder.resume());
@@ -206,7 +217,7 @@ export default function useSessionRecorder({
         startTimeRef.current = Date.now();
         startDurationTimer();
         setIsPaused(false);
-    }, [resumeTimers]);
+    });
 
     const stopAndFlush = useEffectEvent((recorder: MediaRecorder): Promise<void> =>
         new Promise((resolve) => {
@@ -223,7 +234,7 @@ export default function useSessionRecorder({
         })
     );
 
-    const stopRecording = useCallback(async (): Promise<void> => {
+    const stopRecording = useStableCallback(async (): Promise<void> => {
         isFinalizingRef.current = true;
         setIsRecording(false);
 
@@ -247,23 +258,34 @@ export default function useSessionRecorder({
         await Promise.allSettled(pendingUploadsRef.current);
         streamRef.current?.getTracks().forEach(track => track.stop());
         streamRef.current = null;
-    }, [cancelTimers, stopAndFlush]);
+    });
 
     // Resolves once in-flight uploads have settled, so the caller can safely delete
     // the session and its audio without a late chunk racing the delete.
-    const discardRecording = useCallback((): Promise<void> => {
+    const discardRecording = useStableCallback((): Promise<void> => {
         isDiscardingRef.current = true;
         const inFlightUploads = pendingUploadsRef.current;
         cleanup();
         setIsRecording(false);
         return Promise.allSettled(inFlightUploads).then(() => undefined);
-    }, [cleanup]);
+    });
 
-    const startRecording = useEffectEvent(async () => {
+    // A second start while one is already live would open a parallel MediaRecorder and
+    // upload duplicate audio with no handle left to stop it, so capture refuses to
+    // stack. This is the hard stop behind every caller: whatever a screen does with its
+    // effects, only one recording can exist.
+    const isCapturing = () =>
+        isStartingRef.current || streamRef.current !== null || activeWindowsRef.current.length > 0;
+
+    const beginRecording = useEffectEvent(async (consultationId: string) => {
+        if (isCapturing()) return;
+        isStartingRef.current = true;
         try {
             // Reset state
             setDuration(0);
             setIsRecording(false);
+            setIsMicrophoneUnavailable(false);
+            consultationIdRef.current = consultationId;
             isFinalizingRef.current = false;
             isDiscardingRef.current = false;
             chunkIndexRef.current = 0;
@@ -293,19 +315,26 @@ export default function useSessionRecorder({
             scheduleNextWindow();  // every later window opens one chunkSizeInMs after the last
             startDurationTimer();
         } catch (error) {
+            // A denied or missing microphone is a state the doctor has to see and act on,
+            // not a silent no-op that leaves a dead timer on screen.
             console.error("Error starting recording:", error);
             cleanup();
+            setIsMicrophoneUnavailable(true);
+        } finally {
+            isStartingRef.current = false;
         }
+    });
+
+    const startRecording = useStableCallback((consultationId: string) => {
+        void beginRecording(consultationId);
     });
 
     // Warn about a dead/muted mic only while actively capturing — paused gaps are expected silence.
     const isSilent = useSilenceDetection(streamRef.current, isRecording && !isPaused);
 
-    // Auto-start recording on mount
+    // Release the microphone if the hook itself goes away (leaving the dashboard, signing
+    // out) — but never while a graceful stop is still uploading the final chunk.
     useEffect(() => {
-        startRecording();
-
-        // Cleanup on unmount — skip while a graceful stop is still uploading the final chunk
         return () => {
             if (!isFinalizingRef.current) {
                 cleanup();
@@ -318,8 +347,10 @@ export default function useSessionRecorder({
         isRecording,
         isPaused,
         isSilent,
+        isMicrophoneUnavailable,
         failedChunkCount,
         duration,
+        startRecording,
         pauseRecording,
         resumeRecording,
         stopRecording,

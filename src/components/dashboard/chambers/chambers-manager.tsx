@@ -18,7 +18,7 @@ import {
 } from "@/lib/attendant-queue";
 import { chamberLabel, chamberRoom, type Chamber, type Hospital } from "@/types/attendant-queue";
 import { handleError } from "@/lib/utils";
-import { padHasContent } from "@/lib/chamber-pad";
+import { padIsConfigured } from "@/lib/chamber-pad";
 import HospitalSelect from "./hospital-select";
 import NewChamberForm from "./new-chamber-form";
 
@@ -77,12 +77,12 @@ function ChamberPadLink({ chamber }: { chamber: Chamber }) {
             <span className="flex min-w-0 flex-1 flex-col gap-0.5">
                 <span className="flex items-center gap-2 text-sm font-medium">
                     Prescription pad
-                    {padHasContent(chamber.pad_config) && (
+                    {padIsConfigured(chamber.pad_config) && (
                         <span className="size-1.5 rounded-full bg-emerald-500" title="Configured" />
                     )}
                 </span>
                 <span className="text-xs text-muted-foreground">
-                    Name, logo, address, phone &amp; hours printed at this chamber
+                    Paper, name, logo and contact details printed at this chamber
                 </span>
             </span>
             <ChevronRightIcon className="size-4 shrink-0 text-slate-400" />

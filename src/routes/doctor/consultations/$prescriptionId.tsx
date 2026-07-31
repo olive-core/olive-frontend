@@ -224,6 +224,7 @@ function ConsultationDetailPage() {
             consultation={consultation}
             clinician={clinician}
             patient={patient}
+            audience="clinician"
           />
         </div>
       )}

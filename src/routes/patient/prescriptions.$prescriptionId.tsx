@@ -130,6 +130,7 @@ function PrescriptionDetailPage() {
           consultation={consultation}
           clinician={clinician}
           patient={patient}
+          audience="patient"
         />
       </div>
 

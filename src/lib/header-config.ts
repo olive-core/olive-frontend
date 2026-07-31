@@ -1,6 +1,8 @@
 // The prescription letterhead's data model, its API (snake_case) conversions, and the
 // color/monochrome palette derivation shared by every header preset and the editor.
 
+import { printPaperFromApi, type PrintPaper, type PrintPaperApi } from "@/lib/print-paper";
+
 export type HeaderPreset = "classic-split" | "accent-bar";
 export type HeaderColorMode = "color" | "mono";
 export type LogoShape = "circle" | "rounded" | "square";
@@ -348,8 +350,10 @@ export interface FooterModel {
 }
 
 // The frozen letterhead a prescription was issued with, as persisted by the
-// backend at save time. `header` already has the active chamber's pad overlaid.
+// backend at save time. `header` already has the active chamber's pad overlaid,
+// and `paper` freezes the physical pad it was printed on.
 export interface RenderConfigApi {
+    paper?:    PrintPaperApi | null;
     version?:  number;
     identity?: {
         name?:          string | null;
@@ -398,6 +402,8 @@ export interface ResolvedLetterhead {
     identity: DoctorIdentity;
     config:   HeaderConfig;
     footer:   FooterModel;
+    /** The pad this prescription is printed on. Pre-printed pads suppress the rest. */
+    paper:    PrintPaper;
 }
 
 // Legacy snapshots (pre single-name) stored first_name/last_name; new ones store name.
@@ -431,6 +437,7 @@ export function resolveLetterhead(
             },
             config,
             footer: footerFromApi(snapshot.footer),
+            paper:  printPaperFromApi(snapshot.paper),
         };
     }
 
@@ -444,5 +451,6 @@ export function resolveLetterhead(
         },
         config,
         footer: buildFallbackFooter(),
+        paper:  printPaperFromApi(null),
     };
 }

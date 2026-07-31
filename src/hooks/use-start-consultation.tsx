@@ -9,6 +9,7 @@ import { useSubscriptionGate } from "@/stores/subscription-gate-store";
 import { useDefaultChamberId } from "@/stores/active-chamber-store";
 import { useAuthStore } from "@/stores/auth-store";
 import { useGraceGuard } from "@/hooks/use-grace-guard";
+import { useConsultationStartGuard } from "@/hooks/use-consultation-start-guard";
 
 // Starting a consultation is metered, chamber-aware and grace-guarded. Both the
 // single-patient card and the multi-patient picker start one, so the flow lives here.
@@ -19,12 +20,14 @@ export function useStartConsultation() {
     const defaultChamberId = useDefaultChamberId(clinicianId);
     const showSubscriptionGate = useSubscriptionGate((s) => s.show);
     const { guardStart, dialog: graceDialog } = useGraceGuard();
+    const canStartConsultation = useConsultationStartGuard();
     const [startingId, setStartingId] = useState<string | null>(null);
 
     // contactPhone is the number that brought the patient in for this visit (already
     // in +88… form); it decides where the finished prescription is texted.
-    const start = (patientId: string, contactPhone?: string) =>
-        guardStart(async () => {
+    const start = (patientId: string, contactPhone?: string) => {
+        if (!canStartConsultation()) return;
+        return guardStart(async () => {
             try {
                 setStartingId(patientId);
                 const response = await api.post("/session", {
@@ -48,6 +51,7 @@ export function useStartConsultation() {
                 setStartingId(null);
             }
         });
+    };
 
     return { start, startingId, graceDialog };
 }

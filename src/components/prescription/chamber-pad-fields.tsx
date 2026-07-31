@@ -9,6 +9,7 @@ import { padFromApi, type ChamberPad, type PadConfigApi } from "@/lib/chamber-pa
 import { Button } from "@/components/ui/button";
 import ContactLinesEditor from "./header/editor/controls/contact-lines-editor";
 import { LabeledInput } from "./header/editor/controls/control-primitives";
+import ChamberPaperFields from "./chamber-paper-fields";
 
 // The chamber pad-editing fields (name, logo, contact lines), fully controlled so the
 // same UI can be driven by the header/footer editor's Zustand store or by plain local
@@ -99,6 +100,7 @@ interface ChamberPadFieldsProps {
 export default function ChamberPadFields({ chamberId, chamberLabel, pad, onChange, nameFieldId }: ChamberPadFieldsProps) {
     return (
         <div className="flex flex-col gap-3.5">
+            <ChamberPaperFields paper={pad.paper} onChange={(paper) => onChange({ paper })} />
             <LabeledInput
                 id={nameFieldId}
                 label="Name on the pad"

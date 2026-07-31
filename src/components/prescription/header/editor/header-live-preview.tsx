@@ -5,8 +5,10 @@ import type { HeaderColorMode } from "@/lib/header-config";
 import { applyPadState, buildFooterFromPadStates, padDisplayName } from "@/lib/chamber-pad";
 import { useHeaderConfigStore } from "@/stores/header-config-store";
 import { cn } from "@/lib/utils";
+import { isPrePrinted } from "@/lib/print-paper";
 import PrescriptionHeader from "../prescription-header";
 import PrescriptionFooter from "../../footer/prescription-footer";
+import PrePrintedPaperPreview from "../../paper/preprinted-paper-preview";
 import { SegmentedControl } from "./controls/control-primitives";
 import { focusKeyFromEvent, focusControl } from "./focus-field";
 
@@ -132,6 +134,25 @@ export default function HeaderLivePreview() {
     // instant feedback — real prints render nothing until a chamber logo exists.
     const previewChamber = chambers.find((chamber) => chamber.chamber_id === previewChamberId) ?? null;
     const previewPad = previewChamber ? pads[previewChamber.chamber_id] : null;
+
+    // Nothing of the letterhead prints on a pre-printed pad, so the preview becomes the
+    // measurement it is actually about: where the prescription lands on the doctor's own
+    // stationery.
+    if (previewPad && isPrePrinted(previewPad.paper)) {
+        return (
+            <div className="rounded-xl border bg-slate-200/50 p-2.5 shadow-sm">
+                <ChamberPills />
+                <div className="flex flex-col items-center gap-3 rounded-md bg-white p-4">
+                    <PrePrintedPaperPreview paper={previewPad.paper} heightPx={300} />
+                    <p className="max-w-[44ch] text-center text-[11px] text-slate-400">
+                        Prescriptions written at this chamber print into the clear area only — your
+                        pad already carries the header and footer.
+                    </p>
+                </div>
+            </div>
+        );
+    }
+
     const resolvedConfig = previewChamber && previewPad
         ? applyPadState(config, previewChamber, previewPad)
         : config;

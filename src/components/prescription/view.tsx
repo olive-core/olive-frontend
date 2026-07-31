@@ -16,6 +16,7 @@ export const PrescriptionView = () => {
     return (
         <PrescriptionPrintDocument
             letterhead={letterhead}
+            paper={letterhead?.paper}
             data={getSubmitPayload(consultationId)}
             patientSlot={<PatientInfo sessionId={consultationId} />}
         />

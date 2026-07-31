@@ -11,6 +11,13 @@ import {
     type HeaderConfig,
     CONTACT_LINE_KINDS,
 } from "@/lib/header-config";
+import {
+    printPaperFromApi,
+    printPaperToApi,
+    isPrePrinted,
+    type PrintPaper,
+    type PrintPaperApi,
+} from "@/lib/print-paper";
 import type { Chamber } from "@/types/attendant-queue";
 import { chamberLabel } from "@/types/attendant-queue";
 
@@ -22,6 +29,7 @@ export interface PadConfigApi {
     logo_url?:       string | null;
     show_in_footer?: boolean | null;
     footer_order?:   number | null;
+    paper?:          PrintPaperApi | null;
 }
 
 // The editable (camelCase) form used by the editor store and the profile page.
@@ -32,6 +40,7 @@ export interface ChamberPad {
     logoUrl:      string | null;
     showInFooter: boolean;
     footerOrder:  number | null;
+    paper:        PrintPaper;
 }
 
 function toContactLineKind(value: unknown): ContactLineKind {
@@ -55,7 +64,14 @@ export function padFromApi(api?: PadConfigApi | null): ChamberPad {
         logoUrl:      api?.logo_url ?? null,
         showInFooter: api?.show_in_footer ?? true,
         footerOrder:  api?.footer_order ?? null,
+        paper:        printPaperFromApi(api?.paper),
     };
+}
+
+// A pre-printed pad already carries the doctor's letterhead on the paper, so Olive
+// prints only the prescription body inside the window the pad leaves blank.
+export function padPrintsLetterhead(pad: ChamberPad): boolean {
+    return !isPrePrinted(pad.paper);
 }
 
 // Drops empty lines and the derived logoUrl so we only persist meaningful settings.
@@ -68,11 +84,22 @@ export function padToApi(pad: ChamberPad): PadConfigApi {
         logo_blob_name: pad.logoBlobName,
         show_in_footer: pad.showInFooter,
         footer_order:   pad.footerOrder,
+        paper:          printPaperToApi(pad.paper),
     };
 }
 
 export function padHasContent(api?: PadConfigApi | null): boolean {
     return padStateHasContent(padFromApi(api));
+}
+
+// A pre-printed pad is fully set up with no letterhead content at all — the paper
+// carries it — so "configured" is a wider question than "has letterhead content".
+export function padIsConfigured(api?: PadConfigApi | null): boolean {
+    return padStateIsConfigured(padFromApi(api));
+}
+
+export function padStateIsConfigured(pad: ChamberPad): boolean {
+    return padStateHasContent(pad) || isPrePrinted(pad.paper);
 }
 
 // The pad's display name, falling back to the hospital the chamber sits in.

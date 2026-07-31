@@ -1,26 +1,37 @@
 import { MicOffIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-export type RecorderStatus = "listening" | "paused" | "silent";
+import type { RecordingStatus as Status } from "@/hooks/use-recording-session";
 
 // One glanceable line per state — readable from across the desk while the doctor faces the patient.
-const STATUS_COPY: Record<RecorderStatus, { label: string; hint?: string }> = {
-    listening: { label: "Listening" },
-    paused: { label: "Paused" },
-    silent: { label: "Not hearing anything", hint: "Check the mic is connected and unmuted." },
+const STATUS_COPY: Record<Status, { label: string; hint?: string }> = {
+    starting:    { label: "Starting" },
+    listening:   { label: "Listening" },
+    paused:      { label: "Paused" },
+    silent:      { label: "Not hearing anything", hint: "Check the mic is connected and unmuted." },
+    unavailable: { label: "Microphone blocked", hint: "Allow microphone access, then try again." },
 };
 
-function StatusIndicator({ status }: { status: RecorderStatus }) {
-    if (status === "silent") {
+function StatusIndicator({ status }: { status: Status }) {
+    if (status === "silent" || status === "unavailable") {
         return (
-            <span className="flex size-3.5 items-center justify-center text-amber-500">
+            <span
+                className={cn(
+                    "flex size-3.5 items-center justify-center",
+                    status === "unavailable" ? "text-rose-500" : "text-amber-500",
+                )}
+            >
                 <MicOffIcon className="size-3.5" strokeWidth={2.25} />
             </span>
         );
     }
 
-    if (status === "paused") {
-        return <span aria-hidden className="size-3 rounded-full bg-slate-300" />;
+    if (status === "paused" || status === "starting") {
+        return (
+            <span
+                aria-hidden
+                className={cn("size-3 rounded-full bg-slate-300", status === "starting" && "animate-pulse")}
+            />
+        );
     }
 
     // Listening: a steady rose dot wrapped in a soft halo that breathes in sync with the card edge.
@@ -32,7 +43,7 @@ function StatusIndicator({ status }: { status: RecorderStatus }) {
     );
 }
 
-export default function RecordingStatus({ status }: { status: RecorderStatus }) {
+export default function RecordingStatus({ status }: { status: Status }) {
     const { label, hint } = STATUS_COPY[status];
 
     return (
@@ -42,13 +53,22 @@ export default function RecordingStatus({ status }: { status: RecorderStatus }) 
                 <span
                     className={cn(
                         "text-sm font-medium uppercase tracking-wide",
-                        status === "silent" ? "text-amber-600" : "text-slate-500",
+                        status === "unavailable" ? "text-rose-600" : status === "silent" ? "text-amber-600" : "text-slate-500",
                     )}
                 >
                     {label}
                 </span>
             </div>
-            {hint && <p className="max-w-xs text-center text-xs font-medium text-amber-700">{hint}</p>}
+            {hint && (
+                <p
+                    className={cn(
+                        "max-w-xs text-center text-xs font-medium",
+                        status === "unavailable" ? "text-rose-700" : "text-amber-700",
+                    )}
+                >
+                    {hint}
+                </p>
+            )}
         </div>
     );
 }

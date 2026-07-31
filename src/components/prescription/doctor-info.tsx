@@ -1,7 +1,18 @@
 import { useEffect } from "react";
 import { useAuthStore } from "@/stores/auth-store";
 import { useComposeLetterhead } from "@/hooks/use-compose-letterhead";
+import { getPageSize, isPrePrinted, type PrintPaper } from "@/lib/print-paper";
 import { ResolvedPrescriptionHeader } from "./header/clinician-prescription-header";
+
+// This chamber prints on the doctor's own stationery, so the letterhead above is context
+// for the screen only. Saying so here is cheaper than the surprise at the printer.
+function PrePrintedPadNotice({ paper }: { paper: PrintPaper }) {
+    return (
+        <p className="rounded-md bg-amber-50 px-3 py-1.5 text-xs text-amber-800">
+            Pre-printed pad ({getPageSize(paper.pageSize).label}). This header will not print.
+        </p>
+    );
+}
 
 // The resolved letterhead for an active session. The chamber is picked automatically
 // (queue start / last-used chamber), so there is no selector here. Always a full-width
@@ -25,6 +36,7 @@ export default function DoctorInfo({ sessionId }: { sessionId: string }) {
     return (
         <div className="flex w-full flex-col gap-2">
             <ResolvedPrescriptionHeader letterhead={letterhead} />
+            {isPrePrinted(letterhead.paper) && <PrePrintedPadNotice paper={letterhead.paper} />}
         </div>
     )
 }

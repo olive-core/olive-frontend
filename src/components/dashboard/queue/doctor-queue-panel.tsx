@@ -14,6 +14,7 @@ import {
 } from "@/lib/attendant-queue";
 import { applyOptimisticReorder } from "@/lib/queue-reorder";
 import { useQueueStream } from "@/hooks/use-queue-stream";
+import { useConsultationStartGuard } from "@/hooks/use-consultation-start-guard";
 import { chamberLabel, chamberRoom, type QueueEntry } from "@/types/attendant-queue";
 import { useActiveChamberStore, useLastChamberId } from "@/stores/active-chamber-store";
 import { useAuthStore } from "@/stores/auth-store";
@@ -43,6 +44,7 @@ export default function DoctorQueuePanel({ onStateChange }: DoctorQueuePanelProp
     const chambers = chambersQuery.data ?? [];
     const storedChamberId = useLastChamberId(userId ?? undefined);
     const [chamberId, setChamberId] = useState<string | null>(null);
+    const canStartConsultation = useConsultationStartGuard();
     const [starting, setStarting] = useState(false);
     const [pendingRemove, setPendingRemove] = useState<QueueEntry | null>(null);
 
@@ -112,6 +114,7 @@ export default function DoctorQueuePanel({ onStateChange }: DoctorQueuePanelProp
     };
 
     const start = async (entry: QueueEntry) => {
+        if (!canStartConsultation()) return;
         setStarting(true);
         try {
             const { session_id } = await startConsultation(entry.queue_entry_id);

@@ -1,7 +1,7 @@
 import { CheckIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import { padStateHasContent } from "@/lib/chamber-pad";
+import { padStateIsConfigured } from "@/lib/chamber-pad";
 import { useHeaderConfigStore, type EditorTab } from "@/stores/header-config-store";
 
 interface SetupStep {
@@ -27,7 +27,7 @@ export default function PadSetupChecklist() {
     const detailsDone = Boolean(qualification.trim() && designation.trim());
     const chamberDone = chambers.some((chamber) => {
         const pad = pads[chamber.chamber_id];
-        return pad ? padStateHasContent(pad) : false;
+        return pad ? padStateIsConfigured(pad) : false;
     });
 
     if (detailsDone && chamberDone) return null;

@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 
 import api from "@/lib/axios";
-import { applyChamberPad, buildChamberFooter } from "@/lib/chamber-pad";
+import { applyChamberPad, buildChamberFooter, padFromApi } from "@/lib/chamber-pad";
 import { clinicianStyleConfig, type HeaderConfigApi, type ResolvedLetterhead } from "@/lib/header-config";
 import { listChambers } from "@/lib/attendant-queue";
 import { useAuthStore } from "@/stores/auth-store";
@@ -66,6 +66,7 @@ export function useComposeLetterhead(sessionId: string): ComposeLetterhead {
             },
             config,
             footer: buildChamberFooter(chambers, activeChamber ? activeChamberId : null),
+            paper:  padFromApi(activeChamber?.pad_config).paper,
         };
     }
 
