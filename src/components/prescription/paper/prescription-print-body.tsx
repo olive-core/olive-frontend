@@ -21,6 +21,10 @@ function EmptySectionNote({ children }: { children: ReactNode }) {
     return <p className="pl-1 text-xs italic text-gray-700">{children}</p>;
 }
 
+// Clinical text is unpredictable: a pasted lab reference, a hyphenated drug name, a URL.
+// Anything that cannot wrap at a space wraps mid-word rather than running off the page.
+const WRAPPING_TEXT = "break-words";
+
 // Every heading always prints: the prescription is a standard form, and a reader finding the
 // same landmarks each time is what makes a gap legible as a gap. `emptyText` reads as the
 // clinician's own statement, because an empty section is their decision — each of these
@@ -43,7 +47,7 @@ function PrintSection({
             {items.length === 0 ? (
                 <EmptySectionNote>{emptyText}</EmptySectionNote>
             ) : (
-                <ul className={cn("list-disc pl-4", classes.listText)}>
+                <ul className={cn("list-disc pl-4", WRAPPING_TEXT, classes.listText)}>
                     {items.map((item, index) => (
                         <li key={index}>{item.name_text}</li>
                     ))}
@@ -64,8 +68,8 @@ function RxEntry({ medicine, index, classes, showCategory }: {
 
     return (
         <div className={cn("border-b border-dashed break-inside-avoid", classes.rxEntryPadding)}>
-            <div className="flex justify-between items-start">
-                <div className="flex-1">
+            <div className="flex justify-between items-start gap-2">
+                <div className={cn("min-w-0 flex-1", WRAPPING_TEXT)}>
                     {showCategory && category && (
                         <p className="text-[10px] font-semibold uppercase tracking-wide text-emerald-900">
                             {category}
@@ -77,13 +81,13 @@ function RxEntry({ medicine, index, classes, showCategory }: {
                     </p>
                     <p className={cn("text-gray-900", classes.medicineMeta)}>{medicine.dosage}</p>
                 </div>
-                <div className="text-right">
+                <div className="shrink-0 text-right">
                     <p className={cn("font-semibold", classes.frequency)}>{formatStoredFrequency(medicine)}</p>
                     <p className={cn("text-gray-800", classes.medicineMeta)}>{formatStoredDuration(medicine)}</p>
                 </div>
             </div>
             {instructions && (
-                <p className={cn("mt-1.5 border-l-2 border-emerald-200 pl-2 italic text-gray-800", classes.medicineMeta)}>
+                <p className={cn("mt-1.5 border-l-2 border-emerald-200 pl-2 italic text-gray-800", WRAPPING_TEXT, classes.medicineMeta)}>
                     {instructions}
                 </p>
             )}
@@ -98,7 +102,7 @@ function AdviceSection({ items, classes }: { items: string[]; classes: PrintFitC
             {items.length === 0 ? (
                 <EmptySectionNote>No specific advice</EmptySectionNote>
             ) : (
-                <ul className={cn("list-disc space-y-1 pl-5", classes.listText)}>
+                <ul className={cn("list-disc space-y-1 pl-5", WRAPPING_TEXT, classes.listText)}>
                     {items.map((advice, index) => (
                         <li key={index} className="break-inside-avoid">
                             {advice}
@@ -126,8 +130,11 @@ export default function PrescriptionPrintBody({ data, followUpBaseDate }: Prescr
 
             <div className={cn("border-t border-dashed", classes.divider)} />
 
+            {/* min-w-0 on both columns: a grid column will not shrink below its longest
+                line on its own, and one long word would push the whole grid over the Rx
+                column and off the page. */}
             <div className={cn("grid grid-cols-3", classes.columnGap)}>
-                <div className={classes.sectionStack}>
+                <div className={cn("min-w-0", classes.sectionStack)}>
                     <PrintSection title="Chief Complaints" items={data.chief_complaints ?? []} emptyText="None reported" classes={classes} />
                     <PrintSection title="History" items={data.histories ?? []} emptyText="None reported" classes={classes} />
                     <PrintSection title="Diagnosis" items={data.diagnoses ?? []} emptyText="None specified" classes={classes} />
@@ -135,7 +142,7 @@ export default function PrescriptionPrintBody({ data, followUpBaseDate }: Prescr
                     {fit.adviceInSidebar && advice}
                 </div>
 
-                <div className="col-span-2">
+                <div className="col-span-2 min-w-0">
                     <h3 className="mb-2 font-semibold text-emerald-900">Rx</h3>
                     {medicines.length === 0 ? (
                         <EmptySectionNote>No medicine prescribed</EmptySectionNote>

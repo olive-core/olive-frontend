@@ -76,6 +76,26 @@ export function isPrePrinted(paper: PrintPaper): boolean {
     return paper.mode === "preprinted";
 }
 
+// Below this a pad leaves too little clear paper to print a prescription into. The
+// offsets are clamped one at a time, so a doctor can still measure a top and a bottom
+// band that together swallow the sheet — this is what catches that.
+const MIN_WINDOW_WIDTH_MM = 90;
+const MIN_WINDOW_HEIGHT_MM = 70;
+
+/** The clear paper a pre-printed pad leaves for the prescription, in millimetres. */
+export function paperWindowMm(paper: PrintPaper): { widthMm: number; heightMm: number } {
+    const { widthMm, heightMm } = getPageSize(paper.pageSize);
+    return {
+        widthMm:  widthMm - paper.leftMm - paper.rightMm,
+        heightMm: heightMm - paper.topMm - paper.bottomMm,
+    };
+}
+
+export function paperWindowIsUsable(paper: PrintPaper): boolean {
+    const window = paperWindowMm(paper);
+    return window.widthMm >= MIN_WINDOW_WIDTH_MM && window.heightMm >= MIN_WINDOW_HEIGHT_MM;
+}
+
 function clampOffset(value: number | null | undefined, fallback: number, max: number): number {
     if (value === null || value === undefined || Number.isNaN(value)) return fallback;
     return Math.min(max, Math.max(0, value));

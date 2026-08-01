@@ -19,11 +19,13 @@ import {
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import NewChamberForm from "@/components/dashboard/chambers/new-chamber-form";
 import { controlId } from "../focus-field";
+import { usePrintsOliveLetterhead } from "../letterhead-scope";
 import ChamberPadFields from "../../../chamber-pad-fields";
 
 function ChamberPadEditor({ chamber }: { chamber: Chamber }) {
     const pad = useHeaderConfigStore((state) => state.pads[chamber.chamber_id]);
     const patchPad = useHeaderConfigStore((state) => state.patchPad);
+    const printsLetterhead = usePrintsOliveLetterhead();
 
     if (!pad) return null;
     const id = chamber.chamber_id;
@@ -33,6 +35,7 @@ function ChamberPadEditor({ chamber }: { chamber: Chamber }) {
             chamberId={id}
             chamberLabel={chamberLabel(chamber)}
             pad={pad}
+            printsLetterhead={printsLetterhead}
             onChange={(patch) => patchPad(id, patch)}
             nameFieldId={controlId(`pad-${id}-name`)}
         />
@@ -131,6 +134,18 @@ function AddChamberControl() {
     );
 }
 
+function ChambersTabHint() {
+    const printsLetterhead = usePrintsOliveLetterhead();
+
+    return (
+        <p className="px-1 text-xs text-slate-400">
+            {printsLetterhead
+                ? "Each chamber gets its own pad: name, logo and contact lines. The header uses the pad of the chamber a prescription is written at."
+                : "Every chamber prints onto a pre-printed pad, so Olive only needs to know the paper. Switch a chamber back to Olive's letterhead to design one."}
+        </p>
+    );
+}
+
 // One accordion card per chamber. Editing a pad here is what the header shows when a
 // prescription is written at that chamber; the pad also feeds the footer of the
 // doctor's other pads.
@@ -161,10 +176,7 @@ export default function ChambersTab() {
 
     return (
         <div className="flex flex-col gap-2">
-            <p className="px-1 text-xs text-slate-400">
-                Each chamber gets its own pad: name, logo and contact lines. The header uses the
-                pad of the chamber a prescription is written at.
-            </p>
+            <ChambersTabHint />
             <Accordion
                 type="single"
                 collapsible

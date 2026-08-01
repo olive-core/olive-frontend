@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ComponentType } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { ArrowLeftIcon, ChevronDownIcon, SaveIcon } from "lucide-react";
@@ -24,6 +24,7 @@ import ChambersTab from "./controls/chambers-tab";
 import FooterTab from "./controls/footer-tab";
 import HeaderLivePreview from "./header-live-preview";
 import PadSetupChecklist from "./pad-setup-checklist";
+import { usePrintsOliveLetterhead } from "./letterhead-scope";
 import { focusField, registerFocusResolver } from "./focus-field";
 
 export interface HeaderEditorProfile {
@@ -80,30 +81,62 @@ function resolveFocusTarget(key: string, previewChamberId: string | null): {
     return { tab: "doctor", targetKey: key };
 }
 
+interface EditorTabDefinition {
+    value: EditorTab;
+    label: string;
+    Panel: ComponentType;
+}
+
+const EDITOR_TABS: EditorTabDefinition[] = [
+    { value: "style",    label: "Style",    Panel: LayoutStyleControls },
+    { value: "doctor",   label: "Doctor",   Panel: DoctorControls },
+    { value: "chambers", label: "Chambers", Panel: ChambersTab },
+    { value: "footer",   label: "Footer",   Panel: FooterTab },
+];
+
+const LETTERHEAD_TABS: EditorTab[] = ["style", "doctor", "footer"];
+
+function useVisibleTabs(): EditorTabDefinition[] {
+    const printsLetterhead = usePrintsOliveLetterhead();
+    return useMemo(
+        () => EDITOR_TABS.filter((tab) => printsLetterhead || !LETTERHEAD_TABS.includes(tab.value)),
+        [printsLetterhead],
+    );
+}
+
 function ControlTabs() {
     const activeTab = useHeaderConfigStore((state) => state.activeTab);
     const setActiveTab = useHeaderConfigStore((state) => state.setActiveTab);
+    const tabs = useVisibleTabs();
+
+    const fallbackTab = tabs[0].value;
+    const isActiveTabVisible = tabs.some((tab) => tab.value === activeTab);
+
+    // Switching a chamber to a pre-printed pad can retire the tab being looked at.
+    useEffect(() => {
+        if (!isActiveTabVisible) setActiveTab(fallbackTab);
+    }, [isActiveTabVisible, fallbackTab, setActiveTab]);
+
+    if (tabs.length === 1) {
+        const { Panel } = tabs[0];
+        return <Panel />;
+    }
 
     return (
-        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as EditorTab)}>
+        <Tabs
+            value={isActiveTabVisible ? activeTab : fallbackTab}
+            onValueChange={(value) => setActiveTab(value as EditorTab)}
+        >
             <TabsList className="w-full">
-                <TabsTrigger value="style">Style</TabsTrigger>
-                <TabsTrigger value="doctor">Doctor</TabsTrigger>
-                <TabsTrigger value="chambers">Chambers</TabsTrigger>
-                <TabsTrigger value="footer">Footer</TabsTrigger>
+                {tabs.map(({ value, label }) => (
+                    <TabsTrigger key={value} value={value}>{label}</TabsTrigger>
+                ))}
             </TabsList>
-            <TabsContent value="style" className="mt-2.5 flex flex-col gap-3">
-                <LayoutStyleControls />
-            </TabsContent>
-            <TabsContent value="doctor" className="mt-2.5 flex flex-col gap-3">
-                <DoctorControls />
-            </TabsContent>
-            <TabsContent value="chambers" className="mt-2.5">
-                <ChambersTab />
-            </TabsContent>
-            <TabsContent value="footer" className="mt-2.5">
-                <FooterTab />
-            </TabsContent>
+            {tabs.map(({ value, Panel }) => (
+                <TabsContent key={value} value={value} className="mt-2.5 flex flex-col gap-3">
+                    <Panel />
+                </TabsContent>
+            ))}
         </Tabs>
     );
 }

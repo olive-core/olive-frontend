@@ -100,7 +100,17 @@ export async function runTest() {
     check("microphone still opened once", micState.getUserMediaCalls === 1, `calls=${micState.getUserMediaCalls}`);
     check("still exactly one recorder", micState.recorders.length === 1, `recorders=${micState.recorders.length}`);
 
-    section("7. Finishing from the floating widget");
+    section("7. Folding the widget down to a pill and back");
+    await goTo("elsewhere");
+    await click(byAriaLabel("Minimise recorder"));
+    check("controls are out of the way", button("Finish & Prescribe") === undefined);
+    check("the pill still shows the timer", /\d\d:\d\d/.test(widget()?.textContent ?? ""), `pill=${widget()?.textContent}`);
+    check("capture is untouched", micState.recorders.some((r) => r.state === "recording"));
+    await click(byAriaLabel("Show recording controls"));
+    check("controls are back", button("Finish & Prescribe") !== undefined);
+    check("still one microphone", micState.getUserMediaCalls === 1, `calls=${micState.getUserMediaCalls}`);
+
+    section("8. Finishing from the floating widget");
     await goTo("elsewhere");
     await click(button("Finish & Prescribe"));
     await flush(150);
@@ -110,7 +120,7 @@ export async function runTest() {
     check("final chunk uploaded", chunkUploads() === 1, `uploads=${chunkUploads()}`);
     check("widget gone", widget() === null);
 
-    section("8. Returning to a finished consultation");
+    section("9. Returning to a finished consultation");
     await goTo("consultation");
     check("shows the finished notice", text().includes("Recording finished"), `text=${text().slice(0, 120)}`);
     check("does not record again", micState.getUserMediaCalls === 1, `calls=${micState.getUserMediaCalls}`);
@@ -119,7 +129,7 @@ export async function runTest() {
 
     await act(async () => { reactRoot.unmount(); });
 
-    section("9. A blocked microphone is visible and recoverable");
+    section("10. A blocked microphone is visible and recoverable");
     micState.reset();
     setMicrophoneAvailable(false);
     routeParams.consultationId = "session-2";
@@ -138,7 +148,7 @@ export async function runTest() {
     await flush(1200);
     check("timer runs after recovery", /00:0[1-9]/.test(text()), `text=${text().slice(0, 90)}`);
 
-    section("10. Leaving the dashboard releases the microphone");
+    section("11. Leaving the dashboard releases the microphone");
     const tracksBeforeLeaving = micState.liveTracks;
     await act(async () => { secondRoot.unmount(); });
     await flush(30);

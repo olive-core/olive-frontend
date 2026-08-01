@@ -1,7 +1,13 @@
-import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 
 import { DEFAULT_PRINT_PAPER, PX_PER_MM, printSheetGeometry, type PrintPaper } from "@/lib/print-paper";
-import { PRINT_FIT_LEVELS, PrintFitContext } from "./print-fit";
+import {
+    LOOSEST_SHEET_FIT,
+    PrintFitContext,
+    printFitOf,
+    tightenSheetFit,
+    type SheetFit,
+} from "./print-fit";
 import PageSizeStyle from "./page-size-style";
 
 // One printed prescription sheet. The header and footer live in <thead>/<tfoot>, which
@@ -21,7 +27,20 @@ const PIN_SAFETY_MM = 6;
 // reserve a spurious extra page.
 const MEASURE_TOLERANCE_PX = 2;
 
-const LAST_FIT_LEVEL = PRINT_FIT_LEVELS.length - 1;
+// A body drawn down to fit lays out wider and is scaled back to the page's width, and is
+// taken out of flow so its full-size height stops pushing the footer onto a second sheet:
+// the reserved page height around it is what the footer sits below.
+function scaledBodyStyle(scale: number): CSSProperties | undefined {
+    if (scale >= 1) return undefined;
+    return {
+        position:        "absolute",
+        top:             0,
+        left:            0,
+        width:           `${100 / scale}%`,
+        transform:       `scale(${scale})`,
+        transformOrigin: "top left",
+    };
+}
 
 interface PrintSheetProps {
     header:   ReactNode;
@@ -46,11 +65,11 @@ export default function PrintSheet({
     const footerRef = useRef<HTMLTableCellElement>(null);
     const contentRef = useRef<HTMLDivElement>(null);
     const [bodyMinHeight, setBodyMinHeight] = useState<number | null>(null);
-    const [fitLevel, setFitLevel] = useState(0);
+    const [fit, setFit] = useState<SheetFit>(LOOSEST_SHEET_FIT);
 
     const { pageWidthMm, pageHeightMm, insets, chromeGap } = printSheetGeometry(paper);
 
-    useLayoutEffect(() => setFitLevel(0), [fitResetKey]);
+    useLayoutEffect(() => setFit(LOOSEST_SHEET_FIT), [fitResetKey]);
 
     useLayoutEffect(() => {
         const measure = () => {
@@ -61,18 +80,22 @@ export default function PrintSheet({
                 setBodyMinHeight(null);
                 return;
             }
-            const contentHeight = contentRef.current?.offsetHeight ?? 0;
-            const overflowingPx = contentHeight - MEASURE_TOLERANCE_PX - usablePerPage;
+            // offsetHeight ignores the scale transform, so this is the body's full-size
+            // layout height; what lands on paper is that height drawn down.
+            const printedHeight = (contentRef.current?.offsetHeight ?? 0) * fit.scale - MEASURE_TOLERANCE_PX;
 
             // One step per measurement: the tighter body re-renders, this runs again on
-            // the new height, and the climb stops at the first level that fits (or at the
-            // last one, where the prescription honestly takes a second page).
-            if (fitToOnePage && overflowingPx > 0 && fitLevel < LAST_FIT_LEVEL) {
-                setFitLevel(fitLevel + 1);
-                return;
+            // the new height, and the climb stops at the first step that fits (or once
+            // the ladder is spent, where the prescription honestly takes a second page).
+            if (fitToOnePage) {
+                const tighter = tightenSheetFit(fit, printedHeight / usablePerPage);
+                if (tighter) {
+                    setFit(tighter);
+                    return;
+                }
             }
 
-            const pageCount = Math.max(1, Math.ceil((contentHeight - MEASURE_TOLERANCE_PX) / usablePerPage));
+            const pageCount = Math.max(1, Math.ceil(printedHeight / usablePerPage));
             setBodyMinHeight(pageCount * usablePerPage);
         };
         measure();
@@ -81,7 +104,7 @@ export default function PrintSheet({
             if (element) observer.observe(element);
         }
         return () => observer.disconnect();
-    }, [pageHeightMm, fitToOnePage, fitLevel]);
+    }, [pageHeightMm, fitToOnePage, fit]);
 
     return (
         <>
@@ -106,9 +129,12 @@ export default function PrintSheet({
                 <tbody>
                     <tr>
                         <td className="align-top" style={{ paddingLeft: insets.left, paddingRight: insets.right }}>
-                            <div style={bodyMinHeight !== null ? { minHeight: bodyMinHeight } : undefined}>
-                                <div ref={contentRef} className="flex flex-col">
-                                    <PrintFitContext value={PRINT_FIT_LEVELS[fitLevel]}>
+                            <div
+                                className="relative"
+                                style={bodyMinHeight !== null ? { minHeight: bodyMinHeight } : undefined}
+                            >
+                                <div ref={contentRef} className="flex flex-col" style={scaledBodyStyle(fit.scale)}>
+                                    <PrintFitContext value={printFitOf(fit)}>
                                         {children}
                                     </PrintFitContext>
                                 </div>

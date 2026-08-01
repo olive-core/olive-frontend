@@ -9,6 +9,7 @@ import {
 } from "@/hooks/use-recording-session";
 import { useStableCallback } from "@/hooks/use-stable-callback";
 import { trackRecordingFinalization } from "@/lib/recording-finalization";
+import { forgetRecorderRect } from "./recorder-morph";
 
 interface RecorderState {
     isRecording:             boolean;
@@ -88,6 +89,12 @@ export default function RecordingSessionProvider({ children }: { children: React
     }, []);
 
     const hasFinished = useCallback((sessionId: string) => finishedSessionIdsRef.current.has(sessionId), []);
+
+    // The surface a session ended on is no place for the next session's card to fly in
+    // from. This runs after the leaving surface has stored its rect, so it wins.
+    useEffect(() => {
+        if (!target) forgetRecorderRect();
+    }, [target]);
 
     // A reload or a closed tab loses whatever has not been uploaded yet, so the browser
     // asks first for as long as a recording is running.

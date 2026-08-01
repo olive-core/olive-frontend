@@ -4,6 +4,7 @@ import {
     isPrePrinted,
     maxHorizontalOffsetMm,
     maxVerticalOffsetMm,
+    paperWindowIsUsable,
     type PageSizeId,
     type PrintPaper,
     type PrintPaperMode,
@@ -53,9 +54,10 @@ function OffsetInput({ label, valueMm, maxMm, onChange }: {
     );
 }
 
-export default function ChamberPaperFields({ paper, onChange }: {
-    paper:    PrintPaper;
-    onChange: (paper: PrintPaper) => void;
+export default function ChamberPaperFields({ paper, printsLetterhead = true, onChange }: {
+    paper:             PrintPaper;
+    printsLetterhead?: boolean;
+    onChange:          (paper: PrintPaper) => void;
 }) {
     const patch = (changes: Partial<PrintPaper>) => onChange({ ...paper, ...changes });
     const maxVertical = maxVerticalOffsetMm(paper.pageSize);
@@ -103,10 +105,17 @@ export default function ChamberPaperFields({ paper, onChange }: {
                             </div>
                         </div>
 
-                        <p className="text-xs text-slate-400">
-                            Prescriptions written here print without a header or footer. The pad details
-                            below still appear in the footer of your other chambers' pads.
-                        </p>
+                        {paperWindowIsUsable(paper) ? (
+                            <p className="text-xs text-slate-400">
+                                Prescriptions written here print without a header or footer.
+                                {printsLetterhead && " The pad details below still appear in the footer of your other chambers' pads."}
+                            </p>
+                        ) : (
+                            <p className="text-xs font-medium text-rose-600">
+                                These offsets leave almost no room to print into. Reduce them until the
+                                clear area on the right looks like your pad.
+                            </p>
+                        )}
                     </div>
 
                     <PrePrintedPaperPreview paper={paper} />

@@ -95,12 +95,30 @@ interface ChamberPadFieldsProps {
     pad:          ChamberPad;
     onChange:     (patch: Partial<ChamberPad>) => void;
     nameFieldId?: string;
+    /**
+     * False when none of the doctor's chambers print Olive's letterhead. A logo and
+     * contact lines then reach paper nowhere — not on this pad's header, not in another
+     * chamber's footer — so they are not offered. The name stays: it labels the chamber
+     * throughout Olive, printed or not.
+     */
+    printsLetterhead?: boolean;
 }
 
-export default function ChamberPadFields({ chamberId, chamberLabel, pad, onChange, nameFieldId }: ChamberPadFieldsProps) {
+export default function ChamberPadFields({
+    chamberId,
+    chamberLabel,
+    pad,
+    onChange,
+    nameFieldId,
+    printsLetterhead = true,
+}: ChamberPadFieldsProps) {
     return (
         <div className="flex flex-col gap-3.5">
-            <ChamberPaperFields paper={pad.paper} onChange={(paper) => onChange({ paper })} />
+            <ChamberPaperFields
+                paper={pad.paper}
+                printsLetterhead={printsLetterhead}
+                onChange={(paper) => onChange({ paper })}
+            />
             <LabeledInput
                 id={nameFieldId}
                 label="Name on the pad"
@@ -108,21 +126,25 @@ export default function ChamberPadFields({ chamberId, chamberLabel, pad, onChang
                 onChange={(displayName) => onChange({ displayName })}
                 placeholder={chamberLabel}
             />
-            <ChamberPadLogoControl
-                chamberId={chamberId}
-                chamberLabel={chamberLabel}
-                logoUrl={pad.logoUrl}
-                onChange={onChange}
-            />
-            <ContactLinesEditor
-                lines={pad.contactLines}
-                onAdd={(kind) => onChange({ contactLines: [...pad.contactLines, newContactLine(kind)] })}
-                onUpdate={(lineId, changes) => onChange({
-                    contactLines: pad.contactLines.map((line) => (line.id === lineId ? { ...line, ...changes } : line)),
-                })}
-                onRemove={(lineId) => onChange({ contactLines: pad.contactLines.filter((line) => line.id !== lineId) })}
-                onReorder={(lines) => onChange({ contactLines: lines })}
-            />
+            {printsLetterhead && (
+                <>
+                    <ChamberPadLogoControl
+                        chamberId={chamberId}
+                        chamberLabel={chamberLabel}
+                        logoUrl={pad.logoUrl}
+                        onChange={onChange}
+                    />
+                    <ContactLinesEditor
+                        lines={pad.contactLines}
+                        onAdd={(kind) => onChange({ contactLines: [...pad.contactLines, newContactLine(kind)] })}
+                        onUpdate={(lineId, changes) => onChange({
+                            contactLines: pad.contactLines.map((line) => (line.id === lineId ? { ...line, ...changes } : line)),
+                        })}
+                        onRemove={(lineId) => onChange({ contactLines: pad.contactLines.filter((line) => line.id !== lineId) })}
+                        onReorder={(lines) => onChange({ contactLines: lines })}
+                    />
+                </>
+            )}
         </div>
     );
 }

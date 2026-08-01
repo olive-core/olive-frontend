@@ -11,7 +11,7 @@ const STATUS_COPY: Record<Status, { label: string; hint?: string }> = {
     unavailable: { label: "Microphone blocked", hint: "Allow microphone access, then try again." },
 };
 
-function StatusIndicator({ status }: { status: Status }) {
+export function RecordingStatusDot({ status }: { status: Status }) {
     if (status === "silent" || status === "unavailable") {
         return (
             <span
@@ -49,7 +49,7 @@ export default function RecordingStatus({ status }: { status: Status }) {
     return (
         <div className="flex flex-col items-center gap-1.5">
             <div className="flex items-center gap-2.5">
-                <StatusIndicator status={status} />
+                <RecordingStatusDot status={status} />
                 <span
                     className={cn(
                         "text-sm font-medium uppercase tracking-wide",

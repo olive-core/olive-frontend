@@ -3,6 +3,7 @@ import { CheckIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { padStateIsConfigured } from "@/lib/chamber-pad";
 import { useHeaderConfigStore, type EditorTab } from "@/stores/header-config-store";
+import { usePrintsOliveLetterhead } from "./letterhead-scope";
 
 interface SetupStep {
     tab:       EditorTab;
@@ -14,15 +15,16 @@ interface SetupStep {
 
 // First-run guidance for the pad editor: a slim ordered strip that shows what to fill
 // and in what order. It reads completion from the live editor state (so a step ticks
-// the moment its section has content) and retires once the essentials — the doctor's
-// details and a chamber — are in place. Style and footer are optional polish, offered
-// for orientation but never gating.
+// the moment its section has content) and retires once the essentials are in place.
+// Style and footer are optional polish, offered for orientation but never gating — and
+// dropped entirely, along with the doctor's details, when nothing Olive draws is printed.
 export default function PadSetupChecklist() {
     const qualification = useHeaderConfigStore((state) => state.identity.qualification);
     const designation   = useHeaderConfigStore((state) => state.config.designation);
     const chambers      = useHeaderConfigStore((state) => state.chambers);
     const pads          = useHeaderConfigStore((state) => state.pads);
     const setActiveTab  = useHeaderConfigStore((state) => state.setActiveTab);
+    const printsLetterhead = usePrintsOliveLetterhead();
 
     const detailsDone = Boolean(qualification.trim() && designation.trim());
     const chamberDone = chambers.some((chamber) => {
@@ -30,14 +32,19 @@ export default function PadSetupChecklist() {
         return pad ? padStateIsConfigured(pad) : false;
     });
 
-    if (detailsDone && chamberDone) return null;
+    if (chamberDone && (detailsDone || !printsLetterhead)) return null;
 
-    const steps: SetupStep[] = [
-        { tab: "doctor",   label: "Your details",     hint: "Degree, specialty",     done: detailsDone },
-        { tab: "chambers", label: "Add your chamber", hint: "Address, phone, hours", done: chamberDone },
-        { tab: "style",    label: "Style & logo",     hint: "Colour, layout", optional: true, done: false },
-        { tab: "footer",   label: "Footer",           hint: "Bottom line",    optional: true, done: false },
-    ];
+    const chamberStep: SetupStep = {
+        tab: "chambers", label: "Add your chamber", hint: "Address, phone, hours", done: chamberDone,
+    };
+    const steps: SetupStep[] = printsLetterhead
+        ? [
+            { tab: "doctor", label: "Your details", hint: "Degree, specialty", done: detailsDone },
+            chamberStep,
+            { tab: "style",  label: "Style & logo", hint: "Colour, layout", optional: true, done: false },
+            { tab: "footer", label: "Footer",       hint: "Bottom line",    optional: true, done: false },
+        ]
+        : [chamberStep];
 
     const currentTab = steps.find((step) => !step.optional && !step.done)?.tab;
 
