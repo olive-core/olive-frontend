@@ -19,6 +19,7 @@ import FollowUpBlock from "./paper/follow-up-block";
 import { Button } from "@/components/ui/button";
 import { useTargetedPrint } from "@/hooks/use-targeted-print";
 import { useClinicianProfile } from "@/hooks/use-clinician-profile";
+import { useNoteImageUpload } from "@/hooks/use-note-image-upload";
 import { MemoryApplyEnabledContext } from "@/components/memory/memory-apply-context";
 import { cn } from "@/lib/utils";
 
@@ -67,12 +68,25 @@ export default function Prescription({ onGenerate, onCancel, hasBeenGenerated }:
         setSummary,
         safetyNet,
 
+        noteImages,
+        addNoteImages,
+        removeNoteImage,
+
         vitals,
         setVitals,
 
         followUp,
         setFollowUp,
     } = store;
+
+    // Photos upload as soon as they are picked; the note carries only their blob names,
+    // which ride along with the rest of the prescription on save.
+    const noteImageUpload = useNoteImageUpload({
+        sessionId:  consultationId,
+        current:    noteImages,
+        onUploaded: addNoteImages,
+        onRemoved:  (image) => removeNoteImage(image.blob_name),
+    });
 
     // Navigate to the dashboard only after printing finishes — doing it immediately would
     // swap out the DOM before the browser captures the prescription. Printing the note is
@@ -172,6 +186,10 @@ export default function Prescription({ onGenerate, onCancel, hasBeenGenerated }:
             onChange={setSummary}
             patientSlot={<PatientInfo sessionId={consultationId} />}
             onPrint={() => requestPrint("note")}
+            images={noteImages}
+            onAddImages={noteImageUpload.addImages}
+            onRemoveImage={noteImageUpload.removeImage}
+            uploadingImages={noteImageUpload.uploadingCount}
         />
     );
 
@@ -202,7 +220,7 @@ export default function Prescription({ onGenerate, onCancel, hasBeenGenerated }:
                         <DocumentSwitcher
                             value={activeDocument}
                             onValueChange={setActiveDocument}
-                            notesHasContent={!!summary?.trim() || safetyNet.length > 0}
+                            notesHasContent={!!summary?.trim() || safetyNet.length > 0 || noteImages.length > 0}
                             actions={sessionActions}
                             prescription={prescriptionPaper}
                             notes={clinicalNotes}

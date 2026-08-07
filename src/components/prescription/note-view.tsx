@@ -11,6 +11,7 @@ export const ClinicalNoteView = () => {
     const { consultationId } = useParams({ from: "/doctor/prescribe/$consultationId" });
     const summary = usePrescriptionStore((s) => s.summary);
     const safetyNet = usePrescriptionStore((s) => s.safetyNet);
+    const noteImages = usePrescriptionStore((s) => s.noteImages);
     const { letterhead } = useComposeLetterhead(consultationId);
 
     return (
@@ -18,6 +19,7 @@ export const ClinicalNoteView = () => {
             letterhead={letterhead}
             notes={summary}
             safetyNet={safetyNet}
+            images={noteImages}
             patientSlot={<PatientInfo sessionId={consultationId} />}
         />
     );

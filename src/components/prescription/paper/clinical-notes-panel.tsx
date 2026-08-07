@@ -7,6 +7,8 @@ import {
     withAllSections,
     type NoteSection,
 } from "@/lib/soap-notes";
+import NoteImageGallery from "./note-image-gallery";
+import type { NoteImageType } from "@/types/prescription";
 
 interface ClinicalNotesPanelProps {
     notes?:       string | null;
@@ -15,6 +17,11 @@ interface ClinicalNotesPanelProps {
     /** Patient identity strip shown above the note, matching the printed document. */
     patientSlot?: ReactNode;
     onPrint?:     () => void;
+    /** Photos attached to the note. Editable only when onAddImages is given. */
+    images?:         NoteImageType[];
+    onAddImages?:    (files: File[]) => void;
+    onRemoveImage?:  (image: NoteImageType) => void;
+    uploadingImages?: number;
 }
 
 function AutoGrowTextarea({
@@ -184,7 +191,17 @@ function SectionedNotesView({ sections }: { sections: NoteSection[] }) {
     );
 }
 
-export default function ClinicalNotesPanel({ notes, safetyNet, onChange, patientSlot, onPrint }: ClinicalNotesPanelProps) {
+export default function ClinicalNotesPanel({
+    notes,
+    safetyNet,
+    onChange,
+    patientSlot,
+    onPrint,
+    images,
+    onAddImages,
+    onRemoveImage,
+    uploadingImages,
+}: ClinicalNotesPanelProps) {
     const isEditable = onChange !== undefined;
     const noteText = notes ?? "";
     const sections = parseSoapSections(noteText);
@@ -237,6 +254,13 @@ export default function ClinicalNotesPanel({ notes, safetyNet, onChange, patient
                     }
                 </div>
             )}
+
+            <NoteImageGallery
+                images={images ?? []}
+                onAdd={onAddImages}
+                onRemove={onRemoveImage}
+                uploadingCount={uploadingImages}
+            />
         </div>
     );
 }

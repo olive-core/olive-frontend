@@ -1,6 +1,6 @@
 import type { ChiefComplaintItem, DiagnosisItem, RxItem } from "./patient";
 import type { HeaderConfigApi, RenderConfigApi } from "@/lib/header-config";
-import type { VitalsType } from "./prescription";
+import type { NoteImageType, VitalsType } from "./prescription";
 
 export type PatientSex = 'male' | 'female' | 'non_binary';
 
@@ -41,6 +41,7 @@ export type ConsultationPrescriptionData = {
     follow_up_notes?:  string | null;
     summary?:          string | null;
     safety_net?:       string[];
+    note_images?:      NoteImageType[];
 }
 
 export type ConsultationDetail = {

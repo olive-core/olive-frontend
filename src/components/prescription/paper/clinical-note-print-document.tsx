@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 
 import { getHeaderPalette, type ResolvedLetterhead } from "@/lib/header-config";
 import { SECTION_LABELS, parseSoapSections, type NoteSection } from "@/lib/soap-notes";
+import type { NoteImageType } from "@/types/prescription";
 import { ResolvedPrescriptionHeader } from "../header/clinician-prescription-header";
 import HeaderAccentRule from "../header/parts/header-accent-rule";
 import OliveBrandMark from "../header/parts/olive-brand-mark";
@@ -17,6 +18,7 @@ interface ClinicalNotePrintDocumentProps {
     notes:       string | null;
     safetyNet:   string[];
     patientSlot: ReactNode;
+    images?:     NoteImageType[];
 }
 
 function ConfidentialBand() {
@@ -57,6 +59,27 @@ function SafetyNetRow({ items }: { items: string[] }) {
     );
 }
 
+function PhotosRow({ images }: { images: NoteImageType[] }) {
+    const printable = images.filter((image) => !!image.url);
+    if (printable.length === 0) return null;
+
+    return (
+        <NoteRow label="Photos">
+            {/* break-inside-avoid keeps a photo whole when the note runs past one page. */}
+            <div className="grid grid-cols-2 gap-3">
+                {printable.map((image) => (
+                    <img
+                        key={image.blob_name}
+                        src={image.url!}
+                        alt="Clinical note attachment"
+                        className="max-h-[70mm] w-full rounded border border-slate-300 object-contain break-inside-avoid"
+                    />
+                ))}
+            </div>
+        </NoteRow>
+    );
+}
+
 function ClinicalNoteFooter({ letterhead }: { letterhead: ResolvedLetterhead | null }) {
     const palette = letterhead ? getHeaderPalette(letterhead.config) : null;
 
@@ -87,6 +110,7 @@ export default function ClinicalNotePrintDocument({
     notes,
     safetyNet,
     patientSlot,
+    images,
 }: ClinicalNotePrintDocumentProps) {
     const noteText = (notes ?? "").trim();
 
@@ -108,6 +132,7 @@ export default function ClinicalNotePrintDocument({
                     </NoteRow>
                 ))}
                 <SafetyNetRow items={safetyNet} />
+                <PhotosRow images={images ?? []} />
             </div>
         </PrintSheet>
     );

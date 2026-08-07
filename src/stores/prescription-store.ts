@@ -1,4 +1,5 @@
-import type { ChiefComplaintType, DiagnosisType, InvestigationType, MeedicineType, HistoryType, PrescriptionResponseType, VitalsType, FollowUpType } from "@/types/prescription";
+import type { ChiefComplaintType, DiagnosisType, InvestigationType, MeedicineType, HistoryType, NoteImageType, PrescriptionResponseType, VitalsType, FollowUpType } from "@/types/prescription";
+import { noteImagesForSubmit } from "@/lib/note-images";
 import { hasAnyVital, vitalsForSubmit } from "@/lib/vitals";
 import { composeDose, parseDuration } from "@/lib/rx-compose";
 import { scheduleFromRoutine, scheduleFromStored } from "@/lib/rx-format";
@@ -116,6 +117,7 @@ export interface PrescriptionStoreType {
     unresolvedMedicines: string[];
     advice: string[];
     summary: string;
+    noteImages: NoteImageType[];
     safetyNet: string[];
     vitals: VitalsType;
     followUp: FollowUpType;
@@ -161,6 +163,10 @@ export interface PrescriptionStoreType {
 
     setSummary: (value: string) => void;
 
+    // clinical-note photo methods (each file is already uploaded when it lands here)
+    addNoteImages: (images: NoteImageType[]) => void;
+    removeNoteImage: (blobName: string) => void;
+
     // vitals methods
     setVitals: (data: Partial<VitalsType>) => void;
 
@@ -198,6 +204,7 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
             investigation: [],
 
             summary: "",
+            noteImages: [],
             safetyNet: [],
             vitals: {},
             followUp: EMPTY_FOLLOW_UP,
@@ -220,6 +227,7 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
                 diagnosis: [],
                 investigation: [],
                 summary: "",
+                noteImages: [],
                 safetyNet: [],
                 vitals: {},
                 followUp: EMPTY_FOLLOW_UP,
@@ -359,6 +367,7 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
                     follow_up_notes: state.followUp.follow_up_notes || null,
                     summary: state.summary || null,
                     safety_net: state.safetyNet,
+                    note_images: noteImagesForSubmit(state.noteImages),
                 }
             },
 
@@ -419,6 +428,12 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
             }),
 
             setSummary: (value) => set({ summary: value }),
+
+            // Photos are the doctor's own, so re-generating a draft never touches them.
+            addNoteImages: (images) => set((state) => ({ noteImages: [...state.noteImages, ...images] })),
+            removeNoteImage: (blobName) => set((state) => ({
+                noteImages: state.noteImages.filter((image) => image.blob_name !== blobName),
+            })),
 
             // vitals methods
             setVitals: (data) => set((state) => ({ vitals: { ...state.vitals, ...data } })),

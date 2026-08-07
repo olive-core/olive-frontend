@@ -6,9 +6,13 @@ import toast from 'react-hot-toast'
 
 import api from '@/lib/axios'
 import { useTargetedPrint } from '@/hooks/use-targeted-print'
+import { useNoteImageUpload } from '@/hooks/use-note-image-upload'
+import { useStableCallback } from '@/hooks/use-stable-callback'
+import { fetchNoteImages, noteImagesForSubmit } from '@/lib/note-images'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import type { ConsultationDetail } from '@/types/consultation'
+import type { NoteImageType } from '@/types/prescription'
 import type { PatientInfoType } from '@/types/patient'
 import PrescriptionReadView, {
   type ClinicianProfile,
@@ -68,6 +72,25 @@ function useSaveSummary(prescriptionId: string) {
   })
 }
 
+// Signed photo URLs live behind their own endpoint, so a saved note's photos are fetched
+// separately from the consultation itself.
+function useNoteImages(prescriptionId: string, enabled: boolean) {
+  return useQuery<NoteImageType[]>({
+    queryKey: ['note-images', prescriptionId],
+    queryFn:  () => fetchNoteImages(prescriptionId),
+    enabled,
+  })
+}
+
+function useSaveNoteImages(prescriptionId: string) {
+  return useMutation({
+    mutationFn: async (images: NoteImageType[]) => {
+      await api.put(`/prescription/${prescriptionId}`, { note_images: noteImagesForSubmit(images) })
+    },
+    onError: () => toast.error('Failed to save photos'),
+  })
+}
+
 interface ClinicalNotesTabProps {
   notes:       string | null
   safetyNet:   string[]
@@ -77,9 +100,26 @@ interface ClinicalNotesTabProps {
   onSave:      () => void
   isDirty:     boolean
   isSaving:    boolean
+  images:          NoteImageType[]
+  onAddImages:     (files: File[]) => void
+  onRemoveImage:   (image: NoteImageType) => void
+  uploadingImages: number
 }
 
-function ClinicalNotesTab({ notes, safetyNet, patientSlot, onChange, onPrint, onSave, isDirty, isSaving }: ClinicalNotesTabProps) {
+function ClinicalNotesTab({
+  notes,
+  safetyNet,
+  patientSlot,
+  onChange,
+  onPrint,
+  onSave,
+  isDirty,
+  isSaving,
+  images,
+  onAddImages,
+  onRemoveImage,
+  uploadingImages,
+}: ClinicalNotesTabProps) {
   return (
     <>
       <ClinicalNotesPanel
@@ -88,6 +128,10 @@ function ClinicalNotesTab({ notes, safetyNet, patientSlot, onChange, onPrint, on
         onChange={onChange}
         patientSlot={patientSlot}
         onPrint={onPrint}
+        images={images}
+        onAddImages={onAddImages}
+        onRemoveImage={onRemoveImage}
+        uploadingImages={uploadingImages}
       />
       {isDirty && (
         <div className="mx-auto flex w-full max-w-3xl justify-end px-4 mt-2">
@@ -168,6 +212,28 @@ function ConsultationDetailPage() {
   const [notesDraft, setNotesDraft] = useState<string | null>(null)
   const saveSummary = useSaveSummary(prescriptionId)
 
+  // Photos save the moment they are added or removed — unlike the note text, there is
+  // nothing to review before committing them.
+  const storedImageCount = consultation?.prescription_data?.note_images?.length ?? 0
+  const { data: signedImages } = useNoteImages(prescriptionId, storedImageCount > 0)
+  const [imagesDraft, setImagesDraft] = useState<NoteImageType[] | null>(null)
+  const noteImages = imagesDraft ?? signedImages ?? []
+  const saveNoteImages = useSaveNoteImages(prescriptionId)
+
+  const applyNoteImages = (next: NoteImageType[]) => {
+    setImagesDraft(next)
+    saveNoteImages.mutate(next)
+  }
+
+  // Stable callbacks so a second upload that finishes while the first is still in flight
+  // appends to the list as it stands now, not as it stood when the pick started.
+  const noteImageUpload = useNoteImageUpload({
+    sessionId:  consultation?.session_id,
+    current:    noteImages,
+    onUploaded: useStableCallback((uploaded: NoteImageType[]) => applyNoteImages([...noteImages, ...uploaded])),
+    onRemoved:  useStableCallback((image: NoteImageType) => applyNoteImages(noteImages.filter((i) => i.blob_name !== image.blob_name))),
+  })
+
   const { printTarget, requestPrint } = useTargetedPrint({
     documentTitles: {
       prescription: `Prescription_${prescriptionId}`,
@@ -213,6 +279,10 @@ function ConsultationDetailPage() {
       onSave={() => saveSummary.mutate(notesDraft ?? '')}
       isDirty={notesDirty}
       isSaving={saveSummary.isPending}
+      images={noteImages}
+      onAddImages={noteImageUpload.addImages}
+      onRemoveImage={noteImageUpload.removeImage}
+      uploadingImages={noteImageUpload.uploadingCount}
     />
   )
 
@@ -234,6 +304,7 @@ function ConsultationDetailPage() {
           clinician={clinician}
           patient={patient}
           notes={currentNotes}
+          images={noteImages}
         />
       </div>
 
@@ -243,7 +314,7 @@ function ConsultationDetailPage() {
           <DocumentSwitcher
             value={activeDocument}
             onValueChange={setActiveDocument}
-            notesHasContent={!!savedNotes?.trim() || safetyNet.length > 0}
+            notesHasContent={!!savedNotes?.trim() || safetyNet.length > 0 || noteImages.length > 0}
             prescription={
               <PrescriptionReadView
                 consultation={consultation}

@@ -32,6 +32,15 @@ export type InvestigationType = {
 
 export type ListInfoType = ChiefComplaintType | HistoryType | DiagnosisType | InvestigationType;
 
+/** A photo attached to the clinical note. `blob_name` is what the note stores; `url` is
+ *  a short-lived signed link, present only while the image is viewable. */
+export type NoteImageType = {
+    blob_name:    string;
+    url?:         string | null;
+    caption?:     string | null;
+    uploaded_at?: string | null;
+};
+
 export type MedicineDose = {
     amount?: string;
     unit?: string;
