@@ -8,10 +8,11 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "test:recording": "node test/recording-session/build.mjs && node test/recording-session/build/run.cjs",
+    "test:arise": "node test/arise-stream/build.mjs && node test/arise-stream/build/run.cjs",
     "preview": "vite preview",
     "test:print": "node test/prescription-print/build.mjs && node test/prescription-print/build/run.cjs",
     "test:memory": "node test/memory/build.mjs && node test/memory/build/run.cjs",
-    "test": "npm run test:recording && npm run test:print && npm run test:memory"
+    "test": "npm run test:recording && npm run test:arise && npm run test:print && npm run test:memory"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

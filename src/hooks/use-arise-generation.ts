@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { generateAriseDraft } from '@/lib/arise-stream';
+import { ARISE_FINAL_RECORDING_TIMEOUT_MS } from '@/lib/arise-timeouts';
 import { awaitRecordingFinalization } from '@/lib/recording-finalization';
 import { useAuthStore } from '@/stores/auth-store';
 import { usePrescriptionStore } from '@/stores/prescription-store';
@@ -36,7 +37,10 @@ export function useAriseGeneration(sessionId: string) {
         try {
             // The recorder may still be uploading the final audio chunk. Wait for it so the
             // draft is generated from the complete transcription; the skeleton covers this wait.
-            await awaitRecordingFinalization(sessionId);
+            await awaitRecordingFinalization(sessionId, {
+                timeoutMs: ARISE_FINAL_RECORDING_TIMEOUT_MS,
+                signal,
+            });
 
             const outcome = await generateAriseDraft({
                 sessionId,

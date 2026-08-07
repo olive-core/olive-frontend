@@ -8,11 +8,20 @@ const dom = new JSDOM("<!doctype html><html><body><div id='root'></div></body></
 const anyGlobal = globalThis as any;
 anyGlobal.window = dom.window;
 anyGlobal.document = dom.window.document;
-anyGlobal.navigator = dom.window.navigator;
+Object.defineProperty(globalThis, "navigator", {
+    configurable: true,
+    writable: true,
+    value: dom.window.navigator,
+});
 anyGlobal.HTMLElement = dom.window.HTMLElement;
 anyGlobal.Node = dom.window.Node;
 anyGlobal.Event = dom.window.Event;
 anyGlobal.Blob = dom.window.Blob;
+Object.defineProperty(globalThis, "FormData", {
+    configurable: true,
+    writable: true,
+    value: dom.window.FormData,
+});
 anyGlobal.getComputedStyle = dom.window.getComputedStyle;
 anyGlobal.requestAnimationFrame = (cb: FrameRequestCallback) => setTimeout(() => cb(Date.now()), 16) as unknown as number;
 anyGlobal.cancelAnimationFrame = (id: number) => clearTimeout(id);

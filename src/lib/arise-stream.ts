@@ -11,6 +11,7 @@
 // spent the budget surfaces rather than doubling a wait the doctor is tired of.
 
 import type { PrescriptionResponseType } from '@/types/prescription';
+import { ARISE_STREAM_IDLE_TIMEOUT_MS } from '@/lib/arise-timeouts';
 
 const GENERATE_ENDPOINT = '/api/v1/arise/generate-progressive';
 const MAX_ATTEMPTS = 2;
@@ -81,23 +82,29 @@ async function runGenerationAttempt({
     signal,
     handlers,
 }: AriseGenerationRequest): Promise<AriseStreamOutcome> {
-    const response = await fetch(GENERATE_ENDPOINT, {
-        method: 'POST',
-        headers: buildHeaders(accessToken),
-        body: JSON.stringify({
-            session_id: sessionId,
-            dialogue: '',
-            force_variant: 'one',
-            persist_draft: true,
-        }),
-        signal,
-    });
+    let response: Response;
+    try {
+        response = await fetch(GENERATE_ENDPOINT, {
+            method: 'POST',
+            headers: buildHeaders(accessToken),
+            body: JSON.stringify({
+                session_id: sessionId,
+                dialogue: '',
+                force_variant: 'one',
+                persist_draft: true,
+            }),
+            signal,
+        });
+    } catch (error) {
+        if (isAbort(error)) throw error;
+        return { status: 'failed', reason: errorMessage(error) };
+    }
 
     if (!response.ok || !response.body) {
         return { status: 'failed', reason: `Generation request was rejected (${response.status})` };
     }
 
-    return readEventStream(response.body, handlers);
+    return readEventStream(response.body, handlers, signal);
 }
 
 function buildHeaders(accessToken: string | null): Record<string, string> {
@@ -112,6 +119,7 @@ function buildHeaders(accessToken: string | null): Record<string, string> {
 async function readEventStream(
     body: ReadableStream<Uint8Array>,
     handlers: AriseStreamHandlers,
+    signal: AbortSignal,
 ): Promise<AriseStreamOutcome> {
     const reader = body.getReader();
     const decoder = new TextDecoder();
@@ -120,7 +128,15 @@ async function readEventStream(
 
     try {
         while (true) {
-            const { done, value } = await reader.read();
+            let readResult: ReadableStreamReadResult<Uint8Array>;
+            try {
+                readResult = await readWithIdleTimeout(reader, signal);
+            } catch (error) {
+                if (isAbort(error)) throw error;
+                return { status: 'failed', reason: errorMessage(error) };
+            }
+
+            const { done, value } = readResult;
             if (done) break;
 
             buffer += decoder.decode(value, { stream: true });
@@ -141,12 +157,43 @@ async function readEventStream(
             }
         }
     } finally {
-        void reader.cancel().catch(() => undefined);
+        await reader.cancel().catch(() => undefined);
+        reader.releaseLock();
     }
 
     // The server closes the stream only after a `completed` or `error` event, so getting
     // here means the connection dropped part-way through.
     return { status: 'failed', reason: 'Generation stream ended before a result arrived' };
+}
+
+async function readWithIdleTimeout(
+    reader: ReadableStreamDefaultReader<Uint8Array>,
+    signal: AbortSignal,
+): Promise<ReadableStreamReadResult<Uint8Array>> {
+    if (signal.aborted) throw abortError();
+
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+    let abortHandler: (() => void) | undefined;
+    try {
+        return await Promise.race([
+            reader.read(),
+            new Promise<never>((_, reject) => {
+                timeoutId = setTimeout(
+                    () => reject(new Error(
+                        `Generation stream was inactive for ${ARISE_STREAM_IDLE_TIMEOUT_MS}ms`,
+                    )),
+                    ARISE_STREAM_IDLE_TIMEOUT_MS,
+                );
+            }),
+            new Promise<never>((_, reject) => {
+                abortHandler = () => reject(abortError());
+                signal.addEventListener('abort', abortHandler, { once: true });
+            }),
+        ]);
+    } finally {
+        if (timeoutId !== undefined) clearTimeout(timeoutId);
+        if (abortHandler) signal.removeEventListener('abort', abortHandler);
+    }
 }
 
 // Returns the run's outcome once a terminal event lands, and undefined for every event
@@ -197,6 +244,20 @@ function parseEvent(rawData: string): RawAriseEvent | undefined {
     } catch {
         return undefined;
     }
+}
+
+function abortError(): Error {
+    const error = new Error('Arise generation was cancelled');
+    error.name = 'AbortError';
+    return error;
+}
+
+function isAbort(error: unknown): boolean {
+    return error instanceof Error && error.name === 'AbortError';
+}
+
+function errorMessage(error: unknown): string {
+    return error instanceof Error ? error.message : String(error);
 }
 
 function delay(ms: number, signal: AbortSignal): Promise<void> {
