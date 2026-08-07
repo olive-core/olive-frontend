@@ -1,10 +1,9 @@
 import Prescription from '@/components/prescription'
 import PrescriptionSkeleton from '@/components/prescription/prescription-skeleton'
-import { awaitRecordingFinalization } from '@/lib/recording-finalization';
+import { useAriseGeneration } from '@/hooks/use-arise-generation';
 import { useAuthStore } from '@/stores/auth-store';
-import { usePrescriptionStore } from '@/stores/prescription-store'
 import { createFileRoute } from '@tanstack/react-router'
-import { useEffect, useRef, useState } from 'react';
+import { useEffect } from 'react';
 
 export const Route = createFileRoute('/doctor/prescribe/$consultationId')({
   component: RouteComponent,
@@ -12,162 +11,15 @@ export const Route = createFileRoute('/doctor/prescribe/$consultationId')({
 
 function RouteComponent() {
   const { consultationId } = Route.useParams();
-  const { getInitialPrescription, setPartialData, applyScribeData, applyDecideData, setGenerating } = usePrescriptionStore();
-  const accessToken = useAuthStore((s) => s.accessToken);
   const { clinician } = useAuthStore();
+  const { isReady, isError, hasBeenGenerated, start, cancel, skip } = useAriseGeneration(consultationId);
 
-  const [isReady, setIsReady] = useState(false);
-  const [isError, setIsError] = useState(false);
-  const [hasBeenGenerated, setHasBeenGenerated] = useState(false);
-  const abortRef = useRef<AbortController | null>(null);
-
-  function handleCancelSSE() {
-    abortRef.current?.abort();
-    setIsReady(true);
-    setGenerating(false);
-    setHasBeenGenerated(true);
-  }
-
-  function startSSE() {
-    const { resetStore } = usePrescriptionStore.getState();
-    resetStore();
-
-    // Cancel any in-flight request
-    abortRef.current?.abort();
-    const controller = new AbortController();
-    abortRef.current = controller;
-
-    setIsError(false);
-    setIsReady(false);
-    // Generation starts now, not when the server's `accepted` event lands. The wait for
-    // the final audio chunk sits in between, and during it the only honest action to
-    // offer is Cancel.
-    setGenerating(true);
-
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-      'Accept': 'text/event-stream',
-    };
-    if (accessToken) headers['Authorization'] = `Bearer ${accessToken}`;
-
-    // The recorder may still be uploading the final audio chunk. Wait for it so the
-    // draft is generated from the complete transcription; the skeleton covers this wait.
-    awaitRecordingFinalization(consultationId)
-      .then(() => fetch('/api/v1/arise/generate-progressive', {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({
-          session_id: consultationId,
-          dialogue: "",
-          force_variant: 'one',
-          persist_draft: true,
-        }),
-        signal: controller.signal,
-      }))
-      .then(async (res) => {
-        if (!res.ok || !res.body) {
-          setIsError(true);
-          setGenerating(false);
-          return;
-        }
-
-        const reader = res.body.getReader();
-        const decoder = new TextDecoder();
-        let buffer = '';
-        let currentEvent = '';
-
-        // Parse the SSE stream line-by-line
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-
-          buffer += decoder.decode(value, { stream: true });
-          const lines = buffer.split('\n');
-          // Keep the last (potentially incomplete) line in the buffer
-          buffer = lines.pop() ?? '';
-
-          for (const line of lines) {
-            if (line.startsWith('event:')) {
-              currentEvent = line.slice(6).trim();
-            } else if (line.startsWith('data:')) {
-              const rawData = line.slice(5).trim();
-
-              let parsed: any;
-              try {
-                parsed = JSON.parse(rawData);
-              } catch {
-                continue;
-              }
-
-              const payload = parsed?.payload;
-
-              switch (currentEvent) {
-                case 'accepted':
-                  // optional UX hook
-                  setGenerating(true);
-                  break;
-
-                case 'stage01_complete': // v2_faster
-                case 'layer00_complete': // v1_standard
-                  if (payload) {
-                    setPartialData(payload);
-                  }
-                  break;
-
-                // Arise One runs Scribe and Decide in parallel; each patches its own
-                // sections as it lands, in whichever order the calls finish.
-                case 'scribe_complete':
-                  if (payload) {
-                    applyScribeData(payload);
-                  }
-                  break;
-
-                case 'decide_complete':
-                  if (payload) {
-                    applyDecideData(payload);
-                  }
-                  break;
-
-                case 'completed':
-                  if (payload) {
-                    getInitialPrescription(payload);
-                    setIsReady(true);
-                    setGenerating(false);
-                    setHasBeenGenerated(true);
-                  }
-                  reader.cancel();
-                  return;
-
-                default:
-                  break;
-              }
-
-              currentEvent = '';
-            }
-          }
-        }
-      })
-      .catch((err) => {
-        if (err.name !== 'AbortError') {
-          setIsError(true);
-          setGenerating(false);
-        }
-      });
-  }
+  const wantsAiDraft = clinician?.generate_ai_draft !== false;
 
   useEffect(() => {
-    if (clinician?.generate_ai_draft !== false) {
-      startSSE();
-    } else {
-      const { resetStore } = usePrescriptionStore.getState();
-      resetStore();
-      void awaitRecordingFinalization(consultationId);
-      setIsReady(true)
-    }
-    return () => {
-      abortRef.current?.abort();
-    };
-  }, [consultationId]);
+    if (wantsAiDraft) start();
+    else skip();
+  }, [consultationId, wantsAiDraft, start, skip]);
 
   if (isError && !isReady) {
     return (
@@ -176,7 +28,7 @@ function RouteComponent() {
           Failed to generate prescription.
         </div>
         <button
-          onClick={startSSE}
+          onClick={start}
           className="h-9 px-6 font-bold bg-slate-900 text-white hover:bg-slate-800 rounded-lg shadow-md"
         >
           Retry
@@ -186,16 +38,14 @@ function RouteComponent() {
   }
 
   if (!isReady) {
-    return <PrescriptionSkeleton onCancel={handleCancelSSE} sessionId={consultationId} />
+    return <PrescriptionSkeleton onCancel={cancel} sessionId={consultationId} />
   }
 
   return (
-    <>
-      <Prescription 
-        onGenerate={startSSE} 
-        onCancel={handleCancelSSE}
-        hasBeenGenerated={hasBeenGenerated}
-      />
-    </>
+    <Prescription
+      onGenerate={start}
+      onCancel={cancel}
+      hasBeenGenerated={hasBeenGenerated}
+    />
   )
 }

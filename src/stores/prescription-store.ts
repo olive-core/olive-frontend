@@ -4,14 +4,17 @@ import { composeDose, parseDuration } from "@/lib/rx-compose";
 import { scheduleFromRoutine, scheduleFromStored } from "@/lib/rx-format";
 import { serializeMedicine } from "@/lib/rx-medicine";
 import {
-    applyRxMemoryToStore,
-    clearedRxMemorySections,
-    omitRxMemorySections,
-    pickRxMemorySections,
-} from "@/lib/rx-memory";
+    EMPTY_FOLLOW_UP,
+    filledMemorySectionValues,
+    isMemorySectionFilled,
+    omitMemoryOwnedSections,
+    type AppliedMemories,
+    type AppliedMemory,
+    type MemoryBody,
+    type MemorySectionKey,
+    type MemorySectionValues,
+} from "@/lib/memory";
 import { create } from "zustand";
-
-const EMPTY_FOLLOW_UP: FollowUpType = { follow_up_days: null, follow_up_notes: null };
 
 function routineForGenerated(routine?: { gap_hours?: number; meal_times?: string[] }) {
     const meals = routine?.meal_times ?? [];
@@ -97,7 +100,7 @@ function mapGeneratedInvestigations(items: PrescriptionResponseType["investigati
 }
 
 
-interface PrescriptionStoreType {
+export interface PrescriptionStoreType {
     patientId: string | null;
     sessionId: string | null;
     // patient TODO
@@ -117,9 +120,9 @@ interface PrescriptionStoreType {
     vitals: VitalsType;
     followUp: FollowUpType;
 
-    templateSelected: boolean;
-    generatedSections: Record<string, unknown[]>;
-    isRevertingTemplate: boolean;
+    // Which memory each section currently holds, if any. Never persisted — it lives for
+    // the editing session, which is all undo needs.
+    appliedMemories: AppliedMemories;
 
     // methods
     initiatePrescription: (patientId: string, sessionId: string) => void;
@@ -128,8 +131,8 @@ interface PrescriptionStoreType {
     applyScribeData: (data: Pick<PrescriptionResponseType, 'chief_complaints' | 'history' | 'summary' | 'safety_net' | 'vitals' | 'follow_up' | 'advice'>) => void;
     applyDecideData: (data: Pick<PrescriptionResponseType, 'diagnoses' | 'medicines' | 'investigations' | 'unresolved_mentions'>) => void;
     getInitialPrescription: (data: PrescriptionResponseType) => Promise<void>;
-    setPrescriptionFromTemplate: (data: any) => void;
-    revertTemplateSelection: () => void;
+    applyMemory: (memoryName: string, body: MemoryBody, sections?: MemorySectionKey[]) => void;
+    undoMemorySection: (section: MemorySectionKey) => void;
     getSubmitPayload: (sessionId: string) => Record<string, any>;
 
     // chief complaint methods
@@ -203,9 +206,7 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
             unresolvedMedicines: [],
             advice: [],
 
-            templateSelected: false,
-            generatedSections: {},
-            isRevertingTemplate: false,
+            appliedMemories: {},
 
             initiatePrescription: (patientId, sessionId) => {
                 get().resetStore();
@@ -225,101 +226,104 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
                 medicine: [],
                 unresolvedMedicines: [],
                 advice: [],
-                templateSelected: false,
-                generatedSections: {},
-                isRevertingTemplate: false,
+                appliedMemories: {},
             }),
 
             setGenerating: (value) => set({ isGenerating: value }),
 
             setPartialData: (data) => {
-                // Covered sections are cleared until the full draft arrives — unless an RxMemory is
-                // applied, in which case its values must survive the partial update.
+                // Medicine and investigation are blanked until the full draft arrives, so a
+                // re-generate never leaves the previous run's list on screen.
                 set({
-                    chiefComplaint: mapGeneratedChiefComplaints(data.chief_complaints),
-                    history: mapGeneratedHistory(data.history),
-                    diagnosis: mapGeneratedDiagnoses(data.diagnoses),
                     summary: data.summary,
                     safetyNet: data.safety_net ?? [],
                     vitals: data.vitals ?? {},
-                    followUp: { ...EMPTY_FOLLOW_UP, ...data.follow_up },
-                    ...(get().templateSelected ? {} : clearedRxMemorySections()),
+                    ...omitMemoryOwnedSections({
+                        chiefComplaint: mapGeneratedChiefComplaints(data.chief_complaints),
+                        history: mapGeneratedHistory(data.history),
+                        diagnosis: mapGeneratedDiagnoses(data.diagnoses),
+                        followUp: { ...EMPTY_FOLLOW_UP, ...data.follow_up },
+                        medicine: [],
+                        investigation: [],
+                    }, get().appliedMemories),
                 });
             },
 
             applyScribeData: (data) => {
                 set({
-                    chiefComplaint: mapGeneratedChiefComplaints(data.chief_complaints),
-                    history: mapGeneratedHistory(data.history),
                     summary: data.summary ?? "",
                     safetyNet: data.safety_net ?? [],
                     vitals: data.vitals ?? {},
-                    followUp: { ...EMPTY_FOLLOW_UP, ...data.follow_up },
-                    advice: data.advice ?? [],
+                    ...omitMemoryOwnedSections({
+                        chiefComplaint: mapGeneratedChiefComplaints(data.chief_complaints),
+                        history: mapGeneratedHistory(data.history),
+                        followUp: { ...EMPTY_FOLLOW_UP, ...data.follow_up },
+                        advice: data.advice ?? [],
+                    }, get().appliedMemories),
                 });
             },
 
             applyDecideData: (data) => {
                 // Decide's medicines arrive already gated (database-verified), so they use the
-                // same mapping as the final draft. RxMemory-covered sections stay guarded.
-                const medicine = mapGeneratedMedicines(data.medicines);
-                const investigation = mapGeneratedInvestigations(data.investigations);
-                const generatedSections = {
-                    ...get().generatedSections,
-                    ...pickRxMemorySections({ medicine, investigation }),
-                };
+                // same mapping as the final draft.
                 set({
-                    diagnosis: mapGeneratedDiagnoses(data.diagnoses),
-                    generatedSections,
                     unresolvedMedicines: data.unresolved_mentions ?? [],
-                    ...(get().templateSelected ? {} : { medicine, investigation }),
+                    ...omitMemoryOwnedSections({
+                        diagnosis: mapGeneratedDiagnoses(data.diagnoses),
+                        medicine: mapGeneratedMedicines(data.medicines),
+                        investigation: mapGeneratedInvestigations(data.investigations),
+                    }, get().appliedMemories),
                 });
             },
 
             getInitialPrescription: async (data: PrescriptionResponseType) => {
-                const chiefComplaint = mapGeneratedChiefComplaints(data.chief_complaints);
-                const history = mapGeneratedHistory(data.history);
-                const diagnosis = mapGeneratedDiagnoses(data.diagnoses);
-                const generatedMedicine = mapGeneratedMedicines(data.medicines);
-                const generatedInvestigation = mapGeneratedInvestigations(data.investigations);
-
-                const advice = data.advice;
-                const summary = data.summary;
-                const safetyNet = data.safety_net ?? [];
-                const vitals = data.vitals ?? {};
-                const followUp = { ...EMPTY_FOLLOW_UP, ...data.follow_up };
-
-                const generatedByKey = { medicine: generatedMedicine, investigation: generatedInvestigation, chiefComplaint, history, diagnosis, advice };
-                const generatedSections = pickRxMemorySections(generatedByKey);
-
                 set({
-                    // Sections the draft owns outright are always written; covered sections are snapshotted
-                    // and applied only when no RxMemory is already in place (so it isn't clobbered).
-                    ...(omitRxMemorySections({ chiefComplaint, history, diagnosis, advice }) as Partial<PrescriptionStoreType>),
-                    summary,
-                    safetyNet,
-                    vitals,
-                    followUp,
-                    generatedSections,
+                    summary: data.summary,
+                    safetyNet: data.safety_net ?? [],
+                    vitals: data.vitals ?? {},
                     unresolvedMedicines: data.unresolved_mentions ?? [],
-                    ...(get().templateSelected ? {} : (generatedSections as Partial<PrescriptionStoreType>)),
+                    ...omitMemoryOwnedSections({
+                        chiefComplaint: mapGeneratedChiefComplaints(data.chief_complaints),
+                        history: mapGeneratedHistory(data.history),
+                        diagnosis: mapGeneratedDiagnoses(data.diagnoses),
+                        investigation: mapGeneratedInvestigations(data.investigations),
+                        medicine: mapGeneratedMedicines(data.medicines),
+                        advice: data.advice ?? [],
+                        followUp: { ...EMPTY_FOLLOW_UP, ...data.follow_up },
+                    }, get().appliedMemories),
                 })
             },
 
-            setPrescriptionFromTemplate: (data: any) => {
-                const patch = applyRxMemoryToStore(data, get() as unknown as Record<string, unknown[]>);
-                set({ ...(patch as Partial<PrescriptionStoreType>), templateSelected: true });
+            // Writes every section the memory carries — or just the ones asked for, when the
+            // doctor applies it from a single section's button. Sections the memory leaves
+            // blank are untouched, and each section it replaces keeps what it replaced.
+            applyMemory: (memoryName, body, sections) => {
+                const state = get();
+                const patch = filledMemorySectionValues(body, sections);
+                const appliedMemories = { ...state.appliedMemories };
+
+                for (const key of Object.keys(patch) as MemorySectionKey[]) {
+                    appliedMemories[key] = {
+                        memoryName,
+                        replaced: state[key],
+                        applied: patch[key] as AppliedMemory["applied"],
+                    };
+                }
+
+                set({ ...(patch as Partial<PrescriptionStoreType>), appliedMemories });
             },
 
-            revertTemplateSelection: () => {
-                const { generatedSections } = get();
-                set({ isRevertingTemplate: true, templateSelected: false });
-                setTimeout(() => {
-                    set({
-                        ...(generatedSections as Partial<PrescriptionStoreType>),
-                        isRevertingTemplate: false,
-                    });
-                }, 300);
+            undoMemorySection: (section) => {
+                const { appliedMemories } = get();
+                const entry = appliedMemories[section];
+                if (!entry) return;
+
+                const remaining = { ...appliedMemories };
+                delete remaining[section];
+                set({
+                    [section]: entry.replaced,
+                    appliedMemories: remaining,
+                } as Partial<PrescriptionStoreType>);
             },
 
             getSubmitPayload: (sessionId: string) => {
@@ -464,3 +468,15 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
         })
     }
 )
+
+// The undo a section should offer. It appears only where the memory actually replaced
+// something, and only until the doctor edits past it — every edit builds a new value, so
+// comparing against what the apply wrote is enough to tell that they have moved on.
+export function selectMemoryUndo(
+    state: PrescriptionStoreType,
+    section: MemorySectionKey,
+): AppliedMemory | null {
+    const entry = state.appliedMemories[section];
+    if (!entry || entry.applied !== state[section]) return null;
+    return isMemorySectionFilled(section, entry.replaced as MemorySectionValues[MemorySectionKey]) ? entry : null;
+}

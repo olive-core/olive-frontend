@@ -6,7 +6,8 @@ import MedicineEdit from "./medicine-edit";
 import MedicineView from "./medicine-view";
 import UnresolvedMedicineCard from "./unresolved-medicine-card";
 import type { MeedicineType } from "@/types/prescription";
-import { cn } from "@/lib/utils";
+import { SectionMemoryButton } from "@/components/memory/apply-memory-button";
+import MemoryUndoBar from "@/components/memory/memory-undo-bar";
 
 export const MedicineContainer = () => {
 
@@ -19,7 +20,6 @@ export const MedicineContainer = () => {
         moveMedicine,
         resolveUnresolvedMedicine,
         dismissUnresolvedMedicine,
-        isRevertingTemplate,
     } = usePrescriptionStore();
 
     const [editingItemStatus, setEditingItemStatus] = useState<{ index: number, status: "add" | "update" } | null>(null);
@@ -91,12 +91,14 @@ export const MedicineContainer = () => {
 
 
     return (
-        <div className={cn("mb-4 transition-opacity duration-300", isRevertingTemplate ? "opacity-0" : "opacity-100")}>
+        <div className="mb-4">
             <div className="pt-2">
                 <div className="flex items-center justify-between mb-4">
                     <h3 className="font-semibold text-md text-emerald-600">Medicine (Rx)</h3>
+                    <SectionMemoryButton section="medicine" />
                 </div>
-                <div className="flex flex-col gap-2">
+                <MemoryUndoBar section="medicine" />
+                <div className="flex flex-col gap-2 mt-2">
                     {medicine.map((med, idx) => renderMedicine(med, idx))}
                     {unresolvedMedicines.map((heardAs, idx) => (
                         <UnresolvedMedicineCard

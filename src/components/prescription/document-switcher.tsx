@@ -11,7 +11,7 @@ interface DocumentSwitcherProps {
     prescription:     ReactNode;
     notes:            ReactNode;
     notesHasContent?: boolean;
-    /** Session controls (Generate Draft, RxMemory) pinned right under the tab bar. */
+    /** Session controls (Generate Draft, Apply memory) pinned right under the tab bar. */
     actions?:         ReactNode;
 }
 

@@ -19,6 +19,7 @@ import FollowUpBlock from "./paper/follow-up-block";
 import { Button } from "@/components/ui/button";
 import { useTargetedPrint } from "@/hooks/use-targeted-print";
 import { useClinicianProfile } from "@/hooks/use-clinician-profile";
+import { MemoryApplyEnabledContext } from "@/components/memory/memory-apply-context";
 import { cn } from "@/lib/utils";
 
 interface PrescriptionProps {
@@ -29,7 +30,6 @@ interface PrescriptionProps {
 
 export default function Prescription({ onGenerate, onCancel, hasBeenGenerated }: PrescriptionProps) {
     const store = usePrescriptionStore();
-    const isRevertingTemplate = usePrescriptionStore(s => s.isRevertingTemplate);
     const navigate = useNavigate();
     const { consultationId } = useParams({ from: "/doctor/prescribe/$consultationId" });
 
@@ -134,16 +134,14 @@ export default function Prescription({ onGenerate, onCancel, hasBeenGenerated }:
                         removeItem={removeDiagnosis}
                     />
 
-                    <div className={cn("transition-opacity duration-300", isRevertingTemplate ? "opacity-0" : "opacity-100")}>
-                        <ListInfo
-                            title="Investigation"
-                            info={investigation}
-                            fieldName="investigation"
-                            addEmptyItem={addEmptyInvestigation}
-                            updateItem={updateInvestigation}
-                            removeItem={removeInvestigation}
-                        />
-                    </div>
+                    <ListInfo
+                        title="Investigation"
+                        info={investigation}
+                        fieldName="investigation"
+                        addEmptyItem={addEmptyInvestigation}
+                        updateItem={updateInvestigation}
+                        removeItem={removeInvestigation}
+                    />
                 </>
             }
             rightColumn={
@@ -182,7 +180,6 @@ export default function Prescription({ onGenerate, onCancel, hasBeenGenerated }:
             onGenerate={onGenerate}
             onCancel={onCancel}
             hasBeenGenerated={hasBeenGenerated}
-            showTemplates={prescriptionEnabled}
         />
     );
 
@@ -199,14 +196,18 @@ export default function Prescription({ onGenerate, onCancel, hasBeenGenerated }:
 
             <div className="print:hidden">
                 {prescriptionEnabled ? (
-                    <DocumentSwitcher
-                        value={activeDocument}
-                        onValueChange={setActiveDocument}
-                        notesHasContent={!!summary?.trim() || safetyNet.length > 0}
-                        actions={sessionActions}
-                        prescription={prescriptionPaper}
-                        notes={clinicalNotes}
-                    />
+                    // Memory fills prescription sections, so its controls appear only here —
+                    // never in a note-only consultation, which has no sections to fill.
+                    <MemoryApplyEnabledContext.Provider value={true}>
+                        <DocumentSwitcher
+                            value={activeDocument}
+                            onValueChange={setActiveDocument}
+                            notesHasContent={!!summary?.trim() || safetyNet.length > 0}
+                            actions={sessionActions}
+                            prescription={prescriptionPaper}
+                            notes={clinicalNotes}
+                        />
+                    </MemoryApplyEnabledContext.Provider>
                 ) : (
                     <>
                         <div className="container mt-3 flex justify-center">{sessionActions}</div>

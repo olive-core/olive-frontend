@@ -36,9 +36,9 @@ const MENU_ITEMS: MenuItemType[] = [
         href: "/doctor/consultations",
     },
     {
-        label: "RxMemory",
+        label: "Memory",
         icon: <BookMarked />,
-        href: "/doctor/rx-memory",
+        href: "/doctor/memory",
     },
     {
         label: "Prescription Pad",

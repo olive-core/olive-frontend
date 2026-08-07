@@ -21,8 +21,8 @@ type StoredSchedule = {
     code: string | null;
 };
 
-// The persisted medicine shape — mirrors the backend `RxItem`. A prescription and an RxMemory
-// template both serialize to this, so a medicine reloads identically from either source.
+// The persisted medicine shape — mirrors the backend `RxItem`. A prescription and a memory
+// both serialize to this, so a medicine reloads identically from either source.
 export interface StoredRxItem {
     medicine_id: string | null;
     trade_name: string;

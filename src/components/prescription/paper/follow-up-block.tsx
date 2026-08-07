@@ -3,6 +3,8 @@ import { addDays, format } from "date-fns";
 import type { FollowUpType } from "@/types/prescription";
 import { formatFollowUpInterval } from "@/lib/vitals";
 import { cn } from "@/lib/utils";
+import { SectionMemoryButton } from "@/components/memory/apply-memory-button";
+import MemoryUndoBar from "@/components/memory/memory-undo-bar";
 
 interface FollowUpBlockProps {
     value: FollowUpType;
@@ -107,7 +109,11 @@ export default function FollowUpBlock({ value, onChange, baseDate }: FollowUpBlo
 
     return (
         <div className="flex flex-col gap-2 rounded-xl border bg-white p-3">
-            <h3 className="font-bold text-xs uppercase tracking-widest text-slate-900">Follow Up</h3>
+            <div className="flex items-center justify-between">
+                <h3 className="font-bold text-xs uppercase tracking-widest text-slate-900">Follow Up</h3>
+                {isEditable && <SectionMemoryButton section="followUp" />}
+            </div>
+            {isEditable && <MemoryUndoBar section="followUp" />}
             {isEditable ? <EditableFollowUp value={value} onChange={onChange} /> : <ReadOnlyFollowUp value={value} baseDate={baseDate} />}
         </div>
     );

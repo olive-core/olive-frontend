@@ -225,7 +225,7 @@ function ClinicalNoteSkeleton({ onCancel, sessionId }: SkeletonProps) {
         : <SkeletonNotes />}
 
       <div className="flex justify-center py-4">
-        <PrescriptionActions onCancel={onCancel} hasBeenGenerated={false} showTemplates={false} />
+        <PrescriptionActions onCancel={onCancel} hasBeenGenerated={false} />
       </div>
 
       <style>{`

@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Button } from "../ui/button";
 import { PlusCircle } from "lucide-react";
+import { SectionMemoryButton } from "@/components/memory/apply-memory-button";
+import MemoryUndoBar from "@/components/memory/memory-undo-bar";
 
 interface AdviceListProps {
     value: string[];
@@ -65,15 +67,20 @@ export default function AdviceList({ value, onChange }: AdviceListProps) {
             {/* Header */}
             <div className="flex items-center justify-between px-1">
                 <h3 className="font-bold text-xs uppercase tracking-widest text-slate-500">Advice</h3>
-                <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-7 text-xs font-bold text-emerald-600 hover:bg-emerald-100/50"
-                    onClick={handleAdd}
-                >
-                    <PlusCircle className="size-3 mr-1" /> Add
-                </Button>
+                <div className="flex items-center">
+                    <SectionMemoryButton section="advice" />
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 text-xs font-bold text-emerald-600 hover:bg-emerald-100/50"
+                        onClick={handleAdd}
+                    >
+                        <PlusCircle className="size-3 mr-1" /> Add
+                    </Button>
+                </div>
             </div>
+
+            <MemoryUndoBar section="advice" />
 
             {/* List */}
             <div className="flex flex-col gap-2">

@@ -24,9 +24,9 @@ import { Route as PCodeRouteImport } from './routes/p.$code'
 import { Route as authSignInRouteImport } from './routes/(auth)/sign-in'
 import { Route as authEnterOtpRouteImport } from './routes/(auth)/enter-otp'
 import { Route as PatientProfileIndexRouteImport } from './routes/patient/profile/index'
-import { Route as DoctorRxMemoryIndexRouteImport } from './routes/doctor/rx-memory/index'
 import { Route as DoctorProfileIndexRouteImport } from './routes/doctor/profile/index'
 import { Route as DoctorPrescriptionHeaderIndexRouteImport } from './routes/doctor/prescription-header/index'
+import { Route as DoctorMemoryIndexRouteImport } from './routes/doctor/memory/index'
 import { Route as DoctorDeviceCheckIndexRouteImport } from './routes/doctor/device-check/index'
 import { Route as DoctorConsultationsIndexRouteImport } from './routes/doctor/consultations/index'
 import { Route as DoctorChambersIndexRouteImport } from './routes/doctor/chambers/index'
@@ -35,8 +35,8 @@ import { Route as PatientProfileEditRouteImport } from './routes/patient/profile
 import { Route as PatientPrescriptionsPrescriptionIdRouteImport } from './routes/patient/prescriptions.$prescriptionId'
 import { Route as DoctorPrescribeConsultationIdRouteImport } from './routes/doctor/prescribe.$consultationId'
 import { Route as DoctorConsultationsPrescriptionIdRouteImport } from './routes/doctor/consultations/$prescriptionId'
-import { Route as DoctorRxMemoryManageIndexRouteImport } from './routes/doctor/rx-memory/manage.index'
-import { Route as DoctorRxMemoryManageTemplateIdRouteImport } from './routes/doctor/rx-memory/manage.$templateId'
+import { Route as DoctorMemoryManageIndexRouteImport } from './routes/doctor/memory/manage.index'
+import { Route as DoctorMemoryManageMemoryIdRouteImport } from './routes/doctor/memory/manage.$memoryId'
 import { Route as DoctorConsultationUserIdConsultationIdRouteImport } from './routes/doctor/consultation.$userId.$consultationId'
 
 const NotFoundRoute = NotFoundRouteImport.update({
@@ -113,11 +113,6 @@ const PatientProfileIndexRoute = PatientProfileIndexRouteImport.update({
   path: '/profile/',
   getParentRoute: () => PatientRouteRoute,
 } as any)
-const DoctorRxMemoryIndexRoute = DoctorRxMemoryIndexRouteImport.update({
-  id: '/rx-memory/',
-  path: '/rx-memory/',
-  getParentRoute: () => DoctorRouteRoute,
-} as any)
 const DoctorProfileIndexRoute = DoctorProfileIndexRouteImport.update({
   id: '/profile/',
   path: '/profile/',
@@ -129,6 +124,11 @@ const DoctorPrescriptionHeaderIndexRoute =
     path: '/prescription-header/',
     getParentRoute: () => DoctorRouteRoute,
   } as any)
+const DoctorMemoryIndexRoute = DoctorMemoryIndexRouteImport.update({
+  id: '/memory/',
+  path: '/memory/',
+  getParentRoute: () => DoctorRouteRoute,
+} as any)
 const DoctorDeviceCheckIndexRoute = DoctorDeviceCheckIndexRouteImport.update({
   id: '/device-check/',
   path: '/device-check/',
@@ -173,16 +173,15 @@ const DoctorConsultationsPrescriptionIdRoute =
     path: '/consultations/$prescriptionId',
     getParentRoute: () => DoctorRouteRoute,
   } as any)
-const DoctorRxMemoryManageIndexRoute =
-  DoctorRxMemoryManageIndexRouteImport.update({
-    id: '/rx-memory/manage/',
-    path: '/rx-memory/manage/',
-    getParentRoute: () => DoctorRouteRoute,
-  } as any)
-const DoctorRxMemoryManageTemplateIdRoute =
-  DoctorRxMemoryManageTemplateIdRouteImport.update({
-    id: '/rx-memory/manage/$templateId',
-    path: '/rx-memory/manage/$templateId',
+const DoctorMemoryManageIndexRoute = DoctorMemoryManageIndexRouteImport.update({
+  id: '/memory/manage/',
+  path: '/memory/manage/',
+  getParentRoute: () => DoctorRouteRoute,
+} as any)
+const DoctorMemoryManageMemoryIdRoute =
+  DoctorMemoryManageMemoryIdRouteImport.update({
+    id: '/memory/manage/$memoryId',
+    path: '/memory/manage/$memoryId',
     getParentRoute: () => DoctorRouteRoute,
   } as any)
 const DoctorConsultationUserIdConsultationIdRoute =
@@ -214,13 +213,13 @@ export interface FileRoutesByFullPath {
   '/doctor/chambers': typeof DoctorChambersIndexRoute
   '/doctor/consultations': typeof DoctorConsultationsIndexRoute
   '/doctor/device-check': typeof DoctorDeviceCheckIndexRoute
+  '/doctor/memory': typeof DoctorMemoryIndexRoute
   '/doctor/prescription-header': typeof DoctorPrescriptionHeaderIndexRoute
   '/doctor/profile': typeof DoctorProfileIndexRoute
-  '/doctor/rx-memory': typeof DoctorRxMemoryIndexRoute
   '/patient/profile': typeof PatientProfileIndexRoute
   '/doctor/consultation/$userId/$consultationId': typeof DoctorConsultationUserIdConsultationIdRoute
-  '/doctor/rx-memory/manage/$templateId': typeof DoctorRxMemoryManageTemplateIdRoute
-  '/doctor/rx-memory/manage': typeof DoctorRxMemoryManageIndexRoute
+  '/doctor/memory/manage/$memoryId': typeof DoctorMemoryManageMemoryIdRoute
+  '/doctor/memory/manage': typeof DoctorMemoryManageIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -241,13 +240,13 @@ export interface FileRoutesByTo {
   '/doctor/chambers': typeof DoctorChambersIndexRoute
   '/doctor/consultations': typeof DoctorConsultationsIndexRoute
   '/doctor/device-check': typeof DoctorDeviceCheckIndexRoute
+  '/doctor/memory': typeof DoctorMemoryIndexRoute
   '/doctor/prescription-header': typeof DoctorPrescriptionHeaderIndexRoute
   '/doctor/profile': typeof DoctorProfileIndexRoute
-  '/doctor/rx-memory': typeof DoctorRxMemoryIndexRoute
   '/patient/profile': typeof PatientProfileIndexRoute
   '/doctor/consultation/$userId/$consultationId': typeof DoctorConsultationUserIdConsultationIdRoute
-  '/doctor/rx-memory/manage/$templateId': typeof DoctorRxMemoryManageTemplateIdRoute
-  '/doctor/rx-memory/manage': typeof DoctorRxMemoryManageIndexRoute
+  '/doctor/memory/manage/$memoryId': typeof DoctorMemoryManageMemoryIdRoute
+  '/doctor/memory/manage': typeof DoctorMemoryManageIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -273,13 +272,13 @@ export interface FileRoutesById {
   '/doctor/chambers/': typeof DoctorChambersIndexRoute
   '/doctor/consultations/': typeof DoctorConsultationsIndexRoute
   '/doctor/device-check/': typeof DoctorDeviceCheckIndexRoute
+  '/doctor/memory/': typeof DoctorMemoryIndexRoute
   '/doctor/prescription-header/': typeof DoctorPrescriptionHeaderIndexRoute
   '/doctor/profile/': typeof DoctorProfileIndexRoute
-  '/doctor/rx-memory/': typeof DoctorRxMemoryIndexRoute
   '/patient/profile/': typeof PatientProfileIndexRoute
   '/doctor/consultation/$userId/$consultationId': typeof DoctorConsultationUserIdConsultationIdRoute
-  '/doctor/rx-memory/manage/$templateId': typeof DoctorRxMemoryManageTemplateIdRoute
-  '/doctor/rx-memory/manage/': typeof DoctorRxMemoryManageIndexRoute
+  '/doctor/memory/manage/$memoryId': typeof DoctorMemoryManageMemoryIdRoute
+  '/doctor/memory/manage/': typeof DoctorMemoryManageIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -305,13 +304,13 @@ export interface FileRouteTypes {
     | '/doctor/chambers'
     | '/doctor/consultations'
     | '/doctor/device-check'
+    | '/doctor/memory'
     | '/doctor/prescription-header'
     | '/doctor/profile'
-    | '/doctor/rx-memory'
     | '/patient/profile'
     | '/doctor/consultation/$userId/$consultationId'
-    | '/doctor/rx-memory/manage/$templateId'
-    | '/doctor/rx-memory/manage'
+    | '/doctor/memory/manage/$memoryId'
+    | '/doctor/memory/manage'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -332,13 +331,13 @@ export interface FileRouteTypes {
     | '/doctor/chambers'
     | '/doctor/consultations'
     | '/doctor/device-check'
+    | '/doctor/memory'
     | '/doctor/prescription-header'
     | '/doctor/profile'
-    | '/doctor/rx-memory'
     | '/patient/profile'
     | '/doctor/consultation/$userId/$consultationId'
-    | '/doctor/rx-memory/manage/$templateId'
-    | '/doctor/rx-memory/manage'
+    | '/doctor/memory/manage/$memoryId'
+    | '/doctor/memory/manage'
   id:
     | '__root__'
     | '/'
@@ -363,13 +362,13 @@ export interface FileRouteTypes {
     | '/doctor/chambers/'
     | '/doctor/consultations/'
     | '/doctor/device-check/'
+    | '/doctor/memory/'
     | '/doctor/prescription-header/'
     | '/doctor/profile/'
-    | '/doctor/rx-memory/'
     | '/patient/profile/'
     | '/doctor/consultation/$userId/$consultationId'
-    | '/doctor/rx-memory/manage/$templateId'
-    | '/doctor/rx-memory/manage/'
+    | '/doctor/memory/manage/$memoryId'
+    | '/doctor/memory/manage/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -491,13 +490,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PatientProfileIndexRouteImport
       parentRoute: typeof PatientRouteRoute
     }
-    '/doctor/rx-memory/': {
-      id: '/doctor/rx-memory/'
-      path: '/rx-memory'
-      fullPath: '/doctor/rx-memory'
-      preLoaderRoute: typeof DoctorRxMemoryIndexRouteImport
-      parentRoute: typeof DoctorRouteRoute
-    }
     '/doctor/profile/': {
       id: '/doctor/profile/'
       path: '/profile'
@@ -510,6 +502,13 @@ declare module '@tanstack/react-router' {
       path: '/prescription-header'
       fullPath: '/doctor/prescription-header'
       preLoaderRoute: typeof DoctorPrescriptionHeaderIndexRouteImport
+      parentRoute: typeof DoctorRouteRoute
+    }
+    '/doctor/memory/': {
+      id: '/doctor/memory/'
+      path: '/memory'
+      fullPath: '/doctor/memory'
+      preLoaderRoute: typeof DoctorMemoryIndexRouteImport
       parentRoute: typeof DoctorRouteRoute
     }
     '/doctor/device-check/': {
@@ -568,18 +567,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DoctorConsultationsPrescriptionIdRouteImport
       parentRoute: typeof DoctorRouteRoute
     }
-    '/doctor/rx-memory/manage/': {
-      id: '/doctor/rx-memory/manage/'
-      path: '/rx-memory/manage'
-      fullPath: '/doctor/rx-memory/manage'
-      preLoaderRoute: typeof DoctorRxMemoryManageIndexRouteImport
+    '/doctor/memory/manage/': {
+      id: '/doctor/memory/manage/'
+      path: '/memory/manage'
+      fullPath: '/doctor/memory/manage'
+      preLoaderRoute: typeof DoctorMemoryManageIndexRouteImport
       parentRoute: typeof DoctorRouteRoute
     }
-    '/doctor/rx-memory/manage/$templateId': {
-      id: '/doctor/rx-memory/manage/$templateId'
-      path: '/rx-memory/manage/$templateId'
-      fullPath: '/doctor/rx-memory/manage/$templateId'
-      preLoaderRoute: typeof DoctorRxMemoryManageTemplateIdRouteImport
+    '/doctor/memory/manage/$memoryId': {
+      id: '/doctor/memory/manage/$memoryId'
+      path: '/memory/manage/$memoryId'
+      fullPath: '/doctor/memory/manage/$memoryId'
+      preLoaderRoute: typeof DoctorMemoryManageMemoryIdRouteImport
       parentRoute: typeof DoctorRouteRoute
     }
     '/doctor/consultation/$userId/$consultationId': {
@@ -626,12 +625,12 @@ interface DoctorRouteRouteChildren {
   DoctorChambersIndexRoute: typeof DoctorChambersIndexRoute
   DoctorConsultationsIndexRoute: typeof DoctorConsultationsIndexRoute
   DoctorDeviceCheckIndexRoute: typeof DoctorDeviceCheckIndexRoute
+  DoctorMemoryIndexRoute: typeof DoctorMemoryIndexRoute
   DoctorPrescriptionHeaderIndexRoute: typeof DoctorPrescriptionHeaderIndexRoute
   DoctorProfileIndexRoute: typeof DoctorProfileIndexRoute
-  DoctorRxMemoryIndexRoute: typeof DoctorRxMemoryIndexRoute
   DoctorConsultationUserIdConsultationIdRoute: typeof DoctorConsultationUserIdConsultationIdRoute
-  DoctorRxMemoryManageTemplateIdRoute: typeof DoctorRxMemoryManageTemplateIdRoute
-  DoctorRxMemoryManageIndexRoute: typeof DoctorRxMemoryManageIndexRoute
+  DoctorMemoryManageMemoryIdRoute: typeof DoctorMemoryManageMemoryIdRoute
+  DoctorMemoryManageIndexRoute: typeof DoctorMemoryManageIndexRoute
 }
 
 const DoctorRouteRouteChildren: DoctorRouteRouteChildren = {
@@ -643,13 +642,13 @@ const DoctorRouteRouteChildren: DoctorRouteRouteChildren = {
   DoctorChambersIndexRoute: DoctorChambersIndexRoute,
   DoctorConsultationsIndexRoute: DoctorConsultationsIndexRoute,
   DoctorDeviceCheckIndexRoute: DoctorDeviceCheckIndexRoute,
+  DoctorMemoryIndexRoute: DoctorMemoryIndexRoute,
   DoctorPrescriptionHeaderIndexRoute: DoctorPrescriptionHeaderIndexRoute,
   DoctorProfileIndexRoute: DoctorProfileIndexRoute,
-  DoctorRxMemoryIndexRoute: DoctorRxMemoryIndexRoute,
   DoctorConsultationUserIdConsultationIdRoute:
     DoctorConsultationUserIdConsultationIdRoute,
-  DoctorRxMemoryManageTemplateIdRoute: DoctorRxMemoryManageTemplateIdRoute,
-  DoctorRxMemoryManageIndexRoute: DoctorRxMemoryManageIndexRoute,
+  DoctorMemoryManageMemoryIdRoute: DoctorMemoryManageMemoryIdRoute,
+  DoctorMemoryManageIndexRoute: DoctorMemoryManageIndexRoute,
 }
 
 const DoctorRouteRouteWithChildren = DoctorRouteRoute._addFileChildren(

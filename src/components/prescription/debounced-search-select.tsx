@@ -1,24 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Input } from "../ui/input";
+import { useDebouncedValue } from "@/hooks/use-debounced-value";
 
 // How many results to render per scroll page. All matches stay reachable by
 // scrolling; only this many are mounted at a time.
 const RESULT_PAGE_SIZE = 50;
-
-// -----------------------------
-// Hook: Debounce
-// -----------------------------
-function useDebounce<T>(value: T, delay: number = 400) {
-    const [debouncedValue, setDebouncedValue] = useState(value);
-
-    useEffect(() => {
-        const timer = setTimeout(() => setDebouncedValue(value), delay);
-        return () => clearTimeout(timer);
-    }, [value, delay]);
-
-    return debouncedValue;
-}
 
 // -----------------------------
 // Types
@@ -61,7 +48,7 @@ export default function DebouncedSearchSelect({
 
     const containerRef = useRef<HTMLDivElement>(null);
 
-    const debouncedQuery = useDebounce(inputValue, debounceTime);
+    const debouncedQuery = useDebouncedValue(inputValue, debounceTime);
 
     const { data: options = [], isFetching } = useQuery({
         queryKey: [...queryKeyBase, debouncedQuery],
