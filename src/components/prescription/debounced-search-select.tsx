@@ -1,11 +1,17 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useId, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Input } from "../ui/input";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
+import { matchesMediaQuery, useMediaQuery } from "@/hooks/use-media-query";
+import { useAvailableHeightBelow } from "@/hooks/use-available-height";
 
 // How many results to render per scroll page. All matches stay reachable by
 // scrolling; only this many are mounted at a time.
 const RESULT_PAGE_SIZE = 50;
+
+// The viewports where the results get the whole screen rather than a dropdown's worth of it.
+// Matches the one the prescription editors use to decide on a sheet.
+const PHONE_RESULTS_VIEWPORT = "(max-width: 767px), (max-height: 500px)";
 
 // -----------------------------
 // Types
@@ -47,8 +53,22 @@ export default function DebouncedSearchSelect({
     const [visibleCount, setVisibleCount] = useState(RESULT_PAGE_SIZE);
 
     const containerRef = useRef<HTMLDivElement>(null);
+    const inputRef = useRef<HTMLInputElement>(null);
+    const listboxId = useId();
 
     const debouncedQuery = useDebouncedValue(inputValue, debounceTime);
+
+    // On a phone the field sits inside the edit sheet's own scroll area, which clips the
+    // results to whatever room is left below the field — often two or three rows. Lifting the
+    // field to the top of that area first hands the whole sheet to the results.
+    const revealResults = () => {
+        setIsOpen(true);
+        if (!matchesMediaQuery(PHONE_RESULTS_VIEWPORT)) return;
+        containerRef.current?.scrollIntoView({ block: "start", behavior: "smooth" });
+    };
+
+    const isPhone = useMediaQuery(PHONE_RESULTS_VIEWPORT);
+    const resultsHeight = useAvailableHeightBelow(inputRef, isOpen && isPhone);
 
     const { data: options = [], isFetching } = useQuery({
         queryKey: [...queryKeyBase, debouncedQuery],
@@ -136,12 +156,13 @@ export default function DebouncedSearchSelect({
     return (
         <div ref={containerRef} className="relative w-full">
             <Input
+                ref={inputRef}
                 value={inputValue}
                 onChange={(e) => {
                     setInputValue(e.target.value);
-                    setIsOpen(true);
+                    revealResults();
                 }}
-                onFocus={() => setIsOpen(true)}
+                onFocus={revealResults}
                 onKeyDown={handleKeyDown}
                 placeholder={placeholder}
                 // A phone keyboard would otherwise capitalise and "correct" brand names into
@@ -151,22 +172,32 @@ export default function DebouncedSearchSelect({
                 autoCapitalize="off"
                 spellCheck={false}
                 enterKeyHint="search"
+                role="combobox"
+                aria-expanded={isOpen}
+                aria-controls={listboxId}
+                aria-autocomplete="list"
                 className="w-full h-11 sm:h-10 px-3 text-base sm:text-sm border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
 
             {isOpen && (
                 <div
+                    id={listboxId}
+                    role="listbox"
                     onScroll={handleScroll}
-                    // Roughly ten results, since picking a brand means scanning several at once.
-                    // The viewport cap matters because this list only ever opens downwards: on a
-                    // phone, or with the input low on screen, a fixed height would run off the page.
-                    // `dvh` so an open keyboard shortens the list instead of hiding its tail.
-                    className="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-[min(22rem,50dvh)] overflow-auto overscroll-contain"
+                    // Phone: in flow and tall, so the results own the sheet the field was
+                    // lifted to the top of, instead of being clipped to a few rows by it.
+                    // Desktop: the familiar dropdown, roughly ten results deep, capped against
+                    // the viewport because it only ever opens downwards.
+                    // `overscroll-contain` keeps a flick inside the results.
+                    style={resultsHeight ? { maxHeight: resultsHeight } : undefined}
+                    className="relative z-20 mt-1 max-h-[70svh] w-full overflow-auto overscroll-contain rounded-xl border border-gray-200 bg-white shadow-lg sm:absolute sm:max-h-[min(22rem,60vh)]"
                 >
 
 
                     {inputValue?.length > 0 && (
                         <div
+                            role="option"
+                            aria-selected={false}
                             onClick={() => handleAdd()}
                             className={`flex min-h-11 sm:min-h-0 items-center px-3 py-3 sm:py-2 text-base sm:text-sm cursor-pointer hover:bg-gray-100 italic text-blue-600`}
                         >
@@ -187,6 +218,8 @@ export default function DebouncedSearchSelect({
                         // drags to scroll the list must scroll it, not pick that medicine.
                         <div
                             key={index}
+                            role="option"
+                            aria-selected={index === highlightIndex}
                             onClick={() => handleSelect(option)}
                             className={`min-h-11 sm:min-h-0 px-3 py-3 sm:py-2 text-base sm:text-sm cursor-pointer ${index === highlightIndex
                                 ? "bg-blue-100 text-blue-700"

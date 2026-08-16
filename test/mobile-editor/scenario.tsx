@@ -1,10 +1,15 @@
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
+import { renderToStaticMarkup } from "react-dom/server";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import { visualViewportBox } from "@/hooks/use-visual-viewport";
+import { availableHeightBelow } from "@/hooks/use-available-height";
 import EditSurface from "@/components/prescription/editor/edit-surface";
+import DebouncedSearchSelect from "@/components/prescription/debounced-search-select";
+import DoctorInfo from "@/components/prescription/doctor-info";
 import ListInfo from "@/components/prescription/list-info";
+import MedicineView from "@/components/prescription/medicine-view";
 import RxChip from "@/components/prescription/rx/rx-chip";
 import { viewport } from "./dom-setup";
 import { editorMarkup, listItemRowMarkup } from "./markup";
@@ -48,6 +53,31 @@ function mountEditSurface(onCommit: () => void): { root: Root; host: HTMLElement
             >
                 <input data-testid="field" />
             </EditSurface>,
+        );
+    });
+
+    return { root, host };
+}
+
+// A search field inside the phone edit sheet — the arrangement that was clipping the results
+// to a few rows.
+function mountSearchInSheet(): { root: Root; host: HTMLElement } {
+    const host = document.createElement("div");
+    document.body.appendChild(host);
+    const root = createRoot(host);
+
+    act(() => {
+        root.render(
+            <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+                <EditSurface title="Medicine" onCommit={() => {}} footer={<button>Done</button>}>
+                    <DebouncedSearchSelect
+                        value={null}
+                        onChange={() => {}}
+                        fetchOptions={async () => []}
+                        queryKeyBase="sheet-search"
+                    />
+                </EditSurface>
+            </QueryClientProvider>,
         );
     });
 
@@ -105,7 +135,6 @@ export async function runTest() {
 
     section("2. Quick-pick chips are finger-sized on a phone and unchanged on a desktop");
     {
-        const { renderToStaticMarkup } = await import("react-dom/server");
         const markup = renderToStaticMarkup(
             <>
                 <RxChip label="BD" onClick={() => {}} />
@@ -242,6 +271,80 @@ export async function runTest() {
         check("no empty card is left in the list behind it", host.querySelector(".shadow-lg") === null);
 
         unmount(root, host);
+    }
+
+    section("9. The editor's letterhead does not put the doctor and the chamber side by side on a phone");
+    {
+        const markup = renderToStaticMarkup(<DoctorInfo sessionId="s1" />);
+
+        // The full letterhead lays them out in one row; on a phone that row is what collided.
+        const desktopOnly = markup.indexOf('class="hidden sm:block print:block"');
+        const sideBySide  = markup.indexOf('class="flex items-stretch gap-4"');
+        check("the side-by-side letterhead is rendered", sideBySide > -1);
+        check("it is shown only from `sm` up, and in print", desktopOnly > -1 && desktopOnly < sideBySide, `${desktopOnly} / ${sideBySide}`);
+
+        check("a phone gets its own header instead", markup.includes('class="sm:hidden print:hidden"'));
+
+        const disclosure = /aria-expanded="false" aria-controls="rx-header-details"/.test(markup);
+        check("the chamber sits behind a disclosure, under the doctor", disclosure);
+        check("the disclosure is labelled with the chamber", markup.includes("Popular Diagnostic Centre"));
+        check("the doctor's identity is not hidden behind it", markup.includes("Dr. Rafiqul Islam"));
+    }
+
+    section("10. Search results get every row the sheet can give them");
+    {
+        // The field is lifted to the top of the sheet's scroll area, so the room below it is
+        // the whole area — bounded by the area's own bottom, or the keyboard, whichever is nearer.
+        check("the sheet's scroll area bounds the list", availableHeightBelow(200, 640, 900) === 428, `${availableHeightBelow(200, 640, 900)}`);
+        check("an open keyboard bounds it instead when it is nearer", availableHeightBelow(200, 900, 640) === 428, `${availableHeightBelow(200, 900, 640)}`);
+        check("a field with no scrolling ancestor is bounded by the viewport", availableHeightBelow(100, Infinity, 800) === 688, `${availableHeightBelow(100, Infinity, 800)}`);
+        check("a field measured mid-scroll never collapses to a peephole", availableHeightBelow(600, 640, 640) === 180, `${availableHeightBelow(600, 640, 640)}`);
+
+        viewport.isPhone = true;
+        const { root, host } = mountSearchInSheet();
+
+        const field = document.querySelector("input") as HTMLInputElement | null;
+        check("the search field is in the sheet", !!field);
+
+        // React's onFocus listens for `focusin`, which only a real focus() raises.
+        act(() => field?.focus());
+
+        const results = document.querySelector("[role=listbox]") as HTMLElement | null;
+        check("the results open", !!results);
+        // Nothing in CSS can name the sheet scroll area's height, so it is measured.
+        check("their height is measured rather than guessed", !!results?.style.maxHeight, results?.style.maxHeight);
+        check(
+            "they run in flow on a phone, so the sheet is not clipping them to a few rows",
+            results?.className.includes("relative") === true && results?.className.includes("sm:absolute") === true,
+        );
+
+        unmount(root, host);
+    }
+
+    section("11. A medicine reads across the full column on a phone");
+    {
+        const rowMarkup = renderToStaticMarkup(
+            <MedicineView
+                medicine={{ name: "Napa 500mg", value: "napa", trade_name: "Napa 500mg", generic_name: "Paracetamol", type: "tablet", schedule: { morning: 1, noon: 0, night: 1, timing: "after" } }}
+                index={0}
+                onRemove={() => {}}
+                setIsEditing={() => {}}
+                onMoveDown={() => {}}
+            />,
+        );
+
+        const row = classesOf(rowMarkup, "div")[0];
+        check("the actions drop below the card on a phone", row.includes("flex-col") && row.includes("sm:flex-row"), row.join(" "));
+
+        const card = classesOf(rowMarkup, "div").find((classes) => classes.includes("max-w-none"));
+        check("the card takes the whole column", !!card && card.includes("w-full"), card?.join(" "));
+
+        // "1+0+1 (after meal)" beside a name in a phone column left the name a few characters wide.
+        const nameRow = classesOf(rowMarkup, "div").find((classes) => classes.includes("justify-between") && classes.includes("items-start"));
+        check("a long frequency wraps instead of crushing the name", !!nameRow && nameRow.includes("flex-wrap"), nameRow?.join(" "));
+
+        const nameBlock = classesOf(rowMarkup, "div").find((classes) => classes.includes("basis-48"));
+        check("the name keeps a readable minimum width", !!nameBlock, "no basis-48 name block");
     }
 
     console.log(failures === 0 ? "\nALL PASS" : `\n${failures} FAILURE(S)`);

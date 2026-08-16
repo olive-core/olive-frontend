@@ -17,7 +17,7 @@ export default function DoctorIdentityBlock({ identity, config, palette, align =
         <div className={cn("flex min-w-0 flex-col", align === "center" ? "items-center text-center" : "items-start")}>
             <h2
                 data-focus="name"
-                className="font-display text-[1.35rem] font-semibold leading-tight tracking-tight"
+                className="font-display text-[1.35rem] font-semibold leading-tight tracking-tight break-words"
                 style={{ color: palette.nameColor }}
             >
                 {name || "Doctor name"}

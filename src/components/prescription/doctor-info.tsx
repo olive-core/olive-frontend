@@ -33,9 +33,12 @@ export default function DoctorInfo({ sessionId }: { sessionId: string }) {
 
     if (isLoading || !clinician || !letterhead) return null;
 
+    // `responsive`: a phone gets the identity-first header with the chamber block behind a
+    // disclosure. The full letterhead lays the doctor and the chamber side by side, which at
+    // phone width squeezes them into each other. Print has its own DOM and is unaffected.
     return (
         <div className="flex w-full flex-col gap-2">
-            <ResolvedPrescriptionHeader letterhead={letterhead} />
+            <ResolvedPrescriptionHeader letterhead={letterhead} responsive />
             {isPrePrinted(letterhead.paper) && <PrePrintedPadNotice paper={letterhead.paper} />}
         </div>
     )

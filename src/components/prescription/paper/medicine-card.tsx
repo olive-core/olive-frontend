@@ -16,8 +16,10 @@ export interface MedicineCardProps {
 }
 
 function MedicineName({ typeLabel, tradeName, genericName, fallbackName }: Pick<MedicineCardProps, "typeLabel" | "tradeName" | "genericName" | "fallbackName">) {
+    // basis-48: the name never drops below a readable column — below that the frequency
+    // wraps away and gives it the whole card.
     return (
-        <div className="flex flex-col min-w-0">
+        <div className="flex min-w-0 flex-1 basis-48 flex-col">
             {typeLabel && <span className="text-[11px] font-semibold uppercase tracking-wide text-emerald-600">{typeLabel}</span>}
             <h3 className="text-slate-900 leading-tight break-words">
                 {tradeName ? (
@@ -36,10 +38,13 @@ export default function MedicineCard({ typeLabel, tradeName, genericName, fallba
 
     return (
         <div className={cn("group relative rounded-lg border p-3 bg-muted border-border w-full max-w-lg transition-colors hover:bg-emerald-50/50 hover:border-emerald-200", className)}>
-            <div className="flex justify-between items-start gap-2">
+            {/* The frequency keeps its place on the right while both fit. A long one — "1+0+1
+                (after meal)" on a phone column — takes its own line underneath instead of
+                squeezing the medicine name into a two-character-wide ribbon. */}
+            <div className="flex flex-wrap items-start justify-between gap-x-2 gap-y-0.5">
                 <MedicineName typeLabel={typeLabel} tradeName={tradeName} genericName={genericName} fallbackName={fallbackName} />
                 {frequencyText && (
-                    <span className="shrink-0 text-right text-sm font-semibold text-slate-800">{frequencyText}</span>
+                    <span className="ml-auto shrink-0 text-right text-sm font-semibold text-slate-800">{frequencyText}</span>
                 )}
             </div>
 

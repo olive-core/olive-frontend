@@ -8,8 +8,20 @@ import path from "node:path";
 const root = path.resolve(import.meta.dirname, "../..");
 const here = path.join(root, "test/mobile-editor");
 
+// The editor's letterhead is resolved over the network; only the resolution is stubbed, so
+// the header a phone actually renders is the real one.
+const stubs = {
+    "@/hooks/use-compose-letterhead": path.join(here, "stubs/compose-letterhead.ts"),
+};
+
 await build({
     entryPoints: [path.join(here, "run.ts")],
+    plugins: [{
+        name: "stubs",
+        setup(pluginBuild) {
+            pluginBuild.onResolve({ filter: /.*/ }, (args) => (stubs[args.path] ? { path: stubs[args.path] } : null));
+        },
+    }],
     bundle: true,
     platform: "node",
     format: "cjs",

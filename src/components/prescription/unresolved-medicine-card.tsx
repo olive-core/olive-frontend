@@ -13,8 +13,8 @@ interface UnresolvedMedicineCardProps {
 // reads as a confirmed Rx line; the action rail mirrors the medicine view card.
 export default function UnresolvedMedicineCard({ heardAs, onResolve, onDismiss }: UnresolvedMedicineCardProps) {
     return (
-        <div className="group flex items-stretch gap-1.5">
-            <div className="flex-1 rounded-2xl border border-dashed border-amber-300 bg-amber-50/60 p-4 sm:p-5">
+        <div className="group flex flex-col gap-1 sm:flex-row sm:items-stretch sm:gap-1.5">
+            <div className="w-full rounded-2xl border border-dashed border-amber-300 bg-amber-50/60 p-4 sm:flex-1 sm:p-5">
                 <div className="flex gap-3">
                     <AudioLines className="size-5 shrink-0 text-amber-500 mt-0.5" />
                     <div className="min-w-0">
@@ -33,7 +33,7 @@ export default function UnresolvedMedicineCard({ heardAs, onResolve, onDismiss }
                 </div>
             </div>
 
-            <div className="flex flex-col justify-center gap-0.5 shrink-0">
+            <div className="flex shrink-0 items-center justify-end gap-1 sm:flex-col sm:justify-center sm:gap-0.5">
                 <Button
                     size="icon"
                     variant="ghost"

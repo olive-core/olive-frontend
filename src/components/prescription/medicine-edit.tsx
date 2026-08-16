@@ -177,7 +177,9 @@ interface MedicineEditActionsProps {
 
 function MedicineEditActions({ onRemove, onCancel, onSave }: MedicineEditActionsProps) {
     return (
-        <div className="bg-slate-50 px-5 py-3 flex flex-wrap justify-between items-center gap-2 border-t border-slate-100 rounded-b-2xl">
+        // Trimmer on a phone: every row this bar gives up is a row of search results the
+        // sheet's scroll area can show instead.
+        <div className="bg-slate-50 px-3 py-2 flex flex-wrap justify-between items-center gap-2 border-t border-slate-100 rounded-b-2xl sm:px-5 sm:py-3">
             <Button
                 variant="ghost"
                 size="sm"
