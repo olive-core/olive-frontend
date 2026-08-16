@@ -51,7 +51,7 @@ export function SectionMemoryButton({ section }: { section: MemorySectionKey }) 
                 variant="ghost"
                 size="sm"
                 aria-label={`Fill ${memorySectionLabel(section).toLowerCase()} from a memory`}
-                className="h-7 px-2 text-xs font-bold text-slate-500 hover:bg-slate-100"
+                className="h-11 w-11 px-2 text-xs font-bold text-slate-500 hover:bg-slate-100 sm:h-7 sm:w-auto"
                 onClick={picker.open}
                 disabled={picker.isApplying}
             >

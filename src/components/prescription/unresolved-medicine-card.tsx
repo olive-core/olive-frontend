@@ -25,7 +25,7 @@ export default function UnresolvedMedicineCard({ heardAs, onResolve, onDismiss }
                             variant="outline"
                             size="sm"
                             onClick={onResolve}
-                            className="mt-3 flex items-center gap-2 cursor-pointer border-amber-300 text-amber-700 hover:text-amber-800 hover:bg-amber-100"
+                            className="mt-3 flex h-11 items-center gap-2 cursor-pointer border-amber-300 text-amber-700 hover:text-amber-800 hover:bg-amber-100 sm:h-8"
                         >
                             <Search className="size-4" /> Search &amp; add this medicine
                         </Button>
@@ -38,7 +38,7 @@ export default function UnresolvedMedicineCard({ heardAs, onResolve, onDismiss }
                     size="icon"
                     variant="ghost"
                     aria-label="Dismiss — not a medicine"
-                    className="h-7 w-7 cursor-pointer text-slate-400 hover:text-rose-500"
+                    className="size-11 sm:size-7 cursor-pointer text-slate-400 hover:text-rose-500"
                     onClick={onDismiss}
                 >
                     <X className="h-4 w-4" />

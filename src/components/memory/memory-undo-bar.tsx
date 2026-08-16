@@ -21,7 +21,7 @@ export default function MemoryUndoBar({ section }: { section: MemorySectionKey }
             <button
                 type="button"
                 onClick={() => undoMemorySection(section)}
-                className="flex shrink-0 cursor-pointer items-center gap-1 font-bold text-slate-700 underline underline-offset-2 hover:text-slate-900"
+                className="flex min-h-9 shrink-0 cursor-pointer items-center gap-1 px-1 font-bold text-slate-700 underline underline-offset-2 hover:text-slate-900 sm:min-h-0 sm:px-0"
             >
                 <Undo2Icon className="size-3" />
                 Undo

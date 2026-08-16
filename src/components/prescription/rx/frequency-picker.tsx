@@ -6,6 +6,7 @@ import { getFrequency } from "@/constants/prescription";
 import { formatCount, formatSchedule, parseMealPattern } from "@/lib/rx-format";
 import type { MedicineSchedule } from "@/types/prescription";
 import type { FrequencyMode } from "./rx-type-config";
+import RxChip from "./rx-chip";
 
 interface FrequencyPickerProps {
     schedule: MedicineSchedule;
@@ -42,17 +43,19 @@ export default function FrequencyPicker({ schedule, mode, onChange }: FrequencyP
             <div className="bg-slate-50/50 border border-slate-100 rounded-xl p-3 space-y-2.5">
                 <div className="flex flex-wrap gap-1.5">
                     {CODE_CHIPS.map(code => (
-                        <Chip key={code} active={schedule.code === code} label={code} title={getFrequency(code)?.fullForm} onClick={() => setCode(code)} />
+                        <RxChip key={code} active={schedule.code === code} label={code} title={getFrequency(code)?.fullForm} onClick={() => setCode(code)} />
                     ))}
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                     <Clock size={15} className="text-emerald-500" />
                     <span className="text-sm text-slate-600">or every</span>
                     <Input
                         value={schedule.gapHours ?? ""}
                         onChange={event => setGapHours(event.target.value)}
                         type="number"
-                        className="w-20 h-8 text-center"
+                        inputMode="numeric"
+                        aria-label="Hours between doses"
+                        className="w-20 h-11 sm:h-8 text-center"
                     />
                     <span className="text-sm text-slate-600">hours</span>
                     <span className="ml-auto text-sm font-semibold text-slate-800">{preview}</span>
@@ -97,7 +100,9 @@ export default function FrequencyPicker({ schedule, mode, onChange }: FrequencyP
 
     return (
         <div className="bg-slate-50/50 border border-slate-100 rounded-xl p-3 space-y-2.5">
-            <div className="flex items-center gap-3">
+            {/* Wraps because the meal toggle and the pattern box together are wider than a
+                phone's column; unwrapped, the pattern box was clipped off the card edge. */}
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                 <div className="flex p-0.5 bg-slate-200/50 border border-slate-200 rounded-lg">
                     <TimingButton label="After meal" active={timing === "after"} onClick={() => setTiming("after")} />
                     <TimingButton label="Before meal" active={timing === "before"} onClick={() => setTiming("before")} />
@@ -107,7 +112,7 @@ export default function FrequencyPicker({ schedule, mode, onChange }: FrequencyP
                     onChange={event => onPatternChange(event.target.value)}
                     onBlur={() => setDraft(null)}
                     aria-label="Morning + Noon + Night pattern"
-                    className="ml-auto w-28 h-9 text-center font-mono font-bold text-base tracking-wider text-slate-800"
+                    className="ml-auto w-28 h-11 sm:h-9 text-center font-mono font-bold text-base tracking-wider text-slate-800"
                 />
             </div>
 
@@ -118,29 +123,13 @@ export default function FrequencyPicker({ schedule, mode, onChange }: FrequencyP
             </div>
 
             <div className="flex flex-wrap gap-1.5">
-                <Chip label="OD" title={getFrequency("OD")?.fullForm} active={schedule.code === "OD"} onClick={applyOnceDaily} />
+                <RxChip label="OD" title={getFrequency("OD")?.fullForm} active={schedule.code === "OD"} onClick={applyOnceDaily} />
                 {MEAL_QUICK.map(quick => (
-                    <Chip key={quick.code} active={matchesQuick(quick)} label={quick.code} title={getFrequency(quick.code)?.fullForm} onClick={() => applyQuick(quick)} />
+                    <RxChip key={quick.code} active={matchesQuick(quick)} label={quick.code} title={getFrequency(quick.code)?.fullForm} onClick={() => applyQuick(quick)} />
                 ))}
-                <Chip label="QDS" title={getFrequency("QDS")?.fullForm} active={schedule.gapHours === 6} onClick={applyInterval} />
+                <RxChip label="QDS" title={getFrequency("QDS")?.fullForm} active={schedule.gapHours === 6} onClick={applyInterval} />
             </div>
         </div>
-    );
-}
-
-function Chip({ label, title, active, onClick }: { label: string; title?: string; active?: boolean; onClick: () => void }) {
-    return (
-        <button
-            type="button"
-            onClick={onClick}
-            title={title}
-            className={cn(
-                "px-2.5 py-1 text-xs rounded-md border transition-colors cursor-pointer",
-                active ? "bg-emerald-600 border-emerald-600 text-white font-semibold" : "border-slate-200 text-slate-500 hover:bg-slate-50",
-            )}
-        >
-            {label}
-        </button>
     );
 }
 
@@ -150,7 +139,7 @@ function TimingButton({ label, active, onClick }: { label: string; active: boole
             type="button"
             onClick={onClick}
             className={cn(
-                "px-3 py-1.5 text-[11px] font-bold rounded-md transition-all cursor-pointer",
+                "min-h-10 sm:min-h-0 px-3 py-1.5 text-[11px] font-bold rounded-md transition-all cursor-pointer select-none",
                 active ? "bg-white text-emerald-600 shadow-sm" : "text-slate-400 hover:text-slate-600",
             )}
         >
@@ -165,8 +154,9 @@ function MealCell({ label, value, onClick }: { label: string; value?: number; on
         <button
             type="button"
             onClick={onClick}
+            aria-label={`${label} dose: ${formatCount(value)}`}
             className={cn(
-                "flex flex-col items-center justify-center gap-0.5 py-2 rounded-lg border transition-colors cursor-pointer",
+                "flex flex-col items-center justify-center gap-0.5 py-3 sm:py-2 rounded-lg border transition-colors cursor-pointer select-none",
                 active ? "bg-white border-emerald-300 shadow-sm" : "bg-slate-100/60 border-slate-200 hover:bg-white",
             )}
         >

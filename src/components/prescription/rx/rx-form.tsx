@@ -6,7 +6,7 @@ import Combobox, { type ComboboxOption } from "./combobox";
 import FrequencyPicker from "./frequency-picker";
 import DurationInput from "./duration-input";
 import InstructionsInput from "./instructions-input";
-import { cn } from "@/lib/utils";
+import RxChip from "./rx-chip";
 import { DILUENT_UNITS, INJECTION_ROUTES, ROUTES, type RxOption } from "@/constants/prescription";
 import { getSiteOptions } from "@/lib/rx-format";
 import type { MedicineCategory } from "@/lib/dosage-form";
@@ -76,19 +76,12 @@ export default function RxForm({ medicine, config, onChange }: RxFormProps) {
                 <RxField label="Meal timing" icon={<Utensils size={12} />}>
                     <div className="flex flex-wrap gap-1.5">
                         {TIMING_CHIPS.map(option => (
-                            <button
+                            <RxChip
                                 key={option.value}
-                                type="button"
+                                label={option.label}
+                                active={schedule.timing === option.value}
                                 onClick={() => setSchedule({ ...schedule, timing: option.value })}
-                                className={cn(
-                                    "px-2.5 py-1 text-xs rounded-md border transition-colors cursor-pointer",
-                                    schedule.timing === option.value
-                                        ? "bg-emerald-600 border-emerald-600 text-white font-semibold"
-                                        : "border-slate-200 text-slate-500 hover:bg-slate-50",
-                                )}
-                            >
-                                {option.label}
-                            </button>
+                            />
                         ))}
                     </div>
                 </RxField>
@@ -118,7 +111,9 @@ function DiluentInput({ value, onChange }: { value?: MedicineDose; onChange: (di
                     value={amount}
                     onChange={event => onChange({ amount: event.target.value, unit })}
                     placeholder="2.5"
-                    className="h-10 w-20 text-center text-base sm:text-sm"
+                    inputMode="decimal"
+                    aria-label="Dilution volume"
+                    className="h-11 sm:h-10 w-20 text-center text-base sm:text-sm"
                 />
                 <div className="flex-1">
                     <Combobox value={unit} onChange={nextUnit => onChange({ amount, unit: nextUnit })} options={toComboOptions(DILUENT_UNITS)} placeholder="ml" allowCustom />
@@ -126,28 +121,15 @@ function DiluentInput({ value, onChange }: { value?: MedicineDose; onChange: (di
             </div>
             <div className="flex flex-wrap gap-1.5">
                 {DILUENT_PRESETS.map(preset => (
-                    <button
+                    <RxChip
                         key={preset}
-                        type="button"
+                        label={`${preset} ml`}
+                        tone="soft"
+                        active={amount === preset}
                         onClick={() => onChange({ amount: preset, unit })}
-                        className={cn(
-                            "px-2.5 py-1 text-xs rounded-md border transition-colors cursor-pointer",
-                            amount === preset ? "bg-emerald-50 border-emerald-200 text-emerald-700 font-semibold" : "border-slate-200 text-slate-500 hover:bg-slate-50",
-                        )}
-                    >
-                        {preset} ml
-                    </button>
+                    />
                 ))}
-                <button
-                    type="button"
-                    onClick={() => onChange({ amount: "", unit })}
-                    className={cn(
-                        "px-2.5 py-1 text-xs rounded-md border transition-colors cursor-pointer",
-                        !amount ? "bg-slate-200 border-slate-300 text-slate-600 font-semibold" : "border-slate-200 text-slate-400 hover:bg-slate-50",
-                    )}
-                >
-                    Not diluted
-                </button>
+                <RxChip label="Not diluted" tone="muted" active={!amount} onClick={() => onChange({ amount: "", unit })} />
             </div>
         </div>
     );

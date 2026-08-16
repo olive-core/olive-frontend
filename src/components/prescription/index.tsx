@@ -171,7 +171,7 @@ export default function Prescription({ onGenerate, onCancel, hasBeenGenerated }:
                 <Button
                     onClick={() => confirmMutation.mutate()}
                     isLoading={confirmMutation.isPending}
-                    className="px-8 font-bold shadow-md"
+                    className="h-12 w-full px-8 font-bold shadow-md sm:h-9 sm:w-auto"
                 >
                     Save &amp; Print
                 </Button>
@@ -243,7 +243,7 @@ export default function Prescription({ onGenerate, onCancel, hasBeenGenerated }:
                             <Button
                                 onClick={() => confirmMutation.mutate()}
                                 isLoading={confirmMutation.isPending}
-                                className="px-8 font-bold shadow-md"
+                                className="h-12 w-full px-8 font-bold shadow-md sm:h-9 sm:w-auto"
                             >
                                 Save consultation
                             </Button>

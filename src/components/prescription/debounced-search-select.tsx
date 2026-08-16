@@ -57,15 +57,16 @@ export default function DebouncedSearchSelect({
         staleTime: 1000 * 60,
     });
 
-    // Close on outside click
+    // Close on outside tap. `pointerdown` rather than `mousedown`, because iOS Safari fires
+    // no mouse event when a tap lands on plain, non-interactive markup.
     useEffect(() => {
-        const handleClickOutside = (e: MouseEvent) => {
+        const handlePointerOutside = (e: PointerEvent) => {
             if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
                 setIsOpen(false);
             }
         };
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
+        document.addEventListener("pointerdown", handlePointerOutside);
+        return () => document.removeEventListener("pointerdown", handlePointerOutside);
     }, []);
 
     // Reset highlight and the visible window whenever the result set changes
@@ -143,23 +144,31 @@ export default function DebouncedSearchSelect({
                 onFocus={() => setIsOpen(true)}
                 onKeyDown={handleKeyDown}
                 placeholder={placeholder}
-                className="w-full h-10 px-3 text-sm border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                // A phone keyboard would otherwise capitalise and "correct" brand names into
+                // ordinary words. text-base below `sm` keeps iOS Safari from zooming the page in.
+                autoComplete="off"
+                autoCorrect="off"
+                autoCapitalize="off"
+                spellCheck={false}
+                enterKeyHint="search"
+                className="w-full h-11 sm:h-10 px-3 text-base sm:text-sm border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
 
             {isOpen && (
                 <div
                     onScroll={handleScroll}
                     // Roughly ten results, since picking a brand means scanning several at once.
-                    // The vh cap matters because this list only ever opens downwards: on a short
-                    // viewport, or with the input low on screen, a fixed height would run off the page.
-                    className="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-[min(22rem,60vh)] overflow-auto"
+                    // The viewport cap matters because this list only ever opens downwards: on a
+                    // phone, or with the input low on screen, a fixed height would run off the page.
+                    // `dvh` so an open keyboard shortens the list instead of hiding its tail.
+                    className="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-[min(22rem,50dvh)] overflow-auto overscroll-contain"
                 >
 
 
                     {inputValue?.length > 0 && (
                         <div
-                            onMouseDown={() => handleAdd()}
-                            className={`px-3 py-2 text-sm cursor-pointer hover:bg-gray-100 italic text-blue-600`}
+                            onClick={() => handleAdd()}
+                            className={`flex min-h-11 sm:min-h-0 items-center px-3 py-3 sm:py-2 text-base sm:text-sm cursor-pointer hover:bg-gray-100 italic text-blue-600`}
                         >
                             Add "{inputValue}"
                         </div>
@@ -174,10 +183,12 @@ export default function DebouncedSearchSelect({
                     )}
 
                     {visibleOptions.map((option, index) => (
+                        // `onClick`, not `onMouseDown`: a finger that starts on a result and
+                        // drags to scroll the list must scroll it, not pick that medicine.
                         <div
                             key={index}
-                            onMouseDown={() => handleSelect(option)}
-                            className={`px-3 py-2 text-sm cursor-pointer ${index === highlightIndex
+                            onClick={() => handleSelect(option)}
+                            className={`min-h-11 sm:min-h-0 px-3 py-3 sm:py-2 text-base sm:text-sm cursor-pointer ${index === highlightIndex
                                 ? "bg-blue-100 text-blue-700"
                                 : "hover:bg-gray-100 text-gray-700"
                                 }`}

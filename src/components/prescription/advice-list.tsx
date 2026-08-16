@@ -72,7 +72,7 @@ export default function AdviceList({ value, onChange }: AdviceListProps) {
                     <Button
                         variant="ghost"
                         size="sm"
-                        className="h-7 text-xs font-bold text-emerald-600 hover:bg-emerald-100/50"
+                        className="h-11 text-xs font-bold text-emerald-600 hover:bg-emerald-100/50 sm:h-7"
                         onClick={handleAdd}
                     >
                         <PlusCircle className="size-3 mr-1" /> Add
@@ -98,55 +98,59 @@ export default function AdviceList({ value, onChange }: AdviceListProps) {
                         >
                             <span className="text-slate-400 mt-1">•</span>
 
-                            <div className="flex-1">
-                                {isEditing ? (
-                                    <textarea
-                                        value={tempValue}
-                                        onChange={(e) => setTempValue(e.target.value)}
-                                        className="w-full text-sm border rounded-md p-2 outline-none focus:ring-2 focus:ring-emerald-500"
-                                        rows={2}
-                                        autoFocus
-                                    />
-                                ) : (
-                                    <p className="text-sm text-slate-700">{item}</p>
-                                )}
-                            </div>
+                            {/* The actions sit beside the advice on a desktop and under it on a
+                                phone, where a shared row leaves neither enough width. */}
+                            <div className="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row sm:items-start">
+                                <div className="min-w-0 flex-1">
+                                    {isEditing ? (
+                                        <textarea
+                                            value={tempValue}
+                                            onChange={(e) => setTempValue(e.target.value)}
+                                            className="w-full text-base sm:text-sm border rounded-md p-2 outline-none focus:ring-2 focus:ring-emerald-500"
+                                            rows={2}
+                                            autoFocus
+                                        />
+                                    ) : (
+                                        <p className="text-sm text-slate-700">{item}</p>
+                                    )}
+                                </div>
 
-                            <div className="flex gap-1">
-                                {isEditing ? (
-                                    <>
-                                        <Button size="sm" className="h-7 text-xs px-3" onClick={handleSave}>
-                                            Save
-                                        </Button>
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            className="h-7 text-xs px-3 text-slate-500"
-                                            onClick={handleCancel}
-                                        >
-                                            Cancel
-                                        </Button>
-                                    </>
-                                ) : (
-                                    <>
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            className="h-7 text-xs px-2 text-slate-500"
-                                            onClick={() => handleEdit(index)}
-                                        >
-                                            Edit
-                                        </Button>
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            className="h-7 text-xs px-2 text-rose-500 hover:bg-rose-50 hover:text-rose-600"
-                                            onClick={() => handleDelete(index)}
-                                        >
-                                            Delete
-                                        </Button>
-                                    </>
-                                )}
+                                <div className="flex shrink-0 justify-end gap-1">
+                                    {isEditing ? (
+                                        <>
+                                            <Button size="sm" className="h-11 text-xs px-4 sm:h-7 sm:px-3" onClick={handleSave}>
+                                                Save
+                                            </Button>
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                className="h-11 text-xs px-4 text-slate-500 sm:h-7 sm:px-3"
+                                                onClick={handleCancel}
+                                            >
+                                                Cancel
+                                            </Button>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                className="h-11 text-xs px-4 text-slate-500 sm:h-7 sm:px-2"
+                                                onClick={() => handleEdit(index)}
+                                            >
+                                                Edit
+                                            </Button>
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                className="h-11 text-xs px-4 text-rose-500 hover:bg-rose-50 hover:text-rose-600 sm:h-7 sm:px-2"
+                                                onClick={() => handleDelete(index)}
+                                            >
+                                                Delete
+                                            </Button>
+                                        </>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     );

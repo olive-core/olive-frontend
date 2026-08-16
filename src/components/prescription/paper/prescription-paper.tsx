@@ -14,7 +14,11 @@ interface PrescriptionPaperProps {
 
 export default function PrescriptionPaper({ header, patientStrip, vitalsBar, leftColumn, rightColumn, paperFooter, footer }: PrescriptionPaperProps) {
     return (
-        <div className="container rounded-xl border flex flex-col mt-4 mb-12 overflow-hidden">
+        // overflow-visible below `sm`: an `overflow-hidden` ancestor makes itself the scroll
+        // container for anything sticky inside it, which pinned the action bar to the bottom
+        // of the paper instead of the screen. Nothing here reaches the rounded corners — the
+        // action bar rounds its own — so clipping is only needed from `sm` up.
+        <div className="container rounded-xl border flex flex-col mt-4 mb-12 overflow-visible sm:overflow-hidden">
             <div className="m-3 sm:m-4">
                 {header}
                 {patientStrip}
@@ -37,11 +41,11 @@ export default function PrescriptionPaper({ header, patientStrip, vitalsBar, lef
             </div>
 
             {footer && (
-                <div className="sticky bottom-0 z-20 flex items-center justify-end gap-4 rounded-b-xl border-t bg-white/85 px-4 py-3 backdrop-blur sm:justify-between print:hidden">
+                <div className="sticky bottom-0 z-20 flex items-center justify-end gap-4 rounded-b-xl border-t bg-white/85 px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] backdrop-blur sm:justify-between print:hidden">
                     <span className="hidden text-xs text-slate-400 sm:block">
                         Review everything, then save &amp; print.
                     </span>
-                    <div className="flex flex-wrap items-center justify-end gap-3">{footer}</div>
+                    <div className="flex w-full flex-wrap items-center justify-end gap-3 sm:w-auto">{footer}</div>
                 </div>
             )}
         </div>

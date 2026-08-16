@@ -111,7 +111,13 @@ export const MedicineContainer = () => {
                 </div>
             </div>
 
-            <Button variant={"outline"} className="flex items-center gap-2 mt-4 cursor-pointer text-emerald-600 hover:text-emerald-700" onClick={handleAdd}>
+            {/* Full width on a phone: adding a medicine is the most-used action on the page,
+                and a thumb reaches the middle of the screen more easily than its left edge. */}
+            <Button
+                variant={"outline"}
+                className="mt-4 flex h-11 w-full items-center gap-2 cursor-pointer text-emerald-600 hover:text-emerald-700 sm:h-9 sm:w-auto"
+                onClick={handleAdd}
+            >
                 <PlusCircleIcon /> Add Medicine
             </Button>
         </div>

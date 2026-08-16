@@ -56,7 +56,7 @@ export default function Combobox({
                     role="combobox"
                     aria-expanded={open}
                     className={cn(
-                        "flex h-10 w-full items-center justify-between gap-2 rounded-md border border-input bg-transparent px-3 text-base sm:text-sm shadow-xs outline-none transition-colors hover:bg-slate-50 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
+                        "flex h-11 sm:h-10 w-full items-center justify-between gap-2 rounded-md border border-input bg-transparent px-3 text-base sm:text-sm shadow-xs outline-none transition-colors hover:bg-slate-50 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
                         !selected && !value && "text-muted-foreground",
                     )}
                 >
@@ -67,7 +67,8 @@ export default function Combobox({
             <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
                 <Command>
                     <CommandInput value={query} onValueChange={setQuery} placeholder={searchPlaceholder} />
-                    <CommandList>
+                    {/* dvh, so an open keyboard shortens the list rather than hiding its tail. */}
+                    <CommandList className="max-h-[min(18rem,45dvh)] overscroll-contain">
                         <CommandEmpty>No match.</CommandEmpty>
                         <CommandGroup>
                             {options.map(option => (

@@ -1,5 +1,7 @@
 import { InfoIcon } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../../ui/tooltip";
+import { Popover, PopoverContent, PopoverTrigger } from "../../ui/popover";
+import { useMediaQuery } from "@/hooks/use-media-query";
 
 export interface SectionItemProps {
     name:        string;
@@ -51,23 +53,56 @@ function ConfidenceBar({ confidence }: { confidence: number }) {
     );
 }
 
+const REASONING_BODY = "max-w-[250px] bg-slate-800 text-white p-2 rounded shadow-lg text-[12px] leading-relaxed";
+
+function ReasoningBody({ text }: { text: string }) {
+    return (
+        <p>
+            <span className="text-emerald-400 font-semibold mr-1">Reasoning:</span>
+            {text}
+        </p>
+    );
+}
+
+function ReasoningTrigger({ touch }: { touch?: boolean }) {
+    return (
+        <button
+            type="button"
+            aria-label="Why this was suggested"
+            className={`text-slate-400 hover:text-emerald-600 transition-colors flex items-center justify-center ${touch ? "size-9 cursor-pointer" : "cursor-help"}`}
+        >
+            <InfoIcon className="h-3.5 w-3.5" />
+        </button>
+    );
+}
+
+// A touch screen has no hover, and Radix tooltips deliberately never open from a tap — so
+// on a phone the AI's reasoning was written but unreadable. There it becomes a tap-to-open
+// popover instead; a mouse keeps the hover tooltip.
 function ReasoningTooltip({ text }: { text: string }) {
+    const isTouch = useMediaQuery("(pointer: coarse)");
+
+    if (isTouch) {
+        return (
+            <Popover>
+                <PopoverTrigger asChild>
+                    <ReasoningTrigger touch />
+                </PopoverTrigger>
+                <PopoverContent side="top" align="start" className={`${REASONING_BODY} w-auto border-0`}>
+                    <ReasoningBody text={text} />
+                </PopoverContent>
+            </Popover>
+        );
+    }
+
     return (
         <TooltipProvider>
             <Tooltip delayDuration={200}>
                 <TooltipTrigger asChild>
-                    <button
-                        type="button"
-                        className="text-slate-400 hover:text-emerald-600 transition-colors flex items-center justify-center cursor-help"
-                    >
-                        <InfoIcon className="h-3.5 w-3.5" />
-                    </button>
+                    <ReasoningTrigger />
                 </TooltipTrigger>
-                <TooltipContent side="top" className="max-w-[250px] bg-slate-800 text-white p-2 rounded shadow-lg text-[12px] leading-relaxed">
-                    <p>
-                        <span className="text-emerald-400 font-semibold mr-1">Reasoning:</span>
-                        {text}
-                    </p>
+                <TooltipContent side="top" className={REASONING_BODY}>
+                    <ReasoningBody text={text} />
                 </TooltipContent>
             </Tooltip>
         </TooltipProvider>

@@ -49,7 +49,7 @@ function ImageTile({
                     type="button"
                     onClick={onRemove}
                     aria-label="Remove photo"
-                    className="absolute top-1 right-1 flex size-7 items-center justify-center rounded-full bg-slate-900/70 text-white transition-colors hover:bg-red-600"
+                    className="absolute top-1 right-1 flex size-9 sm:size-7 items-center justify-center rounded-full bg-slate-900/70 text-white transition-colors hover:bg-red-600"
                 >
                     <XIcon className="size-3.5" />
                 </button>
@@ -81,7 +81,7 @@ function PickerButton({
         <button
             type="button"
             onClick={onClick}
-            className={`flex h-9 items-center gap-1.5 rounded-lg border border-dashed border-slate-300 px-3 text-xs font-medium text-slate-700 transition-colors hover:border-emerald-400 hover:text-emerald-700 ${className ?? ""}`}
+            className={`flex h-11 sm:h-9 items-center gap-1.5 rounded-lg border border-dashed border-slate-300 px-3 text-xs font-medium text-slate-700 transition-colors hover:border-emerald-400 hover:text-emerald-700 ${className ?? ""}`}
         >
             {icon}
             {label}
