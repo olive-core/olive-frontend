@@ -10,7 +10,6 @@ import NewPatient from "./patient/new-patient";
 import PatientPicker from "@/components/shared/patient-picker";
 import type { ShowContentStatus } from "@/types/patient";
 import { useAuthStore } from "@/stores/auth-store";
-import { useStartConsultation } from "@/hooks/use-start-consultation";
 import { withDoctorPrefix } from "@/lib/clinician";
 import DoctorQueuePanel from "./queue/doctor-queue-panel";
 
@@ -23,7 +22,6 @@ export default function WelcomeScreen() {
     const clinician = useAuthStore(state => state.clinician);
     const clinicianName = useAuthStore(state => state.accounts.clinicianName);
     const doctorName = withDoctorPrefix(clinician?.name ?? clinicianName);
-    const { start, startingId, graceDialog } = useStartConsultation();
 
     const [showContent, setShowContent] = useState<ShowContentStatus>({ status: "NOTHING" });
     const [phoneNumber, setPhoneNumber] = useState<string[]>(["0", "1"].concat(Array(9).fill("")));
@@ -117,9 +115,8 @@ export default function WelcomeScreen() {
                                     return (
                                         <PatientPicker
                                             candidates={showContent.candidates}
-                                            actionLabel="Start Consultation"
-                                            onAction={(patient) => start(patient.patient_id, "+88" + phoneNumber.join("").trim())}
-                                            busyPatientId={startingId}
+                                            actionLabel="Select patient"
+                                            onAction={(patient) => setShowContent({ status: "PATIENT_INFO", userId: patient.patient_id })}
                                             onSelect={(patient) => setShowContent({ status: "PATIENT_INFO", userId: patient.patient_id })}
                                             onNew={() => setShowContent({ status: "PATIENT_CREATE", initialValues: { name: "", age: "", sex: "male" } })}
                                         />
@@ -133,6 +130,7 @@ export default function WelcomeScreen() {
                                             age={showContent.initialValues?.age}
                                             sex={showContent.initialValues?.sex}
                                             userId={showContent.userId}
+                                            onExistingPatientReady={(patientId) => setShowContent({ status: "PATIENT_INFO", userId: patientId })}
                                         />
                                     );
 
@@ -153,8 +151,6 @@ export default function WelcomeScreen() {
                     </motion.div>
                 )}
             </AnimatePresence>
-
-            {graceDialog}
         </div>
     )
 }

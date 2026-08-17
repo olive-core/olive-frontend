@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { AlertCircleIcon, ArrowLeftIcon, PrinterIcon } from 'lucide-react'
+import { AlertCircleIcon, ArrowLeftIcon, ChevronLeftIcon, ChevronRightIcon, PrinterIcon } from 'lucide-react'
 import { useState } from 'react'
 import toast from 'react-hot-toast'
 
@@ -8,12 +8,16 @@ import api from '@/lib/axios'
 import { useTargetedPrint } from '@/hooks/use-targeted-print'
 import { useNoteImageUpload } from '@/hooks/use-note-image-upload'
 import { useStableCallback } from '@/hooks/use-stable-callback'
+import { useStartConsultation } from '@/hooks/use-start-consultation'
 import { fetchNoteImages, noteImagesForSubmit } from '@/lib/note-images'
 import { cn } from '@/lib/utils'
+import { parseSoapSections } from '@/lib/soap-notes'
 import { Button } from '@/components/ui/button'
 import type { ConsultationDetail } from '@/types/consultation'
 import type { NoteImageType } from '@/types/prescription'
 import type { PatientInfoType } from '@/types/patient'
+import ConsultationLinkMark from '@/components/consultation-start/consultation-link-mark'
+import FollowUpConfirmDialog from '@/components/consultation-start/follow-up-confirm-dialog'
 import PrescriptionReadView, {
   type ClinicianProfile,
 } from '@/components/prescription/paper/read-view'
@@ -27,6 +31,9 @@ import DocumentSwitcher, {
 } from '@/components/prescription/document-switcher'
 
 export const Route = createFileRoute('/doctor/consultations/$prescriptionId')({
+  validateSearch: (search: Record<string, unknown>) => ({
+    document: search.document === 'notes' ? 'notes' as const : undefined,
+  }),
   component: ConsultationDetailPage,
 })
 
@@ -65,7 +72,14 @@ function usePatient(patientId?: string) {
 function useSaveSummary(prescriptionId: string) {
   return useMutation({
     mutationFn: async (summary: string) => {
-      await api.put(`/prescription/${prescriptionId}`, { summary })
+      const sections = parseSoapSections(summary)
+      const section = (key: string) => sections?.find((item) => item.key === key)?.text ?? ''
+      await api.put(`/prescription/${prescriptionId}`, {
+        summary,
+        clinical_note: sections
+          ? { subjective: section('S'), objective: section('O'), assessment: section('A') }
+          : null,
+      })
     },
     onSuccess: () => toast.success('Summary saved'),
     onError:   () => toast.error('Failed to save summary'),
@@ -104,6 +118,7 @@ interface ClinicalNotesTabProps {
   onAddImages:     (files: File[]) => void
   onRemoveImage:   (image: NoteImageType) => void
   uploadingImages: number
+  historyNavigation?: React.ReactNode
 }
 
 function ClinicalNotesTab({
@@ -119,9 +134,11 @@ function ClinicalNotesTab({
   onAddImages,
   onRemoveImage,
   uploadingImages,
+  historyNavigation,
 }: ClinicalNotesTabProps) {
   return (
     <>
+      {historyNavigation}
       <ClinicalNotesPanel
         notes={notes}
         safetyNet={safetyNet}
@@ -149,6 +166,39 @@ function ClinicalNotesTab({
   )
 }
 
+function NoteHistoryNavigation({
+  previousPrescriptionId,
+  nextPrescriptionId,
+}: {
+  previousPrescriptionId?: string | null
+  nextPrescriptionId?: string | null
+}) {
+  const navigate = useNavigate()
+  if (!previousPrescriptionId && !nextPrescriptionId) return null
+
+  const openNote = (prescriptionId: string) => navigate({
+    to: '/doctor/consultations/$prescriptionId',
+    params: { prescriptionId },
+    search: { document: 'notes' },
+  })
+
+  return (
+    <div className="mx-auto flex w-full max-w-3xl items-center justify-between px-4">
+      <Button variant="outline" size="sm" disabled={!previousPrescriptionId} onClick={() => previousPrescriptionId && openNote(previousPrescriptionId)}>
+        <ChevronLeftIcon className="size-4 mr-1" />
+        Previous note
+      </Button>
+      <span className="hidden items-center gap-1.5 text-xs font-medium text-blue-700 sm:inline-flex">
+        <ConsultationLinkMark className="scale-75" /> Follow-up series
+      </span>
+      <Button variant="outline" size="sm" disabled={!nextPrescriptionId} onClick={() => nextPrescriptionId && openNote(nextPrescriptionId)}>
+        Next note
+        <ChevronRightIcon className="size-4 ml-1" />
+      </Button>
+    </div>
+  )
+}
+
 function BackButton() {
   const navigate = useNavigate()
   return (
@@ -173,11 +223,22 @@ function PrintButton({ onPrint, disabled }: { onPrint: () => void; disabled?: bo
   )
 }
 
-function DetailToolbar({ onPrint, printDisabled }: { onPrint?: () => void; printDisabled?: boolean }) {
+function DetailToolbar({
+  onPrint,
+  printDisabled,
+  followUpAction,
+}: {
+  onPrint?: () => void
+  printDisabled?: boolean
+  followUpAction?: React.ReactNode
+}) {
   return (
     <div className="container mx-auto flex items-center justify-between mt-4 mb-6 print:hidden">
       <BackButton />
-      {onPrint && <PrintButton onPrint={onPrint} disabled={printDisabled} />}
+      <div className="flex items-center gap-2">
+        {followUpAction}
+        {onPrint && <PrintButton onPrint={onPrint} disabled={printDisabled} />}
+      </div>
     </div>
   )
 }
@@ -203,13 +264,22 @@ function DetailError() {
 
 function ConsultationDetailPage() {
   const { prescriptionId } = Route.useParams()
+  return <ConsultationDetailContent key={prescriptionId} prescriptionId={prescriptionId} />
+}
+
+function ConsultationDetailContent({ prescriptionId }: { prescriptionId: string }) {
+  const search = Route.useSearch()
 
   const { data: consultation, isLoading, isError } = useConsultation(prescriptionId)
   const { data: clinician } = useClinicianProfile(consultation?.clinician_id)
   const { data: patient }   = usePatient(consultation?.patient_id)
 
-  const [activeDocument, setActiveDocument] = useState<PrescriptionDocument>('prescription')
+  const { start, startingSourceSessionId, graceDialog } = useStartConsultation()
+  const [activeDocument, setActiveDocument] = useState<PrescriptionDocument>(
+    search.document === 'notes' ? 'notes' : 'prescription'
+  )
   const [notesDraft, setNotesDraft] = useState<string | null>(null)
+  const [followUpConfirmOpen, setFollowUpConfirmOpen] = useState(false)
   const saveSummary = useSaveSummary(prescriptionId)
 
   // Photos save the moment they are added or removed — unlike the note text, there is
@@ -283,6 +353,12 @@ function ConsultationDetailPage() {
       onAddImages={noteImageUpload.addImages}
       onRemoveImage={noteImageUpload.removeImage}
       uploadingImages={noteImageUpload.uploadingCount}
+      historyNavigation={
+        <NoteHistoryNavigation
+          previousPrescriptionId={consultation.previous_prescription_id}
+          nextPrescriptionId={consultation.next_prescription_id}
+        />
+      }
     />
   )
 
@@ -309,7 +385,20 @@ function ConsultationDetailPage() {
       </div>
 
       <div className="print:hidden">
-        <DetailToolbar onPrint={() => requestPrint(hasPrescription ? 'prescription' : 'note')} />
+        <DetailToolbar
+          onPrint={() => requestPrint(hasPrescription ? 'prescription' : 'note')}
+          followUpAction={consultation.session_id && !consultation.has_follow_up ? (
+            <Button
+              variant="outline"
+              className="gap-2 border-blue-200 text-blue-700 hover:bg-blue-50 hover:text-blue-800"
+              isLoading={startingSourceSessionId === consultation.session_id}
+              disabled={!!startingSourceSessionId}
+              onClick={() => setFollowUpConfirmOpen(true)}
+            >
+              <ConsultationLinkMark /> Follow up
+            </Button>
+          ) : undefined}
+        />
         {hasPrescription ? (
           <DocumentSwitcher
             value={activeDocument}
@@ -328,6 +417,22 @@ function ConsultationDetailPage() {
           clinicalNotesTab
         )}
       </div>
+      <FollowUpConfirmDialog
+        open={followUpConfirmOpen}
+        onOpenChange={setFollowUpConfirmOpen}
+        patientName={consultation.patient_name}
+        sourceDate={consultation.created_at}
+        sourceSummary={
+          consultation.prescription_data?.chief_complaints?.[0]?.name_text
+          || consultation.prescription_data?.diagnoses?.[0]?.name_text
+        }
+        isStarting={startingSourceSessionId === consultation.session_id}
+        onConfirm={() => {
+          if (!consultation.session_id) return
+          start(consultation.patient_id, undefined, consultation.session_id)
+        }}
+      />
+      {graceDialog}
     </>
   )
 }

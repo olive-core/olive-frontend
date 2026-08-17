@@ -20,12 +20,26 @@ const RETRY_DELAY_MS = 500;
 
 export type ArisePartialPayload = Pick<
     PrescriptionResponseType,
-    'chief_complaints' | 'history' | 'summary' | 'safety_net' | 'diagnoses' | 'vitals' | 'follow_up'
+    | 'chief_complaints'
+    | 'history'
+    | 'summary'
+    | 'safety_net'
+    | 'diagnoses'
+    | 'vitals'
+    | 'vital_sources'
+    | 'follow_up'
 >;
 
 export type AriseScribePayload = Pick<
     PrescriptionResponseType,
-    'chief_complaints' | 'history' | 'summary' | 'safety_net' | 'vitals' | 'follow_up' | 'advice'
+    | 'chief_complaints'
+    | 'history'
+    | 'summary'
+    | 'safety_net'
+    | 'vitals'
+    | 'vital_sources'
+    | 'follow_up'
+    | 'advice'
 >;
 
 export type AriseDecidePayload = Pick<

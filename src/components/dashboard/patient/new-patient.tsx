@@ -39,9 +39,10 @@ interface NewPatientProps {
     age?: string;
     sex?: 'male' | 'female' | 'non_binary';
     userId?: string;
+    onExistingPatientReady?: (patientId: string) => void;
 }
 
-export default function NewPatient({ phone, name, age, sex, userId }: NewPatientProps) {
+export default function NewPatient({ phone, name, age, sex, userId, onExistingPatientReady }: NewPatientProps) {
 
     const navigate = useNavigate();
     const { userId: clinicianId } = useAuthStore();
@@ -109,8 +110,25 @@ export default function NewPatient({ phone, name, age, sex, userId }: NewPatient
         });
     }
 
-    const proceed = () =>
-        resolveAndStart(() => (userId ? updateExisting(form.getValues()) : createNew(form.getValues())));
+    const proceed = () => {
+        if (!userId) {
+            resolveAndStart(() => createNew(form.getValues()));
+            return;
+        }
+        resolveExisting(() => updateExisting(form.getValues()));
+    };
+
+    async function resolveExisting(resolvePatient: () => Promise<string>) {
+        setStarting(true);
+        try {
+            const patientId = await resolvePatient();
+            onExistingPatientReady?.(patientId);
+        } catch (error) {
+            handleError(error, "An error occurred while updating the patient.");
+        } finally {
+            setStarting(false);
+        }
+    }
 
     async function createNew(values: PatientFormValues): Promise<string> {
         const patient = await createPatient({
@@ -173,7 +191,10 @@ export default function NewPatient({ phone, name, age, sex, userId }: NewPatient
                 <DuplicateGate
                     matches={matches}
                     busy={starting}
-                    onLink={(patientId) => resolveAndStart(async () => { await linkPhone(patientId, fullPhone); return patientId; })}
+                    onLink={(patientId) => resolveExisting(async () => {
+                        await linkPhone(patientId, fullPhone);
+                        return patientId;
+                    })}
                     onCreateNew={() => setStep("review")}
                 />
                 {graceDialog}

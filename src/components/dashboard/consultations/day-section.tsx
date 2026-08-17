@@ -5,9 +5,11 @@ import { getDayLabel } from "./helpers";
 interface DaySectionProps {
     isoDate:       string;
     consultations: ClinicianConsultationItem[];
+    onFollowUp: (consultation: ClinicianConsultationItem) => void;
+    startingSourceSessionId?: string | null;
 }
 
-export default function DaySection({ isoDate, consultations }: DaySectionProps) {
+export default function DaySection({ isoDate, consultations, onFollowUp, startingSourceSessionId }: DaySectionProps) {
     return (
         <section className="space-y-4">
             <div className="flex items-baseline gap-3">
@@ -25,6 +27,8 @@ export default function DaySection({ isoDate, consultations }: DaySectionProps) 
                     <ConsultationCard
                         key={consultation.prescription_id}
                         consultation={consultation}
+                        onFollowUp={() => onFollowUp(consultation)}
+                        isStartingFollowUp={startingSourceSessionId === consultation.session_id}
                     />
                 ))}
             </div>

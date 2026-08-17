@@ -22,26 +22,41 @@ export function useStartConsultation() {
     const { guardStart, dialog: graceDialog } = useGraceGuard();
     const canStartConsultation = useConsultationStartGuard();
     const [startingId, setStartingId] = useState<string | null>(null);
+    const [startingSourceSessionId, setStartingSourceSessionId] = useState<string | null>(null);
 
     // contactPhone is the number that brought the patient in for this visit (already
     // in +88… form); it decides where the finished prescription is texted.
-    const start = (patientId: string, contactPhone?: string) => {
+    const start = (
+        patientId: string,
+        contactPhone?: string,
+        followUpOfSessionId?: string,
+    ) => {
         if (!canStartConsultation()) return;
         return guardStart(async () => {
             try {
                 setStartingId(patientId);
+                setStartingSourceSessionId(followUpOfSessionId ?? null);
                 const response = await api.post("/session", {
                     patient_id: patientId,
                     clinician_id: clinicianId,
                     ...(defaultChamberId ? { chamber_id: defaultChamberId } : {}),
                     ...(contactPhone ? { contact_phone: contactPhone } : {}),
+                    ...(followUpOfSessionId
+                        ? { follow_up_of_session_id: followUpOfSessionId }
+                        : {}),
                 });
                 queryClient.invalidateQueries({ queryKey: ["subscription"] });
+                queryClient.invalidateQueries({ queryKey: ["patient-consultations", patientId] });
+                queryClient.invalidateQueries({ queryKey: ["clinician-consultations"] });
                 navigate({
                     to: "/doctor/consultation/$userId/$consultationId",
                     params: { userId: patientId, consultationId: response.data.session_id },
                 });
             } catch (error) {
+                if (followUpOfSessionId) {
+                    queryClient.invalidateQueries({ queryKey: ["patient-consultations", patientId] });
+                    queryClient.invalidateQueries({ queryKey: ["clinician-consultations"] });
+                }
                 if (isSubscriptionBlocked(error)) {
                     showSubscriptionGate(getSubscriptionStatusFromError(error));
                     return;
@@ -49,9 +64,10 @@ export function useStartConsultation() {
                 handleError(error, "An error occurred while starting the consultation.");
             } finally {
                 setStartingId(null);
+                setStartingSourceSessionId(null);
             }
         });
     };
 
-    return { start, startingId, graceDialog };
+    return { start, startingId, startingSourceSessionId, graceDialog };
 }

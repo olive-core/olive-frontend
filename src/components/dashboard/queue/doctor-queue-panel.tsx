@@ -19,6 +19,12 @@ import { chamberLabel, chamberRoom, type QueueEntry } from "@/types/attendant-qu
 import { useActiveChamberStore, useLastChamberId } from "@/stores/active-chamber-store";
 import { useAuthStore } from "@/stores/auth-store";
 import { cn, handleError } from "@/lib/utils";
+import {
+    eligibleFollowUpSources,
+    usePatientConsultations,
+} from "@/hooks/use-patient-consultations";
+import ConsultationModeActions from "@/components/consultation-start/consultation-mode-actions";
+import FollowUpSourcePicker from "@/components/consultation-start/follow-up-source-picker";
 
 interface DoctorQueuePanelProps {
     /** Reports readiness + whether a patient is waiting, so the parent can hold
@@ -46,15 +52,18 @@ export default function DoctorQueuePanel({ onStateChange }: DoctorQueuePanelProp
     const [chamberId, setChamberId] = useState<string | null>(null);
     const canStartConsultation = useConsultationStartGuard();
     const [starting, setStarting] = useState(false);
+    const [startingSourceSessionId, setStartingSourceSessionId] = useState<string | null>(null);
+    const [modeOpen, setModeOpen] = useState(false);
+    const [sourcePickerOpen, setSourcePickerOpen] = useState(false);
     const [pendingRemove, setPendingRemove] = useState<QueueEntry | null>(null);
 
     // The panel's selection is the doctor's "I'm sitting here now" — remember it so
     // walk-in sessions started from this page print on the same chamber's pad without
     // the doctor picking again on the prescription screen.
-    const selectChamber = (nextChamberId: string) => {
+    const selectChamber = useCallback((nextChamberId: string) => {
         setChamberId(nextChamberId);
         if (userId) setLastChamber(userId, nextChamberId);
-    };
+    }, [setLastChamber, userId]);
 
     // Default to the chamber that actually has patients today, then the remembered
     // one, so a doctor with several chambers lands on the right pad without a click.
@@ -65,7 +74,7 @@ export default function DoctorQueuePanel({ onStateChange }: DoctorQueuePanelProp
     )?.chamber_id;
     useEffect(() => {
         if (!chamberId && preferredChamberId) selectChamber(preferredChamberId);
-    }, [preferredChamberId, chamberId]);
+    }, [preferredChamberId, chamberId, selectChamber]);
 
     const queueQuery = useQuery({
         queryKey: ["queue", chamberId],
@@ -81,6 +90,8 @@ export default function DoctorQueuePanel({ onStateChange }: DoctorQueuePanelProp
     const inside = entries.find((entry) => entry.status === "in_room");
     const waiting = entries.filter((entry) => entry.status === "waiting");
     const next = waiting[0];
+    const patientConsultationsQuery = usePatientConsultations(next?.patient_id);
+    const followUpSources = eligibleFollowUpSources(patientConsultationsQuery.data ?? []);
 
     const ready = !chambersQuery.isLoading && (chambers.length === 0 || queueQuery.isSuccess);
     useEffect(() => {
@@ -113,11 +124,12 @@ export default function DoctorQueuePanel({ onStateChange }: DoctorQueuePanelProp
         reorderMutation.mutate(ids);
     };
 
-    const start = async (entry: QueueEntry) => {
+    const start = async (entry: QueueEntry, followUpOfSessionId?: string) => {
         if (!canStartConsultation()) return;
         setStarting(true);
+        setStartingSourceSessionId(followUpOfSessionId ?? null);
         try {
-            const { session_id } = await startConsultation(entry.queue_entry_id);
+            const { session_id } = await startConsultation(entry.queue_entry_id, followUpOfSessionId);
             // Remember the chamber so later walk-ins default to today's pad.
             if (userId) setLastChamber(userId, entry.chamber_id);
             navigate({
@@ -128,7 +140,24 @@ export default function DoctorQueuePanel({ onStateChange }: DoctorQueuePanelProp
             handleError(error, "Could not start consultation");
         } finally {
             setStarting(false);
+            setStartingSourceSessionId(null);
         }
+    };
+
+    const chooseMode = (entry: QueueEntry) => {
+        if (patientConsultationsQuery.isError) {
+            handleError(
+                patientConsultationsQuery.error,
+                "Could not check previous consultations. Please try again",
+            );
+            patientConsultationsQuery.refetch();
+            return;
+        }
+        if (followUpSources.length === 0) {
+            start(entry);
+            return;
+        }
+        setModeOpen(true);
     };
 
     if (chambers.length === 0) return null;
@@ -219,7 +248,12 @@ export default function DoctorQueuePanel({ onStateChange }: DoctorQueuePanelProp
                             </Button>
                         </div>
                     </div>
-                    <Button className="w-full mt-3" onClick={() => start(next)} isLoading={starting}>
+                    <Button
+                        className="w-full mt-3"
+                        onClick={() => chooseMode(next)}
+                        isLoading={starting || patientConsultationsQuery.isLoading}
+                        disabled={starting || patientConsultationsQuery.isLoading}
+                    >
                         <MicIcon className="size-4" /> Start Consultation
                     </Button>
                 </div>
@@ -312,6 +346,32 @@ export default function DoctorQueuePanel({ onStateChange }: DoctorQueuePanelProp
                     </div>
                 </DialogContent>
             </Dialog>
+
+            <Dialog open={modeOpen} onOpenChange={setModeOpen}>
+                <DialogContent className="sm:max-w-lg">
+                    <DialogHeader>
+                        <DialogTitle>Start consultation for {next?.name}</DialogTitle>
+                    </DialogHeader>
+                    <ConsultationModeActions
+                        onStartNew={() => next && start(next)}
+                        onChooseFollowUp={() => {
+                            setModeOpen(false);
+                            setSourcePickerOpen(true);
+                        }}
+                        hasFollowUpSources={followUpSources.length > 0}
+                        startingNew={starting && !startingSourceSessionId}
+                        disabled={starting}
+                    />
+                </DialogContent>
+            </Dialog>
+
+            <FollowUpSourcePicker
+                open={sourcePickerOpen}
+                onOpenChange={setSourcePickerOpen}
+                sources={followUpSources}
+                startingSessionId={startingSourceSessionId}
+                onStart={(source) => next && start(next, source.session_id)}
+            />
         </div>
     );
 }

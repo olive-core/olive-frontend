@@ -73,6 +73,7 @@ export default function Prescription({ onGenerate, onCancel, hasBeenGenerated }:
         removeNoteImage,
 
         vitals,
+        vitalSources,
         setVitals,
 
         followUp,
@@ -118,7 +119,14 @@ export default function Prescription({ onGenerate, onCancel, hasBeenGenerated }:
         <PrescriptionPaper
             header={<DoctorInfo sessionId={consultationId} />}
             patientStrip={<PatientInfo sessionId={consultationId} />}
-            vitalsBar={<VitalsBar vitals={vitals} onChange={setVitals} />}
+            vitalsBar={
+                <VitalsBar
+                    vitals={vitals}
+                    sources={vitalSources}
+                    currentSessionId={consultationId}
+                    onChange={setVitals}
+                />
+            }
             leftColumn={
                 <>
                     <ListInfo

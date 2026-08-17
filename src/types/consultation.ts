@@ -1,6 +1,6 @@
 import type { ChiefComplaintItem, DiagnosisItem, RxItem } from "./patient";
 import type { HeaderConfigApi, RenderConfigApi } from "@/lib/header-config";
-import type { NoteImageType, VitalsType } from "./prescription";
+import type { ClinicalNoteType, NoteImageType, VitalSourceType, VitalsType } from "./prescription";
 
 export type PatientSex = 'male' | 'female' | 'non_binary';
 
@@ -9,6 +9,11 @@ export type ClinicianConsultationItem = {
     session_id?:            string;
     created_at:             string;
     diagnoses_summary:      string[];
+    chief_complaints_summary?: string[];
+    follow_up_of_session_id?: string | null;
+    previous_prescription_id?: string | null;
+    next_prescription_id?: string | null;
+    has_follow_up?:         boolean;
     patient_id:             string;
     patient_name?:          string | null;
     patient_sex?:           PatientSex | null;
@@ -40,6 +45,8 @@ export type ConsultationPrescriptionData = {
     follow_up_days?:   number | null;
     follow_up_notes?:  string | null;
     summary?:          string | null;
+    clinical_note?:    ClinicalNoteType | null;
+    vital_sources?:    Record<string, VitalSourceType>;
     safety_net?:       string[];
     note_images?:      NoteImageType[];
 }
@@ -56,6 +63,10 @@ export type ConsultationDetail = {
     includes_prescription?: boolean;
     created_at:            string;
     updated_at:            string;
+    follow_up_of_session_id?: string | null;
+    previous_prescription_id?: string | null;
+    next_prescription_id?: string | null;
+    has_follow_up?:         boolean;
     // Letterhead: render_config is the snapshot frozen at save time; the
     // clinician_* fields back-fill legacy prescriptions saved before snapshots.
     chamber_id?:              string | null;

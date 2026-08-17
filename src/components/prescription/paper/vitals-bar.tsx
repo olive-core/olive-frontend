@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from "react";
 
-import type { VitalsType } from "@/types/prescription";
+import type { VitalSourceType, VitalsType } from "@/types/prescription";
 import {
     cmToFeetInches,
     computeBmi,
@@ -14,6 +14,8 @@ import { cn } from "@/lib/utils";
 interface VitalsBarProps {
     vitals: VitalsType;
     onChange?: (data: Partial<VitalsType>) => void;
+    sources?: Record<string, VitalSourceType>;
+    currentSessionId?: string;
 }
 
 type NumericField = {
@@ -30,6 +32,17 @@ const NUMERIC_FIELDS: NumericField[] = [
     { label: "SpO₂",   unit: "%",    key: "spo2" },
     { label: "Weight", unit: "kg",   key: "weight", step: "0.1" },
 ];
+
+const SOURCE_LABELS: Record<string, string> = {
+    bp_systolic: "BP",
+    bp_diastolic: "BP",
+    pulse: "Pulse",
+    temperature: "Temp",
+    respiratory_rate: "Resp",
+    spo2: "SpO₂",
+    weight: "Weight",
+    height: "Height",
+};
 
 const COMPACT_GRID = "grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2";
 
@@ -114,7 +127,7 @@ function HeightCell({ cm, onChange }: { cm?: number | null; onChange: (cm: numbe
     );
 }
 
-function EditableVitals({ vitals, onChange }: Required<VitalsBarProps>) {
+function EditableVitals({ vitals, onChange }: Pick<Required<VitalsBarProps>, "vitals" | "onChange">) {
     const bmi = computeBmi(vitals.weight, vitals.height);
 
     return (
@@ -204,7 +217,30 @@ function ReadOnlyVitals({ vitals }: { vitals: VitalsType }) {
     );
 }
 
-export default function VitalsBar({ vitals, onChange }: VitalsBarProps) {
+function CarriedVitalSources({
+    sources,
+    currentSessionId,
+}: {
+    sources?: Record<string, VitalSourceType>;
+    currentSessionId?: string;
+}) {
+    const carried = Object.entries(sources ?? {})
+        .filter(([, source]) => !currentSessionId || source.session_id !== currentSessionId)
+        .map(([field, source]) => ({ label: SOURCE_LABELS[field] ?? field, source }))
+        .filter((item, index, items) => items.findIndex((candidate) => candidate.label === item.label) === index);
+
+    if (carried.length === 0) return null;
+
+    return (
+        <p className="text-[10px] text-amber-700">
+            Last recorded: {carried.map(({ label, source }) => (
+                `${label} ${new Date(source.observed_at).toLocaleString()}`
+            )).join(" · ")}
+        </p>
+    );
+}
+
+export default function VitalsBar({ vitals, onChange, sources, currentSessionId }: VitalsBarProps) {
     const isEditable = onChange !== undefined;
 
     if (!isEditable && !hasAnyVital(vitals)) return null;
@@ -214,14 +250,18 @@ export default function VitalsBar({ vitals, onChange }: VitalsBarProps) {
             <div className="flex flex-col gap-2 border-y py-2.5">
                 <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-900">On Examination</h3>
                 <EditableVitals vitals={vitals} onChange={onChange} />
+                <CarriedVitalSources sources={sources} currentSessionId={currentSessionId} />
             </div>
         );
     }
 
     return (
-        <div className="flex items-baseline gap-3 border-y py-2">
-            <span className="shrink-0 text-[10px] font-bold uppercase tracking-widest text-slate-900">On Exam</span>
-            <ReadOnlyVitals vitals={vitals} />
+        <div className="flex flex-col gap-1 border-y py-2">
+            <div className="flex items-baseline gap-3">
+                <span className="shrink-0 text-[10px] font-bold uppercase tracking-widest text-slate-900">On Exam</span>
+                <ReadOnlyVitals vitals={vitals} />
+            </div>
+            <CarriedVitalSources sources={sources} currentSessionId={currentSessionId} />
         </div>
     );
 }

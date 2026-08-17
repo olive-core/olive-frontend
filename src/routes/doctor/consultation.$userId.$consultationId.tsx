@@ -8,6 +8,12 @@ import type { HistoryType, PrescriptionType } from '@/types/patient'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
+import ConsultationModeBanner from '@/components/consultation-start/consultation-mode-banner'
+
+type ConsultationSession = {
+  session_id: string
+  follow_up_of_session_id?: string | null
+}
 
 export const Route = createFileRoute('/doctor/consultation/$userId/$consultationId')({
   component: RouteComponent,
@@ -20,6 +26,14 @@ function RouteComponent() {
   useWarmLetterheadCache(consultationId);
 
   const [activeHistoryId, setActiveHistoryId] = useState<string | undefined>(undefined);
+
+  const { data: sessionData } = useQuery({
+    queryKey: ['session', consultationId],
+    queryFn: async () => {
+      const response = await api.get<ConsultationSession>(`/session/${consultationId}`)
+      return response.data
+    },
+  });
 
   const {
     data: historiesData,
@@ -47,18 +61,24 @@ function RouteComponent() {
   });
 
   const histories = historiesData ?? [];
+  const followUpSource = histories.find(
+    (history) => history.session_id === sessionData?.follow_up_of_session_id,
+  );
 
   // For follow-ups, surface the patient's most recent visit on load so its prescription is
   // already on screen — no clicks. Runs once; the doctor stays in control after that.
   const [didAutoSelect, setDidAutoSelect] = useState(false);
   useEffect(() => {
-    if (didAutoSelect || activeHistoryId || !historiesData || historiesData.length === 0) return;
+    if (didAutoSelect || activeHistoryId || !sessionData || !historiesData || historiesData.length === 0) return;
     const mostRecent = historiesData.reduce((latest, h) =>
       new Date(h.created_at) > new Date(latest.created_at) ? h : latest
     );
-    setActiveHistoryId(mostRecent.prescription_id);
+    const initialHistory = historiesData.find(
+      (history) => history.session_id === sessionData.follow_up_of_session_id,
+    ) ?? mostRecent;
+    setActiveHistoryId(initialHistory.prescription_id);
     setDidAutoSelect(true);
-  }, [historiesData, activeHistoryId, didAutoSelect]);
+  }, [sessionData, historiesData, activeHistoryId, didAutoSelect]);
 
   // -1 when nothing is selected
   const currentIndex = activeHistoryId
@@ -81,8 +101,17 @@ function RouteComponent() {
 
   return (
     <div className="container flex flex-col py-6 md:h-[calc(100svh-136px)]">
-      <div className="mb-5 flex-none">
+      <div className="mb-5 flex flex-none flex-col gap-3">
         <PatientChip userId={userId} />
+        {sessionData && (
+          <ConsultationModeBanner
+            isFollowUp={!!sessionData.follow_up_of_session_id}
+            followUpSource={followUpSource}
+            onViewSource={followUpSource
+              ? () => setActiveHistoryId(followUpSource.prescription_id)
+              : undefined}
+          />
+        )}
       </div>
 
       {/*

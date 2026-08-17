@@ -54,7 +54,13 @@ export default function PrescriptionReadView({ consultation, clinician, patient 
                     dateTime={consultation.created_at}
                 />
             }
-            vitalsBar={<VitalsBar vitals={vitals} />}
+            vitalsBar={
+                <VitalsBar
+                    vitals={vitals}
+                    sources={data.vital_sources}
+                    currentSessionId={consultation.session_id}
+                />
+            }
             leftColumn={
                 <>
                     <SectionList

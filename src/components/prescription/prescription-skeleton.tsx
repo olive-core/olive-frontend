@@ -282,6 +282,7 @@ function FullPrescriptionSkeleton({ onCancel, sessionId }: SkeletonProps) {
 
     // vitals
     vitals,
+    vitalSources,
     setVitals,
   } = store;
 
@@ -301,7 +302,7 @@ function FullPrescriptionSkeleton({ onCancel, sessionId }: SkeletonProps) {
 
         {/* ── Vitals (real once streamed, skeleton until then) ───── */}
         {hasAnyVital(vitals)
-          ? <VitalsBar vitals={vitals} onChange={setVitals} />
+          ? <VitalsBar vitals={vitals} sources={vitalSources} currentSessionId={sessionId} onChange={setVitals} />
           : <SkeletonVitals />}
 
         {/* ── AI Status block ────────────────────────────────────── */}

@@ -29,8 +29,13 @@ export type HistoryType = {
     session_id: string;
     created_at: string;
     diagnoses_summary: string[];
+    chief_complaints_summary?: string[];
     clinician_id: string;
     clinician_name: string;
+    follow_up_of_session_id?: string | null;
+    previous_prescription_id?: string | null;
+    next_prescription_id?: string | null;
+    has_follow_up?: boolean;
 }
 
 export type PatientPrescriptionListItem = HistoryType;

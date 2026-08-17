@@ -15,6 +15,8 @@ import {
 } from "@/lib/memory";
 import type { PrescriptionResponseType } from "@/types/prescription";
 import type { StoredRxItem } from "@/lib/rx-medicine";
+import { eligibleFollowUpSources } from "@/hooks/use-patient-consultations";
+import type { PatientPrescriptionListItem } from "@/types/patient";
 
 let failures = 0;
 function check(label: string, passed: boolean, detail = "") {
@@ -185,6 +187,36 @@ async function runDomScenarios() {
 // ─── Store rules ────────────────────────────────────────────────────────────
 
 async function run() {
+    section("Follow-up source eligibility keeps only standalone visits and series endpoints");
+    {
+        const consultation = (
+            sessionId: string,
+            hasFollowUp: boolean,
+            parentId?: string,
+        ): PatientPrescriptionListItem => ({
+            prescription_id: `prescription-${sessionId}`,
+            session_id: sessionId,
+            created_at: "2026-08-17T09:00:00+06:00",
+            diagnoses_summary: [],
+            clinician_id: "clinician-1",
+            clinician_name: "Doctor",
+            has_follow_up: hasFollowUp,
+            follow_up_of_session_id: parentId,
+        });
+        const eligible = eligibleFollowUpSources([
+            consultation("dermatology-root", true),
+            consultation("dermatology-latest", false, "dermatology-root"),
+            consultation("orthopedic-standalone", false),
+        ]);
+
+        check("an intermediate consultation is hidden",
+            !eligible.some((item) => item.session_id === "dermatology-root"));
+        check("the latest consultation in a series remains available",
+            eligible.some((item) => item.session_id === "dermatology-latest"));
+        check("a standalone consultation can start its first follow-up",
+            eligible.some((item) => item.session_id === "orthopedic-standalone"));
+    }
+
     section("Which sections a memory covers is derived from its contents");
     {
         const values = (partial: Partial<MemorySectionValues>): MemorySectionValues => ({
@@ -360,6 +392,32 @@ async function run() {
         store().undoMemorySection("medicine");
         check("undoing after a draft leaves the section empty, as it was before the apply",
             store().medicine.length === 0);
+    }
+
+    section("Saving a generated follow-up preserves grounded state metadata");
+    {
+        reset();
+        const draft = generatedDraft();
+        draft.session_id = "follow-up-session";
+        draft.medicines[0].medicine_id = "medicine-1";
+        draft.summary = "S: Fever is improving.\n\nO: Pulse 88 bpm.\n\nA: Viral fever improving.";
+        draft.vital_sources = {
+            pulse: { observed_at: "2026-08-16T09:00:00+06:00", session_id: "previous-session" },
+        };
+
+        await store().getInitialPrescription(draft);
+        const payload = store().getSubmitPayload("follow-up-session") as {
+            rx_list: StoredRxItem[];
+            clinical_note: { subjective: string; objective: string; assessment: string } | null;
+            vital_sources: Record<string, { observed_at: string; session_id: string }>;
+        };
+
+        check("the database-grounded medicine id survives review and save",
+            payload.rx_list[0]?.medicine_id === "medicine-1");
+        check("the encounter note is saved in structured form",
+            payload.clinical_note?.assessment === "Viral fever improving.");
+        check("a carried vital keeps its original observation source",
+            payload.vital_sources.pulse?.session_id === "previous-session");
     }
 
     section("A re-generate clears the previous run without touching a memory");

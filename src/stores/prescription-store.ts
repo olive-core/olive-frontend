@@ -1,4 +1,4 @@
-import type { ChiefComplaintType, DiagnosisType, InvestigationType, MeedicineType, HistoryType, NoteImageType, PrescriptionResponseType, VitalsType, FollowUpType } from "@/types/prescription";
+import type { ChiefComplaintType, DiagnosisType, InvestigationType, MeedicineType, HistoryType, NoteImageType, PrescriptionResponseType, VitalSourceType, VitalsType, FollowUpType } from "@/types/prescription";
 import { noteImagesForSubmit } from "@/lib/note-images";
 import { hasAnyVital, vitalsForSubmit } from "@/lib/vitals";
 import { composeDose, parseDuration } from "@/lib/rx-compose";
@@ -16,6 +16,7 @@ import {
     type MemorySectionValues,
 } from "@/lib/memory";
 import { create } from "zustand";
+import { parseSoapSections } from "@/lib/soap-notes";
 
 function routineForGenerated(routine?: { gap_hours?: number; meal_times?: string[] }) {
     const meals = routine?.meal_times ?? [];
@@ -63,6 +64,7 @@ function mapGeneratedMedicines(items: PrescriptionResponseType["medicines"] | un
         const hasStructuredDuration = item.duration_value != null || !!item.duration_unit || !!item.duration_preset;
         const hasStructuredFields = !!(item.type || item.route || item.dose || item.schedule);
         return {
+            medicine_id: item.medicine_id,
             name: item.trade_name || item.generic_name,
             value: item.trade_name || item.generic_name,
             trade_name: item.trade_name,
@@ -117,6 +119,7 @@ export interface PrescriptionStoreType {
     unresolvedMedicines: string[];
     advice: string[];
     summary: string;
+    vitalSources: Record<string, VitalSourceType>;
     noteImages: NoteImageType[];
     safetyNet: string[];
     vitals: VitalsType;
@@ -129,13 +132,13 @@ export interface PrescriptionStoreType {
     // methods
     initiatePrescription: (patientId: string, sessionId: string) => void;
     setGenerating: (value: boolean) => void;
-    setPartialData: (data: Pick<PrescriptionResponseType, 'chief_complaints' | 'history' | 'summary' | 'safety_net' | 'diagnoses' | 'vitals' | 'follow_up'>) => void;
-    applyScribeData: (data: Pick<PrescriptionResponseType, 'chief_complaints' | 'history' | 'summary' | 'safety_net' | 'vitals' | 'follow_up' | 'advice'>) => void;
+    setPartialData: (data: Pick<PrescriptionResponseType, 'chief_complaints' | 'history' | 'summary' | 'safety_net' | 'diagnoses' | 'vitals' | 'vital_sources' | 'follow_up'>) => void;
+    applyScribeData: (data: Pick<PrescriptionResponseType, 'chief_complaints' | 'history' | 'summary' | 'safety_net' | 'vitals' | 'vital_sources' | 'follow_up' | 'advice'>) => void;
     applyDecideData: (data: Pick<PrescriptionResponseType, 'diagnoses' | 'medicines' | 'investigations' | 'unresolved_mentions'>) => void;
     getInitialPrescription: (data: PrescriptionResponseType) => Promise<void>;
     applyMemory: (memoryName: string, body: MemoryBody, sections?: MemorySectionKey[]) => void;
     undoMemorySection: (section: MemorySectionKey) => void;
-    getSubmitPayload: (sessionId: string) => Record<string, any>;
+    getSubmitPayload: (sessionId: string) => Record<string, unknown>;
 
     // chief complaint methods
     addChiefComplaint: (data: ChiefComplaintType) => void;
@@ -204,6 +207,7 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
             investigation: [],
 
             summary: "",
+            vitalSources: {},
             noteImages: [],
             safetyNet: [],
             vitals: {},
@@ -227,6 +231,7 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
                 diagnosis: [],
                 investigation: [],
                 summary: "",
+                vitalSources: {},
                 noteImages: [],
                 safetyNet: [],
                 vitals: {},
@@ -244,6 +249,7 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
                 // re-generate never leaves the previous run's list on screen.
                 set({
                     summary: data.summary,
+                    vitalSources: data.vital_sources ?? {},
                     safetyNet: data.safety_net ?? [],
                     vitals: data.vitals ?? {},
                     ...omitMemoryOwnedSections({
@@ -260,6 +266,7 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
             applyScribeData: (data) => {
                 set({
                     summary: data.summary ?? "",
+                    vitalSources: data.vital_sources ?? {},
                     safetyNet: data.safety_net ?? [],
                     vitals: data.vitals ?? {},
                     ...omitMemoryOwnedSections({
@@ -286,7 +293,9 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
 
             getInitialPrescription: async (data: PrescriptionResponseType) => {
                 set({
+                    sessionId: data.session_id,
                     summary: data.summary,
+                    vitalSources: data.vital_sources ?? {},
                     safetyNet: data.safety_net ?? [],
                     vitals: data.vitals ?? {},
                     unresolvedMedicines: data.unresolved_mentions ?? [],
@@ -366,6 +375,12 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
                     follow_up_days: state.followUp.follow_up_days,
                     follow_up_notes: state.followUp.follow_up_notes || null,
                     summary: state.summary || null,
+                    clinical_note: noteFromSummary(state.summary),
+                    vital_sources: sourcesForSubmittedVitals(
+                        state.vitals,
+                        state.vitalSources,
+                        sessionId,
+                    ),
                     safety_net: state.safetyNet,
                     note_images: noteImagesForSubmit(state.noteImages),
                 }
@@ -436,7 +451,17 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
             })),
 
             // vitals methods
-            setVitals: (data) => set((state) => ({ vitals: { ...state.vitals, ...data } })),
+            setVitals: (data) => set((state) => {
+                const observedAt = new Date().toISOString();
+                const vitalSources = { ...state.vitalSources };
+                for (const [field, value] of Object.entries(data)) {
+                    if (value == null) delete vitalSources[field];
+                    else if (state.sessionId) {
+                        vitalSources[field] = { observed_at: observedAt, session_id: state.sessionId };
+                    }
+                }
+                return { vitals: { ...state.vitals, ...data }, vitalSources };
+            }),
 
             // follow-up methods
             setFollowUp: (data) => set((state) => ({ followUp: { ...state.followUp, ...data } })),
@@ -494,4 +519,27 @@ export function selectMemoryUndo(
     const entry = state.appliedMemories[section];
     if (!entry || entry.applied !== state[section]) return null;
     return isMemorySectionFilled(section, entry.replaced as MemorySectionValues[MemorySectionKey]) ? entry : null;
+}
+
+function noteFromSummary(summary: string) {
+    const sections = parseSoapSections(summary);
+    if (!sections) return null;
+    const text = (key: string) => sections.find((section) => section.key === key)?.text ?? "";
+    return { subjective: text("S"), objective: text("O"), assessment: text("A") };
+}
+
+function sourcesForSubmittedVitals(
+    vitals: VitalsType,
+    existing: Record<string, VitalSourceType>,
+    sessionId: string,
+): Record<string, VitalSourceType> {
+    const submittedAt = new Date().toISOString();
+    return Object.fromEntries(
+        Object.entries(vitals)
+            .filter(([, value]) => value != null)
+            .map(([field]) => [
+                field,
+                existing[field] ?? { observed_at: submittedAt, session_id: sessionId },
+            ]),
+    );
 }

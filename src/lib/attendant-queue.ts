@@ -70,8 +70,10 @@ export const reorderQueue = (chamberId: string, orderedIds: string[]) =>
 export const removeQueueEntry = (entryId: string) =>
     api.delete(`/queue/${entryId}`);
 
-export const startConsultation = (entryId: string) =>
-    api.post<{ queue_entry_id: string; session_id: string }>(`/queue/${entryId}/start`).then((r) => r.data);
+export const startConsultation = (entryId: string, followUpOfSessionId?: string) =>
+    api.post<{ queue_entry_id: string; session_id: string }>(`/queue/${entryId}/start`, {
+        ...(followUpOfSessionId ? { follow_up_of_session_id: followUpOfSessionId } : {}),
+    }).then((r) => r.data);
 
 export const completeQueueEntry = (entryId: string) =>
     api.post(`/queue/${entryId}/complete`);

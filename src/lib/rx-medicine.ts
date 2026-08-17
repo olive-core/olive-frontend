@@ -45,7 +45,7 @@ export interface StoredRxItem {
 
 export function serializeMedicine(item: MeedicineType): StoredRxItem {
     return {
-        medicine_id: null,
+        medicine_id: item.medicine_id ?? null,
         trade_name: item.trade_name || item.value,
         generic_name: item.generic_name || item.value,
         dosage: item.dosage || composeDose(item),
@@ -68,6 +68,7 @@ export function serializeMedicine(item: MeedicineType): StoredRxItem {
 export function deserializeMedicine(item: StoredRxItem): MeedicineType {
     const name = item.trade_name || item.generic_name || "";
     return {
+        medicine_id: item.medicine_id,
         name,
         value: name,
         trade_name: item.trade_name || undefined,
