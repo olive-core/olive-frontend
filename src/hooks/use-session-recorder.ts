@@ -1,4 +1,10 @@
-import api from "@/lib/axios";
+import {
+    enqueueChunk,
+    forgetDiscardedSession,
+    hasRoomToRecord,
+    nudgeDrainer,
+    requestPersistentStorage,
+} from "@/lib/audio-queue";
 import { PausableTimeout } from "@/lib/pausable-timeout";
 import { useCallback, useEffect, useEffectEvent, useRef, useState } from "react";
 import { useSilenceDetection } from "./use-silence-detection";
@@ -18,12 +24,13 @@ interface UseSessionRecorderReturn {
     isSilent: boolean;
     /** The microphone could not be opened — permission denied, or no input device. */
     isMicrophoneUnavailable: boolean;
-    /** Chunks that never reached the server, even after a retry. */
-    failedChunkCount: number;
+    /** The device has no room to store a new recording safely. */
+    isStorageFull: boolean;
     duration: number;
     startRecording: (consultationId: string) => void;
     pauseRecording: () => void;
     resumeRecording: () => void;
+    /** Resolves once every chunk is written to the device — not when it reaches the server. */
     stopRecording: () => Promise<void>;
     discardRecording: () => Promise<void>;
     stream: MediaStream | null;
@@ -37,10 +44,6 @@ interface RecordingWindow {
     closeTimer: PausableTimeout;
 }
 
-// Identifies the chunking algorithm the stored chunks were captured with, so they can be
-// merged into a continuous recording later. Bump the version if the algorithm changes.
-const CHUNKING_SCHEME = "listen-v1";
-
 // Capturing audio is deliberately decoupled from any one screen: the caller starts a
 // recording for a consultation and keeps the hook mounted above the router, so the
 // microphone survives navigation. Nothing here knows which page is on screen.
@@ -52,7 +55,7 @@ export default function useSessionRecorder({
     const [isRecording, setIsRecording] = useState<boolean>(false);
     const [isPaused, setIsPaused] = useState<boolean>(false);
     const [isMicrophoneUnavailable, setIsMicrophoneUnavailable] = useState<boolean>(false);
-    const [failedChunkCount, setFailedChunkCount] = useState<number>(0);
+    const [isStorageFull, setIsStorageFull] = useState<boolean>(false);
 
     const consultationIdRef = useRef<string>("");  // the session the current chunks belong to
     const isStartingRef = useRef<boolean>(false);  // true from the start request until capture is live
@@ -63,9 +66,9 @@ export default function useSessionRecorder({
     const accumulatedMsRef = useRef<number>(0);   // elapsed time banked from previous running segments
     const durationIntervalRef = useRef<number | null>(null);
     const chunkIndexRef = useRef<number>(0);
-    const pendingUploadsRef = useRef<Promise<void>[]>([]); // Every in-flight chunk upload
-    const isFinalizingRef = useRef<boolean>(false); // True while a graceful stop finishes uploading
-    const isDiscardingRef = useRef<boolean>(false); // True while discarding, so stopped windows are not uploaded
+    const pendingWritesRef = useRef<Promise<void>[]>([]); // chunks still being written to the device
+    const isFinalizingRef = useRef<boolean>(false); // True while a graceful stop drains its last windows
+    const isDiscardingRef = useRef<boolean>(false); // True while discarding, so stopped windows are not stored
 
     // The displayed timer must exclude paused gaps, so it sums banked segments plus the live one.
     const startDurationTimer = () => {
@@ -76,38 +79,27 @@ export default function useSessionRecorder({
         }, 250);
     };
 
-    // A chunk that never lands is audio the doctor believes was captured, so a failed
-    // upload is retried once and then counted — silence here means silent data loss.
-    const sendAudioChunk = useCallback((chunk: Blob): Promise<void> => {
+    // Captured audio is written to the device and handed to the drainer, which owns every
+    // retry from here on. The recorder never waits on the network: a chunk that cannot be
+    // uploaded yet is a delay, and one that was never written down is lost audio.
+    const storeAudioChunk = useCallback((chunk: Blob): Promise<void> => {
         const chunkIndex = chunkIndexRef.current;
         chunkIndexRef.current += 1;
 
-        const postChunk = () => {
-            const formData = new FormData();
-            formData.append('file', chunk, `chunk-${Date.now()}.webm`);
-            formData.append("session_id", consultationIdRef.current);
-            formData.append('chunk_index', chunkIndex.toString());
-            formData.append('chunking_scheme', CHUNKING_SCHEME);
-            formData.append('chunk_size_ms', chunkSizeInMs.toString());
-            formData.append('overlap_ms', overlapMs.toString());
-            return api.post('/conversation/chunk', formData);
-        };
+        const write = enqueueChunk({
+            sessionId:   consultationIdRef.current,
+            chunkIndex,
+            blob:        chunk,
+            mimeType:    chunk.type,
+            byteSize:    chunk.size,
+            chunkSizeMs: chunkSizeInMs,
+            overlapMs,
+        })
+            .then(nudgeDrainer)
+            .catch((error) => console.error("Audio chunk could not be stored:", error));
 
-        const upload = (async () => {
-            try {
-                await postChunk();
-            } catch {
-                try {
-                    await postChunk();
-                } catch (error) {
-                    console.error("Audio chunk failed to upload after retry:", error);
-                    setFailedChunkCount((count) => count + 1);
-                }
-            }
-        })();
-
-        pendingUploadsRef.current.push(upload);
-        return upload;
+        pendingWritesRef.current.push(write);
+        return write;
     }, [chunkSizeInMs, overlapMs]);
 
     const closeWindow = useEffectEvent((recorder: MediaRecorder) => {
@@ -129,8 +121,7 @@ export default function useSessionRecorder({
         };
         recorder.onstop = () => {
             if (isDiscardingRef.current || parts.length === 0) return;
-            const chunk = new Blob(parts, { type: 'audio/webm' });
-            sendAudioChunk(chunk);
+            storeAudioChunk(new Blob(parts, { type: 'audio/webm' }));
         };
         recorder.start();
 
@@ -183,7 +174,7 @@ export default function useSessionRecorder({
             streamRef.current = null;
         }
 
-        pendingUploadsRef.current = [];
+        pendingWritesRef.current = [];
         startTimeRef.current = 0;
         accumulatedMsRef.current = 0;
         setIsRecording(false);
@@ -225,15 +216,18 @@ export default function useSessionRecorder({
                 resolve();
                 return;
             }
-            const uploadOnStop = recorder.onstop;
+            const storeOnStop = recorder.onstop;
             recorder.onstop = (event) => {
-                uploadOnStop?.call(recorder, event);
+                storeOnStop?.call(recorder, event);
                 resolve();
             };
             recorder.stop();
         })
     );
 
+    // Resolves once every captured chunk is durably on the device, which takes
+    // milliseconds. Delivering them to the server is the drainer's job and happens on its
+    // own clock — the doctor is not held behind it.
     const stopRecording = useStableCallback(async (): Promise<void> => {
         isFinalizingRef.current = true;
         setIsRecording(false);
@@ -249,25 +243,27 @@ export default function useSessionRecorder({
         activeWindowsRef.current = [];
         const finalRecorder = windows[windows.length - 1]?.recorder ?? null;
 
-        // Close earlier overlapping windows first, then the newest, so chunks upload in order.
+        // Close earlier overlapping windows first, then the newest, so chunks are stored in order.
         const earlierRecorders = windows.slice(0, -1).map(window => window.recorder);
         await Promise.all(earlierRecorders.map(stopAndFlush));
         if (finalRecorder) await stopAndFlush(finalRecorder);
 
-        // Wait until every chunk — including the final one — is persisted, then release the mic.
-        await Promise.allSettled(pendingUploadsRef.current);
+        await Promise.allSettled(pendingWritesRef.current);
         streamRef.current?.getTracks().forEach(track => track.stop());
         streamRef.current = null;
     });
 
-    // Resolves once in-flight uploads have settled, so the caller can safely delete
-    // the session and its audio without a late chunk racing the delete.
-    const discardRecording = useStableCallback((): Promise<void> => {
+    // Discarding is the one instruction that removes audio the server never confirmed, so
+    // the stored chunks go only once the last write has landed and can be found.
+    const discardRecording = useStableCallback(async (): Promise<void> => {
         isDiscardingRef.current = true;
-        const inFlightUploads = pendingUploadsRef.current;
+        const sessionId = consultationIdRef.current;
+        const pendingWrites = pendingWritesRef.current;
         cleanup();
         setIsRecording(false);
-        return Promise.allSettled(inFlightUploads).then(() => undefined);
+
+        await Promise.allSettled(pendingWrites);
+        await forgetDiscardedSession(sessionId);
     });
 
     // A second start while one is already live would open a parallel MediaRecorder and
@@ -285,14 +281,22 @@ export default function useSessionRecorder({
             setDuration(0);
             setIsRecording(false);
             setIsMicrophoneUnavailable(false);
+            setIsStorageFull(false);
             consultationIdRef.current = consultationId;
             isFinalizingRef.current = false;
             isDiscardingRef.current = false;
             chunkIndexRef.current = 0;
             openWindowTimerRef.current = null;
             activeWindowsRef.current = [];
-            pendingUploadsRef.current = [];
-            setFailedChunkCount(0);
+            pendingWritesRef.current = [];
+
+            // Room is checked before the first chunk exists, never during a consultation:
+            // a full device is a reason not to start and never a reason to interrupt.
+            if (!(await hasRoomToRecord())) {
+                setIsStorageFull(true);
+                return;
+            }
+            void requestPersistentStorage();
 
             // Request microphone access
             const stream = await navigator.mediaDevices.getUserMedia({
@@ -348,7 +352,7 @@ export default function useSessionRecorder({
         isPaused,
         isSilent,
         isMicrophoneUnavailable,
-        failedChunkCount,
+        isStorageFull,
         duration,
         startRecording,
         pauseRecording,

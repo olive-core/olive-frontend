@@ -1,3 +1,6 @@
+// jsdom ships no IndexedDB, and the audio queue writes every chunk to it before the
+// network is touched. Without this the recorder silently exercises its memory fallback.
+import "fake-indexeddb/auto";
 import { JSDOM } from "jsdom";
 
 const dom = new JSDOM("<!doctype html><html><body><div id='root'></div></body></html>", {
@@ -16,12 +19,8 @@ Object.defineProperty(globalThis, "navigator", {
 anyGlobal.HTMLElement = dom.window.HTMLElement;
 anyGlobal.Node = dom.window.Node;
 anyGlobal.Event = dom.window.Event;
-anyGlobal.Blob = dom.window.Blob;
-Object.defineProperty(globalThis, "FormData", {
-    configurable: true,
-    writable: true,
-    value: dom.window.FormData,
-});
+// Blob and FormData stay Node's own. A browser hands IndexedDB and FormData objects from
+// the same realm; mixing jsdom's Blob with structuredClone would not.
 anyGlobal.getComputedStyle = dom.window.getComputedStyle;
 anyGlobal.requestAnimationFrame = (cb: FrameRequestCallback) => setTimeout(() => cb(Date.now()), 16) as unknown as number;
 anyGlobal.cancelAnimationFrame = (id: number) => clearTimeout(id);
@@ -62,7 +61,7 @@ class MockMediaRecorder {
     stop() {
         if (this.state === "inactive") return;
         this.state = "inactive";
-        this.ondataavailable?.({ data: new dom.window.Blob(["audio"], { type: "audio/webm" }) as unknown as Blob });
+        this.ondataavailable?.({ data: new Blob(["audio"], { type: "audio/webm" }) });
         this.onstop?.({});
     }
 }

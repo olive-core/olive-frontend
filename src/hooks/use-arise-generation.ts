@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { generateAriseDraft } from '@/lib/arise-stream';
-import { ARISE_FINAL_RECORDING_TIMEOUT_MS } from '@/lib/arise-timeouts';
 import { awaitRecordingFinalization } from '@/lib/recording-finalization';
+import { useAudioDeliveryGate } from '@/hooks/use-audio-delivery-gate';
 import { useAuthStore } from '@/stores/auth-store';
 import { usePrescriptionStore } from '@/stores/prescription-store';
 import { useStableCallback } from '@/hooks/use-stable-callback';
@@ -14,6 +14,7 @@ import { useStableCallback } from '@/hooks/use-stable-callback';
  */
 export function useAriseGeneration(sessionId: string) {
     const accessToken = useAuthStore((s) => s.accessToken);
+    const deliveryGate = useAudioDeliveryGate();
 
     const [isReady, setIsReady] = useState(false);
     const [isError, setIsError] = useState(false);
@@ -35,12 +36,12 @@ export function useAriseGeneration(sessionId: string) {
     const run = useStableCallback(async (signal: AbortSignal) => {
         const store = usePrescriptionStore.getState();
         try {
-            // The recorder may still be uploading the final audio chunk. Wait for it so the
-            // draft is generated from the complete transcription; the skeleton covers this wait.
-            await awaitRecordingFinalization(sessionId, {
-                timeoutMs: ARISE_FINAL_RECORDING_TIMEOUT_MS,
-                signal,
-            });
+            // Two waits, in order, and only one of them is about the network. The first is
+            // the recorder writing its last chunk to the device, which takes milliseconds.
+            // The second is the server actually receiving every chunk — the gate owns that
+            // clock, so nothing else here races it.
+            await awaitRecordingFinalization(sessionId, { signal });
+            await deliveryGate.awaitDelivery(sessionId, signal);
 
             const outcome = await generateAriseDraft({
                 sessionId,
@@ -95,7 +96,7 @@ export function useAriseGeneration(sessionId: string) {
 
     useEffect(() => () => abortRef.current?.abort(), [sessionId]);
 
-    return { isReady, isError, hasBeenGenerated, start, cancel, skip };
+    return { isReady, isError, hasBeenGenerated, start, cancel, skip, deliveryGate };
 }
 
 function isAbort(error: unknown): boolean {

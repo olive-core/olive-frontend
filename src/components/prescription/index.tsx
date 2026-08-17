@@ -21,6 +21,7 @@ import { useTargetedPrint } from "@/hooks/use-targeted-print";
 import { useClinicianProfile } from "@/hooks/use-clinician-profile";
 import { useNoteImageUpload } from "@/hooks/use-note-image-upload";
 import { MemoryApplyEnabledContext } from "@/components/memory/memory-apply-context";
+import { clearSyncedSessionChunks } from "@/lib/audio-queue";
 import { cn } from "@/lib/utils";
 
 interface PrescriptionProps {
@@ -107,6 +108,10 @@ export default function Prescription({ onGenerate, onCancel, hasBeenGenerated }:
             await api.post("/prescription", { ...payload, includes_prescription: prescriptionEnabled });
         },
         onSuccess: () => {
+            // The consultation is saved, so its upload receipts have nothing left to prove.
+            // Audio the server never confirmed is deliberately left alone.
+            void clearSyncedSessionChunks(consultationId);
+
             // A note-only consultation has nothing to hand the patient, so finishing it
             // returns to the dashboard instead of opening the print dialog.
             if (prescriptionEnabled) requestPrint("prescription");

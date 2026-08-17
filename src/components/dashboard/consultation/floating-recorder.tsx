@@ -6,7 +6,7 @@ import { useRecordingSessionActions } from "@/hooks/use-recording-session-action
 import { cn, formatDuration } from "@/lib/utils";
 import RecordingStatus, { RecordingStatusDot } from "./recording-status";
 import RecorderControls from "./recorder-controls";
-import FailedChunkNotice from "./failed-chunk-notice";
+import SyncStatusNotice from "./sync-status-notice";
 import DiscardSessionDialog from "./discard-session-dialog";
 import { rememberRecorderRect, useRecorderMorph } from "./recorder-morph";
 
@@ -48,7 +48,7 @@ function FloatingRecorderWidget() {
 }
 
 function ExpandedRecorder({ ref, onMinimize }: { ref: Ref<HTMLDivElement>; onMinimize: () => void }) {
-    const { status, duration, failedChunkCount } = useRecordingSession();
+    const { status, duration } = useRecordingSession();
     const { discardSession, openConsultation } = useRecordingSessionActions();
 
     return (
@@ -85,7 +85,7 @@ function ExpandedRecorder({ ref, onMinimize }: { ref: Ref<HTMLDivElement>; onMin
                 </div>
             </div>
 
-            <FailedChunkNotice count={failedChunkCount} className="mt-2" />
+            <SyncStatusNotice className="mt-2" />
 
             <div className="mt-3 flex gap-2">
                 <RecorderControls compact />
