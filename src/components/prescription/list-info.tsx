@@ -12,7 +12,7 @@ import type {
     HistoryType,
     InvestigationType,
 } from "@/types/prescription";
-import DebouncedSearchSelect from "./debounced-search-select";
+import DebouncedSearchSelect, { type Option } from "./debounced-search-select";
 import api from "@/lib/axios";
 import { useInvestigationSearch } from "@/hooks/use-investigation-search";
 import SectionItem, { type SectionItemProps } from "./paper/section-item";
@@ -175,12 +175,17 @@ interface EditingItemProps {
     fieldName: ListInfoFieldName;
 }
 
-const FETCH_OPTION_ENDPOINTS: Record<ListInfoFieldName, string> = {
-    "chief-complaint": "/chief-complaint-name/search",
-    "history": "/history-name/search",
-    "diagnosis": "/diagnosis-name/search",
-    "investigation": "/investigation-name/search",
-}
+const FIELD_LABELS: Record<ListInfoFieldName, string> = {
+    "chief-complaint": "Chief complaint",
+    "history": "History",
+    "diagnosis": "Diagnosis",
+    "investigation": "Investigation",
+};
+
+type DiagnosisSearchResult = {
+    short_description: string;
+    icd_code?: string | null;
+};
 
 
 const EditingItem = ({ item, index, cardRef, setIsEditing, onUpdate, onRemove, editingItemStatus, fieldName }: EditingItemProps) => {
@@ -210,53 +215,75 @@ const EditingItem = ({ item, index, cardRef, setIsEditing, onUpdate, onRemove, e
     // DiagnosisType strictly has no notes in your definition
     const hasNotes = "notes" in localItem;
 
-    // Investigation runs on the client-side local index (instant, offline); the other
-    // fields still search server-side.
+    // Chief complaint and history are clinician-authored free text. Diagnosis and
+    // investigation have real catalogues, so only those fields expose search.
     const isInvestigation = fieldName === "investigation";
+    const isDiagnosis = fieldName === "diagnosis";
+    const usesCatalogue = isInvestigation || isDiagnosis;
     const { search: searchInvestigations, ready: investigationReady } = useInvestigationSearch();
 
-    const fetchFromServer = async (query: string) => {
-        const res = await api.get<{ name: string }[]>(
-            `${FETCH_OPTION_ENDPOINTS[fieldName]}?q=${query}`
-        )
+    const searchDiagnoses = async (query: string): Promise<Option[]> => {
+        const res = await api.get<DiagnosisSearchResult[]>(
+            `/diagnosis-name/search?q=${encodeURIComponent(query)}`
+        );
 
         return res.data.map(item => ({
-            label: item.name,
-            value: item.name,
-        }))
-    }
+            label: item.short_description,
+            value: item.short_description,
+            icd_code: item.icd_code ?? undefined,
+        }));
+    };
 
-    const fetchOptions = isInvestigation ? searchInvestigations : fetchFromServer;
+    const fetchOptions = isInvestigation ? searchInvestigations : searchDiagnoses;
 
     return (
         <div className="w-full space-y-4" onClick={(e) => e.stopPropagation()}>
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-3">
                 {/* Name Input - Always present */}
                 <div className="flex-1 space-y-1">
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">
-                        Name
+                        {FIELD_LABELS[fieldName]}
                     </p>
 
-                    <DebouncedSearchSelect
-                        value={{
-                            label: localItem.name,
-                            value: localItem.name,
-                        }}
-                        onChange={option => {
-                            setLocalItem({
-                                ...localItem, name: option?.value || ""
-                            })
-                        }}
-                        fetchOptions={fetchOptions}
-                        minLength={isInvestigation ? 1 : undefined}
-                        debounceTime={isInvestigation ? 120 : undefined}
-                        queryKeyBase={isInvestigation ? [`${fieldName}-search`, investigationReady] : `${fieldName}-search`}
-                    />
+                    {usesCatalogue ? (
+                        <DebouncedSearchSelect
+                            value={{
+                                label: localItem.name,
+                                value: localItem.name,
+                                icd_code: isDiagnosis ? (localItem as DiagnosisType).icd_code : undefined,
+                            }}
+                            onChange={option => {
+                                if (isDiagnosis) {
+                                    setLocalItem({
+                                        ...localItem,
+                                        name: option?.value || "",
+                                        icd_code: option?.icd_code,
+                                    });
+                                    return;
+                                }
+                                setLocalItem({ ...localItem, name: option?.value || "" });
+                            }}
+                            fetchOptions={fetchOptions}
+                            placeholder={`Search or enter ${FIELD_LABELS[fieldName].toLowerCase()}...`}
+                            minLength={isInvestigation ? 1 : undefined}
+                            debounceTime={isInvestigation ? 120 : undefined}
+                            queryKeyBase={isInvestigation ? [`${fieldName}-search`, investigationReady] : `${fieldName}-search`}
+                        />
+                    ) : (
+                        <Input
+                            autoFocus
+                            className="h-10 text-sm"
+                            value={localItem.name}
+                            placeholder={`Enter ${FIELD_LABELS[fieldName].toLowerCase()}...`}
+                            onChange={(event) => setLocalItem({ ...localItem, name: event.target.value })}
+                            onKeyDown={(event) => event.key === "Enter" && handleSave()}
+                        />
+                    )}
                 </div>
 
                 {/* Duration Input - Conditional */}
                 {hasDuration && (
-                    <div className="w-1/3 space-y-1">
+                    <div className="w-full sm:w-1/3 space-y-1">
                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">
                             Timeline
                         </p>

@@ -13,6 +13,7 @@ const RESULT_PAGE_SIZE = 50;
 export type Option = {
     label: string;
     value: string;
+    icd_code?: string;
     trade_name?: string;
     generic_name?: string;
     dosage_form?: string;
@@ -193,6 +194,13 @@ export default function DebouncedSearchSelect({
                                             {option.dosage_form}
                                         </span>
                                     )}
+                                </div>
+                            ) : option.icd_code ? (
+                                <div className="flex items-start justify-between gap-2">
+                                    <span>{option.label}</span>
+                                    <span className="shrink-0 text-[10px] font-medium px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-100">
+                                        {option.icd_code}
+                                    </span>
                                 </div>
                             ) : (
                                 option.label
