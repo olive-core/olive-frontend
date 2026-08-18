@@ -1,4 +1,5 @@
 import { useEffect, useState, type ReactNode } from "react";
+import { ChevronDownIcon } from "lucide-react";
 
 import type { VitalSourceType, VitalsType } from "@/types/prescription";
 import {
@@ -46,8 +47,10 @@ const SOURCE_LABELS: Record<string, string> = {
 
 const COMPACT_GRID = "grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2";
 
+// text-base below `sm`: iOS Safari zooms the page in on any input under 16px and never
+// zooms back out. The wider cells below `sm` are what keeps 16px digits from being clipped.
 const BASE_INPUT =
-    "min-w-0 bg-transparent text-sm font-bold text-slate-800 outline-none placeholder:font-medium placeholder:text-slate-300 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none";
+    "min-w-0 bg-transparent text-base sm:text-sm font-bold text-slate-800 outline-none placeholder:font-medium placeholder:text-slate-300 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none";
 
 function parseNum(value: string): number | null {
     if (value.trim() === "") return null;
@@ -100,7 +103,7 @@ function HeightCell({ cm, onChange }: { cm?: number | null; onChange: (cm: numbe
     return (
         <CellCard label="Height">
             <input
-                className={cn(BASE_INPUT, "w-7 text-center")}
+                className={cn(BASE_INPUT, "w-9 sm:w-7 text-center")}
                 type="number"
                 inputMode="numeric"
                 placeholder="—"
@@ -112,7 +115,7 @@ function HeightCell({ cm, onChange }: { cm?: number | null; onChange: (cm: numbe
             />
             <Unit>ft</Unit>
             <input
-                className={cn(BASE_INPUT, "w-7 text-center")}
+                className={cn(BASE_INPUT, "w-9 sm:w-7 text-center")}
                 type="number"
                 inputMode="numeric"
                 placeholder="—"
@@ -134,7 +137,7 @@ function EditableVitals({ vitals, onChange }: Pick<Required<VitalsBarProps>, "vi
         <div className={COMPACT_GRID}>
             <CellCard label="BP">
                 <input
-                    className={cn(BASE_INPUT, "w-8")}
+                    className={cn(BASE_INPUT, "w-10 sm:w-8")}
                     type="number"
                     inputMode="numeric"
                     placeholder="—"
@@ -143,7 +146,7 @@ function EditableVitals({ vitals, onChange }: Pick<Required<VitalsBarProps>, "vi
                 />
                 <span className="text-slate-300 text-sm">/</span>
                 <input
-                    className={cn(BASE_INPUT, "w-8")}
+                    className={cn(BASE_INPUT, "w-10 sm:w-8")}
                     type="number"
                     inputMode="numeric"
                     placeholder="—"
@@ -174,6 +177,47 @@ function EditableVitals({ vitals, onChange }: Pick<Required<VitalsBarProps>, "vi
                 <span className="text-sm font-bold text-emerald-700">{bmi ?? "—"}</span>
                 {bmi !== null && <Unit>kg/m²</Unit>}
             </CellCard>
+        </div>
+    );
+}
+
+// Eight vital cells cost roughly a third of a phone screen, above the prescription and
+// before anything the clinician came to write. Folded away they cost one line, and what is
+// already filled in still reads at a glance. The desktop grid is untouched — it opens from
+// `sm` up regardless of this toggle.
+type EditableVitalsSectionProps = Pick<Required<VitalsBarProps>, "vitals" | "onChange"> &
+    Pick<VitalsBarProps, "sources" | "currentSessionId">;
+
+function EditableVitalsSection({ vitals, onChange, sources, currentSessionId }: EditableVitalsSectionProps) {
+    const [isOpenOnPhone, setIsOpenOnPhone] = useState(false);
+    const isFilled = hasAnyVital(vitals);
+
+    return (
+        <div className="flex flex-col gap-2 border-y py-2.5">
+            <div className="flex items-center justify-between gap-2">
+                <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-900">On Examination</h3>
+                <button
+                    type="button"
+                    aria-expanded={isOpenOnPhone}
+                    onClick={() => setIsOpenOnPhone((open) => !open)}
+                    className="flex min-h-9 items-center gap-1 rounded-md px-2 text-xs font-bold text-emerald-600 sm:hidden"
+                >
+                    {isOpenOnPhone ? "Done" : isFilled ? "Edit" : "Add vitals"}
+                    <ChevronDownIcon aria-hidden className={cn("size-3.5 transition-transform", isOpenOnPhone && "rotate-180")} />
+                </button>
+            </div>
+
+            {!isOpenOnPhone && isFilled && (
+                <div className="sm:hidden">
+                    <ReadOnlyVitals vitals={vitals} />
+                </div>
+            )}
+
+            <div className={cn(isOpenOnPhone ? "block" : "hidden", "sm:block")}>
+                <EditableVitals vitals={vitals} onChange={onChange} />
+            </div>
+
+            <CarriedVitalSources sources={sources} currentSessionId={currentSessionId} />
         </div>
     );
 }
@@ -247,11 +291,12 @@ export default function VitalsBar({ vitals, onChange, sources, currentSessionId 
 
     if (isEditable) {
         return (
-            <div className="flex flex-col gap-2 border-y py-2.5">
-                <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-900">On Examination</h3>
-                <EditableVitals vitals={vitals} onChange={onChange} />
-                <CarriedVitalSources sources={sources} currentSessionId={currentSessionId} />
-            </div>
+            <EditableVitalsSection
+                vitals={vitals}
+                onChange={onChange}
+                sources={sources}
+                currentSessionId={currentSessionId}
+            />
         );
     }
 

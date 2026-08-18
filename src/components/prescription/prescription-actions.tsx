@@ -19,11 +19,11 @@ export default function PrescriptionActions({
     return (
         <div className="flex w-full flex-wrap items-center justify-center gap-3">
             {isGenerating ? (
-                <Button variant="destructive" onClick={onCancel}>
+                <Button variant="destructive" className="h-11 sm:h-9" onClick={onCancel}>
                     Cancel
                 </Button>
             ) : (
-                <Button onClick={onGenerate}>
+                <Button className="h-11 sm:h-9" onClick={onGenerate}>
                     {hasBeenGenerated ? "Re-generate" : "Generate Draft"}
                 </Button>
             )}

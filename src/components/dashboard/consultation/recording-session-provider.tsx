@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 
 import useSessionRecorder from "@/hooks/use-session-recorder";
+import { useAudioQueueStatus } from "@/hooks/use-audio-queue-status";
 import {
     RecordingSessionContext,
     type RecordingSession,
@@ -8,6 +9,7 @@ import {
     type RecordingTarget,
 } from "@/hooks/use-recording-session";
 import { useStableCallback } from "@/hooks/use-stable-callback";
+import { setDrainUrgency, startDrainer, sweepSyncedChunks } from "@/lib/audio-queue";
 import { trackRecordingFinalization } from "@/lib/recording-finalization";
 import { forgetRecorderRect } from "./recorder-morph";
 
@@ -16,9 +18,13 @@ interface RecorderState {
     isPaused:                boolean;
     isSilent:                boolean;
     isMicrophoneUnavailable: boolean;
+    isStorageFull:           boolean;
 }
 
-function recordingStatus({ isRecording, isPaused, isSilent, isMicrophoneUnavailable }: RecorderState): RecordingStatus {
+function recordingStatus(
+    { isRecording, isPaused, isSilent, isMicrophoneUnavailable, isStorageFull }: RecorderState,
+): RecordingStatus {
+    if (isStorageFull) return "storage-full";
     if (isMicrophoneUnavailable) return "unavailable";
     if (!isRecording) return "starting";
     if (isPaused) return "paused";
@@ -30,8 +36,16 @@ function recordingStatus({ isRecording, isPaused, isSilent, isMicrophoneUnavaila
 // navigating between pages mid-consultation never touches the microphone.
 export default function RecordingSessionProvider({ children }: { children: ReactNode }) {
     const recorder = useSessionRecorder({ chunkSizeInMs: 30 * 1000 });
+    const queue = useAudioQueueStatus();
     const [target, setTarget] = useState<RecordingTarget | null>(null);
     const [inlineRecorderCount, setInlineRecorderCount] = useState(0);
+
+    // The queue outlives any one recording: chunks left unsent by a closed tab or a
+    // reload are picked up here, and the sweep clears receipts nothing is waiting on.
+    useEffect(() => {
+        startDrainer();
+        void sweepSyncedChunks();
+    }, []);
 
     // Actions read the live target without depending on the render that set it.
     const targetRef = useRef<RecordingTarget | null>(null);
@@ -55,6 +69,7 @@ export default function RecordingSessionProvider({ children }: { children: React
 
     const startRecording = useCallback((next: RecordingTarget) => {
         if (targetRef.current || finishedSessionIdsRef.current.has(next.sessionId)) return;
+        setDrainUrgency("patient");
         setActiveTarget(next);
     }, [setActiveTarget]);
 
@@ -71,15 +86,20 @@ export default function RecordingSessionProvider({ children }: { children: React
         if (activeSessionId) startCapture(activeSessionId);
     });
 
-    // The final chunk keeps uploading in the background; the prescribe screen waits on
-    // that promise behind its loading skeleton before generating the draft.
+    // Capture is written to the device in milliseconds, which is all the prescribe screen
+    // waits on. Delivery carries on in the background — but from here a doctor is watching
+    // it, so the queue stops being patient about retries.
     const finishRecording = useCallback(() => {
         const finished = endSession();
-        if (finished) trackRecordingFinalization(finished.sessionId, stopRecording());
+        if (!finished) return;
+        trackRecordingFinalization(finished.sessionId, stopRecording());
+        setDrainUrgency("urgent");
+        void sweepSyncedChunks();
     }, [endSession, stopRecording]);
 
     const discardRecording = useCallback(() => {
         endSession();
+        setDrainUrgency("patient");
         return discardCapture();
     }, [endSession, discardCapture]);
 
@@ -96,14 +116,16 @@ export default function RecordingSessionProvider({ children }: { children: React
         if (!target) forgetRecorderRect();
     }, [target]);
 
-    // A reload or a closed tab loses whatever has not been uploaded yet, so the browser
-    // asks first for as long as a recording is running.
+    // Leaving with audio the server has not acknowledged costs time, not data — the queue
+    // is on disk and resumes on the next load. iOS honours this prompt inconsistently,
+    // which is exactly why durability, rather than this warning, is the actual defence.
+    const hasUnsentAudio = queue.pending > 0 || queue.rejected > 0;
     useEffect(() => {
-        if (!target) return;
+        if (!target && !hasUnsentAudio) return;
         const warn = (event: BeforeUnloadEvent) => event.preventDefault();
         window.addEventListener("beforeunload", warn);
         return () => window.removeEventListener("beforeunload", warn);
-    }, [target]);
+    }, [target, hasUnsentAudio]);
 
     const status = recordingStatus(recorder);
 
@@ -111,7 +133,7 @@ export default function RecordingSessionProvider({ children }: { children: React
         target,
         status,
         duration:         recorder.duration,
-        failedChunkCount: recorder.failedChunkCount,
+        queue,
         hasInlineRecorder: inlineRecorderCount > 0,
         hasFinished,
         startRecording,
@@ -125,7 +147,7 @@ export default function RecordingSessionProvider({ children }: { children: React
         target,
         status,
         recorder.duration,
-        recorder.failedChunkCount,
+        queue,
         recorder.pauseRecording,
         recorder.resumeRecording,
         inlineRecorderCount,

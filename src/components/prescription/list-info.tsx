@@ -1,8 +1,8 @@
 import { PlusCircle, Trash2, XIcon } from "lucide-react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
-import { useRef, useState } from "react";
-import { useCommitOnClickOutside } from "@/hooks/use-commit-on-click-outside";
+import { useState } from "react";
+import EditSurface from "./editor/edit-surface";
 
 import type {
     ListInfoFieldName,
@@ -67,7 +67,7 @@ export default function ListInfo({ title, info, fieldName, addEmptyItem, updateI
                     <Button
                         variant="ghost"
                         size="sm"
-                        className="h-7 text-xs font-bold text-emerald-600 hover:bg-emerald-100/50"
+                        className="h-11 text-xs font-bold text-emerald-600 hover:bg-emerald-100/50 sm:h-7"
                         onClick={handleAdd}
                     >
                         <PlusCircle className="size-3 mr-1" /> Add
@@ -84,6 +84,7 @@ export default function ListInfo({ title, info, fieldName, addEmptyItem, updateI
                         key={`${fieldName}-${index}`}
                         index={index}
                         item={item}
+                        title={title}
                         isDiagnosis={isDiagnosis}
                         onUpdate={updateItem}
                         onRemove={removeItem}
@@ -105,6 +106,8 @@ export default function ListInfo({ title, info, fieldName, addEmptyItem, updateI
 interface InfoItemProps {
     item: ListInfoType;
     index: number;
+    /** Section name, used as the sheet header when the editor opens on a phone. */
+    title: string;
     isDiagnosis: boolean;
     onUpdate: (index: number, item: ListInfoType) => void;
     onRemove: (index: number) => void;
@@ -114,10 +117,7 @@ interface InfoItemProps {
     fieldName: ListInfoFieldName;
 }
 
-const InfoItem = ({ item, index, isDiagnosis, onUpdate, onRemove, editingItemIndex, setEditingItemIndex, editingItemStatus, fieldName }: InfoItemProps) => {
-
-    const isEditingThisItem = editingItemIndex === index;
-    const cardRef = useRef<HTMLDivElement>(null);
+const InfoItem = ({ item, index, title, isDiagnosis, onUpdate, onRemove, editingItemIndex, setEditingItemIndex, editingItemStatus, fieldName }: InfoItemProps) => {
 
     const setIsEditing = (value: boolean) => {
         if (value) {
@@ -127,38 +127,38 @@ const InfoItem = ({ item, index, isDiagnosis, onUpdate, onRemove, editingItemInd
         }
     }
 
+    // The open editor brings its own card (or, on a phone, its own sheet), so the row is
+    // handed over to it entirely rather than wrapped around it.
+    if (editingItemIndex === index) {
+        return (
+            <EditingItem
+                item={item}
+                index={index}
+                title={title}
+                setIsEditing={setIsEditing}
+                onUpdate={onUpdate}
+                onRemove={onRemove}
+                editingItemStatus={editingItemStatus}
+                fieldName={fieldName}
+            />
+        );
+    }
+
     return (
         <div
-            ref={cardRef}
-            className={`group relative transition-all duration-200 rounded-lg border
-                ${isEditingThisItem
-                    ? "border-emerald-500 bg-white shadow-lg p-4 z-10"
-                    : `py-1 px-2 cursor-pointer ${isDiagnosis
-                        ? "bg-white/80 border-emerald-100 hover:border-emerald-300"
-                        : "bg-muted hover:bg-accent border-border"
-                    }`
+            className={`group relative transition-all duration-200 rounded-lg border py-1 px-2 cursor-pointer
+                ${isDiagnosis
+                    ? "bg-white/80 border-emerald-100 hover:border-emerald-300"
+                    : "bg-muted hover:bg-accent border-border"
                 }`}
-            onClick={() => !isEditingThisItem && setIsEditing(true)}
+            onClick={() => setIsEditing(true)}
         >
-            {isEditingThisItem ? (
-                <EditingItem
-                    item={item}
-                    index={index}
-                    cardRef={cardRef}
-                    setIsEditing={setIsEditing}
-                    onUpdate={onUpdate}
-                    onRemove={onRemove}
-                    editingItemStatus={editingItemStatus}
-                    fieldName={fieldName}
-                />
-            ) : (
-                <NonEditingItem
-                    item={item}
-                    index={index}
-                    onRemove={onRemove}
-                    fieldName={fieldName}
-                />
-            )}
+            <NonEditingItem
+                item={item}
+                index={index}
+                onRemove={onRemove}
+                fieldName={fieldName}
+            />
         </div>
     );
 };
@@ -166,8 +166,7 @@ const InfoItem = ({ item, index, isDiagnosis, onUpdate, onRemove, editingItemInd
 interface EditingItemProps {
     item: ListInfoType;
     index: number;
-    // The editor's own card, so a click anywhere on it (its padding included) is not "outside".
-    cardRef: React.RefObject<HTMLDivElement | null>;
+    title: string;
     setIsEditing: (value: boolean) => void;
     onUpdate: (index: number, item: ListInfoType) => void;
     onRemove: (index: number) => void;
@@ -188,7 +187,7 @@ type DiagnosisSearchResult = {
 };
 
 
-const EditingItem = ({ item, index, cardRef, setIsEditing, onUpdate, onRemove, editingItemStatus, fieldName }: EditingItemProps) => {
+const EditingItem = ({ item, index, title, setIsEditing, onUpdate, onRemove, editingItemStatus, fieldName }: EditingItemProps) => {
     // Local state for the form inputs
     const [localItem, setLocalItem] = useState<ListInfoType>(item);
     const handleSave = () => {
@@ -199,8 +198,6 @@ const EditingItem = ({ item, index, cardRef, setIsEditing, onUpdate, onRemove, e
         }
         setIsEditing(false);
     };
-
-    useCommitOnClickOutside(cardRef, handleSave);
 
     const handleCancel = () => {
         // If adding a new item and canceling, remove it
@@ -237,119 +234,140 @@ const EditingItem = ({ item, index, cardRef, setIsEditing, onUpdate, onRemove, e
     const fetchOptions = isInvestigation ? searchInvestigations : searchDiagnoses;
 
     return (
-        <div className="w-full space-y-4" onClick={(e) => e.stopPropagation()}>
-            <div className="flex flex-col sm:flex-row gap-3">
-                {/* Name Input - Always present */}
-                <div className="flex-1 space-y-1">
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">
-                        {FIELD_LABELS[fieldName]}
-                    </p>
+        <EditSurface
+            title={title}
+            onCommit={handleSave}
+            className="relative z-10 rounded-lg border border-emerald-500 bg-white shadow-lg transition-all duration-200"
+            footer={
+                <EditingItemActions
+                    onRemove={() => { onRemove(index); setIsEditing(false); }}
+                    onCancel={handleCancel}
+                    onSave={handleSave}
+                />
+            }
+        >
+            <div className="w-full space-y-4 p-4">
+                {/* Timeline sits beside the name on a desktop and under it on a phone, where a
+                    third of a phone column is too narrow to type a duration into. */}
+                <div className="flex flex-col gap-3 sm:flex-row">
+                    <div className="flex-1 space-y-1">
+                        <FieldLabel>{FIELD_LABELS[fieldName]}</FieldLabel>
 
-                    {usesCatalogue ? (
-                        <DebouncedSearchSelect
-                            value={{
-                                label: localItem.name,
-                                value: localItem.name,
-                                icd_code: isDiagnosis ? (localItem as DiagnosisType).icd_code : undefined,
-                            }}
-                            onChange={option => {
-                                if (isDiagnosis) {
-                                    setLocalItem({
-                                        ...localItem,
-                                        name: option?.value || "",
-                                        icd_code: option?.icd_code,
-                                    });
-                                    return;
-                                }
-                                setLocalItem({ ...localItem, name: option?.value || "" });
-                            }}
-                            fetchOptions={fetchOptions}
-                            placeholder={`Search or enter ${FIELD_LABELS[fieldName].toLowerCase()}...`}
-                            minLength={isInvestigation ? 1 : undefined}
-                            debounceTime={isInvestigation ? 120 : undefined}
-                            queryKeyBase={isInvestigation ? [`${fieldName}-search`, investigationReady] : `${fieldName}-search`}
-                        />
-                    ) : (
-                        <Input
-                            autoFocus
-                            className="h-10 text-sm"
-                            value={localItem.name}
-                            placeholder={`Enter ${FIELD_LABELS[fieldName].toLowerCase()}...`}
-                            onChange={(event) => setLocalItem({ ...localItem, name: event.target.value })}
-                            onKeyDown={(event) => event.key === "Enter" && handleSave()}
-                        />
+                        {usesCatalogue ? (
+                            <DebouncedSearchSelect
+                                value={{
+                                    label: localItem.name,
+                                    value: localItem.name,
+                                    icd_code: isDiagnosis ? (localItem as DiagnosisType).icd_code : undefined,
+                                }}
+                                onChange={option => {
+                                    if (isDiagnosis) {
+                                        setLocalItem({
+                                            ...localItem,
+                                            name: option?.value || "",
+                                            icd_code: option?.icd_code,
+                                        });
+                                        return;
+                                    }
+                                    setLocalItem({ ...localItem, name: option?.value || "" });
+                                }}
+                                fetchOptions={fetchOptions}
+                                placeholder={`Search or enter ${FIELD_LABELS[fieldName].toLowerCase()}...`}
+                                minLength={isInvestigation ? 1 : undefined}
+                                debounceTime={isInvestigation ? 120 : undefined}
+                                queryKeyBase={isInvestigation ? [`${fieldName}-search`, investigationReady] : `${fieldName}-search`}
+                            />
+                        ) : (
+                            <Input
+                                autoFocus
+                                className={FIELD_INPUT}
+                                value={localItem.name}
+                                placeholder={`Enter ${FIELD_LABELS[fieldName].toLowerCase()}...`}
+                                enterKeyHint="done"
+                                onChange={(event) => setLocalItem({ ...localItem, name: event.target.value })}
+                                onKeyDown={(event) => event.key === "Enter" && handleSave()}
+                            />
+                        )}
+                    </div>
+
+                    {hasDuration && (
+                        <div className="w-full space-y-1 sm:w-1/3">
+                            <FieldLabel>Timeline</FieldLabel>
+                            <Input
+                                className={FIELD_INPUT}
+                                value={(localItem as ChiefComplaintType).duration || ""}
+                                placeholder="e.g. 5 days"
+                                enterKeyHint="done"
+                                onChange={(event) => setLocalItem({ ...localItem, duration: event.target.value })}
+                                onKeyDown={(event) => event.key === "Enter" && handleSave()}
+                            />
+                        </div>
                     )}
                 </div>
 
-                {/* Duration Input - Conditional */}
-                {hasDuration && (
-                    <div className="w-full sm:w-1/3 space-y-1">
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">
-                            Timeline
-                        </p>
+                {hasNotes && (
+                    <div className="space-y-1">
+                        <FieldLabel>Clinical Notes</FieldLabel>
                         <Input
-                            className="h-9 text-sm"
-                            // We must cast or assert here because TS knows hasDuration is true, 
-                            // but localItem is still the Union type in the eyes of the compiler for access
-                            value={(localItem as ChiefComplaintType).duration || ""}
-                            placeholder="e.g. 5 days"
-                            onChange={(e) => setLocalItem({ ...localItem, duration: e.target.value })}
-                            onKeyDown={(e) => e.key === "Enter" && handleSave()}
+                            className={FIELD_INPUT}
+                            value={(localItem as ChiefComplaintType).notes || ""}
+                            placeholder="Additional details..."
+                            enterKeyHint="done"
+                            onChange={(event) => setLocalItem({ ...localItem, notes: event.target.value })}
+                            onKeyDown={(event) => event.key === "Enter" && handleSave()}
                         />
                     </div>
                 )}
             </div>
+        </EditSurface>
+    );
+};
 
-            {/* Notes Input - Conditional */}
-            {hasNotes && (
-                <div className="space-y-1">
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">
-                        Clinical Notes
-                    </p>
-                    <Input
-                        className="h-9 text-sm"
-                        value={(localItem as ChiefComplaintType).notes || ""}
-                        placeholder="Additional details..."
-                        onChange={(e) => setLocalItem({ ...localItem, notes: e.target.value })}
-                        onKeyDown={(e) => e.key === "Enter" && handleSave()}
-                    />
-                </div>
-            )}
+// text-base below `sm`: iOS Safari zooms the page in on any input under 16px and never
+// zooms back out.
+const FIELD_INPUT = "h-11 text-base sm:h-9 sm:text-sm";
 
-            {/* Action Buttons */}
-            <div className="flex flex-wrap justify-between items-center gap-2 pt-2 border-t border-slate-50">
+const FieldLabel = ({ children }: { children: React.ReactNode }) => (
+    <p className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">{children}</p>
+);
+
+interface EditingItemActionsProps {
+    onRemove: () => void;
+    onCancel: () => void;
+    onSave:   () => void;
+}
+
+function EditingItemActions({ onRemove, onCancel, onSave }: EditingItemActionsProps) {
+    return (
+        <div className="flex flex-wrap justify-between items-center gap-2 border-t border-slate-100 px-4 pt-2 pb-4">
+            <Button
+                variant="ghost"
+                size="sm"
+                className="h-11 text-xs font-bold text-rose-500 hover:bg-rose-50 hover:text-rose-600 px-2 sm:h-8"
+                onClick={onRemove}
+            >
+                <Trash2 className="size-3.5 mr-1.5" /> Remove
+            </Button>
+            <div className="flex gap-2">
                 <Button
                     variant="ghost"
                     size="sm"
-                    className="h-8 text-xs font-bold text-rose-500 hover:bg-rose-50 hover:text-rose-600 px-2"
-                    onClick={() => {
-                        onRemove(index);
-                        setIsEditing(false);
-                    }}
+                    className="h-11 text-xs font-bold text-slate-500 sm:h-8"
+                    onClick={onCancel}
                 >
-                    <Trash2 className="size-3.5 mr-1.5" /> Remove
+                    Cancel
                 </Button>
-                <div className="flex gap-2">
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 text-xs font-bold text-slate-500"
-                        onClick={handleCancel}
-                    >
-                        Cancel
-                    </Button>
-                    <Button
-                        size="sm"
-                        className="h-8 text-xs font-bold px-4"
-                        onClick={handleSave}
-                    >
-                        Done
-                    </Button>
-                </div>
+                <Button
+                    size="sm"
+                    className="h-11 text-xs font-bold px-4 sm:h-8"
+                    onClick={onSave}
+                >
+                    Done
+                </Button>
             </div>
         </div>
     );
-};
+}
 
 function mapToSectionItemProps(item: ListInfoType, fieldName: ListInfoFieldName): SectionItemProps {
     if (fieldName === "diagnosis") {
@@ -386,10 +404,13 @@ const NonEditingItem = ({ item, index, onRemove, fieldName }: { item: ListInfoTy
                 <SectionItem {...mapToSectionItemProps(item, fieldName)} />
             </div>
 
+            {/* Hover reveal is a desktop affordance: a touch screen has no hover, so on a
+                phone this button was invisible and the row had no way to be removed. */}
             <Button
                 size="icon"
                 variant="ghost"
-                className="opacity-0 group-hover:opacity-100 transition-opacity text-slate-500 hover:text-slate-700"
+                aria-label="Remove item"
+                className="size-11 shrink-0 text-slate-500 transition-opacity hover:text-slate-700 sm:size-9 sm:opacity-0 sm:group-hover:opacity-100"
                 onClick={(e) => {
                     e.stopPropagation();
                     onRemove(index);

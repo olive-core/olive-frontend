@@ -1,7 +1,10 @@
 // Bridges the recorder and the prescribe screen across navigation: the recorder
-// registers the promise that resolves once every audio chunk has been uploaded,
-// and the prescribe screen awaits it before generating the draft so the
-// transcription is complete — including the final chunk.
+// registers the promise that resolves once every audio chunk is durably written to
+// the device, and the prescribe screen awaits it before generating.
+//
+// This promise means captured, not delivered. Delivery is the upload queue's job and
+// the delivery gate's clock — putting a second timeout on it here would leave two
+// timers racing over the same wait.
 
 const pendingFinalizations = new Map<string, Promise<void>>();
 

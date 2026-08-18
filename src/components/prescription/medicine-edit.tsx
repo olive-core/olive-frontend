@@ -1,9 +1,9 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { Trash2 } from "lucide-react";
 import { Button } from "../ui/button";
 import type { MedicineSchedule, MeedicineType } from "@/types/prescription";
 import { useMedicineSearch } from "@/hooks/use-medicine-search";
-import { useCommitOnClickOutside } from "@/hooks/use-commit-on-click-outside";
+import EditSurface from "./editor/edit-surface";
 import DebouncedSearchSelect, { type Option } from "./debounced-search-select";
 import RxForm from "./rx/rx-form";
 import Combobox from "./rx/combobox";
@@ -108,14 +108,22 @@ export default function MedicineEdit({ medicine, onRemove, onUpdate, index, setI
     const hasMedicine = Boolean(working.name || working.value);
     const config = RX_TYPE_CONFIG[getRxArchetype(working.type)];
 
-    const cardRef = useRef<HTMLDivElement>(null);
-    useCommitOnClickOutside(cardRef, handleSave);
-
     return (
-        // No overflow-hidden: it would clip the medicine search dropdown to the card.
+        // No overflow-hidden on the card: it would clip the medicine search dropdown.
         // The footer rounds its own bottom corners instead, since it is the only child
         // sitting flush against the card edge.
-        <div ref={cardRef} className="bg-white border border-primary shadow-xl rounded-2xl transition-all duration-200">
+        <EditSurface
+            title="Medicine"
+            onCommit={handleSave}
+            className="bg-white border border-primary shadow-xl rounded-2xl transition-all duration-200"
+            footer={
+                <MedicineEditActions
+                    onRemove={() => { onRemove(index); setIsEditing(false, index); }}
+                    onCancel={handleCancel}
+                    onSave={handleSave}
+                />
+            }
+        >
             <div className="p-4 sm:p-5 space-y-3">
                 <div className="space-y-1.5">
                     <label className="text-[11px] font-semibold text-slate-500 ml-1">Medicine</label>
@@ -157,24 +165,36 @@ export default function MedicineEdit({ medicine, onRemove, onUpdate, index, setI
                     <p className="text-xs text-slate-400 ml-1">Search and select a medicine to reveal its prescription fields.</p>
                 )}
             </div>
+        </EditSurface>
+    );
+}
 
-            <div className="bg-slate-50 px-5 py-3 flex flex-wrap justify-between items-center gap-2 border-t border-slate-100 rounded-b-2xl">
-                <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-xs font-bold text-slate-400 hover:text-rose-500 transition-colors"
-                    onClick={() => { onRemove(index); setIsEditing(false, index); }}
-                >
-                    <Trash2 className="size-3.5 mr-2" /> Remove
+interface MedicineEditActionsProps {
+    onRemove: () => void;
+    onCancel: () => void;
+    onSave:   () => void;
+}
+
+function MedicineEditActions({ onRemove, onCancel, onSave }: MedicineEditActionsProps) {
+    return (
+        // Trimmer on a phone: every row this bar gives up is a row of search results the
+        // sheet's scroll area can show instead.
+        <div className="bg-slate-50 px-3 py-2 flex flex-wrap justify-between items-center gap-2 border-t border-slate-100 rounded-b-2xl sm:px-5 sm:py-3">
+            <Button
+                variant="ghost"
+                size="sm"
+                className="h-11 sm:h-8 text-xs font-bold text-slate-400 hover:text-rose-500 transition-colors"
+                onClick={onRemove}
+            >
+                <Trash2 className="size-3.5 mr-2" /> Remove
+            </Button>
+            <div className="flex gap-2">
+                <Button variant="ghost" size="sm" className="h-11 sm:h-9 text-xs font-bold text-slate-500" onClick={onCancel}>
+                    Cancel
                 </Button>
-                <div className="flex gap-2">
-                    <Button variant="ghost" size="sm" className="h-9 text-xs font-bold text-slate-500" onClick={handleCancel}>
-                        Cancel
-                    </Button>
-                    <Button size="sm" className="h-9 text-xs px-6 font-bold shadow-md" onClick={handleSave}>
-                        Done
-                    </Button>
-                </div>
+                <Button size="sm" className="h-11 sm:h-9 text-xs px-6 font-bold shadow-md" onClick={onSave}>
+                    Done
+                </Button>
             </div>
         </div>
     );

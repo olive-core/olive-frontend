@@ -2,6 +2,7 @@ import { Input } from "../../ui/input";
 import { cn } from "@/lib/utils";
 import { DURATION_PRESETS, DURATION_UNITS } from "@/constants/prescription";
 import type { MedicineDuration } from "@/types/prescription";
+import RxChip from "./rx-chip";
 
 interface DurationInputProps {
     duration?: MedicineDuration;
@@ -26,49 +27,38 @@ export default function DurationInput({ duration, onChange }: DurationInputProps
 
     return (
         <div className="space-y-2">
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
                 <Input
                     value={value ?? ""}
                     onChange={event => setValue(event.target.value)}
                     type="number"
+                    inputMode="numeric"
                     min={0}
                     placeholder="e.g. 5"
-                    className={cn("h-10 w-20 text-center text-base sm:text-sm", preset && "opacity-50")}
+                    aria-label="Course length"
+                    className={cn("h-11 sm:h-10 w-20 text-center text-base sm:text-sm", preset && "opacity-50")}
                 />
                 <div className="flex gap-1">
                     {DURATION_UNITS.map(option => (
-                        <button
+                        <RxChip
                             key={option.code}
-                            type="button"
+                            label={option.code}
+                            active={!preset && unit === option.code}
                             onClick={() => onChange({ value, unit: option.code, preset: undefined })}
-                            className={cn(
-                                "px-3 py-1 text-xs rounded-md border transition-colors cursor-pointer",
-                                !preset && unit === option.code
-                                    ? "bg-emerald-600 border-emerald-600 text-white font-semibold"
-                                    : "border-slate-200 text-slate-500 hover:bg-slate-50",
-                            )}
-                        >
-                            {option.code}
-                        </button>
+                            className="sm:px-3"
+                        />
                     ))}
                 </div>
             </div>
             <div className="flex flex-wrap gap-1.5">
                 {DURATION_PRESETS.map(option => (
-                    <button
+                    <RxChip
                         key={option.code}
-                        type="button"
-                        onClick={() => togglePreset(option.code)}
+                        label={option.code}
                         title={option.fullForm}
-                        className={cn(
-                            "px-2.5 py-1 text-xs rounded-md border transition-colors cursor-pointer",
-                            preset === option.code
-                                ? "bg-emerald-600 border-emerald-600 text-white font-semibold"
-                                : "border-slate-200 text-slate-500 hover:bg-slate-50",
-                        )}
-                    >
-                        {option.code}
-                    </button>
+                        active={preset === option.code}
+                        onClick={() => togglePreset(option.code)}
+                    />
                 ))}
             </div>
         </div>

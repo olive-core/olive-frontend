@@ -50,7 +50,7 @@ function AutoGrowTextarea({
         <textarea
             ref={ref}
             autoFocus={autoFocus}
-            className={`w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm leading-relaxed resize-none overflow-hidden ${minHeightClass} transition-colors hover:border-emerald-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500`}
+            className={`w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-base sm:text-sm leading-relaxed resize-none overflow-hidden ${minHeightClass} transition-colors hover:border-emerald-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500`}
             value={value}
             placeholder={placeholder}
             onChange={(e) => onChange(e.target.value)}
@@ -92,7 +92,7 @@ function CopyNotesButton({ notes }: { notes: string }) {
         <button
             type="button"
             onClick={handleCopy}
-            className="flex items-center gap-1.5 rounded-lg border border-border bg-white px-2.5 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 transition-colors"
+            className="flex min-h-11 sm:min-h-0 items-center gap-1.5 rounded-lg border border-border bg-white px-2.5 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 transition-colors"
             title="Copy clinical notes"
         >
             {copied
@@ -108,7 +108,7 @@ function PrintNotesButton({ onPrint }: { onPrint: () => void }) {
         <button
             type="button"
             onClick={onPrint}
-            className="flex items-center gap-1.5 rounded-lg border border-border bg-white px-2.5 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 transition-colors"
+            className="flex min-h-11 sm:min-h-0 items-center gap-1.5 rounded-lg border border-border bg-white px-2.5 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 transition-colors"
             title="Print clinical notes"
         >
             <PrinterIcon className="size-3.5" /> Print
@@ -166,7 +166,7 @@ function SectionedNotesEditor({
                             key={section.key}
                             type="button"
                             onClick={() => setOpenedKeys((keys) => [...keys, section.key])}
-                            className="flex items-center gap-1.5 rounded-lg border border-dashed border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 hover:border-emerald-400 hover:text-emerald-700 transition-colors"
+                            className="flex min-h-11 sm:min-h-0 items-center gap-1.5 rounded-lg border border-dashed border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 hover:border-emerald-400 hover:text-emerald-700 transition-colors"
                         >
                             <PlusIcon className="size-3.5" />
                             {SECTION_LABELS[section.key]}

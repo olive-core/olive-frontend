@@ -6,7 +6,7 @@ import { useRecordingSessionActions } from "@/hooks/use-recording-session-action
 import { cn, formatDuration } from "@/lib/utils";
 import RecordingStatus from "./recording-status";
 import RecorderControls from "./recorder-controls";
-import FailedChunkNotice from "./failed-chunk-notice";
+import SyncStatusNotice from "./sync-status-notice";
 import DiscardSessionDialog from "./discard-session-dialog";
 import { useRecorderMorph } from "./recorder-morph";
 
@@ -14,7 +14,7 @@ import { useRecorderMorph } from "./recorder-morph";
 // so leaving the page only hides this card — the microphone keeps running behind the
 // floating widget, which the card visibly folds into as the doctor navigates away.
 export default function RecorderCard() {
-    const { status, duration, failedChunkCount, registerInlineRecorder } = useRecordingSession();
+    const { status, duration, registerInlineRecorder } = useRecordingSession();
     const { discardSession } = useRecordingSessionActions();
     const ref = useRecorderMorph<HTMLDivElement>("card");
 
@@ -36,7 +36,7 @@ export default function RecorderCard() {
                     {formatDuration(duration)}
                 </div>
 
-                <FailedChunkNotice count={failedChunkCount} className="max-w-xs text-center" />
+                <SyncStatusNotice className="max-w-xs text-center" />
 
                 {/* Live audio waveform — disabled for now: it drew too much attention during
                     the consult. The breathing dot + silence warning already reassure capture.

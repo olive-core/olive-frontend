@@ -13,8 +13,8 @@ interface UnresolvedMedicineCardProps {
 // reads as a confirmed Rx line; the action rail mirrors the medicine view card.
 export default function UnresolvedMedicineCard({ heardAs, onResolve, onDismiss }: UnresolvedMedicineCardProps) {
     return (
-        <div className="group flex items-stretch gap-1.5">
-            <div className="flex-1 rounded-2xl border border-dashed border-amber-300 bg-amber-50/60 p-4 sm:p-5">
+        <div className="group flex flex-col gap-1 sm:flex-row sm:items-stretch sm:gap-1.5">
+            <div className="w-full rounded-2xl border border-dashed border-amber-300 bg-amber-50/60 p-4 sm:flex-1 sm:p-5">
                 <div className="flex gap-3">
                     <AudioLines className="size-5 shrink-0 text-amber-500 mt-0.5" />
                     <div className="min-w-0">
@@ -25,7 +25,7 @@ export default function UnresolvedMedicineCard({ heardAs, onResolve, onDismiss }
                             variant="outline"
                             size="sm"
                             onClick={onResolve}
-                            className="mt-3 flex items-center gap-2 cursor-pointer border-amber-300 text-amber-700 hover:text-amber-800 hover:bg-amber-100"
+                            className="mt-3 flex h-11 items-center gap-2 cursor-pointer border-amber-300 text-amber-700 hover:text-amber-800 hover:bg-amber-100 sm:h-8"
                         >
                             <Search className="size-4" /> Search &amp; add this medicine
                         </Button>
@@ -33,12 +33,12 @@ export default function UnresolvedMedicineCard({ heardAs, onResolve, onDismiss }
                 </div>
             </div>
 
-            <div className="flex flex-col justify-center gap-0.5 shrink-0">
+            <div className="flex shrink-0 items-center justify-end gap-1 sm:flex-col sm:justify-center sm:gap-0.5">
                 <Button
                     size="icon"
                     variant="ghost"
                     aria-label="Dismiss — not a medicine"
-                    className="h-7 w-7 cursor-pointer text-slate-400 hover:text-rose-500"
+                    className="size-11 sm:size-7 cursor-pointer text-slate-400 hover:text-rose-500"
                     onClick={onDismiss}
                 >
                     <X className="h-4 w-4" />

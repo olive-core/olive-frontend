@@ -167,6 +167,25 @@ html {
   /* Firefox   */
   -ms-overflow-style: none;
   /* IE/Edge   */
+
+  /* The default black flash reads as an error on a green UI, but dropping it entirely
+     makes taps feel dead. A brand tint still confirms the tap landed. */
+  -webkit-tap-highlight-color: rgba(16, 185, 129, 0.15);
+}
+
+/* A prescription is written by tapping small chips in quick succession, and the browser
+   reads two fast taps as double-tap-to-zoom — swallowing every second tap and leaving the
+   page zoomed in. `manipulation` keeps panning and pinch-zoom, and drops only that gesture. */
+@media (pointer: coarse) {
+
+  button,
+  [role="button"],
+  a,
+  input,
+  select,
+  textarea {
+    touch-action: manipulation;
+  }
 }
 
 html::-webkit-scrollbar {

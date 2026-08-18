@@ -1,9 +1,9 @@
 import { Input } from "../../ui/input";
-import { cn } from "@/lib/utils";
 import { DOSE_UNITS, type RxOption } from "@/constants/prescription";
 import { parseFraction, toFractionLabel } from "@/lib/rx-format";
 import type { MedicineDose } from "@/types/prescription";
 import Combobox, { type ComboboxOption } from "./combobox";
+import RxChip from "./rx-chip";
 
 interface DoseInputProps {
     dose?: MedicineDose;
@@ -37,12 +37,15 @@ export default function DoseInput({
     return (
         <div className="space-y-1.5">
             <div className="flex gap-2">
+                {/* No inputMode: a numeric keypad has no "/", and fractions like 1/2 are
+                    typed here as often as decimals. */}
                 <Input
                     value={amount}
                     onChange={event => onChange({ amount: event.target.value, unit })}
                     onBlur={normalizeAmount}
                     placeholder={amountPlaceholder}
-                    className="h-10 w-20 text-center text-base sm:text-sm"
+                    aria-label="Dose amount"
+                    className="h-11 sm:h-10 w-20 text-center text-base sm:text-sm"
                 />
                 <div className="flex-1">
                     <Combobox
@@ -54,21 +57,15 @@ export default function DoseInput({
                     />
                 </div>
             </div>
-            <div className="flex gap-1.5">
+            <div className="flex flex-wrap gap-1.5">
                 {AMOUNT_PRESETS.map(preset => (
-                    <button
+                    <RxChip
                         key={preset}
-                        type="button"
+                        label={preset}
+                        tone="soft"
+                        active={amount === preset}
                         onClick={() => onChange({ amount: preset, unit })}
-                        className={cn(
-                            "px-2.5 py-1 text-xs rounded-md border transition-colors cursor-pointer",
-                            amount === preset
-                                ? "bg-emerald-50 border-emerald-200 text-emerald-700 font-semibold"
-                                : "border-slate-200 text-slate-500 hover:bg-slate-50",
-                        )}
-                    >
-                        {preset}
-                    </button>
+                    />
                 ))}
             </div>
         </div>

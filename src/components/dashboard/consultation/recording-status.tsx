@@ -1,4 +1,4 @@
-import { MicOffIcon } from "lucide-react";
+import { HardDriveIcon, MicOffIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { RecordingStatus as Status } from "@/hooks/use-recording-session";
 
@@ -9,18 +9,25 @@ const STATUS_COPY: Record<Status, { label: string; hint?: string }> = {
     paused:      { label: "Paused" },
     silent:      { label: "Not hearing anything", hint: "Check the mic is connected and unmuted." },
     unavailable: { label: "Microphone blocked", hint: "Allow microphone access, then try again." },
+    "storage-full": { label: "No space on device", hint: "Free up space, then start the recording." },
 };
 
+// The states that mean capture is not happening and the doctor has to act.
+function isBlocked(status: Status): boolean {
+    return status === "unavailable" || status === "storage-full";
+}
+
 export function RecordingStatusDot({ status }: { status: Status }) {
-    if (status === "silent" || status === "unavailable") {
+    if (status === "silent" || isBlocked(status)) {
+        const Icon = status === "storage-full" ? HardDriveIcon : MicOffIcon;
         return (
             <span
                 className={cn(
                     "flex size-3.5 items-center justify-center",
-                    status === "unavailable" ? "text-rose-500" : "text-amber-500",
+                    isBlocked(status) ? "text-rose-500" : "text-amber-500",
                 )}
             >
-                <MicOffIcon className="size-3.5" strokeWidth={2.25} />
+                <Icon className="size-3.5" strokeWidth={2.25} />
             </span>
         );
     }
@@ -53,7 +60,7 @@ export default function RecordingStatus({ status }: { status: Status }) {
                 <span
                     className={cn(
                         "text-sm font-medium uppercase tracking-wide",
-                        status === "unavailable" ? "text-rose-600" : status === "silent" ? "text-amber-600" : "text-slate-500",
+                        isBlocked(status) ? "text-rose-600" : status === "silent" ? "text-amber-600" : "text-slate-500",
                     )}
                 >
                     {label}
@@ -63,7 +70,7 @@ export default function RecordingStatus({ status }: { status: Status }) {
                 <p
                     className={cn(
                         "max-w-xs text-center text-xs font-medium",
-                        status === "unavailable" ? "text-rose-700" : "text-amber-700",
+                        isBlocked(status) ? "text-rose-700" : "text-amber-700",
                     )}
                 >
                     {hint}

@@ -30,7 +30,8 @@ export default function PatientStrip({ name, dateOfBirth, sex, dateTime }: Patie
 
     return (
         <div className="border-y py-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 text-sm mt-5">
-            <div className="flex gap-4">
+            {/* Wraps: a long patient name would otherwise push age and sex off a phone. */}
+            <div className="flex flex-wrap gap-x-4 gap-y-0.5">
                 <p className="text-slate-900">
                     Name: <span className="font-semibold">{(name ?? "").trim()}</span>
                 </p>
