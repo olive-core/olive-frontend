@@ -525,7 +525,12 @@ function noteFromSummary(summary: string) {
     const sections = parseSoapSections(summary);
     if (!sections) return null;
     const text = (key: string) => sections.find((section) => section.key === key)?.text ?? "";
-    return { subjective: text("S"), objective: text("O"), assessment: text("A") };
+    return {
+        subjective: text("S"),
+        objective: text("O"),
+        assessment: text("A"),
+        plan: text("P"),
+    };
 }
 
 function sourcesForSubmittedVitals(

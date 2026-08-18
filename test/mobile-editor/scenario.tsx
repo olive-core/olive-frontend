@@ -11,6 +11,7 @@ import DoctorInfo from "@/components/prescription/doctor-info";
 import ListInfo from "@/components/prescription/list-info";
 import MedicineView from "@/components/prescription/medicine-view";
 import RxChip from "@/components/prescription/rx/rx-chip";
+import ClinicalNotesPanel from "@/components/prescription/paper/clinical-notes-panel";
 import { viewport } from "./dom-setup";
 import { editorMarkup, listItemRowMarkup } from "./markup";
 
@@ -108,6 +109,18 @@ function mountListInfo(): { root: Root; host: HTMLElement } {
     return { root, host };
 }
 
+function mountEmptyClinicalNotes(): { root: Root; host: HTMLElement } {
+    const host = document.createElement("div");
+    document.body.appendChild(host);
+    const root = createRoot(host);
+
+    act(() => {
+        root.render(<ClinicalNotesPanel notes="" onChange={() => {}} />);
+    });
+
+    return { root, host };
+}
+
 const unmount = (root: Root, host: HTMLElement) => {
     act(() => root.unmount());
     host.remove();
@@ -173,7 +186,29 @@ export async function runTest() {
         check("no field renders below 16px", tooSmall.length === 0, tooSmall.map((f) => f.join(" ")).join(" | "));
     }
 
-    section("4. A list row can be removed without a hover");
+    section("4. Empty SOAP sections are clear manual actions");
+    {
+        const { root, host } = mountEmptyClinicalNotes();
+        const buttons = [...host.querySelectorAll("button")];
+        const labels = buttons.map((button) => button.textContent?.trim());
+
+        check(
+            "all four empty SOAP sections can be added",
+            ["Subjective", "Objective", "Assessment", "Plan"].every((label) => labels.includes(label)),
+            labels.join(", "),
+        );
+
+        const planButton = buttons.find((button) => button.textContent?.trim() === "Plan");
+        act(() => planButton?.dispatchEvent(new window.MouseEvent("click", { bubbles: true })));
+        check(
+            "opening Plan creates its focused editor",
+            host.querySelector('textarea[placeholder="Add plan notes..."]') !== null,
+        );
+
+        unmount(root, host);
+    }
+
+    section("5. A list row can be removed without a hover");
     {
         const markup = listItemRowMarkup();
         const removeButton = classesOf(markup, "button").find((classes) => classes.includes("size-11"));
@@ -185,7 +220,7 @@ export async function runTest() {
         );
     }
 
-    section("5. A desktop opens the editor in place");
+    section("6. A desktop opens the editor in place");
     {
         viewport.isPhone = false;
         let commits = 0;
@@ -204,7 +239,7 @@ export async function runTest() {
         unmount(root, host);
     }
 
-    section("6. A phone opens the editor as a sheet with its actions pinned");
+    section("7. A phone opens the editor as a sheet with its actions pinned");
     {
         viewport.isPhone = true;
         let commits = 0;
@@ -231,7 +266,7 @@ export async function runTest() {
         unmount(root, host);
     }
 
-    section("7. Turning the phone mid-edit does not restart the edit");
+    section("8. Turning the phone mid-edit does not restart the edit");
     {
         viewport.isPhone = true;
         const { root, host } = mountEditSurface(() => {});
@@ -252,7 +287,7 @@ export async function runTest() {
         unmount(root, host);
     }
 
-    section("8. Tapping a complaint on a phone opens the real editor as a sheet");
+    section("9. Tapping a complaint on a phone opens the real editor as a sheet");
     {
         viewport.isPhone = true;
         const { root, host } = mountListInfo();
@@ -273,7 +308,7 @@ export async function runTest() {
         unmount(root, host);
     }
 
-    section("9. The editor's letterhead does not put the doctor and the chamber side by side on a phone");
+    section("10. The editor's letterhead does not put the doctor and the chamber side by side on a phone");
     {
         const markup = renderToStaticMarkup(<DoctorInfo sessionId="s1" />);
 
@@ -291,7 +326,7 @@ export async function runTest() {
         check("the doctor's identity is not hidden behind it", markup.includes("Dr. Rafiqul Islam"));
     }
 
-    section("10. Search results get every row the sheet can give them");
+    section("11. Search results get every row the sheet can give them");
     {
         // The field is lifted to the top of the sheet's scroll area, so the room below it is
         // the whole area — bounded by the area's own bottom, or the keyboard, whichever is nearer.
@@ -321,7 +356,7 @@ export async function runTest() {
         unmount(root, host);
     }
 
-    section("11. A medicine reads across the full column on a phone");
+    section("12. A medicine reads across the full column on a phone");
     {
         const rowMarkup = renderToStaticMarkup(
             <MedicineView

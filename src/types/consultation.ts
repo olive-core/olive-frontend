@@ -18,6 +18,10 @@ export type ClinicianConsultationItem = {
     patient_name?:          string | null;
     patient_sex?:           PatientSex | null;
     patient_date_of_birth?: string | null;
+    access_type?:          "owned" | "shared";
+    case_root_session_id?: string | null;
+    clinician_name?:       string | null;
+    shared_by_name?:       string | null;
 }
 
 export type ConsultationHistoryItem = {
@@ -67,6 +71,7 @@ export type ConsultationDetail = {
     previous_prescription_id?: string | null;
     next_prescription_id?: string | null;
     has_follow_up?:         boolean;
+    access_type?:           "owned" | "shared" | "patient";
     // Letterhead: render_config is the snapshot frozen at save time; the
     // clinician_* fields back-fill legacy prescriptions saved before snapshots.
     chamber_id?:              string | null;

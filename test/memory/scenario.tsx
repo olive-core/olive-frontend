@@ -17,6 +17,9 @@ import type { PrescriptionResponseType } from "@/types/prescription";
 import type { StoredRxItem } from "@/lib/rx-medicine";
 import { eligibleFollowUpSources } from "@/hooks/use-patient-consultations";
 import type { PatientPrescriptionListItem } from "@/types/patient";
+import type { ClinicianConsultationItem } from "@/types/consultation";
+import { filterConsultationsByAccess } from "@/components/dashboard/consultations/filters/filter-by-access";
+import { mergeClinicianConsultations } from "@/components/dashboard/consultations/use-clinician-consultations";
 
 let failures = 0;
 function check(label: string, passed: boolean, detail = "") {
@@ -187,6 +190,30 @@ async function runDomScenarios() {
 // ─── Store rules ────────────────────────────────────────────────────────────
 
 async function run() {
+    section("Owned consultations and shared Cases stay distinguishable in one list");
+    {
+        const owned = [{
+            prescription_id: "owned",
+            created_at: "2026-08-17T09:00:00Z",
+            diagnoses_summary: [],
+            patient_id: "patient-1",
+            access_type: "owned",
+        }] as ClinicianConsultationItem[];
+        const shared = [{
+            prescription_id: "shared-latest",
+            created_at: "2026-08-18T09:00:00Z",
+            diagnoses_summary: [],
+            patient_id: "patient-2",
+            access_type: "shared",
+            case_root_session_id: "case-root",
+        }] as ClinicianConsultationItem[];
+
+        const combined = mergeClinicianConsultations(owned, shared);
+        check("the latest shared Case joins the normal consultation list", combined[0]?.prescription_id === "shared-latest");
+        check("Mine hides shared Cases", filterConsultationsByAccess(combined, "owned").map((item) => item.prescription_id).join() === "owned");
+        check("Shared shows one Case entry", filterConsultationsByAccess(combined, "shared").map((item) => item.case_root_session_id).join() === "case-root");
+    }
+
     section("Follow-up source eligibility keeps only standalone visits and series endpoints");
     {
         const consultation = (
@@ -400,7 +427,10 @@ async function run() {
         const draft = generatedDraft();
         draft.session_id = "follow-up-session";
         draft.medicines[0].medicine_id = "medicine-1";
-        draft.summary = "S: Fever is improving.\n\nO: Pulse 88 bpm.\n\nA: Viral fever improving.";
+        draft.summary = (
+            "S: Fever is improving.\n\nO: Pulse 88 bpm.\n\n"
+            + "A: Viral fever improving.\n\nP: Continue hydration and review tomorrow."
+        );
         draft.vital_sources = {
             pulse: { observed_at: "2026-08-16T09:00:00+06:00", session_id: "previous-session" },
         };
@@ -408,14 +438,20 @@ async function run() {
         await store().getInitialPrescription(draft);
         const payload = store().getSubmitPayload("follow-up-session") as {
             rx_list: StoredRxItem[];
-            clinical_note: { subjective: string; objective: string; assessment: string } | null;
+            clinical_note: {
+                subjective: string;
+                objective: string;
+                assessment: string;
+                plan: string;
+            } | null;
             vital_sources: Record<string, { observed_at: string; session_id: string }>;
         };
 
         check("the database-grounded medicine id survives review and save",
             payload.rx_list[0]?.medicine_id === "medicine-1");
         check("the encounter note is saved in structured form",
-            payload.clinical_note?.assessment === "Viral fever improving.");
+            payload.clinical_note?.assessment === "Viral fever improving."
+            && payload.clinical_note?.plan === "Continue hydration and review tomorrow.");
         check("a carried vital keeps its original observation source",
             payload.vital_sources.pulse?.session_id === "previous-session");
     }

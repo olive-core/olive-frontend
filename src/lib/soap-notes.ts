@@ -1,4 +1,5 @@
-// The backend composes clinical notes as "S: ...\n\nO: ...\n\nA: ..." (gate.compose_summary).
+// The backend composes clinical notes as "S: ...\n\nO: ...\n\nA: ...\n\nP: ..."
+// (gate.compose_summary).
 // These helpers parse that string into labeled sections and recompose the identical
 // format, so the stored note never changes shape.
 
@@ -6,9 +7,10 @@ export const SECTION_LABELS: Record<string, string> = {
     S: "Subjective",
     O: "Objective",
     A: "Assessment",
+    P: "Plan",
 };
 
-export const SECTION_ORDER = ["S", "O", "A"];
+export const SECTION_ORDER = ["S", "O", "A", "P"];
 
 export interface NoteSection {
     key:  string;
@@ -16,7 +18,7 @@ export interface NoteSection {
 }
 
 export function parseSoapSections(text: string): NoteSection[] | null {
-    const markers = [...text.matchAll(/^([SOA]):[ \t]*/gm)];
+    const markers = [...text.matchAll(/^([SOAP]):[ \t]*/gm)];
     if (markers.length === 0) return null;
     // Anything before the first marker means free-form text — don't force sections on it.
     if (text.slice(0, markers[0].index).trim() !== "") return null;

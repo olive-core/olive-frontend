@@ -15,6 +15,11 @@ function AuthLayout() {
 
   useEffect(() => {
     if (isLoggedIn) {
+      const pendingCaseCode = sessionStorage.getItem("pendingCaseCode");
+      if (activeView === "doctor" && pendingCaseCode) {
+        navigate({ to: "/c/$code", params: { code: pendingCaseCode } });
+        return;
+      }
       const target = activeView === "patient" ? "/patient" : activeView === "attendant" ? "/attendant" : "/doctor";
       navigate({ to: target });
     }

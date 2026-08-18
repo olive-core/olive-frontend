@@ -21,6 +21,7 @@ import { Route as PatientIndexRouteImport } from './routes/patient/index'
 import { Route as DoctorIndexRouteImport } from './routes/doctor/index'
 import { Route as AttendantIndexRouteImport } from './routes/attendant/index'
 import { Route as PCodeRouteImport } from './routes/p.$code'
+import { Route as CCodeRouteImport } from './routes/c.$code'
 import { Route as authSignInRouteImport } from './routes/(auth)/sign-in'
 import { Route as authEnterOtpRouteImport } from './routes/(auth)/enter-otp'
 import { Route as PatientProfileIndexRouteImport } from './routes/patient/profile/index'
@@ -96,6 +97,11 @@ const AttendantIndexRoute = AttendantIndexRouteImport.update({
 const PCodeRoute = PCodeRouteImport.update({
   id: '/p/$code',
   path: '/p/$code',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CCodeRoute = CCodeRouteImport.update({
+  id: '/c/$code',
+  path: '/c/$code',
   getParentRoute: () => rootRouteImport,
 } as any)
 const authSignInRoute = authSignInRouteImport.update({
@@ -201,6 +207,7 @@ export interface FileRoutesByFullPath {
   '/not-found': typeof NotFoundRoute
   '/enter-otp': typeof authEnterOtpRoute
   '/sign-in': typeof authSignInRoute
+  '/c/$code': typeof CCodeRoute
   '/p/$code': typeof PCodeRoute
   '/attendant/': typeof AttendantIndexRoute
   '/doctor/': typeof DoctorIndexRoute
@@ -228,6 +235,7 @@ export interface FileRoutesByTo {
   '/not-found': typeof NotFoundRoute
   '/enter-otp': typeof authEnterOtpRoute
   '/sign-in': typeof authSignInRoute
+  '/c/$code': typeof CCodeRoute
   '/p/$code': typeof PCodeRoute
   '/attendant': typeof AttendantIndexRoute
   '/doctor': typeof DoctorIndexRoute
@@ -260,6 +268,7 @@ export interface FileRoutesById {
   '/not-found': typeof NotFoundRoute
   '/(auth)/enter-otp': typeof authEnterOtpRoute
   '/(auth)/sign-in': typeof authSignInRoute
+  '/c/$code': typeof CCodeRoute
   '/p/$code': typeof PCodeRoute
   '/attendant/': typeof AttendantIndexRoute
   '/doctor/': typeof DoctorIndexRoute
@@ -292,6 +301,7 @@ export interface FileRouteTypes {
     | '/not-found'
     | '/enter-otp'
     | '/sign-in'
+    | '/c/$code'
     | '/p/$code'
     | '/attendant/'
     | '/doctor/'
@@ -319,6 +329,7 @@ export interface FileRouteTypes {
     | '/not-found'
     | '/enter-otp'
     | '/sign-in'
+    | '/c/$code'
     | '/p/$code'
     | '/attendant'
     | '/doctor'
@@ -350,6 +361,7 @@ export interface FileRouteTypes {
     | '/not-found'
     | '/(auth)/enter-otp'
     | '/(auth)/sign-in'
+    | '/c/$code'
     | '/p/$code'
     | '/attendant/'
     | '/doctor/'
@@ -380,6 +392,7 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   ComingSoonRoute: typeof ComingSoonRoute
   NotFoundRoute: typeof NotFoundRoute
+  CCodeRoute: typeof CCodeRoute
   PCodeRoute: typeof PCodeRoute
 }
 
@@ -467,6 +480,13 @@ declare module '@tanstack/react-router' {
       path: '/p/$code'
       fullPath: '/p/$code'
       preLoaderRoute: typeof PCodeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/c/$code': {
+      id: '/c/$code'
+      path: '/c/$code'
+      fullPath: '/c/$code'
+      preLoaderRoute: typeof CCodeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/(auth)/sign-in': {
@@ -683,6 +703,7 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   ComingSoonRoute: ComingSoonRoute,
   NotFoundRoute: NotFoundRoute,
+  CCodeRoute: CCodeRoute,
   PCodeRoute: PCodeRoute,
 }
 export const routeTree = rootRouteImport

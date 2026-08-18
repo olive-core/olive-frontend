@@ -8,6 +8,14 @@ interface UseClinicianConsultationsArgs {
     dateRange:    DateRange;
 }
 
+export function mergeClinicianConsultations(
+    owned: ClinicianConsultationItem[],
+    shared: ClinicianConsultationItem[],
+): ClinicianConsultationItem[] {
+    return [...owned, ...shared]
+        .sort((left, right) => Date.parse(right.created_at) - Date.parse(left.created_at));
+}
+
 function buildQueryParams(dateRange: DateRange): Record<string, string> {
     const params: Record<string, string> = {};
     if (dateRange.fromDate) params.from_date = dateRange.fromDate;
@@ -19,10 +27,12 @@ export function useClinicianConsultations({ clinicianId, dateRange }: UseClinici
     return useQuery<ClinicianConsultationItem[]>({
         queryKey: ['clinician-consultations', clinicianId, dateRange.fromDate, dateRange.toDate],
         queryFn:  async () => {
-            const response = await api.get(`/prescription/clinician/${clinicianId}`, {
-                params: buildQueryParams(dateRange),
-            });
-            return response.data;
+            const params = buildQueryParams(dateRange);
+            const [owned, shared] = await Promise.all([
+                api.get<ClinicianConsultationItem[]>(`/prescription/clinician/${clinicianId}`, { params }),
+                api.get<ClinicianConsultationItem[]>("/case/shared", { params }),
+            ]);
+            return mergeClinicianConsultations(owned.data, shared.data);
         },
         enabled: !!clinicianId,
     });

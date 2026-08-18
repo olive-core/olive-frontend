@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { AlertCircleIcon, ArrowLeftIcon, ChevronLeftIcon, ChevronRightIcon, HistoryIcon, PrinterIcon } from 'lucide-react'
+import { AlertCircleIcon, ArrowLeftIcon, ChevronLeftIcon, ChevronRightIcon, EllipsisIcon, HistoryIcon, PrinterIcon, Share2Icon } from 'lucide-react'
 import { useState } from 'react'
 import toast from 'react-hot-toast'
 
@@ -13,6 +13,12 @@ import { fetchNoteImages, noteImagesForSubmit } from '@/lib/note-images'
 import { cn } from '@/lib/utils'
 import { parseSoapSections } from '@/lib/soap-notes'
 import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import type { ConsultationDetail } from '@/types/consultation'
 import type { NoteImageType } from '@/types/prescription'
 import type { PatientInfoType } from '@/types/patient'
@@ -27,6 +33,7 @@ import PatientStrip from '@/components/prescription/paper/patient-strip'
 import DocumentSwitcher, {
   type PrescriptionDocument,
 } from '@/components/prescription/document-switcher'
+import CaseShareDialog from '@/components/consultation/case-share-button'
 
 export const Route = createFileRoute('/doctor/consultations/$prescriptionId')({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -75,7 +82,12 @@ function useSaveSummary(prescriptionId: string) {
       await api.put(`/prescription/${prescriptionId}`, {
         summary,
         clinical_note: sections
-          ? { subjective: section('S'), objective: section('O'), assessment: section('A') }
+          ? {
+              subjective: section('S'),
+              objective: section('O'),
+              assessment: section('A'),
+              plan: section('P'),
+            }
           : null,
       })
     },
@@ -107,14 +119,14 @@ interface ClinicalNotesTabProps {
   notes:       string | null
   safetyNet:   string[]
   patientSlot: React.ReactNode
-  onChange:    (value: string) => void
+  onChange?:   (value: string) => void
   onPrint:     () => void
-  onSave:      () => void
+  onSave?:     () => void
   isDirty:     boolean
   isSaving:    boolean
   images:          NoteImageType[]
-  onAddImages:     (files: File[]) => void
-  onRemoveImage:   (image: NoteImageType) => void
+  onAddImages?:    (files: File[]) => void
+  onRemoveImage?:  (image: NoteImageType) => void
   uploadingImages: number
 }
 
@@ -145,7 +157,7 @@ function ClinicalNotesTab({
         onRemoveImage={onRemoveImage}
         uploadingImages={uploadingImages}
       />
-      {isDirty && (
+      {isDirty && onSave && (
         <div className="mx-auto flex w-full max-w-3xl justify-end px-4 mt-2">
           <Button
             size="sm"
@@ -180,20 +192,20 @@ function ConsultationSeriesNavigation({
   })
 
   return (
-    <div className="mx-auto mb-3 flex w-full max-w-3xl items-center justify-between gap-2 px-4">
-      <Button variant="outline" size="sm" disabled={!previousPrescriptionId} onClick={() => previousPrescriptionId && openConsultation(previousPrescriptionId)}>
-        <ChevronLeftIcon className="size-4 mr-1" />
-        <span className="hidden sm:inline">Previous consultation</span>
-        <span className="sm:hidden">Previous</span>
-      </Button>
-      <span className="hidden items-center gap-1.5 text-xs font-medium text-emerald-700 sm:inline-flex">
-        <HistoryIcon className="size-3.5" /> Follow-up series
-      </span>
-      <Button variant="outline" size="sm" disabled={!nextPrescriptionId} onClick={() => nextPrescriptionId && openConsultation(nextPrescriptionId)}>
-        <span className="hidden sm:inline">Next consultation</span>
-        <span className="sm:hidden">Next</span>
-        <ChevronRightIcon className="size-4 ml-1" />
-      </Button>
+    <div className="mx-auto mb-4 w-full max-w-xl px-4">
+      <div className="flex items-center justify-between gap-1 rounded-xl border border-slate-200 bg-white p-1 shadow-sm">
+        <Button variant="ghost" size="sm" disabled={!previousPrescriptionId} onClick={() => previousPrescriptionId && openConsultation(previousPrescriptionId)}>
+          <ChevronLeftIcon className="size-4 sm:mr-1" />
+          <span className="hidden sm:inline">Earlier</span>
+        </Button>
+        <span className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-700">
+          <HistoryIcon className="size-3.5" /> Follow-up series
+        </span>
+        <Button variant="ghost" size="sm" disabled={!nextPrescriptionId} onClick={() => nextPrescriptionId && openConsultation(nextPrescriptionId)}>
+          <span className="hidden sm:inline">Later</span>
+          <ChevronRightIcon className="size-4 sm:ml-1" />
+        </Button>
+      </div>
     </div>
   )
 }
@@ -208,16 +220,7 @@ function BackButton() {
       className="text-slate-500 hover:text-slate-800 -ml-2"
     >
       <ArrowLeftIcon className="size-4 mr-1" />
-      Back to consultations
-    </Button>
-  )
-}
-
-function PrintButton({ onPrint, disabled }: { onPrint: () => void; disabled?: boolean }) {
-  return (
-    <Button size="sm" onClick={onPrint} disabled={disabled} className="gap-2">
-      <PrinterIcon className="size-4" />
-      Print
+      Consultations
     </Button>
   )
 }
@@ -226,17 +229,46 @@ function DetailToolbar({
   onPrint,
   printDisabled,
   followUpAction,
+  onShare,
+  sharedLabel,
 }: {
   onPrint?: () => void
   printDisabled?: boolean
   followUpAction?: React.ReactNode
+  onShare?: () => void
+  sharedLabel?: boolean
 }) {
   return (
     <div className="container mx-auto mt-4 mb-6 flex flex-wrap items-center justify-between gap-2 px-4 print:hidden">
       <BackButton />
-      <div className="ml-auto flex items-center gap-2">
+      <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
+        {sharedLabel && (
+          <span className="inline-flex h-8 items-center rounded-full bg-emerald-50 px-3 text-xs font-semibold text-emerald-700">
+            Shared case
+          </span>
+        )}
         {followUpAction}
-        {onPrint && <PrintButton onPrint={onPrint} disabled={printDisabled} />}
+        {(onShare || onPrint) && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button type="button" variant="outline" size="icon" aria-label="More consultation actions">
+                <EllipsisIcon className="size-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="min-w-44">
+              {onShare && (
+                <DropdownMenuItem onSelect={onShare}>
+                  <Share2Icon className="size-4" /> Share case
+                </DropdownMenuItem>
+              )}
+              {onPrint && (
+                <DropdownMenuItem onSelect={onPrint} disabled={printDisabled}>
+                  <PrinterIcon className="size-4" /> Print
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
       </div>
     </div>
   )
@@ -278,6 +310,7 @@ function ConsultationDetailContent({ prescriptionId }: { prescriptionId: string 
     search.document === 'notes' ? 'notes' : 'prescription'
   )
   const [notesDraft, setNotesDraft] = useState<string | null>(null)
+  const [shareDialogOpen, setShareDialogOpen] = useState(false)
   const saveSummary = useSaveSummary(prescriptionId)
 
   // Photos save the moment they are added or removed — unlike the note text, there is
@@ -312,7 +345,7 @@ function ConsultationDetailContent({ prescriptionId }: { prescriptionId: string 
   if (isLoading) {
     return (
       <>
-        <DetailToolbar onPrint={() => requestPrint('prescription')} printDisabled />
+        <DetailToolbar />
         <ReadSkeleton />
       </>
     )
@@ -327,6 +360,7 @@ function ConsultationDetailContent({ prescriptionId }: { prescriptionId: string 
   const currentNotes = notesDraft ?? savedNotes
   const notesDirty = notesDraft !== null && notesDraft !== savedNotes
   const hasPrescription = consultation.includes_prescription !== false
+  const isShared = consultation.access_type === 'shared'
 
   const patientStrip = (
     <PatientStrip
@@ -342,14 +376,14 @@ function ConsultationDetailContent({ prescriptionId }: { prescriptionId: string 
       notes={currentNotes}
       safetyNet={safetyNet}
       patientSlot={patientStrip}
-      onChange={setNotesDraft}
+      onChange={isShared ? undefined : setNotesDraft}
       onPrint={() => requestPrint('note')}
-      onSave={() => saveSummary.mutate(notesDraft ?? '')}
+      onSave={isShared ? undefined : () => saveSummary.mutate(notesDraft ?? '')}
       isDirty={notesDirty}
       isSaving={saveSummary.isPending}
       images={noteImages}
-      onAddImages={noteImageUpload.addImages}
-      onRemoveImage={noteImageUpload.removeImage}
+      onAddImages={isShared ? undefined : noteImageUpload.addImages}
+      onRemoveImage={isShared ? undefined : noteImageUpload.removeImage}
       uploadingImages={noteImageUpload.uploadingCount}
     />
   )
@@ -379,10 +413,11 @@ function ConsultationDetailContent({ prescriptionId }: { prescriptionId: string 
       <div className="print:hidden">
         <DetailToolbar
           onPrint={() => requestPrint(hasPrescription ? 'prescription' : 'note')}
-          followUpAction={consultation.session_id && !consultation.has_follow_up ? (
+          sharedLabel={isShared}
+          onShare={!isShared ? () => setShareDialogOpen(true) : undefined}
+          followUpAction={!isShared && consultation.session_id && !consultation.has_follow_up ? (
             <Button
-              variant="outline"
-              className="gap-2 border-emerald-200 text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800"
+              className="gap-2 bg-emerald-600 text-white hover:bg-emerald-700"
               isLoading={startingSourceSessionId === consultation.session_id}
               disabled={!!startingSourceSessionId}
               onClick={() => start(consultation.patient_id, undefined, consultation.session_id!)}
@@ -414,6 +449,13 @@ function ConsultationDetailContent({ prescriptionId }: { prescriptionId: string 
           clinicalNotesTab
         )}
       </div>
+      {!isShared && (
+        <CaseShareDialog
+          prescriptionId={prescriptionId}
+          open={shareDialogOpen}
+          onOpenChange={setShareDialogOpen}
+        />
+      )}
       {graceDialog}
     </>
   )

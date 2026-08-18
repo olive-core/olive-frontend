@@ -7,9 +7,18 @@ interface DaySectionProps {
     consultations: ClinicianConsultationItem[];
     onFollowUp: (consultation: ClinicianConsultationItem) => void;
     startingSourceSessionId?: string | null;
+    onRemoveShared: (consultation: ClinicianConsultationItem) => void;
+    removingRootSessionId?: string;
 }
 
-export default function DaySection({ isoDate, consultations, onFollowUp, startingSourceSessionId }: DaySectionProps) {
+export default function DaySection({
+    isoDate,
+    consultations,
+    onFollowUp,
+    startingSourceSessionId,
+    onRemoveShared,
+    removingRootSessionId,
+}: DaySectionProps) {
     return (
         <section className="space-y-4">
             <div className="flex items-baseline gap-3">
@@ -18,7 +27,7 @@ export default function DaySection({ isoDate, consultations, onFollowUp, startin
                 </h2>
                 <span className="text-xs text-slate-400">
                     {consultations.length}
-                    {consultations.length === 1 ? " consultation" : " consultations"}
+                    {consultations.length === 1 ? " record" : " records"}
                 </span>
             </div>
 
@@ -29,6 +38,8 @@ export default function DaySection({ isoDate, consultations, onFollowUp, startin
                         consultation={consultation}
                         onFollowUp={() => onFollowUp(consultation)}
                         isStartingFollowUp={startingSourceSessionId === consultation.session_id}
+                        onRemoveShared={() => onRemoveShared(consultation)}
+                        isRemovingShared={removingRootSessionId === consultation.case_root_session_id}
                     />
                 ))}
             </div>

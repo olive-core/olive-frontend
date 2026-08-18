@@ -115,6 +115,7 @@ export type ClinicalNoteType = {
     subjective: string;
     objective: string;
     assessment: string;
+    plan?: string;
 };
 
 export type VitalSourceType = {

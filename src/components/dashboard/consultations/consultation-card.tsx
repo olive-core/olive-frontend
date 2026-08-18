@@ -1,5 +1,5 @@
 import { useNavigate } from "@tanstack/react-router";
-import { CheckIcon, ChevronRightIcon, HistoryIcon } from "lucide-react";
+import { CheckIcon, ChevronRightIcon, HistoryIcon, Share2Icon, XIcon } from "lucide-react";
 import type { ClinicianConsultationItem } from "@/types/consultation";
 import { Button } from "@/components/ui/button";
 import PatientAvatar from "./patient-avatar";
@@ -11,9 +11,17 @@ interface ConsultationCardProps {
     consultation: ClinicianConsultationItem;
     onFollowUp: () => void;
     isStartingFollowUp?: boolean;
+    onRemoveShared: () => void;
+    isRemovingShared?: boolean;
 }
 
-export default function ConsultationCard({ consultation, onFollowUp, isStartingFollowUp }: ConsultationCardProps) {
+export default function ConsultationCard({
+    consultation,
+    onFollowUp,
+    isStartingFollowUp,
+    onRemoveShared,
+    isRemovingShared,
+}: ConsultationCardProps) {
     const navigate = useNavigate();
 
     const handleOpen = () => {
@@ -27,7 +35,8 @@ export default function ConsultationCard({ consultation, onFollowUp, isStartingF
     const fullName = getFullName(consultation.patient_name);
     const timeOfDay = getTimeOfDay(consultation.created_at);
 
-    const canFollowUp = !!consultation.session_id && !consultation.has_follow_up;
+    const isShared = consultation.access_type === "shared";
+    const canFollowUp = !isShared && !!consultation.session_id && !consultation.has_follow_up;
 
     return (
         <div className="group w-full bg-white border border-slate-100 rounded-2xl px-4 py-4 transition-all duration-200 hover:shadow-md hover:border-emerald-200 flex flex-col md:flex-row md:items-center gap-3 md:gap-4">
@@ -47,6 +56,12 @@ export default function ConsultationCard({ consultation, onFollowUp, isStartingF
                     <h3 className="font-semibold text-slate-800 text-sm truncate group-hover:text-emerald-700 transition-colors">
                         {fullName}
                     </h3>
+                    {isShared && (
+                        <span className="mt-1 inline-flex items-center gap-1 text-xs font-medium text-emerald-700">
+                            <Share2Icon className="size-3" />
+                            Shared{consultation.shared_by_name ? ` by ${consultation.shared_by_name}` : " with you"}
+                        </span>
+                    )}
                     <SexAgeMeta
                         sex={consultation.patient_sex}
                         dateOfBirth={consultation.patient_date_of_birth}
@@ -68,7 +83,18 @@ export default function ConsultationCard({ consultation, onFollowUp, isStartingF
             </div>
             </button>
 
-            {canFollowUp ? (
+            {isShared ? (
+                <Button
+                    type="button"
+                    variant="ghost"
+                    className="h-11 w-full shrink-0 gap-2 text-slate-500 hover:bg-slate-100 hover:text-slate-700 md:w-auto"
+                    onClick={onRemoveShared}
+                    isLoading={isRemovingShared}
+                    disabled={isRemovingShared}
+                >
+                    <XIcon className="size-4" /> Remove
+                </Button>
+            ) : canFollowUp ? (
                 <Button
                     type="button"
                     variant="outline"
