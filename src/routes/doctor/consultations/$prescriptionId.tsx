@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { AlertCircleIcon, ArrowLeftIcon, ChevronLeftIcon, ChevronRightIcon, PrinterIcon } from 'lucide-react'
+import { AlertCircleIcon, ArrowLeftIcon, ChevronLeftIcon, ChevronRightIcon, HistoryIcon, PrinterIcon } from 'lucide-react'
 import { useState } from 'react'
 import toast from 'react-hot-toast'
 
@@ -16,8 +16,6 @@ import { Button } from '@/components/ui/button'
 import type { ConsultationDetail } from '@/types/consultation'
 import type { NoteImageType } from '@/types/prescription'
 import type { PatientInfoType } from '@/types/patient'
-import ConsultationLinkMark from '@/components/consultation-start/consultation-link-mark'
-import FollowUpConfirmDialog from '@/components/consultation-start/follow-up-confirm-dialog'
 import PrescriptionReadView, {
   type ClinicianProfile,
 } from '@/components/prescription/paper/read-view'
@@ -118,7 +116,6 @@ interface ClinicalNotesTabProps {
   onAddImages:     (files: File[]) => void
   onRemoveImage:   (image: NoteImageType) => void
   uploadingImages: number
-  historyNavigation?: React.ReactNode
 }
 
 function ClinicalNotesTab({
@@ -134,11 +131,9 @@ function ClinicalNotesTab({
   onAddImages,
   onRemoveImage,
   uploadingImages,
-  historyNavigation,
 }: ClinicalNotesTabProps) {
   return (
     <>
-      {historyNavigation}
       <ClinicalNotesPanel
         notes={notes}
         safetyNet={safetyNet}
@@ -166,33 +161,37 @@ function ClinicalNotesTab({
   )
 }
 
-function NoteHistoryNavigation({
+function ConsultationSeriesNavigation({
   previousPrescriptionId,
   nextPrescriptionId,
+  activeDocument,
 }: {
   previousPrescriptionId?: string | null
   nextPrescriptionId?: string | null
+  activeDocument: PrescriptionDocument
 }) {
   const navigate = useNavigate()
   if (!previousPrescriptionId && !nextPrescriptionId) return null
 
-  const openNote = (prescriptionId: string) => navigate({
+  const openConsultation = (prescriptionId: string) => navigate({
     to: '/doctor/consultations/$prescriptionId',
     params: { prescriptionId },
-    search: { document: 'notes' },
+    search: { document: activeDocument === 'notes' ? 'notes' : undefined },
   })
 
   return (
-    <div className="mx-auto flex w-full max-w-3xl items-center justify-between px-4">
-      <Button variant="outline" size="sm" disabled={!previousPrescriptionId} onClick={() => previousPrescriptionId && openNote(previousPrescriptionId)}>
+    <div className="mx-auto mb-3 flex w-full max-w-3xl items-center justify-between gap-2 px-4">
+      <Button variant="outline" size="sm" disabled={!previousPrescriptionId} onClick={() => previousPrescriptionId && openConsultation(previousPrescriptionId)}>
         <ChevronLeftIcon className="size-4 mr-1" />
-        Previous note
+        <span className="hidden sm:inline">Previous consultation</span>
+        <span className="sm:hidden">Previous</span>
       </Button>
-      <span className="hidden items-center gap-1.5 text-xs font-medium text-blue-700 sm:inline-flex">
-        <ConsultationLinkMark className="scale-75" /> Follow-up series
+      <span className="hidden items-center gap-1.5 text-xs font-medium text-emerald-700 sm:inline-flex">
+        <HistoryIcon className="size-3.5" /> Follow-up series
       </span>
-      <Button variant="outline" size="sm" disabled={!nextPrescriptionId} onClick={() => nextPrescriptionId && openNote(nextPrescriptionId)}>
-        Next note
+      <Button variant="outline" size="sm" disabled={!nextPrescriptionId} onClick={() => nextPrescriptionId && openConsultation(nextPrescriptionId)}>
+        <span className="hidden sm:inline">Next consultation</span>
+        <span className="sm:hidden">Next</span>
         <ChevronRightIcon className="size-4 ml-1" />
       </Button>
     </div>
@@ -233,9 +232,9 @@ function DetailToolbar({
   followUpAction?: React.ReactNode
 }) {
   return (
-    <div className="container mx-auto flex items-center justify-between mt-4 mb-6 print:hidden">
+    <div className="container mx-auto mt-4 mb-6 flex flex-wrap items-center justify-between gap-2 px-4 print:hidden">
       <BackButton />
-      <div className="flex items-center gap-2">
+      <div className="ml-auto flex items-center gap-2">
         {followUpAction}
         {onPrint && <PrintButton onPrint={onPrint} disabled={printDisabled} />}
       </div>
@@ -279,7 +278,6 @@ function ConsultationDetailContent({ prescriptionId }: { prescriptionId: string 
     search.document === 'notes' ? 'notes' : 'prescription'
   )
   const [notesDraft, setNotesDraft] = useState<string | null>(null)
-  const [followUpConfirmOpen, setFollowUpConfirmOpen] = useState(false)
   const saveSummary = useSaveSummary(prescriptionId)
 
   // Photos save the moment they are added or removed — unlike the note text, there is
@@ -353,12 +351,6 @@ function ConsultationDetailContent({ prescriptionId }: { prescriptionId: string 
       onAddImages={noteImageUpload.addImages}
       onRemoveImage={noteImageUpload.removeImage}
       uploadingImages={noteImageUpload.uploadingCount}
-      historyNavigation={
-        <NoteHistoryNavigation
-          previousPrescriptionId={consultation.previous_prescription_id}
-          nextPrescriptionId={consultation.next_prescription_id}
-        />
-      }
     />
   )
 
@@ -390,14 +382,19 @@ function ConsultationDetailContent({ prescriptionId }: { prescriptionId: string 
           followUpAction={consultation.session_id && !consultation.has_follow_up ? (
             <Button
               variant="outline"
-              className="gap-2 border-blue-200 text-blue-700 hover:bg-blue-50 hover:text-blue-800"
+              className="gap-2 border-emerald-200 text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800"
               isLoading={startingSourceSessionId === consultation.session_id}
               disabled={!!startingSourceSessionId}
-              onClick={() => setFollowUpConfirmOpen(true)}
+              onClick={() => start(consultation.patient_id, undefined, consultation.session_id!)}
             >
-              <ConsultationLinkMark /> Follow up
+              <HistoryIcon className="size-4" /> Follow up
             </Button>
           ) : undefined}
+        />
+        <ConsultationSeriesNavigation
+          previousPrescriptionId={consultation.previous_prescription_id}
+          nextPrescriptionId={consultation.next_prescription_id}
+          activeDocument={activeDocument}
         />
         {hasPrescription ? (
           <DocumentSwitcher
@@ -417,21 +414,6 @@ function ConsultationDetailContent({ prescriptionId }: { prescriptionId: string 
           clinicalNotesTab
         )}
       </div>
-      <FollowUpConfirmDialog
-        open={followUpConfirmOpen}
-        onOpenChange={setFollowUpConfirmOpen}
-        patientName={consultation.patient_name}
-        sourceDate={consultation.created_at}
-        sourceSummary={
-          consultation.prescription_data?.chief_complaints?.[0]?.name_text
-          || consultation.prescription_data?.diagnoses?.[0]?.name_text
-        }
-        isStarting={startingSourceSessionId === consultation.session_id}
-        onConfirm={() => {
-          if (!consultation.session_id) return
-          start(consultation.patient_id, undefined, consultation.session_id)
-        }}
-      />
       {graceDialog}
     </>
   )

@@ -1,6 +1,5 @@
-import { CirclePlusIcon } from "lucide-react";
+import { HistoryIcon, PlusIcon } from "lucide-react";
 
-import ConsultationLinkMark from "./consultation-link-mark";
 import { cn } from "@/lib/utils";
 
 
@@ -21,6 +20,7 @@ export default function ConsultationModeActions({
 }: ConsultationModeActionsProps) {
     const actionClass = cn(
         "group flex min-h-32 flex-1 cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-2 px-4 py-5 text-center transition-all",
+        "border-slate-200 bg-white text-slate-800 hover:border-emerald-300 hover:bg-emerald-50/50",
         "disabled:cursor-not-allowed disabled:opacity-50",
     );
 
@@ -31,16 +31,13 @@ export default function ConsultationModeActions({
                 autoFocus={!hasFollowUpSources}
                 onClick={onStartNew}
                 disabled={disabled}
-                className={cn(
-                    actionClass,
-                    "border-emerald-200 bg-emerald-50/60 text-emerald-800 hover:border-emerald-400 hover:bg-emerald-50",
-                )}
+                className={actionClass}
             >
-                <span className="flex size-12 items-center justify-center rounded-full bg-emerald-600 text-white shadow-sm">
-                    <CirclePlusIcon className="size-7" strokeWidth={2.5} />
+                <span className="flex size-11 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
+                    <PlusIcon className="size-6" strokeWidth={2.25} />
                 </span>
                 <span className="font-semibold">{startingNew ? "Starting…" : "New consultation"}</span>
-                <span className="text-xs text-emerald-700/80">Start fresh</span>
+                <span className="text-xs text-slate-500">Start fresh</span>
             </button>
 
             {hasFollowUpSources && (
@@ -48,16 +45,13 @@ export default function ConsultationModeActions({
                     type="button"
                     onClick={onChooseFollowUp}
                     disabled={disabled}
-                    className={cn(
-                        actionClass,
-                        "border-blue-200 bg-blue-50/60 text-blue-800 hover:border-blue-400 hover:bg-blue-50",
-                    )}
+                    className={actionClass}
                 >
-                    <span className="flex h-12 min-w-20 items-center justify-center rounded-full bg-blue-600 px-4 text-white shadow-sm">
-                        <ConsultationLinkMark className="scale-110" />
+                    <span className="flex size-11 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
+                        <HistoryIcon className="size-5.5" strokeWidth={2.25} />
                     </span>
                     <span className="font-semibold">Follow-up</span>
-                    <span className="text-xs text-blue-700/80">Continue previous care</span>
+                    <span className="text-xs text-slate-500">Continue previous care</span>
                 </button>
             )}
         </div>

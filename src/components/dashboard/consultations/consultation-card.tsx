@@ -1,8 +1,7 @@
 import { useNavigate } from "@tanstack/react-router";
-import { CheckIcon, ChevronRightIcon } from "lucide-react";
+import { CheckIcon, ChevronRightIcon, HistoryIcon } from "lucide-react";
 import type { ClinicianConsultationItem } from "@/types/consultation";
 import { Button } from "@/components/ui/button";
-import ConsultationLinkMark from "@/components/consultation-start/consultation-link-mark";
 import PatientAvatar from "./patient-avatar";
 import SexAgeMeta from "./sex-age-meta";
 import DiagnosisPills from "./diagnosis-pills";
@@ -73,16 +72,16 @@ export default function ConsultationCard({ consultation, onFollowUp, isStartingF
                 <Button
                     type="button"
                     variant="outline"
-                    className="h-11 shrink-0 gap-2 border-blue-200 text-blue-700 hover:bg-blue-50 hover:text-blue-800"
+                    className="h-11 w-full shrink-0 gap-2 border-emerald-200 text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800 md:w-auto"
                     onClick={onFollowUp}
                     isLoading={isStartingFollowUp}
                     disabled={isStartingFollowUp}
                 >
-                    <ConsultationLinkMark />
+                    <HistoryIcon className="size-4" />
                     Follow up
                 </Button>
             ) : consultation.has_follow_up ? (
-                <span className="inline-flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-full bg-slate-100 px-3 text-xs font-medium text-slate-500">
+                <span className="inline-flex h-9 w-full shrink-0 items-center justify-center gap-1.5 rounded-full bg-slate-100 px-3 text-xs font-medium text-slate-500 md:w-auto">
                     <CheckIcon className="size-3.5" /> Continued
                 </span>
             ) : null}

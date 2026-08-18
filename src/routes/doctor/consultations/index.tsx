@@ -12,8 +12,6 @@ import { useClinicianConsultations } from '@/components/dashboard/consultations/
 import { filterConsultationsByName } from '@/components/dashboard/consultations/filters/filter-by-name'
 import { EMPTY_DATE_RANGE, isDateRangeActive, type DateRange } from '@/components/dashboard/consultations/filters/date-range'
 import { useStartConsultation } from '@/hooks/use-start-consultation'
-import FollowUpConfirmDialog from '@/components/consultation-start/follow-up-confirm-dialog'
-import type { ClinicianConsultationItem } from '@/types/consultation'
 
 export const Route = createFileRoute('/doctor/consultations/')({
   component: ConsultationsPage,
@@ -25,7 +23,6 @@ function ConsultationsPage() {
 
   const [dateRange, setDateRange] = useState<DateRange>(EMPTY_DATE_RANGE)
   const [searchTerm, setSearchTerm] = useState("")
-  const [pendingFollowUp, setPendingFollowUp] = useState<ClinicianConsultationItem | null>(null)
 
   const { data: consultations = [], isLoading, isError } = useClinicianConsultations({
     clinicianId,
@@ -73,27 +70,15 @@ function ConsultationsPage() {
               key={group.isoDate}
               isoDate={group.isoDate}
               consultations={group.consultations}
-              onFollowUp={setPendingFollowUp}
+              onFollowUp={(consultation) => {
+                if (!consultation.session_id) return
+                start(consultation.patient_id, undefined, consultation.session_id)
+              }}
               startingSourceSessionId={startingSourceSessionId}
             />
           ))}
         </div>
       )}
-      <FollowUpConfirmDialog
-        open={!!pendingFollowUp}
-        onOpenChange={(open) => !open && setPendingFollowUp(null)}
-        patientName={pendingFollowUp?.patient_name}
-        sourceDate={pendingFollowUp?.created_at}
-        sourceSummary={
-          pendingFollowUp?.chief_complaints_summary?.[0]
-          || pendingFollowUp?.diagnoses_summary?.[0]
-        }
-        isStarting={startingSourceSessionId === pendingFollowUp?.session_id}
-        onConfirm={() => {
-          if (!pendingFollowUp?.session_id) return
-          start(pendingFollowUp.patient_id, undefined, pendingFollowUp.session_id)
-        }}
-      />
       {graceDialog}
     </div>
   )

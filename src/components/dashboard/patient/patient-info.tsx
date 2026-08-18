@@ -117,7 +117,7 @@ export default function PatientInfo({ userId: patientId, phone, setShowContent }
 
             </Item>
             {areConsultationsLoading ? (
-                <div className="grid grid-cols-2 gap-3" aria-label="Loading consultation choices">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2" aria-label="Loading consultation choices">
                     <div className="h-32 animate-pulse rounded-2xl bg-slate-100" />
                     <div className="h-32 animate-pulse rounded-2xl bg-slate-100" />
                 </div>
