@@ -71,7 +71,7 @@ export type ConsultationDetail = {
     previous_prescription_id?: string | null;
     next_prescription_id?: string | null;
     has_follow_up?:         boolean;
-    access_type?:           "owned" | "shared" | "patient";
+    access_type?:           "owned" | "shared" | "patient" | "clinician";
     // Letterhead: render_config is the snapshot frozen at save time; the
     // clinician_* fields back-fill legacy prescriptions saved before snapshots.
     chamber_id?:              string | null;

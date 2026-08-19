@@ -16,10 +16,16 @@ export function usePatientConsultations(patientId?: string) {
     });
 }
 
+// The history covers every doctor who has seen this patient, but a follow-up continues a
+// care series: the backend only accepts a source consultation the signed-in doctor wrote.
 export function eligibleFollowUpSources(
     consultations: PatientPrescriptionListItem[],
+    clinicianId: string | undefined,
 ): FollowUpSource[] {
     return consultations.filter(
-        (consultation) => !!consultation.session_id && !consultation.has_follow_up,
+        (consultation) =>
+            !!consultation.session_id &&
+            !consultation.has_follow_up &&
+            consultation.clinician_id === clinicianId,
     ) as FollowUpSource[];
 }

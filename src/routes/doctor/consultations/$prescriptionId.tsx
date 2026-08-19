@@ -230,21 +230,28 @@ function DetailToolbar({
   printDisabled,
   followUpAction,
   onShare,
-  sharedLabel,
+  access,
 }: {
   onPrint?: () => void
   printDisabled?: boolean
   followUpAction?: React.ReactNode
   onShare?: () => void
-  sharedLabel?: boolean
+  access?: 'shared' | 'read-only'
 }) {
   return (
     <div className="container mx-auto mt-4 mb-6 flex flex-wrap items-center justify-between gap-2 px-4 print:hidden">
       <BackButton />
       <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
-        {sharedLabel && (
-          <span className="inline-flex h-8 items-center rounded-full bg-emerald-50 px-3 text-xs font-semibold text-emerald-700">
-            Shared case
+        {access && (
+          <span
+            className={cn(
+              'inline-flex h-8 items-center rounded-full px-3 text-xs font-semibold',
+              access === 'shared'
+                ? 'bg-emerald-50 text-emerald-700'
+                : 'bg-slate-100 text-slate-600',
+            )}
+          >
+            {access === 'shared' ? 'Shared case' : 'Read only'}
           </span>
         )}
         {followUpAction}
@@ -360,7 +367,12 @@ function ConsultationDetailContent({ prescriptionId }: { prescriptionId: string 
   const currentNotes = notesDraft ?? savedNotes
   const notesDirty = notesDraft !== null && notesDraft !== savedNotes
   const hasPrescription = consultation.includes_prescription !== false
-  const isShared = consultation.access_type === 'shared'
+  // Only the author may write. Every other clinician reads: an accepted Case link, or
+  // any past consultation opened from the patient's history.
+  const canEdit = consultation.access_type === 'owned'
+  const accessBadge = canEdit
+    ? undefined
+    : consultation.access_type === 'shared' ? 'shared' as const : 'read-only' as const
 
   const patientStrip = (
     <PatientStrip
@@ -376,14 +388,14 @@ function ConsultationDetailContent({ prescriptionId }: { prescriptionId: string 
       notes={currentNotes}
       safetyNet={safetyNet}
       patientSlot={patientStrip}
-      onChange={isShared ? undefined : setNotesDraft}
+      onChange={canEdit ? setNotesDraft : undefined}
       onPrint={() => requestPrint('note')}
-      onSave={isShared ? undefined : () => saveSummary.mutate(notesDraft ?? '')}
+      onSave={canEdit ? () => saveSummary.mutate(notesDraft ?? '') : undefined}
       isDirty={notesDirty}
       isSaving={saveSummary.isPending}
       images={noteImages}
-      onAddImages={isShared ? undefined : noteImageUpload.addImages}
-      onRemoveImage={isShared ? undefined : noteImageUpload.removeImage}
+      onAddImages={canEdit ? noteImageUpload.addImages : undefined}
+      onRemoveImage={canEdit ? noteImageUpload.removeImage : undefined}
       uploadingImages={noteImageUpload.uploadingCount}
     />
   )
@@ -413,9 +425,9 @@ function ConsultationDetailContent({ prescriptionId }: { prescriptionId: string 
       <div className="print:hidden">
         <DetailToolbar
           onPrint={() => requestPrint(hasPrescription ? 'prescription' : 'note')}
-          sharedLabel={isShared}
-          onShare={!isShared ? () => setShareDialogOpen(true) : undefined}
-          followUpAction={!isShared && consultation.session_id && !consultation.has_follow_up ? (
+          access={accessBadge}
+          onShare={canEdit ? () => setShareDialogOpen(true) : undefined}
+          followUpAction={canEdit && consultation.session_id && !consultation.has_follow_up ? (
             <Button
               className="gap-2 bg-emerald-600 text-white hover:bg-emerald-700"
               isLoading={startingSourceSessionId === consultation.session_id}
@@ -449,7 +461,7 @@ function ConsultationDetailContent({ prescriptionId }: { prescriptionId: string 
           clinicalNotesTab
         )}
       </div>
-      {!isShared && (
+      {canEdit && (
         <CaseShareDialog
           prescriptionId={prescriptionId}
           open={shareDialogOpen}

@@ -14,6 +14,7 @@ import api from "@/lib/axios";
 import type { PatientInfoType, ShowContentStatus } from "@/types/patient";
 import { getAgeFromDOB } from "@/lib/utils";
 import { useStartConsultation } from "@/hooks/use-start-consultation";
+import { useAuthStore } from "@/stores/auth-store";
 import {
     eligibleFollowUpSources,
     usePatientConsultations,
@@ -33,6 +34,7 @@ export default function PatientInfo({ userId: patientId, phone, setShowContent }
 
     const { start, startingId, startingSourceSessionId, graceDialog } = useStartConsultation();
     const [pickerOpen, setPickerOpen] = useState(false);
+    const userId = useAuthStore((state) => state.userId);
 
     const { data: patientData, isLoading, isError } = useQuery({
         queryKey: ['patient-info', patientId],
@@ -47,7 +49,7 @@ export default function PatientInfo({ userId: patientId, phone, setShowContent }
         isError: didConsultationsFail,
         refetch: refetchConsultations,
     } = usePatientConsultations(patientId);
-    const followUpSources = eligibleFollowUpSources(consultations);
+    const followUpSources = eligibleFollowUpSources(consultations, userId);
 
     if (isLoading) {
         return <PatientSkeleton />;

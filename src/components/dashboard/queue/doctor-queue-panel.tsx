@@ -91,7 +91,7 @@ export default function DoctorQueuePanel({ onStateChange }: DoctorQueuePanelProp
     const waiting = entries.filter((entry) => entry.status === "waiting");
     const next = waiting[0];
     const patientConsultationsQuery = usePatientConsultations(next?.patient_id);
-    const followUpSources = eligibleFollowUpSources(patientConsultationsQuery.data ?? []);
+    const followUpSources = eligibleFollowUpSources(patientConsultationsQuery.data ?? [], userId);
 
     const ready = !chambersQuery.isLoading && (chambers.length === 0 || queueQuery.isSuccess);
     useEffect(() => {
