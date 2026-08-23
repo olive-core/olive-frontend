@@ -1,5 +1,5 @@
 import { Reorder, useDragControls } from "motion/react";
-import { Building2, GripVerticalIcon, PanelBottomIcon } from "lucide-react";
+import { Building2, GripVerticalIcon } from "lucide-react";
 import toast from "react-hot-toast";
 
 import { MAX_FOOTER_CHAMBERS, padDisplayName } from "@/lib/chamber-pad";
@@ -7,7 +7,6 @@ import { chamberRoom, type Chamber } from "@/types/attendant-queue";
 import { useHeaderConfigStore } from "@/stores/header-config-store";
 import { cn } from "@/lib/utils";
 import { controlId } from "../focus-field";
-import { ControlSection } from "./control-primitives";
 
 function FooterChamberRow({ chamber }: { chamber: Chamber }) {
     const pad = useHeaderConfigStore((state) => state.pads[chamber.chamber_id]);
@@ -43,7 +42,7 @@ function FooterChamberRow({ chamber }: { chamber: Chamber }) {
                 type="button"
                 aria-label="Drag to reorder"
                 onPointerDown={(event) => dragControls.start(event)}
-                className="cursor-grab touch-none rounded p-1 text-slate-300 transition-colors hover:text-slate-500 active:cursor-grabbing"
+                className="min-h-11 cursor-grab touch-none rounded p-1 text-slate-300 transition-colors hover:text-slate-500 active:cursor-grabbing sm:min-h-0"
             >
                 <GripVerticalIcon className="size-4" />
             </button>
@@ -60,7 +59,8 @@ function FooterChamberRow({ chamber }: { chamber: Chamber }) {
                 aria-label={`Show ${padDisplayName(chamber)} in the footer`}
                 onClick={() => toggle(!pad.showInFooter)}
                 className={cn(
-                    "flex h-6 w-11 shrink-0 items-center rounded-full p-1 transition",
+                    "relative flex h-6 w-11 shrink-0 items-center rounded-full p-1 transition",
+                    "before:absolute before:inset-x-0 before:-inset-y-2.5 before:content-[''] sm:before:content-none",
                     pad.showInFooter ? "bg-emerald-500" : "bg-slate-300",
                 )}
             >
@@ -72,7 +72,7 @@ function FooterChamberRow({ chamber }: { chamber: Chamber }) {
 
 // What prints at the bottom of the page: the doctor's other chambers (so patients can
 // find them elsewhere) and the Olive brand mark. Order here is footer order.
-export default function FooterTab() {
+export default function FooterControls() {
     const chambers = useHeaderConfigStore((state) => state.chambers);
     const pads = useHeaderConfigStore((state) => state.pads);
     const patchPad = useHeaderConfigStore((state) => state.patchPad);
@@ -97,37 +97,31 @@ export default function FooterTab() {
 
     return (
         <div className="flex flex-col gap-3">
-            <ControlSection
-                title="Footer"
-                description="Printed at the bottom of every prescription."
-                icon={PanelBottomIcon}
-            >
-                <p className="text-xs text-slate-400">
-                    Every pad carries the "Powered by Olive" mark at the bottom right.
-                </p>
+            <p className="text-xs text-slate-400">
+                Every pad carries the "Powered by Olive" mark at the bottom right.
+            </p>
 
-                {chambers.length > 1 && (
-                    <div className="flex flex-col gap-1.5">
-                        <p className="text-xs font-medium text-slate-500">
-                            Other chambers on the pad
-                            <span className="ml-1.5 font-normal text-slate-400">
-                                (max {MAX_FOOTER_CHAMBERS} — a prescription's own chamber is never repeated)
-                            </span>
-                        </p>
-                        <Reorder.Group as="div" axis="y" values={ordered} onReorder={handleReorder} className="flex flex-col gap-1.5">
-                            {ordered.map((chamber) => (
-                                <FooterChamberRow key={chamber.chamber_id} chamber={chamber} />
-                            ))}
-                        </Reorder.Group>
-                    </div>
-                )}
-                {chambers.length <= 1 && (
-                    <p className="text-xs text-slate-400">
-                        Add more chambers to cross-reference them in the footer — patients seeing
-                        you at one chamber will know where else to find you.
+            {chambers.length > 1 && (
+                <div className="flex flex-col gap-1.5">
+                    <p className="text-xs font-medium text-slate-500">
+                        Other chambers on the pad
+                        <span className="ml-1.5 font-normal text-slate-400">
+                            (max {MAX_FOOTER_CHAMBERS} — a prescription's own chamber is never repeated)
+                        </span>
                     </p>
-                )}
-            </ControlSection>
+                    <Reorder.Group as="div" axis="y" values={ordered} onReorder={handleReorder} className="flex flex-col gap-1.5">
+                        {ordered.map((chamber) => (
+                            <FooterChamberRow key={chamber.chamber_id} chamber={chamber} />
+                        ))}
+                    </Reorder.Group>
+                </div>
+            )}
+            {chambers.length <= 1 && (
+                <p className="text-xs text-slate-400">
+                    Add more chambers to cross-reference them in the footer — patients seeing
+                    you at one chamber will know where else to find you.
+                </p>
+            )}
         </div>
     );
 }

@@ -1,33 +1,20 @@
-import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 
-// Shared building blocks that give the header editor's control panel a consistent look.
+// Shared building blocks that give the pad editor's sections a consistent look.
 
-export function ControlSection({ title, description, icon: Icon, action, children }: {
-    title:        string;
-    description?:  string;
-    icon?:        LucideIcon;
-    action?:      ReactNode;
-    children:     ReactNode;
+export function FieldGroup({ label, hint, children }: {
+    label:    string;
+    hint?:    string;
+    children: ReactNode;
 }) {
     return (
-        <section className="flex flex-col gap-3.5 rounded-xl border bg-white p-4 shadow-xs">
-            <div className="flex items-start justify-between gap-3">
-                <div className="flex items-center gap-2.5">
-                    {Icon && (
-                        <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
-                            <Icon className="size-4" />
-                        </span>
-                    )}
-                    <div>
-                        <h3 className="text-sm font-semibold text-slate-800">{title}</h3>
-                        {description && <p className="text-xs text-slate-400">{description}</p>}
-                    </div>
-                </div>
-                {action}
+        <section className="flex flex-col gap-2.5">
+            <div>
+                <h3 className="text-sm font-semibold text-slate-800">{label}</h3>
+                {hint && <p className="text-xs text-slate-400">{hint}</p>}
             </div>
             {children}
         </section>
@@ -45,7 +32,7 @@ export function LabeledInput({ id, label, value, onChange, placeholder, lang }: 
     return (
         <label className="flex flex-col gap-1">
             <span className="text-xs font-medium text-slate-500">{label}</span>
-            <Input id={id} lang={lang} value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} />
+            <Input id={id} lang={lang} value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} className="h-11 sm:h-9" />
         </label>
     );
 }
@@ -60,7 +47,7 @@ export function LabeledTextarea({ id, label, value, onChange, placeholder, rows 
 }) {
     return (
         <label className="flex flex-col gap-1">
-            <span className="flex items-baseline justify-between text-xs font-medium text-slate-500">
+            <span className="flex flex-wrap items-baseline justify-between gap-x-2 text-xs font-medium text-slate-500">
                 {label}
                 <span className="text-[10px] font-normal text-slate-300">Enter ↵ for a new line</span>
             </span>
@@ -70,7 +57,7 @@ export function LabeledTextarea({ id, label, value, onChange, placeholder, rows 
                 onChange={(event) => onChange(event.target.value)}
                 placeholder={placeholder}
                 rows={rows}
-                className="w-full resize-y rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] md:text-sm"
+                className="w-full resize-y rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs outline-none [field-sizing:content] focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] md:text-sm"
             />
         </label>
     );
@@ -97,7 +84,9 @@ export function ToggleRow({ id, label, description, checked, onChange }: {
                 aria-label={label}
                 onClick={() => onChange(!checked)}
                 className={cn(
-                    "flex h-6 w-11 shrink-0 items-center rounded-full p-1 transition",
+                    "relative flex h-6 w-11 shrink-0 items-center rounded-full p-1 transition",
+                    // The visible track stays 24px; the tap area reaches 44 on a phone.
+                    "before:absolute before:inset-x-0 before:-inset-y-2.5 before:content-[''] sm:before:content-none",
                     checked ? "bg-emerald-500" : "bg-slate-300",
                 )}
             >
@@ -113,14 +102,14 @@ export function SegmentedControl<T extends string>({ value, options, onChange }:
     onChange: (value: T) => void;
 }) {
     return (
-        <div className="inline-flex rounded-lg border bg-slate-50 p-0.5">
+        <div className="inline-flex max-w-full flex-wrap rounded-lg border bg-slate-50 p-0.5">
             {options.map((option) => (
                 <button
                     key={option.value}
                     type="button"
                     onClick={() => onChange(option.value)}
                     className={cn(
-                        "rounded-md px-3 py-1 text-xs font-medium transition-colors",
+                        "min-h-11 rounded-md px-3.5 text-xs font-medium transition-colors sm:min-h-0 sm:px-3 sm:py-1",
                         value === option.value ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700",
                     )}
                 >

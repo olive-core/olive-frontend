@@ -1,5 +1,3 @@
-import { PaletteIcon } from "lucide-react";
-
 import { useHeaderConfigStore } from "@/stores/header-config-store";
 import {
     ACCENT_SWATCHES,
@@ -17,7 +15,7 @@ import {
 import { cn } from "@/lib/utils";
 import { ColorPicker } from "@/components/ui/color-picker";
 import { controlId } from "../focus-field";
-import { ControlSection, SegmentedControl, ToggleRow } from "./control-primitives";
+import { SegmentedControl, ToggleRow } from "./control-primitives";
 
 function SymbolSizeSlider({ id, label, value, onChange }: {
     id?:      string;
@@ -36,7 +34,7 @@ function SymbolSizeSlider({ id, label, value, onChange }: {
                 step={2}
                 value={value}
                 onChange={(event) => onChange(clampSymbolSize(Number(event.target.value)))}
-                className="h-1.5 flex-1 cursor-pointer appearance-none rounded-full bg-slate-200 accent-emerald-500"
+                className="h-2.5 flex-1 cursor-pointer appearance-none rounded-full bg-slate-200 accent-emerald-500 sm:h-1.5"
             />
             <span className="w-12 text-right text-xs tabular-nums text-slate-400">{value}px</span>
         </label>
@@ -65,7 +63,7 @@ function LogoShapePicker({ value, onChange }: { value: LogoShape; onChange: (sha
                     aria-label={`${shape.label} logo frame`}
                     onClick={() => onChange(shape.value)}
                     className={cn(
-                        "flex size-9 items-center justify-center rounded-lg border transition-colors",
+                        "flex size-11 items-center justify-center rounded-lg border transition-colors sm:size-9",
                         value === shape.value
                             ? "border-emerald-500 bg-emerald-50/60 ring-1 ring-emerald-500/30"
                             : "border-slate-200 hover:border-slate-300",
@@ -127,7 +125,7 @@ export default function LayoutStyleControls() {
     const patch = useHeaderConfigStore((state) => state.patch);
 
     return (
-        <ControlSection title="Layout & style" description="Pick a layout and the brand look." icon={PaletteIcon}>
+        <div className="flex flex-col gap-3.5">
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 {HEADER_PRESETS.map((preset) => (
                     <button
@@ -161,7 +159,7 @@ export default function LayoutStyleControls() {
                 </div>
 
                 <div className="flex flex-col gap-1">
-                    <span className="text-xs font-medium text-slate-500">Print mode</span>
+                    <span className="text-xs font-medium text-slate-500">Printing</span>
                     <SegmentedControl
                         value={config.colorMode}
                         options={COLOR_MODE_OPTIONS}
@@ -172,7 +170,7 @@ export default function LayoutStyleControls() {
 
             <ToggleRow
                 label="Show chamber logo"
-                description="Each chamber's logo is uploaded on its pad, in the Chambers tab."
+                description="Uploaded per chamber, in that chamber's section above."
                 checked={config.showLogo}
                 onChange={(showLogo) => patch({ showLogo })}
             />
@@ -193,7 +191,7 @@ export default function LayoutStyleControls() {
                                 step={2}
                                 value={config.logoSize}
                                 onChange={(event) => patch({ logoSize: clampLogoSize(Number(event.target.value)) })}
-                                className="h-1.5 flex-1 cursor-pointer appearance-none rounded-full bg-slate-200 accent-emerald-500"
+                                className="h-2.5 flex-1 cursor-pointer appearance-none rounded-full bg-slate-200 accent-emerald-500 sm:h-1.5"
                             />
                             <span className="w-12 text-right text-xs tabular-nums text-slate-400">{config.logoSize}px</span>
                         </span>
@@ -221,6 +219,6 @@ export default function LayoutStyleControls() {
                     />
                 </div>
             )}
-        </ControlSection>
+        </div>
     );
 }

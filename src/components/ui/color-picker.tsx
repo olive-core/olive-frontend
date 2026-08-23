@@ -19,7 +19,7 @@ export function ColorPicker({ value, onChange, swatches = [], className }: Color
                     type="button"
                     aria-label="Pick accent color"
                     className={cn(
-                        "flex h-9 items-center gap-2 rounded-md border border-input bg-transparent px-2 shadow-xs transition-colors hover:bg-slate-50",
+                        "flex h-11 items-center gap-2 rounded-md border border-input bg-transparent px-2 shadow-xs transition-colors hover:bg-slate-50 sm:h-9",
                         className,
                     )}
                 >
@@ -31,7 +31,7 @@ export function ColorPicker({ value, onChange, swatches = [], className }: Color
             <PopoverContent align="start" className="w-56">
                 <div className="flex flex-col gap-3">
                     {swatches.length > 0 && (
-                        <div className="grid grid-cols-6 gap-2">
+                        <div className="flex flex-wrap gap-2">
                             {swatches.map(swatch => (
                                 <button
                                     key={swatch}
@@ -39,7 +39,7 @@ export function ColorPicker({ value, onChange, swatches = [], className }: Color
                                     aria-label={`Use ${swatch}`}
                                     onClick={() => onChange(swatch)}
                                     className={cn(
-                                        "size-7 rounded-full border transition-transform hover:scale-110",
+                                        "size-9 rounded-full border transition-transform hover:scale-110 sm:size-7",
                                         swatch.toLowerCase() === value.toLowerCase() ? "border-slate-900" : "border-black/10",
                                     )}
                                     style={{ backgroundColor: swatch }}
@@ -54,12 +54,12 @@ export function ColorPicker({ value, onChange, swatches = [], className }: Color
                             value={value}
                             onChange={(event) => onChange(event.target.value)}
                             aria-label="Custom color"
-                            className="h-9 w-10 shrink-0 cursor-pointer rounded-md border border-input bg-transparent p-1"
+                            className="h-11 w-12 shrink-0 cursor-pointer rounded-md border border-input bg-transparent p-1 sm:h-9 sm:w-10"
                         />
                         <Input
                             value={value}
                             onChange={(event) => onChange(event.target.value)}
-                            className="font-mono text-xs uppercase"
+                            className="h-11 font-mono text-xs uppercase sm:h-9"
                         />
                     </div>
                 </div>

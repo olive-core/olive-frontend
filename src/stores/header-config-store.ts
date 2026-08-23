@@ -15,7 +15,28 @@ import type { Chamber } from "@/types/attendant-queue";
 // not in header_config) so the live preview reacts to those edits as well.
 const EMPTY_IDENTITY: EditableIdentity = { name: "", qualification: "", bmdcNo: "" };
 
-export type EditorTab = "style" | "doctor" | "chambers" | "footer";
+// One expandable section of the pad editor. Every chamber owns a section of its own, so
+// the list a doctor reads down is flat: their places first, then what prints on all pads.
+export type PadSectionId = "doctor" | "style" | "footer" | `chamber:${string}`;
+
+const CHAMBER_SECTION_PREFIX = "chamber:";
+const GLOBAL_SECTION_IDS: PadSectionId[] = ["doctor", "style", "footer"];
+
+export const chamberSectionId = (chamberId: string): PadSectionId =>
+    `${CHAMBER_SECTION_PREFIX}${chamberId}`;
+
+export function chamberIdFromSection(sectionId: PadSectionId): string | null {
+    return sectionId.startsWith(CHAMBER_SECTION_PREFIX)
+        ? sectionId.slice(CHAMBER_SECTION_PREFIX.length)
+        : null;
+}
+
+/** Guards the section carried in the URL by pages that deep-link into the editor. */
+export function parsePadSectionId(value: unknown): PadSectionId | undefined {
+    if (typeof value !== "string") return undefined;
+    if (GLOBAL_SECTION_IDS.includes(value as PadSectionId)) return value as PadSectionId;
+    return value.startsWith(CHAMBER_SECTION_PREFIX) ? (value as PadSectionId) : undefined;
+}
 
 // Holds the letterhead currently being edited: the doctor's global style config plus
 // one pad per chamber. The control panel writes to it and the live preview subscribes
@@ -33,12 +54,12 @@ interface HeaderConfigStore {
     dirtyPadIds:      string[];
     previewChamberId: string | null;
 
-    // Editor chrome the focus bridge needs to drive (click-to-edit across tabs).
-    activeTab: EditorTab;
-    openPadId: string | null;
+    // Editor chrome the focus bridge needs to drive (click-to-edit across sections).
+    openSectionId: PadSectionId | null;
 
     hydrate: (identity: EditableIdentity, config: HeaderConfig) => void;
     hydratePads: (chambers: Chamber[]) => void;
+    addChamber:  (chamber: Chamber) => void;
     reset:   () => void;
 
     setIdentity: (changes: Partial<EditableIdentity>) => void;
@@ -50,8 +71,7 @@ interface HeaderConfigStore {
     reorderContactLines: (lines: ContactLine[]) => void;
 
     setPreviewChamber: (chamberId: string | null) => void;
-    setActiveTab:      (tab: EditorTab) => void;
-    setOpenPadId:      (chamberId: string | null) => void;
+    setOpenSection:    (sectionId: PadSectionId | null) => void;
 
     patchPad:        (chamberId: string, changes: Partial<ChamberPad>) => void;
     padAddLine:      (chamberId: string, kind: ContactLineKind) => void;
@@ -85,8 +105,7 @@ export const useHeaderConfigStore = create<HeaderConfigStore>((set) => {
         dirtyPadIds:      [],
         previewChamberId: null,
 
-        activeTab: "style",
-        openPadId: null,
+        openSectionId: null,
 
         hydrate: (identity, config) => set({ identity, config }),
 
@@ -117,6 +136,14 @@ export const useHeaderConfigStore = create<HeaderConfigStore>((set) => {
             };
         }),
 
+        // A chamber created inside the editor joins the store immediately, so its section
+        // can open on the spot instead of waiting for the ["chambers"] refetch to land.
+        addChamber: (chamber) => set((state) => ({
+            chambers:         [...state.chambers, chamber],
+            pads:             { ...state.pads, [chamber.chamber_id]: padFromApi(chamber.pad_config) },
+            previewChamberId: state.previewChamberId ?? chamber.chamber_id,
+        })),
+
         reset: () => set({
             config:   { ...DEFAULT_HEADER_CONFIG },
             identity: { ...EMPTY_IDENTITY },
@@ -124,8 +151,7 @@ export const useHeaderConfigStore = create<HeaderConfigStore>((set) => {
             pads: {},
             dirtyPadIds: [],
             previewChamberId: null,
-            activeTab: "style",
-            openPadId: null,
+            openSectionId: null,
         }),
 
         setIdentity: (changes) => set((state) => ({ identity: { ...state.identity, ...changes } })),
@@ -157,8 +183,7 @@ export const useHeaderConfigStore = create<HeaderConfigStore>((set) => {
         })),
 
         setPreviewChamber: (chamberId) => set({ previewChamberId: chamberId }),
-        setActiveTab:      (tab) => set({ activeTab: tab }),
-        setOpenPadId:      (chamberId) => set({ openPadId: chamberId }),
+        setOpenSection:    (sectionId) => set({ openSectionId: sectionId }),
 
         patchPad: (chamberId, changes) => updatePad(chamberId, (pad) => ({ ...pad, ...changes })),
 

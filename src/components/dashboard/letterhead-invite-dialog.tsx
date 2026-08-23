@@ -69,7 +69,7 @@ export default function LetterheadInviteDialog() {
 
     const setUp = () => {
         dismiss();
-        navigate({ to: "/doctor/prescription-header", search: { tab: "doctor" } });
+        navigate({ to: "/doctor/prescription-header", search: {} });
     };
 
     return (
@@ -78,8 +78,8 @@ export default function LetterheadInviteDialog() {
                 <DialogHeader>
                     <DialogTitle className="text-center">Make it your own prescription pad</DialogTitle>
                     <DialogDescription className="text-center">
-                        Add your name, degree, chambers and logo — so every prescription prints looking
-                        professionally yours.
+                        Three quick questions — where you sit, what paper you print on, and how your
+                        name should appear — and every prescription prints looking professionally yours.
                     </DialogDescription>
                 </DialogHeader>
                 <div className="py-2">

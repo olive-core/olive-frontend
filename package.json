@@ -14,7 +14,10 @@
     "test:print": "node test/prescription-print/build.mjs && node test/prescription-print/build/run.cjs",
     "test:memory": "node test/memory/build.mjs && node test/memory/build/run.cjs",
     "test:mobile": "node test/mobile-editor/build.mjs && node test/mobile-editor/build/run.cjs",
-    "test": "npm run test:queue && npm run test:recording && npm run test:arise && npm run test:print && npm run test:memory && npm run test:mobile"
+    "test": "npm run test:queue && npm run test:recording && npm run test:arise && npm run test:print && npm run test:memory && npm run test:mobile && npm run test:pad-setup",
+    "test:pad-setup": "node test/pad-setup/build.mjs && node test/pad-setup/build/run.cjs",
+    "probe:build": "vite build --config vite.probe.config.ts",
+    "probe:phone": "npm run probe:build && node probe/measure-phone.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

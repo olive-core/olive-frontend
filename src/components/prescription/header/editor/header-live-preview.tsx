@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { MousePointerClickIcon } from "lucide-react";
 
-import type { HeaderColorMode } from "@/lib/header-config";
 import { applyPadState, buildFooterFromPadStates, padDisplayName } from "@/lib/chamber-pad";
 import { useHeaderConfigStore } from "@/stores/header-config-store";
 import { cn } from "@/lib/utils";
@@ -10,16 +9,13 @@ import PrescriptionHeader from "../prescription-header";
 import PrescriptionFooter from "../../footer/prescription-footer";
 import PrePrintedPaperPreview from "../../paper/preprinted-paper-preview";
 import { SegmentedControl } from "./controls/control-primitives";
+import { PAPER_PX, previewFit, type PreviewZoom } from "./preview-zoom";
 import { focusKeyFromEvent, focusControl } from "./focus-field";
 
-const COLOR_MODE_OPTIONS: { value: HeaderColorMode; label: string }[] = [
-    { value: "color", label: "Color" },
-    { value: "mono",  label: "B & W" },
+const ZOOM_OPTIONS: { value: PreviewZoom; label: string }[] = [
+    { value: "fit",    label: "Fit" },
+    { value: "actual", label: "Actual size" },
 ];
-
-// 210mm at CSS 96dpi — the paper's true layout width. The preview always lays out at
-// this width (so wrapping matches print exactly) and scales down to fit its pane.
-const PAPER_PX = 794;
 
 // Neutral editor-only stand-in shown in the logo frame before a chamber logo is uploaded.
 const LOGO_PLACEHOLDER = "data:image/svg+xml," + encodeURIComponent(
@@ -75,7 +71,7 @@ function ChamberPills() {
                         tabIndex={isActive ? 0 : -1}
                         onClick={() => setPreviewChamber(option.id)}
                         className={cn(
-                            "max-w-[180px] truncate rounded-full border px-3 py-1 text-xs font-medium transition-colors",
+                            "min-h-9 max-w-[180px] truncate rounded-full border px-3 text-xs font-medium transition-colors sm:min-h-0 sm:py-1",
                             isActive
                                 ? "border-emerald-500 bg-emerald-50 text-emerald-700"
                                 : "border-slate-200 bg-white text-slate-500 hover:border-slate-300 hover:text-slate-700",
@@ -93,29 +89,26 @@ function ChamberPills() {
 // page's width (210mm, p-6 — mirroring print-view) so wrapping matches print, and it
 // scales down to fit the pane instead of scrolling. Clicking any labelled region jumps
 // to that field's control.
-export default function HeaderLivePreview() {
+export default function HeaderLivePreview({ onEditRequest }: { onEditRequest?: () => void }) {
     const identity = useHeaderConfigStore((state) => state.identity);
     const config = useHeaderConfigStore((state) => state.config);
     const chambers = useHeaderConfigStore((state) => state.chambers);
     const pads = useHeaderConfigStore((state) => state.pads);
     const previewChamberId = useHeaderConfigStore((state) => state.previewChamberId);
-    const patch = useHeaderConfigStore((state) => state.patch);
 
     const containerRef = useRef<HTMLDivElement>(null);
     const paperRef = useRef<HTMLDivElement>(null);
-    const [scale, setScale] = useState(1);
-    const [scaledHeight, setScaledHeight] = useState<number | undefined>(undefined);
+    const [zoom, setZoom] = useState<PreviewZoom>("fit");
+    const [box, setBox] = useState({ paneWidth: 0, paperHeight: 0 });
 
-    // Scale-to-fit: track both the pane width (drag-resizes) and the paper height
-    // (content edits) so the scaled wrapper never clips or leaves dead space.
+    // Track both the pane width (drag-resizes, phone rotation) and the paper height
+    // (content edits) so the scaled wrapper never clips or leaves dead space. The paper
+    // is transformed, not resized, so offsetHeight stays the unscaled height.
     useEffect(() => {
-        const measure = () => {
-            const width = containerRef.current?.clientWidth ?? 0;
-            const nextScale = width > 0 ? Math.min(1, width / PAPER_PX) : 1;
-            setScale(nextScale);
-            const height = paperRef.current?.offsetHeight ?? 0;
-            setScaledHeight(height > 0 ? height * nextScale : undefined);
-        };
+        const measure = () => setBox({
+            paneWidth:   containerRef.current?.clientWidth ?? 0,
+            paperHeight: paperRef.current?.offsetHeight ?? 0,
+        });
         measure();
         const observer = new ResizeObserver(measure);
         if (containerRef.current) observer.observe(containerRef.current);
@@ -123,9 +116,17 @@ export default function HeaderLivePreview() {
         return () => observer.disconnect();
     }, []);
 
+    const { canZoom, scale } = previewFit(box.paneWidth, zoom);
+    const isActualSize = scale === 1 && canZoom;
+    const boxHeight = box.paperHeight > 0 ? box.paperHeight * scale : undefined;
+
+    // Tapping a region of the paper jumps to the field behind it. On a phone the preview
+    // is a sheet over the form, so it has to step aside before the field can be reached.
     const handleClick = (event: React.MouseEvent) => {
         const key = focusKeyFromEvent(event.target);
-        if (key) focusControl(key);
+        if (!key) return;
+        onEditRequest?.();
+        focusControl(key);
     };
 
     // Resolve the preview context: the selected chamber's pad overlays the style
@@ -163,21 +164,23 @@ export default function HeaderLivePreview() {
 
     return (
         <div className="rounded-xl border bg-slate-200/50 p-2.5 shadow-sm">
-            <div className="mb-2 flex items-center justify-between gap-2 px-1">
+            <div className="mb-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5 px-1">
                 <span className="flex items-center gap-1.5 text-[11px] text-slate-400">
                     <MousePointerClickIcon className="size-3.5" />
-                    Click any text on the paper to edit it
+                    Tap any text on the paper to edit it
                 </span>
-                <SegmentedControl
-                    value={config.colorMode}
-                    options={COLOR_MODE_OPTIONS}
-                    onChange={(colorMode) => patch({ colorMode })}
-                />
+                {canZoom && (
+                    <SegmentedControl value={zoom} options={ZOOM_OPTIONS} onChange={setZoom} />
+                )}
             </div>
 
             <ChamberPills />
 
-            <div ref={containerRef} className="overflow-hidden rounded-md" style={{ height: scaledHeight }}>
+            <div
+                ref={containerRef}
+                className={cn("rounded-md", isActualSize ? "overflow-auto" : "overflow-hidden")}
+                style={{ height: boxHeight }}
+            >
                 <div
                     ref={paperRef}
                     onClick={handleClick}

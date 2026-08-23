@@ -1,0 +1,4 @@
+@import "../src/index.css";
+/* The Vite root is probe/, so Tailwind's automatic detection never reaches the app. */
+@source "../src";
+@source "../probe";

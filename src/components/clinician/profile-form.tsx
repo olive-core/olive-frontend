@@ -135,7 +135,7 @@ export function ProfileForm({ clinicianData }: ProfileFormProps) {
                                 Qualification and designation / specialization are edited on your{" "}
                                 <Link
                                     to="/doctor/prescription-header"
-                                    search={{ tab: "doctor" }}
+                                    search={{ section: "doctor" as const }}
                                     className="font-medium text-emerald-600 underline-offset-2 hover:underline"
                                 >
                                     Prescription pad

@@ -98,7 +98,7 @@ export default function WelcomeScreen() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="mt-10 max-w-xl mx-auto"
+                        className="mt-10 w-full max-w-xl mx-auto"
                     >
                         {(() => {
                             switch (showContent.status) {

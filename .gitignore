@@ -28,3 +28,7 @@ dist-ssr
 
 # Test bundles
 test/**/build
+
+# Phone layout probe output
+probe/dist
+probe/shots

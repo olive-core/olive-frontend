@@ -1,8 +1,6 @@
-import { UserRoundIcon } from "lucide-react";
-
 import { useHeaderConfigStore } from "@/stores/header-config-store";
 import { controlId } from "../focus-field";
-import { ControlSection, LabeledInput, LabeledTextarea } from "./control-primitives";
+import { LabeledInput, LabeledTextarea } from "./control-primitives";
 
 export default function DoctorControls() {
     const identity = useHeaderConfigStore((state) => state.identity);
@@ -12,7 +10,7 @@ export default function DoctorControls() {
     const patch = useHeaderConfigStore((state) => state.patch);
 
     return (
-        <ControlSection title="Doctor" description="Shown at the top of every prescription." icon={UserRoundIcon}>
+        <div className="flex flex-col gap-3">
             <LabeledInput id={controlId("name")} label="Name" value={identity.name} onChange={(name) => setIdentity({ name })} placeholder="Dr. Ahsan Habib" />
             <LabeledInput
                 id={controlId("nameBn")}
@@ -25,6 +23,6 @@ export default function DoctorControls() {
             <LabeledTextarea id={controlId("qualification")} label="Qualification" value={identity.qualification} onChange={(qualification) => setIdentity({ qualification })} placeholder="MBBS, FCPS (Medicine)" />
             <LabeledTextarea id={controlId("designation")} label="Designation / specialization" value={designation} onChange={(designation) => patch({ designation })} placeholder="Consultant — Internal Medicine" />
             <LabeledInput id={controlId("bmdcNo")} label="BMDC registration no." value={identity.bmdcNo} onChange={(bmdcNo) => setIdentity({ bmdcNo })} placeholder="A-12345" />
-        </ControlSection>
+        </div>
     );
 }

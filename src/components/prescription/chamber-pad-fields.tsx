@@ -8,12 +8,14 @@ import { newContactLine } from "@/lib/header-config";
 import { padFromApi, type ChamberPad, type PadConfigApi } from "@/lib/chamber-pad";
 import { Button } from "@/components/ui/button";
 import ContactLinesEditor from "./header/editor/controls/contact-lines-editor";
-import { LabeledInput } from "./header/editor/controls/control-primitives";
+import { FieldGroup, LabeledInput } from "./header/editor/controls/control-primitives";
 import ChamberPaperFields from "./chamber-paper-fields";
+import { isPrePrinted } from "@/lib/print-paper";
 
-// The chamber pad-editing fields (name, logo, contact lines), fully controlled so the
-// same UI can be driven by the header/footer editor's Zustand store or by plain local
-// component state on the profile's chamber page — both write the same `pad_config`.
+// Everything a doctor sets for one chamber's pad, in the order the questions actually
+// depend on each other: the paper first (it decides whether Olive draws a letterhead at
+// all), then what that letterhead says. Fully controlled, so the editor's Zustand store
+// and plain local state can both drive it — both write the same `pad_config`.
 
 interface ChamberPadLogoControlProps {
     chamberId:    string;
@@ -74,12 +76,12 @@ export function ChamberPadLogoControl({ chamberId, chamberLabel, logoUrl, onChan
             </div>
             <div className="flex flex-col items-start gap-1.5">
                 <input ref={inputRef} type="file" accept="image/*" hidden onChange={(event) => handleFile(event.target.files?.[0])} />
-                <Button type="button" variant="outline" size="sm" disabled={isBusy} onClick={() => inputRef.current?.click()}>
+                <Button type="button" variant="outline" size="sm" className="min-h-11 sm:min-h-8" disabled={isBusy} onClick={() => inputRef.current?.click()}>
                     {isBusy ? <Loader2Icon className="size-4 animate-spin" /> : <ImageUpIcon className="size-4" />}
                     {logoUrl ? "Replace logo" : "Upload logo"}
                 </Button>
                 {logoUrl && (
-                    <Button type="button" variant="ghost" size="sm" disabled={isBusy} className="text-slate-500" onClick={handleRemove}>
+                    <Button type="button" variant="ghost" size="sm" disabled={isBusy} className="min-h-11 text-slate-500 sm:min-h-8" onClick={handleRemove}>
                         <XIcon className="size-4" />
                         Remove
                     </Button>
@@ -113,38 +115,48 @@ export default function ChamberPadFields({
     printsLetterhead = true,
 }: ChamberPadFieldsProps) {
     return (
-        <div className="flex flex-col gap-3.5">
-            <ChamberPaperFields
-                paper={pad.paper}
-                printsLetterhead={printsLetterhead}
-                onChange={(paper) => onChange({ paper })}
-            />
-            <LabeledInput
-                id={nameFieldId}
-                label="Name on the pad"
-                value={pad.displayName}
-                onChange={(displayName) => onChange({ displayName })}
-                placeholder={chamberLabel}
-            />
-            {printsLetterhead && (
-                <>
-                    <ChamberPadLogoControl
-                        chamberId={chamberId}
-                        chamberLabel={chamberLabel}
-                        logoUrl={pad.logoUrl}
-                        onChange={onChange}
-                    />
-                    <ContactLinesEditor
-                        lines={pad.contactLines}
-                        onAdd={(kind) => onChange({ contactLines: [...pad.contactLines, newContactLine(kind)] })}
-                        onUpdate={(lineId, changes) => onChange({
-                            contactLines: pad.contactLines.map((line) => (line.id === lineId ? { ...line, ...changes } : line)),
-                        })}
-                        onRemove={(lineId) => onChange({ contactLines: pad.contactLines.filter((line) => line.id !== lineId) })}
-                        onReorder={(lines) => onChange({ contactLines: lines })}
-                    />
-                </>
-            )}
+        <div className="flex flex-col gap-5">
+            <FieldGroup label="What paper do you print on?">
+                <ChamberPaperFields
+                    paper={pad.paper}
+                    printsLetterhead={printsLetterhead}
+                    onChange={(paper) => onChange({ paper })}
+                />
+            </FieldGroup>
+
+            <FieldGroup
+                label={isPrePrinted(pad.paper) ? "Details of this chamber" : "What prints at the top"}
+                hint={isPrePrinted(pad.paper)
+                    ? "Not printed here — your own pad already carries them. They appear in the footer of your other chambers' pads."
+                    : "The chamber block beside your name on every prescription written here."}
+            >
+                <LabeledInput
+                    id={nameFieldId}
+                    label="Name on the pad"
+                    value={pad.displayName}
+                    onChange={(displayName) => onChange({ displayName })}
+                    placeholder={chamberLabel}
+                />
+                {printsLetterhead && (
+                    <>
+                        <ChamberPadLogoControl
+                            chamberId={chamberId}
+                            chamberLabel={chamberLabel}
+                            logoUrl={pad.logoUrl}
+                            onChange={onChange}
+                        />
+                        <ContactLinesEditor
+                            lines={pad.contactLines}
+                            onAdd={(kind) => onChange({ contactLines: [...pad.contactLines, newContactLine(kind)] })}
+                            onUpdate={(lineId, changes) => onChange({
+                                contactLines: pad.contactLines.map((line) => (line.id === lineId ? { ...line, ...changes } : line)),
+                            })}
+                            onRemove={(lineId) => onChange({ contactLines: pad.contactLines.filter((line) => line.id !== lineId) })}
+                            onReorder={(lines) => onChange({ contactLines: lines })}
+                        />
+                    </>
+                )}
+            </FieldGroup>
         </div>
     );
 }

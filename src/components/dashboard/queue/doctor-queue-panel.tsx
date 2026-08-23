@@ -163,7 +163,7 @@ export default function DoctorQueuePanel({ onStateChange }: DoctorQueuePanelProp
     if (chambers.length === 0) return null;
 
     return (
-        <div className="max-w-md mx-auto border rounded-xl p-4 mb-8">
+        <div className="w-full max-w-md mx-auto border rounded-xl p-4 mb-8">
             {chambers.length > 1 && (
                 <div className="flex gap-1 mb-4 p-1 bg-slate-100 rounded-xl">
                     {chambers.map((chamber) => {

@@ -19,6 +19,7 @@ import {
 import { chamberLabel, chamberRoom, type Chamber, type Hospital } from "@/types/attendant-queue";
 import { handleError } from "@/lib/utils";
 import { padIsConfigured } from "@/lib/chamber-pad";
+import { chamberSectionId } from "@/stores/header-config-store";
 import HospitalSelect from "./hospital-select";
 import NewChamberForm from "./new-chamber-form";
 
@@ -36,12 +37,12 @@ export default function ChambersManager() {
     const creating = showCreate || chambers.length === 0;
 
     return (
-        <div className="max-w-2xl mx-auto px-4 py-6 space-y-4">
+        <div className="w-full max-w-2xl mx-auto px-4 py-6 space-y-4">
             <div>
                 <h1 className="text-xl font-medium mb-1">Chambers &amp; Attendants</h1>
                 <p className="text-sm text-muted-foreground">
-                    Each chamber carries its own prescription pad (logo, address, serial, phone) and its
-                    attendants, added by phone so they can register your queue.
+                    The places you sit, and the attendants who register your queue at each — added by
+                    phone. Each chamber's prescription pad is set up from the row below it.
                 </p>
             </div>
 
@@ -70,7 +71,7 @@ function ChamberPadLink({ chamber }: { chamber: Chamber }) {
     return (
         <Link
             to="/doctor/prescription-header"
-            search={{ tab: "chambers", chamber: chamber.chamber_id }}
+            search={{ section: chamberSectionId(chamber.chamber_id) }}
             className="flex items-center gap-2 rounded-lg border px-3 py-2.5 transition-colors hover:bg-slate-50"
         >
             <Building2Icon className="size-4 shrink-0 text-emerald-600" />

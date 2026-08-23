@@ -60,6 +60,7 @@ export default function HospitalSelect({ selected, onSelect }: HospitalSelectPro
         <div className="relative">
             <Input
                 placeholder="Search hospital or chamber name…"
+                className="h-11 sm:h-9"
                 value={query}
                 onChange={(e) => {
                     setQuery(e.target.value);
@@ -73,7 +74,7 @@ export default function HospitalSelect({ selected, onSelect }: HospitalSelectPro
                         <button
                             key={hospital.hospital_id}
                             type="button"
-                            className="w-full text-left px-3 py-2 text-sm hover:bg-slate-50 cursor-pointer"
+                            className="w-full min-h-11 text-left px-3 py-2 text-sm hover:bg-slate-50 cursor-pointer"
                             onClick={() => {
                                 onSelect(hospital);
                                 setOpen(false);
@@ -88,7 +89,7 @@ export default function HospitalSelect({ selected, onSelect }: HospitalSelectPro
                         <button
                             type="button"
                             disabled={creating}
-                            className="w-full text-left px-3 py-2 text-sm text-primary hover:bg-slate-50 disabled:opacity-50 cursor-pointer"
+                            className="w-full min-h-11 text-left px-3 py-2 text-sm text-primary hover:bg-slate-50 disabled:opacity-50 cursor-pointer"
                             onClick={create}
                         >
                             + Create “{query.trim()}”
