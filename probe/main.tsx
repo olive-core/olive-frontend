@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import "./probe.css";
 import HeaderEditor from "@/components/prescription/header/editor/header-editor";
 import ChambersManager from "@/components/dashboard/chambers/chambers-manager";
+import InsightsPage from "@/components/dashboard/insights/insights-page";
 import { useAuthStore } from "@/stores/auth-store";
 
 useAuthStore.setState({ userId: "doctor-1", isLoggedIn: true, activeView: "doctor" } as never);
@@ -17,6 +18,7 @@ const PROFILE = {
 };
 
 function Page() {
+    if (window.location.hash.includes("insights")) return <InsightsPage />;
     if (window.location.hash.includes("chambers-page")) return <ChambersManager />;
     return <HeaderEditor initialProfile={PROFILE} isSaving={false} onSave={() => {}} />;
 }

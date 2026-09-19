@@ -85,6 +85,8 @@ export interface PrintFitClasses {
     rxStack:        string;
     rxEntryPadding: string;
     listText:       string;
+    detailText:     string;
+    sectionItems:   string;
     medicineName:   string;
     medicineMeta:   string;
     frequency:      string;
@@ -100,6 +102,8 @@ export function printFitClasses(fit: PrintFit): PrintFitClasses {
         rxStack:        fit.tightSpacing ? "space-y-1" : "space-y-2",
         rxEntryPadding: fit.tightSpacing ? "pb-1" : "pb-2",
         listText:       fit.denseType ? "text-[11px]" : "text-xs",
+        detailText:     fit.denseType ? "text-[10px]" : "text-[11px]",
+        sectionItems:   fit.tightSpacing ? "space-y-0.5" : "space-y-1",
         medicineName:   fit.denseType ? "text-[13px]" : "text-sm",
         medicineMeta:   fit.denseType ? "text-[11px]" : "text-xs",
         frequency:      fit.denseType ? "text-xs" : "text-sm",

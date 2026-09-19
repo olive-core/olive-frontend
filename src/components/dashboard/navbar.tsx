@@ -1,4 +1,4 @@
-import { BookMarked, ClipboardListIcon, DoorOpenIcon, EllipsisIcon, HandCoinsIcon, House, LogOutIcon, MenuIcon, StampIcon, UserIcon, XIcon } from "lucide-react";
+import { BookMarked, ChartNoAxesColumnIcon, ClipboardListIcon, DoorOpenIcon, EllipsisIcon, HandCoinsIcon, House, LogOutIcon, MenuIcon, StampIcon, UserIcon, XIcon } from "lucide-react";
 import { useState } from "react";
 import NavbarContainer from "../shared/navbar-container";
 import SubscriptionStatusPill from "./subscription/status-pill";
@@ -45,11 +45,11 @@ const MENU_ITEMS: MenuItemType[] = [
         icon: <StampIcon />,
         href: "/doctor/prescription-header",
     },
-    // {
-    //     label: "Statistics",
-    //     icon: <ChartNoAxesColumnIcon />,
-    //     href: "/doctor/statistics",
-    // },
+    {
+        label: "Insights",
+        icon: <ChartNoAxesColumnIcon />,
+        href: "/doctor/insights",
+    },
     // {
     //     label: "Session History",
     //     icon: <HistoryIcon />,

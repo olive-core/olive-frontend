@@ -2,7 +2,8 @@ import http from "node:http";
 import fs from "node:fs";
 import path from "node:path";
 
-// Renders the real pad editor at phone sizes in a headless browser and fails if anything
+// Renders the real pad editor and insight screens at phone sizes in a headless browser,
+// and fails if anything
 // reaches past the viewport. jsdom cannot do this — it has no layout engine — and the bug
 // this catches (content sized to max-content, clipped on the right, no scrollbar to hint at
 // it) is invisible in markup assertions and invisible on a desktop browser.
@@ -34,6 +35,9 @@ const VIEWPORTS = [
     { name: "tablet",           hash: "#editor", width: 820, height: 1180 },
     { name: "first-run",        hash: "#wizard", width: 360, height: 780 },
     { name: "chambers-page",    hash: "#chambers-page", width: 360, height: 780 },
+    { name: "insights",         hash: "#insights", width: 360, height: 780 },
+    { name: "insights-se",      hash: "#insights", width: 320, height: 568 },
+    { name: "insights-desktop", hash: "#insights", width: 1024, height: 900 },
 ];
 
 const OPEN_SECTIONS = ["Ibn Sina", "Popular", "Your details", "Look of the pad", "Bottom of the page"];

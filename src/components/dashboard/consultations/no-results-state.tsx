@@ -14,7 +14,7 @@ export default function NoResultsState({ onClearFilters }: NoResultsStateProps) 
             <div>
                 <p className="text-slate-700 font-semibold text-lg">No matching consultations</p>
                 <p className="text-slate-400 text-sm mt-1">
-                    Try a different patient name or widen your date range.
+                    Try a name, a diagnosis or part of a number.
                 </p>
             </div>
             <Button variant="outline" size="sm" onClick={onClearFilters}>

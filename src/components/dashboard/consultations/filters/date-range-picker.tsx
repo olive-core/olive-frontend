@@ -47,7 +47,7 @@ export default function DateRangePicker({ value, onChange }: DateRangePickerProp
                     variant="outline"
                     size="sm"
                     className={cn(
-                        "h-9 gap-2 font-normal",
+                        "h-11 w-full gap-2 font-normal sm:h-9 sm:w-auto",
                         isActive ? "border-emerald-300 text-emerald-700" : "text-slate-600",
                     )}
                 >

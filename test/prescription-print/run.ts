@@ -162,5 +162,29 @@ section("10. The pad editor only offers what will actually be printed");
     check("a pad that has not loaded is not read as pre-printed", printsOliveLetterhead([chamber("a")], {}));
 }
 
+section("11. A complaint prints its details, not just its label");
+{
+    const markup = printBodyMarkup(0);
+
+    check("the complaint's note prints", markup.includes("Persistent vomiting \u00d7 4 days following fall."), markup.slice(0, 200));
+    check("a typed timeline prints beside the name", markup.includes("\u2014 3 days"));
+    check("the history's note prints", markup.includes("On amlodipine 5mg for six years."));
+    check("an empty timeline prints nothing", !/>\s*\u2014\s*</.test(markup));
+    check("a complaint and its note stay on one page", /<li class="break-inside-avoid">/.test(markup));
+
+    // An investigation's Clinical Notes box is stored as `reason`. A clinician who types
+    // "fasting sample" there must see it on the paper, so the note prints whatever wrote it.
+    check("the investigation itself prints", markup.includes("CBC with ESR"));
+    check("an investigation's note prints", markup.includes("To evaluate febrile illness."));
+    check("an investigation with no note prints just its name", markup.includes("Serum creatinine"));
+    check("and gains no empty detail line", !/Serum creatinine<span class="block/.test(markup));
+
+    // The detail line has to tighten with everything else, or it is what pushes a
+    // prescription onto a second sheet.
+    const densest = printBodyMarkup(PRINT_FIT_LEVELS.length - 1);
+    check("the detail line shrinks on the densest step", densest.includes("text-[10px]"), "no dense detail class");
+    check("and is roomier on the loosest", markup.includes("text-[11px]"), "no loose detail class");
+}
+
 console.log(failures === 0 ? "\nALL CHECKS PASSED" : `\n${failures} CHECK(S) FAILED`);
 process.exitCode = failures === 0 ? 0 : 1;

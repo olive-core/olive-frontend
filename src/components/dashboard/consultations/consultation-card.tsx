@@ -1,10 +1,12 @@
 import { useNavigate } from "@tanstack/react-router";
-import { CheckIcon, ChevronRightIcon, HistoryIcon, Share2Icon, XIcon } from "lucide-react";
+import { CheckIcon, ChevronRightIcon, HistoryIcon, PhoneIcon, Share2Icon, XIcon } from "lucide-react";
 import type { ClinicianConsultationItem } from "@/types/consultation";
 import { Button } from "@/components/ui/button";
 import PatientAvatar from "./patient-avatar";
 import SexAgeMeta from "./sex-age-meta";
 import DiagnosisPills from "./diagnosis-pills";
+import SearchHighlight from "./search-highlight";
+import { formatPhone, matchedPhone, type SearchTokens } from "./filters/search-consultations";
 import { getFullName, getTimeOfDay } from "./helpers";
 
 interface ConsultationCardProps {
@@ -13,6 +15,8 @@ interface ConsultationCardProps {
     isStartingFollowUp?: boolean;
     onRemoveShared: () => void;
     isRemovingShared?: boolean;
+    /** Active search words, so the row can show what the search landed on. */
+    tokens?: SearchTokens;
 }
 
 export default function ConsultationCard({
@@ -21,6 +25,7 @@ export default function ConsultationCard({
     isStartingFollowUp,
     onRemoveShared,
     isRemovingShared,
+    tokens = [],
 }: ConsultationCardProps) {
     const navigate = useNavigate();
 
@@ -34,6 +39,9 @@ export default function ConsultationCard({
 
     const fullName = getFullName(consultation.patient_name);
     const timeOfDay = getTimeOfDay(consultation.created_at);
+    // Numbers stay off the row until one is why the row is here: then it is both the
+    // explanation for the match and the number the doctor was about to look up anyway.
+    const phone = matchedPhone(consultation, tokens);
 
     const isShared = consultation.access_type === "shared";
     const canFollowUp = !isShared && !!consultation.session_id && !consultation.has_follow_up;
@@ -54,7 +62,7 @@ export default function ConsultationCard({
 
                 <div className="flex-1 min-w-0 md:flex-none md:w-56 md:shrink-0">
                     <h3 className="font-semibold text-slate-800 text-sm truncate group-hover:text-emerald-700 transition-colors">
-                        {fullName}
+                        <SearchHighlight text={fullName} tokens={tokens} />
                     </h3>
                     {isShared && (
                         <span className="mt-1 inline-flex items-center gap-1 text-xs font-medium text-emerald-700">
@@ -66,6 +74,14 @@ export default function ConsultationCard({
                         sex={consultation.patient_sex}
                         dateOfBirth={consultation.patient_date_of_birth}
                     />
+                    {phone && (
+                        <span className="mt-0.5 flex items-center gap-1 text-xs text-slate-500">
+                            <PhoneIcon aria-hidden className="size-3 shrink-0" />
+                            <span className="font-mono truncate">
+                                <SearchHighlight text={formatPhone(phone)} tokens={tokens} />
+                            </span>
+                        </span>
+                    )}
                 </div>
 
                 <div className="md:hidden flex items-center gap-2 shrink-0 ml-auto">
@@ -74,7 +90,11 @@ export default function ConsultationCard({
             </div>
 
             <div className="flex-1 min-w-0">
-                <DiagnosisPills diagnoses={consultation.diagnoses_summary} />
+                <DiagnosisPills
+                    diagnoses={consultation.diagnoses_summary}
+                    complaints={consultation.chief_complaints_summary}
+                    tokens={tokens}
+                />
             </div>
 
             <div className="hidden md:flex items-center gap-2 shrink-0 ml-auto">

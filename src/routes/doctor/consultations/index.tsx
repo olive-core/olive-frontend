@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useDeferredValue, useMemo, useState } from 'react'
 import toast from 'react-hot-toast'
 import api from '@/lib/axios'
 import { useAuthStore } from '@/stores/auth-store'
@@ -12,10 +12,15 @@ import NoResultsState from '@/components/dashboard/consultations/no-results-stat
 import ConsultationsToolbar, { type CaseAccessFilter } from '@/components/dashboard/consultations/filters/toolbar'
 import { groupConsultationsByDay } from '@/components/dashboard/consultations/group-by-day'
 import { useClinicianConsultations } from '@/components/dashboard/consultations/use-clinician-consultations'
-import { filterConsultationsByName } from '@/components/dashboard/consultations/filters/filter-by-name'
+import {
+  buildConsultationIndex,
+  searchConsultations,
+  tokenizeQuery,
+} from '@/components/dashboard/consultations/filters/search-consultations'
 import { filterConsultationsByAccess } from '@/components/dashboard/consultations/filters/filter-by-access'
 import { EMPTY_DATE_RANGE, isDateRangeActive, type DateRange } from '@/components/dashboard/consultations/filters/date-range'
 import { useStartConsultation } from '@/hooks/use-start-consultation'
+import { cn } from '@/lib/utils'
 
 export const Route = createFileRoute('/doctor/consultations/')({
   component: ConsultationsPage,
@@ -44,8 +49,19 @@ function ConsultationsPage() {
     dateRange,
   })
 
-  const visibleByAccess = filterConsultationsByAccess(consultations, accessFilter)
-  const filteredConsultations = filterConsultationsByName(visibleByAccess, searchTerm)
+  // The typed value drives the input; the deferred one drives the list, so a long history
+  // never makes the field feel sticky on a phone. No debounce: nothing here is a request.
+  const deferredTerm = useDeferredValue(searchTerm)
+  const searchIndex = useMemo(() => buildConsultationIndex(consultations), [consultations])
+  const tokens = useMemo(() => tokenizeQuery(deferredTerm), [deferredTerm])
+  const { items: matched, isApproximate } = useMemo(
+    () => searchConsultations(searchIndex, deferredTerm),
+    [searchIndex, deferredTerm],
+  )
+  const filteredConsultations = useMemo(
+    () => filterConsultationsByAccess(matched, accessFilter),
+    [matched, accessFilter],
+  )
   const dayGroups = groupConsultationsByDay(filteredConsultations)
 
   const hasActiveFilters = isDateRangeActive(dateRange) || searchTerm.trim().length > 0 || accessFilter !== "all"
@@ -77,6 +93,23 @@ function ConsultationsPage() {
         onAccessChange={setAccessFilter}
       />
 
+      {/* Always mounted so the count is announced on every change, not just the first. */}
+      <p
+        role="status"
+        aria-live="polite"
+        className={cn('mb-4 text-xs text-slate-500', !hasActiveFilters && 'sr-only')}
+      >
+        {hasActiveFilters && isReady
+          ? `${filteredConsultations.length} of ${consultations.length} consultations`
+          : ''}
+      </p>
+
+      {isApproximate && isReady && (
+        <p className="mb-4 text-sm text-slate-500">
+          Nothing matches that exactly. These are the closest spellings.
+        </p>
+      )}
+
       {isLoading && <GridSkeleton />}
       {!isLoading && isError && <ErrorState />}
       {showNoResults && <NoResultsState onClearFilters={handleClearFilters} />}
@@ -100,6 +133,7 @@ function ConsultationsPage() {
                 }
               }}
               removingRootSessionId={removeSharedCase.variables}
+              tokens={tokens}
             />
           ))}
         </div>

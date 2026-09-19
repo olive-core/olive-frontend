@@ -10,10 +10,20 @@ const LONG_ADVICE =
 
 export function printBodyMarkup(level: number): string {
     const data = {
-        chief_complaints: [{ name_text: "Fever for three days with a persistent unproductive cough" }],
-        histories:        [{ name_text: "Hypertension, on amlodipine for six years" }],
+        chief_complaints: [
+            // The shape the AI pipeline actually produces: a short label, with the substance
+            // of the complaint in the note. Printing the label alone loses the complaint.
+            { name_text: "Vomiting", duration: "", notes: "Persistent vomiting \u00d7 4 days following fall." },
+            { name_text: "Fever for three days with a persistent unproductive cough", duration: "3 days" },
+        ],
+        histories:        [{ name_text: "Hypertension", notes: "On amlodipine 5mg for six years." }],
         diagnoses:        [{ name_text: "Acute upper respiratory tract infection" }],
-        investigations:   [{ name_text: "CBC with ESR" }],
+        // An investigation's Clinical Notes field is stored as `reason`, so it prints like any
+        // other note — and a test ordered without one must not gain a blank line.
+        investigations: [
+            { name_text: "CBC with ESR", reason: "To evaluate febrile illness.", priority: "routine" },
+            { name_text: "Serum creatinine", reason: "", priority: "routine" },
+        ],
         rx_list: [
             {
                 trade_name: "Napa Extra", generic_name: "Paracetamol + Caffeine", type: "tablet",

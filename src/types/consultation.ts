@@ -18,6 +18,9 @@ export type ClinicianConsultationItem = {
     patient_name?:          string | null;
     patient_sex?:           PatientSex | null;
     patient_date_of_birth?: string | null;
+    /** Every number this patient is reachable on for this visit, richest first: the
+     *  number that brought them in, then each linked number, oldest link first. */
+    patient_phones?:        string[];
     access_type?:          "owned" | "shared";
     case_root_session_id?: string | null;
     clinician_name?:       string | null;

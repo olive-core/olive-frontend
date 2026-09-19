@@ -1,5 +1,6 @@
 import type { ClinicianConsultationItem } from "@/types/consultation";
 import ConsultationCard from "./consultation-card";
+import type { SearchTokens } from "./filters/search-consultations";
 import { getDayLabel } from "./helpers";
 
 interface DaySectionProps {
@@ -9,6 +10,7 @@ interface DaySectionProps {
     startingSourceSessionId?: string | null;
     onRemoveShared: (consultation: ClinicianConsultationItem) => void;
     removingRootSessionId?: string;
+    tokens?: SearchTokens;
 }
 
 export default function DaySection({
@@ -18,6 +20,7 @@ export default function DaySection({
     startingSourceSessionId,
     onRemoveShared,
     removingRootSessionId,
+    tokens,
 }: DaySectionProps) {
     return (
         <section className="space-y-4">
@@ -40,6 +43,7 @@ export default function DaySection({
                         isStartingFollowUp={startingSourceSessionId === consultation.session_id}
                         onRemoveShared={() => onRemoveShared(consultation)}
                         isRemovingShared={removingRootSessionId === consultation.case_root_session_id}
+                        tokens={tokens}
                     />
                 ))}
             </div>

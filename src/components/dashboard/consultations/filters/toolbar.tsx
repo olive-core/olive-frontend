@@ -1,6 +1,6 @@
 import type { DateRange } from "./date-range";
 import DateRangePicker from "./date-range-picker";
-import PatientSearch from "./patient-search";
+import ConsultationSearch from "./consultation-search";
 import { Button } from "@/components/ui/button";
 
 export type CaseAccessFilter = "all" | "owned" | "shared";
@@ -25,7 +25,7 @@ export default function ConsultationsToolbar({
     return (
         <div className="mb-6 flex flex-col gap-3">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                <PatientSearch value={searchTerm} onChange={onSearchChange} />
+                <ConsultationSearch value={searchTerm} onChange={onSearchChange} />
                 <DateRangePicker value={dateRange} onChange={onDateChange} />
             </div>
             <div className="flex gap-2" aria-label="Consultation ownership">

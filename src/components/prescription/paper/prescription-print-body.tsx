@@ -25,6 +25,41 @@ function EmptySectionNote({ children }: { children: ReactNode }) {
 // Anything that cannot wrap at a space wraps mid-word rather than running off the page.
 const WRAPPING_TEXT = "break-words";
 
+// A section entry as it prints: the name, the timeline the clinician typed beside it, and
+// the clinical note under it. The note is where the substance of a complaint lives — the
+// name is only its label, so "Vomiting" alone loses "Persistent vomiting × 4 days following
+// fall." Which fields an item actually has is what decides what prints: chief complaints and
+// histories carry `duration` and `notes`, investigations carry `reason`, and diagnoses are a
+// bare name.
+interface PrintSectionItem {
+    name_text?: string;
+    duration?:  string | null;
+    notes?:     string | null;
+    /** An investigation's note. The editor writes the same "Clinical Notes" field here,
+     *  under a different name, because that is what the stored payload calls it. */
+    reason?:    string | null;
+}
+
+function SectionEntry({ item, classes }: { item: PrintSectionItem; classes: PrintFitClasses }) {
+    const duration = item.duration?.trim();
+    // Never both: the stored payload gives complaints and histories `notes` and gives
+    // investigations `reason`, and the editor feeds one Clinical Notes box into whichever
+    // one this section uses.
+    const note = (item.notes ?? item.reason)?.trim();
+
+    return (
+        // A complaint and the note explaining it are one thought; a page break between them
+        // would leave the note stranded under the wrong heading.
+        <li className="break-inside-avoid">
+            {item.name_text}
+            {duration && <span className="text-gray-700"> — {duration}</span>}
+            {note && (
+                <span className={cn("block italic text-gray-800", classes.detailText)}>{note}</span>
+            )}
+        </li>
+    );
+}
+
 // Every heading always prints: the prescription is a standard form, and a reader finding the
 // same landmarks each time is what makes a gap legible as a gap. `emptyText` reads as the
 // clinician's own statement, because an empty section is their decision — each of these
@@ -37,7 +72,7 @@ function PrintSection({
     classes,
 }: {
     title:     string;
-    items:     { name_text?: string }[];
+    items:     PrintSectionItem[];
     emptyText: string;
     classes:   PrintFitClasses;
 }) {
@@ -47,9 +82,9 @@ function PrintSection({
             {items.length === 0 ? (
                 <EmptySectionNote>{emptyText}</EmptySectionNote>
             ) : (
-                <ul className={cn("list-disc pl-4", WRAPPING_TEXT, classes.listText)}>
+                <ul className={cn("list-disc pl-4", WRAPPING_TEXT, classes.listText, classes.sectionItems)}>
                     {items.map((item, index) => (
-                        <li key={index}>{item.name_text}</li>
+                        <SectionEntry key={index} item={item} classes={classes} />
                     ))}
                 </ul>
             )}
@@ -138,6 +173,12 @@ export default function PrescriptionPrintBody({ data, followUpBaseDate }: Prescr
                     <PrintSection title="Chief Complaints" items={data.chief_complaints ?? []} emptyText="None reported" classes={classes} />
                     <PrintSection title="History" items={data.histories ?? []} emptyText="None reported" classes={classes} />
                     <PrintSection title="Diagnosis" items={data.diagnoses ?? []} emptyText="None specified" classes={classes} />
+                    {/* An investigation's note prints for the same reason a complaint's does: the
+                        clinician typed it into a box labelled Clinical Notes, and "fasting sample"
+                        or "bring previous reports" is worth more on the paper than the line it
+                        costs. An AI-drafted one reads as the rationale for ordering the test
+                        ("To rule out dengue fever"), which is redundant but never wrong — and
+                        dropping every note to spare that redundancy is what lost the typed ones. */}
                     <PrintSection title="Investigation" items={data.investigations ?? []} emptyText="No investigation advised" classes={classes} />
                     {fit.adviceInSidebar && advice}
                 </div>
