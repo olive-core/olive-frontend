@@ -234,8 +234,11 @@ async function run() {
             consultation("dermatology-root", true),
             consultation("dermatology-latest", false, "dermatology-root"),
             consultation("orthopedic-standalone", false),
-        ]);
+            { ...consultation("another-doctor", false), clinician_id: "clinician-2" },
+        ], "clinician-1");
 
+        check("another doctor's consultation cannot start this doctor's follow-up",
+            !eligible.some((item) => item.session_id === "another-doctor"));
         check("an intermediate consultation is hidden",
             !eligible.some((item) => item.session_id === "dermatology-root"));
         check("the latest consultation in a series remains available",
