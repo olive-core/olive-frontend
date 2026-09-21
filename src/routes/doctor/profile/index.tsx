@@ -1,77 +1,9 @@
-import { ProfileForm } from '@/components/clinician/profile-form'
-import ConsultationSettingsCard from '@/components/clinician/consultation-settings-card'
-import DeviceCheckCard from '@/components/device/device-check-card'
-import { ProfileSummary } from '@/components/clinician/profile-summary'
-import MembershipBadge from '@/components/dashboard/subscription/membership-badge'
-import { Card, CardContent } from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton'
-import api from '@/lib/axios'
-import { useAuthStore } from '@/stores/auth-store'
-import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
+import AccountLayout from '@/components/dashboard/practice-account/account-layout'
+import ProfileSection from '@/components/dashboard/practice-account/profile-section'
 
-export const Route = createFileRoute('/doctor/profile/')({
-  component: RouteComponent,
-})
+export const Route = createFileRoute('/doctor/profile/')({ component: ProfilePage })
 
-function ProfileSkeleton() {
-  return (
-    <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-      <Card className="md:col-span-1">
-        <CardContent className="flex flex-col items-center gap-4">
-          <Skeleton className="size-20 rounded-full" />
-          <Skeleton className="h-5 w-32" />
-          <Skeleton className="h-3 w-24" />
-        </CardContent>
-      </Card>
-      <Card className="md:col-span-2">
-        <CardContent className="space-y-4">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <Skeleton key={i} className="h-10 w-full" />
-          ))}
-        </CardContent>
-      </Card>
-    </div>
-  )
-}
-
-function RouteComponent() {
-  const { userId, phoneNumber } = useAuthStore()
-
-  const { data: clinicianData, isLoading } = useQuery({
-    queryKey: ['clinician', userId],
-    queryFn: async () => {
-      const response = await api.get(`/clinician/${userId}`)
-      return response.data
-    },
-  })
-
-  return (
-    <div className="container mx-auto max-w-5xl px-4 py-8">
-      <h1 className="mb-6 text-2xl font-bold text-slate-900">Profile</h1>
-
-      <MembershipBadge />
-
-      {isLoading || !clinicianData ? (
-        <ProfileSkeleton />
-      ) : (
-        <div className="grid grid-cols-1 items-start gap-6 md:grid-cols-3">
-          <div className="md:col-span-1">
-            <ProfileSummary
-              name={clinicianData.name}
-              qualification={clinicianData.qualification}
-              specializations={clinicianData.specializations}
-              bmdcNo={clinicianData.bmdc_no}
-              phone={phoneNumber}
-            />
-          </div>
-          <div className="flex flex-col gap-6 md:col-span-2">
-            <ProfileForm clinicianData={clinicianData} />
-            <ConsultationSettingsCard clinicianData={clinicianData} />
-            <DeviceCheckCard />
-          </div>
-        </div>
-      )}
-    </div>
-  )
+function ProfilePage() {
+  return <AccountLayout section="profile" title="Profile" description="Your personal and professional details, kept in sync with your prescription pad."><ProfileSection /></AccountLayout>
 }

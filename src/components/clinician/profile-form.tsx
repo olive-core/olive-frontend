@@ -21,11 +21,14 @@ import toast from "react-hot-toast"
 import { AxiosError } from "axios"
 import { useQueryClient } from "@tanstack/react-query"
 import { Link } from "@tanstack/react-router"
+import { specializationsFromDesignation, type HeaderConfigApi } from "@/lib/header-config"
+import UnsavedChangesDialog from "@/components/dashboard/practice-account/unsaved-changes-dialog"
 
 const formSchema = z.object({
     name: z.string().trim().min(1, "Name is required"),
     bmdcNo: z.string().trim().min(1, "BMDC number is required").regex(/^[A-Za-z0-9-]+$/, "Enter a valid BMDC number (e.g. A-53127)"),
-    defaultGeneration: z.boolean().optional(),
+    qualification: z.string().trim(),
+    designation: z.string().trim(),
 })
 
 type FormValues = z.infer<typeof formSchema>
@@ -38,7 +41,7 @@ interface ProfileFormProps {
         "qualification": string;
         "specializations": string[];
         "medicine_company_ids"?: string[] | null;
-        "generate_ai_draft"?: boolean;
+        "header_config"?: HeaderConfigApi | null;
     };
 }
 
@@ -62,7 +65,8 @@ export function ProfileForm({ clinicianData }: ProfileFormProps) {
         defaultValues: {
             name: clinicianData?.name || "",
             bmdcNo: clinicianData?.bmdc_no || "",
-            defaultGeneration: clinicianData?.generate_ai_draft ?? true,
+            qualification: clinicianData.qualification || "",
+            designation: clinicianData.header_config?.designation?.trim() || clinicianData.specializations?.join(", ") || "",
         },
     })
 
@@ -73,7 +77,9 @@ export function ProfileForm({ clinicianData }: ProfileFormProps) {
             const payload = {
                 name: data.name,
                 bmdc_no: data.bmdcNo,
-                generate_ai_draft: data.defaultGeneration,
+                qualification: data.qualification,
+                specializations: specializationsFromDesignation(data.designation),
+                header_config: { ...clinicianData.header_config, designation: data.designation },
             }
 
             setIsLoading(true)
@@ -81,11 +87,11 @@ export function ProfileForm({ clinicianData }: ProfileFormProps) {
             storeClinicianInfo({
                 bmdcNo: payload.bmdc_no,
                 name: payload.name,
-                qualification: clinicianData?.qualification,
-                specializations: clinicianData?.specializations,
-                generate_ai_draft: payload.generate_ai_draft,
+                qualification: payload.qualification,
+                specializations: payload.specializations,
             })
             queryClient.invalidateQueries({ queryKey: ["clinician", userId] })
+            queryClient.invalidateQueries({ queryKey: ["clinician-profile", userId] })
             form.reset(data) // clears the dirty state and disables Save until the next edit
             toast.success("Profile updated successfully")
         } catch (error) {
@@ -97,7 +103,8 @@ export function ProfileForm({ clinicianData }: ProfileFormProps) {
     }
 
     return (
-        <Card className="w-full">
+        <Card className="w-full border-slate-200/80 shadow-none">
+            <UnsavedChangesDialog dirty={isDirty} />
             <CardContent>
                 <form id="form-rhf-input" onSubmit={form.handleSubmit(onSubmit)}>
                     <FieldGroup className="gap-8">
@@ -109,8 +116,8 @@ export function ProfileForm({ clinicianData }: ProfileFormProps) {
                                 control={form.control}
                                 render={({ field, fieldState }) => (
                                     <Field data-invalid={fieldState.invalid}>
-                                        <FieldLabel>Name</FieldLabel>
-                                        <Input {...field} placeholder="Full name" />
+                                        <FieldLabel htmlFor="profile-name">Name</FieldLabel>
+                                        <Input className="h-11 sm:h-9" id="profile-name" {...field} placeholder="Full name" />
                                         {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                                     </Field>
                                 )}
@@ -125,55 +132,25 @@ export function ProfileForm({ clinicianData }: ProfileFormProps) {
                                 control={form.control}
                                 render={({ field, fieldState }) => (
                                     <Field data-invalid={fieldState.invalid}>
-                                        <FieldLabel>BMDC registration no.</FieldLabel>
-                                        <Input {...field} placeholder="A-53127" />
+                                        <FieldLabel htmlFor="profile-bmdc">BMDC registration no.</FieldLabel>
+                                        <Input className="h-11 sm:h-9" id="profile-bmdc" {...field} placeholder="A-53127" />
                                         {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                                     </Field>
                                 )}
                             />
-                            <FieldDescription>
-                                Qualification and designation / specialization are edited on your{" "}
-                                <Link
-                                    to="/doctor/prescription-header"
-                                    search={{ section: "doctor" as const }}
-                                    className="font-medium text-emerald-600 underline-offset-2 hover:underline"
-                                >
-                                    Prescription pad
-                                </Link>
-                                , so your profile and printed pads always match.
-                            </FieldDescription>
-                        </div>
-
-                        {/* Preferences */}
-                        <div className="flex flex-col gap-4">
-                            <SectionTitle>Preferences</SectionTitle>
-                            <Controller
-                                name="defaultGeneration"
-                                control={form.control}
-                                render={({ field }) => (
-                                    <Field>
-                                        <div className="flex items-center justify-between gap-4">
-                                            <div>
-                                                <FieldLabel>Auto-generate prescription draft</FieldLabel>
-                                                <FieldDescription>
-                                                    When on, ARIS drafts the prescription automatically after each recording.
-                                                </FieldDescription>
-                                            </div>
-                                            <button
-                                                type="button"
-                                                role="switch"
-                                                aria-checked={field.value}
-                                                onClick={() => field.onChange(!field.value)}
-                                                className={`flex h-6 w-11 shrink-0 items-center rounded-full p-1 transition ${field.value ? "bg-emerald-500" : "bg-gray-300"}`}
-                                            >
-                                                <div
-                                                    className={`size-4 rounded-full bg-white shadow-md transition ${field.value ? "translate-x-5" : "translate-x-0"}`}
-                                                />
-                                            </button>
-                                        </div>
+                            {(['qualification', 'designation'] as const).map((name) => (
+                                <Controller key={name} name={name} control={form.control} render={({ field, fieldState }) => (
+                                    <Field data-invalid={fieldState.invalid}>
+                                        <FieldLabel htmlFor={name}>{name === 'qualification' ? 'Qualifications' : 'Designation / specialization'}</FieldLabel>
+                                        <textarea id={name} {...field} rows={2} className="min-h-20 w-full resize-y rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] md:text-sm" />
+                                        {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                                     </Field>
-                                )}
-                            />
+                                )} />
+                            ))}
+                            <FieldDescription>
+                                These details also appear on new prescription pads. Existing finalized prescriptions keep their original details.{' '}
+                                <Link to="/doctor/prescription-header" search={{ section: 'doctor' }} className="font-medium text-emerald-700 underline underline-offset-4">View prescription pad</Link>
+                            </FieldDescription>
                         </div>
                     </FieldGroup>
                 </form>
@@ -183,12 +160,13 @@ export function ProfileForm({ clinicianData }: ProfileFormProps) {
                 <Button
                     type="button"
                     variant="outline"
+                    className="min-h-11 sm:min-h-9"
                     disabled={!isDirty || isLoading}
                     onClick={() => form.reset()}
                 >
                     Reset
                 </Button>
-                <Button type="submit" form="form-rhf-input" disabled={!isDirty} isLoading={isLoading}>
+                <Button className="min-h-11 sm:min-h-9" type="submit" form="form-rhf-input" disabled={!isDirty} isLoading={isLoading}>
                     Save changes
                 </Button>
             </CardFooter>

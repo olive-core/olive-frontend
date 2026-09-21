@@ -36,11 +36,11 @@ export default function DisableSettingDialog({ setting, isSaving, onCancel, onCo
 
     return (
         <Dialog open onOpenChange={(open) => !open && close()}>
-            <DialogContent className="sm:max-w-lg">
+            <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-lg">
                 <DialogHeader>
                     <DialogTitle>Turn off &ldquo;{setting.label}&rdquo;?</DialogTitle>
                     <DialogDescription>
-                        You can turn this back on at any time from your profile.
+                        You can turn this back on at any time from Consultation preferences.
                     </DialogDescription>
                 </DialogHeader>
 
@@ -62,7 +62,7 @@ export default function DisableSettingDialog({ setting, isSaving, onCancel, onCo
                     </p>
                     <RadioGroup value={reason} onValueChange={setReason} className="gap-2">
                         {setting.reasons.map((option) => (
-                            <div key={option} className="flex items-center gap-2.5">
+                            <div key={option} className="flex min-h-11 items-center gap-2.5">
                                 <RadioGroupItem value={option} id={option} />
                                 <Label htmlFor={option} className="text-sm font-normal text-slate-900">
                                     {option}
@@ -75,13 +75,14 @@ export default function DisableSettingDialog({ setting, isSaving, onCancel, onCo
                 <DialogFooter className="gap-2 sm:justify-between">
                     <Button
                         variant="outline"
+                        className="min-h-11"
                         onClick={() => onConfirm(reason)}
                         disabled={!reason || isSaving}
                         isLoading={isSaving}
                     >
                         Turn it off
                     </Button>
-                    <Button onClick={close} autoFocus>
+                    <Button className="min-h-11" onClick={close} autoFocus>
                         Keep it on
                     </Button>
                 </DialogFooter>

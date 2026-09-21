@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useId, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { Link } from "@tanstack/react-router";
-import { Building2Icon, ChevronRightIcon, PenIcon, PlusIcon, Trash2Icon } from "lucide-react";
+import { Building2Icon, ChevronDownIcon, ChevronRightIcon, EllipsisIcon, PenIcon, PlusIcon, Trash2Icon, UsersIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import NumberGroupInputMemo from "@/components/dashboard/number-group-input";
@@ -27,9 +29,9 @@ const emptyPhone = () => ["0", "1"].concat(Array(9).fill(""));
 const isPhoneComplete = (phone: string[]) =>
     phone.length === 11 && phone.every((c) => c >= "0" && c <= "9");
 
-export default function ChambersManager() {
+export default function ChambersManager({ embedded = false }: { embedded?: boolean }) {
     const clinicianId = useAuthStore((s) => s.userId);
-    const { data: chambers = [] } = useQuery({ queryKey: ["chambers"], queryFn: listChambers });
+    const { data: chambers = [], isPending, isError, refetch } = useQuery({ queryKey: ["chambers"], queryFn: listChambers });
     const [showCreate, setShowCreate] = useState(false);
 
     // A doctor with no chambers gets the form straight away; once they have one it
@@ -37,30 +39,29 @@ export default function ChambersManager() {
     const creating = showCreate || chambers.length === 0;
 
     return (
-        <div className="w-full max-w-2xl mx-auto px-4 py-6 space-y-4">
-            <div>
+        <div className={embedded ? "space-y-4" : "w-full max-w-2xl mx-auto px-4 py-6 space-y-4"}>
+            {!embedded && <div>
                 <h1 className="text-xl font-medium mb-1">Chambers &amp; Attendants</h1>
                 <p className="text-sm text-muted-foreground">
                     The places you sit, and the attendants who register your queue at each — added by
                     phone. Each chamber's prescription pad is set up from the row below it.
                 </p>
-            </div>
+            </div>}
 
-            {chambers.map((chamber) => (
-                <ChamberRow key={chamber.chamber_id} chamber={chamber} />
-            ))}
+            {isPending ? <Skeleton className="h-48 rounded-2xl" /> : isError ? (
+                <div role="alert" className="rounded-xl border p-5 text-sm text-slate-600">
+                    Your chambers couldn’t load.
+                    <Button variant="outline" className="mt-3 min-h-11" onClick={() => refetch()}>Try again</Button>
+                </div>
+            ) : <>
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                    <p className="text-sm text-slate-500">{chambers.length} {chambers.length === 1 ? 'chamber' : 'chambers'}</p>
+                    {!creating && <Button variant="outline" className="min-h-11" onClick={() => setShowCreate(true)}><PlusIcon className="size-4" />Add chamber</Button>}
+                </div>
+                {creating && <NewChamberForm clinicianId={clinicianId!} onDone={() => setShowCreate(false)} onCancel={chambers.length > 0 ? () => setShowCreate(false) : undefined} />}
+                {chambers.map((chamber) => <ChamberRow key={chamber.chamber_id} chamber={chamber} />)}
+            </>}
 
-            {creating ? (
-                <NewChamberForm
-                    clinicianId={clinicianId!}
-                    onDone={() => setShowCreate(false)}
-                    onCancel={chambers.length > 0 ? () => setShowCreate(false) : undefined}
-                />
-            ) : (
-                <Button variant="outline" className="w-full" onClick={() => setShowCreate(true)}>
-                    <PlusIcon className="size-4" /> Add another chamber
-                </Button>
-            )}
         </div>
     );
 }
@@ -83,7 +84,7 @@ function ChamberPadLink({ chamber }: { chamber: Chamber }) {
                     )}
                 </span>
                 <span className="text-xs text-muted-foreground">
-                    Paper, name, logo and contact details printed at this chamber
+                    {padIsConfigured(chamber.pad_config) ? "Configured · view or edit this chamber’s pad" : "Set up paper and printed details"}
                 </span>
             </span>
             <ChevronRightIcon className="size-4 shrink-0 text-slate-400" />
@@ -96,9 +97,11 @@ function ChamberRow({ chamber }: { chamber: Chamber }) {
     const [phone, setPhone] = useState<string[]>(emptyPhone);
     const [editing, setEditing] = useState(false);
     const [confirmDelete, setConfirmDelete] = useState(false);
+    const [attendantsOpen, setAttendantsOpen] = useState(false);
+    const attendantsId = useId();
     const room = chamberRoom(chamber);
 
-    const { data: attendants = [] } = useQuery({
+    const { data: attendants = [], isPending: attendantsLoading, isError: attendantsError, refetch: refetchAttendants } = useQuery({
         queryKey: ["chamber-attendants", chamber.chamber_id],
         queryFn: () => listChamberAttendants(chamber.chamber_id),
     });
@@ -119,6 +122,7 @@ function ChamberRow({ chamber }: { chamber: Chamber }) {
     const revokeMutation = useMutation({
         mutationFn: (attendantUserId: string) => revokeChamberAttendant(chamber.chamber_id, attendantUserId),
         onSuccess: invalidate,
+        onError: (error) => handleError(error, "Could not remove attendant"),
     });
 
     const deleteMutation = useMutation({
@@ -132,62 +136,52 @@ function ChamberRow({ chamber }: { chamber: Chamber }) {
     });
 
     return (
-        <div className="border rounded-xl p-4 space-y-3">
-            <div className="flex items-start justify-between gap-2">
-                <p className="font-medium">
-                    {chamberLabel(chamber)}
-                    {room ? ` · ${room}` : ""}
-                </p>
-                <div className="flex gap-1 shrink-0">
-                    <Button variant="ghost" size="sm" onClick={() => setEditing(true)}>
-                        <PenIcon className="size-3" /> Edit
-                    </Button>
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        aria-label="Delete chamber"
-                        onClick={() => setConfirmDelete(true)}
-                    >
-                        <Trash2Icon className="size-4 text-rose-500" />
-                    </Button>
+        <div className="space-y-4 rounded-2xl border border-slate-200/80 bg-white p-4 sm:p-5">
+            <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                    <h3 className="break-words text-base font-semibold text-slate-900">{chamberLabel(chamber)}</h3>
+                    {room && <p className="mt-1 break-words text-sm text-slate-500">Room / chamber {room}</p>}
                 </div>
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="size-11 shrink-0" aria-label={`Actions for ${chamberLabel(chamber)}`}><EllipsisIcon className="size-5" /></Button></DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="rounded-xl p-1.5">
+                        <DropdownMenuItem className="min-h-11 rounded-lg" onSelect={() => setEditing(true)}><PenIcon />Edit chamber</DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem className="min-h-11 rounded-lg" variant="destructive" onSelect={() => setConfirmDelete(true)}><Trash2Icon />Delete chamber</DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
             </div>
 
             <ChamberPadLink chamber={chamber} />
 
-            <div>
-                <p className="text-sm text-muted-foreground mb-1">Attendants</p>
-                {attendants.length === 0 && <p className="text-sm text-muted-foreground">None yet.</p>}
-                {attendants.map((attendant) => (
-                    <div key={attendant.id} className="flex items-center justify-between py-1">
-                        <span className="text-sm">
-                            {attendant.name} · {attendant.phone}
-                            {attendant.status === "pending" && (
-                                <span className="ml-2 text-xs text-amber-600">Pending</span>
-                            )}
-                        </span>
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => revokeMutation.mutate(attendant.attendant_user_id)}
-                        >
-                            Remove
-                        </Button>
-                    </div>
-                ))}
-            </div>
-
-            <div className="space-y-2">
-                <p className="text-sm text-muted-foreground">Add an attendant by phone</p>
-                <NumberGroupInputMemo numberInput={phone} setNumberInput={setPhone} />
-                <Button
-                    className="w-full"
-                    onClick={() => addMutation.mutate()}
-                    isLoading={addMutation.isPending}
-                    disabled={!isPhoneComplete(phone)}
-                >
-                    Add attendant
-                </Button>
+            <div className="border-t border-slate-100 pt-2">
+                <button type="button" aria-expanded={attendantsOpen} aria-controls={attendantsId} onClick={() => setAttendantsOpen(!attendantsOpen)} className="flex min-h-12 w-full items-center gap-3 rounded-lg text-left text-sm text-slate-600 transition-colors hover:text-emerald-700 focus-visible:outline-2 focus-visible:outline-emerald-600">
+                    <UsersIcon className="size-4 shrink-0" />
+                    <span className="min-w-0 flex-1">{attendantsLoading ? 'Loading attendants…' : attendantsError ? 'Attendants unavailable' : `${attendants.length} ${attendants.length === 1 ? 'attendant' : 'attendants'}`}</span>
+                    <span className="text-xs font-medium">{attendantsOpen ? 'Close' : 'Manage'}</span>
+                    <ChevronDownIcon className={`size-4 shrink-0 transition-transform motion-reduce:transition-none ${attendantsOpen ? 'rotate-180' : ''}`} />
+                </button>
+                <div id={attendantsId} hidden={!attendantsOpen} className="space-y-4 pt-3">
+                    {attendantsError ? <div role="alert" className="text-sm text-slate-600">Couldn’t load attendants.<Button variant="outline" className="ml-2 min-h-11" onClick={() => refetchAttendants()}>Try again</Button></div> : attendantsLoading ? <Skeleton className="h-16" /> : <>
+                        {attendants.length === 0 && <p className="text-sm text-slate-500">Add an attendant to help register patients at this chamber.</p>}
+                        <div className="divide-y divide-slate-100">
+                            {attendants.map((attendant) => (
+                                <div key={attendant.id} className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 py-2">
+                                    <div className="min-w-0 flex-1 basis-40">
+                                        <p className="break-words text-sm font-medium text-slate-800">{attendant.name || 'Invited attendant'}</p>
+                                        <p className="break-words text-xs text-slate-500">{attendant.phone}{attendant.status === 'pending' && <span className="ml-2 text-amber-700">Pending</span>}</p>
+                                    </div>
+                                    <Button variant="ghost" className="min-h-11 text-slate-500" disabled={revokeMutation.isPending} onClick={() => revokeMutation.mutate(attendant.attendant_user_id)}>Remove</Button>
+                                </div>
+                            ))}
+                        </div>
+                        <div className="space-y-3 rounded-xl bg-slate-50 p-3 sm:p-4">
+                            <p className="text-sm font-medium text-slate-700">Add an attendant by phone</p>
+                            <NumberGroupInputMemo numberInput={phone} setNumberInput={setPhone} />
+                            <Button className="min-h-11 w-full" onClick={() => addMutation.mutate()} isLoading={addMutation.isPending} disabled={!isPhoneComplete(phone)}>Add attendant</Button>
+                        </div>
+                    </>}
+                </div>
             </div>
 
             {editing && (
@@ -195,7 +189,7 @@ function ChamberRow({ chamber }: { chamber: Chamber }) {
             )}
 
             <Dialog open={confirmDelete} onOpenChange={(next) => !next && setConfirmDelete(false)}>
-                <DialogContent>
+                <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle>Delete this chamber?</DialogTitle>
                     </DialogHeader>
@@ -247,7 +241,7 @@ function EditChamberDialog({ chamber, onClose }: { chamber: Chamber; onClose: ()
 
     return (
         <Dialog open onOpenChange={(next) => !next && onClose()}>
-            <DialogContent>
+            <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>Edit chamber</DialogTitle>
                 </DialogHeader>

@@ -67,9 +67,9 @@ function EditorHeading() {
     return (
         <div className="flex items-center gap-2.5">
             <button
-                onClick={() => navigate({ to: "/doctor/profile" })}
+                onClick={() => navigate({ to: "/doctor/account/prescription-pad" })}
                 className="cursor-pointer rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-100"
-                aria-label="Back to profile"
+                aria-label="Back to prescription pad settings"
             >
                 <ArrowLeftIcon className="size-4" />
             </button>
@@ -93,7 +93,7 @@ function SaveButton({ isSaving, onSave, className }: { isSaving: boolean; onSave
 function WideEditor({ isSaving, onSave }: { isSaving: boolean; onSave: () => void }) {
     return (
         <div className="mx-auto w-full max-w-[1400px] px-4 pb-24">
-            <div className="sticky top-0 z-30 -mx-4 flex items-center justify-between gap-3 border-b bg-white/95 px-4 py-2.5 backdrop-blur">
+            <div className="sticky top-[var(--doctor-header-height,0px)] z-30 -mx-4 flex items-center justify-between gap-3 border-b bg-white/95 px-4 py-2.5 backdrop-blur">
                 <EditorHeading />
                 <SaveButton isSaving={isSaving} onSave={onSave} className="px-5 font-bold shadow-sm" />
             </div>
@@ -103,7 +103,7 @@ function WideEditor({ isSaving, onSave }: { isSaving: boolean; onSave: () => voi
                 className="mt-3 !h-auto items-stretch"
             >
                 <ResizablePanel defaultSize={58} minSize={35} className="pr-3">
-                    <div data-sticky-preview className="sticky top-[61px]">
+                    <div data-sticky-preview className="sticky top-[calc(var(--doctor-header-height,0px)+61px)]">
                         <HeaderLivePreview />
                     </div>
                 </ResizablePanel>
