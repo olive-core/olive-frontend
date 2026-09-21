@@ -1,236 +1,72 @@
-import { BookMarked, ChartNoAxesColumnIcon, ClipboardListIcon, DoorOpenIcon, EllipsisIcon, HandCoinsIcon, House, LogOutIcon, MenuIcon, StampIcon, UserIcon, XIcon } from "lucide-react";
-import { useState } from "react";
-import NavbarContainer from "../shared/navbar-container";
-import SubscriptionStatusPill from "./subscription/status-pill";
-import { Button } from "../ui/button";
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipTrigger,
-} from "@/components/ui/tooltip"
-import { useAuthStore } from "@/stores/auth-store";
-import { Link } from "@tanstack/react-router";
+import { BookMarked, ChartNoAxesColumn, ChevronDown, ClipboardList, CreditCard, House, LogOut, Settings2 } from 'lucide-react'
+import { Link, useLocation } from '@tanstack/react-router'
+import NavbarLogo from '@/components/shared/navbar-logo'
+import SubscriptionStatusPill from './subscription/status-pill'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { useAuthStore } from '@/stores/auth-store'
+import { withDoctorFirstName, withDoctorPrefix } from '@/lib/clinician'
+import { cn } from '@/lib/utils'
 
-type MenuItemType = {
-    label: string;
-    icon: React.ReactNode;
-    href?: string;
-    buttonType?: "logout";
+const CLINICAL_LINKS = [
+  { label: 'Home', to: '/doctor', icon: House },
+  { label: 'Consultations', to: '/doctor/consultations', icon: ClipboardList },
+  { label: 'Memory', to: '/doctor/memory', icon: BookMarked },
+  { label: 'Insights', to: '/doctor/insights', icon: ChartNoAxesColumn },
+] as const
+
+function ClinicalLinks({ mobile = false }: { mobile?: boolean }) {
+  const pathname = useLocation({ select: (location) => location.pathname })
+  return (
+    <nav aria-label={mobile ? 'Clinical navigation on mobile' : 'Clinical navigation'} className={cn(mobile ? 'grid grid-cols-[0.8fr_1.4fr_1fr_1fr] gap-1 px-3 pb-2 sm:grid-cols-4 lg:hidden' : 'hidden items-center gap-1 lg:flex')}>
+      {CLINICAL_LINKS.map(({ label, to, icon: Icon }) => {
+        const active = to === '/doctor'
+          ? pathname.replace(/\/$/, '') === to || pathname.startsWith('/doctor/consultation/') || pathname.startsWith('/doctor/prescribe/')
+          : pathname === to || pathname.startsWith(`${to}/`)
+        return (
+          <Link key={to} to={to} aria-current={active ? 'page' : undefined}
+            className={cn('flex min-h-11 items-center justify-center gap-2 rounded-xl font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600',
+              mobile ? 'min-w-0 px-1 text-xs sm:text-sm' : 'px-4 text-sm',
+              active ? 'bg-emerald-50 text-emerald-800' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900')}>
+            <Icon className={cn('size-4 shrink-0', mobile && 'hidden sm:block')} strokeWidth={1.7} />{label}
+          </Link>
+        )
+      })}
+    </nav>
+  )
 }
 
-const MENU_ITEMS: MenuItemType[] = [
-    {
-        label: "Home",
-        icon: <House />,
-        href: "/doctor",
-    },
-    {
-        label: "Consultations",
-        icon: <ClipboardListIcon />,
-        href: "/doctor/consultations",
-    },
-    {
-        label: "Memory",
-        icon: <BookMarked />,
-        href: "/doctor/memory",
-    },
-    {
-        label: "Prescription Pad",
-        icon: <StampIcon />,
-        href: "/doctor/prescription-header",
-    },
-    {
-        label: "Insights",
-        icon: <ChartNoAxesColumnIcon />,
-        href: "/doctor/insights",
-    },
-    // {
-    //     label: "Session History",
-    //     icon: <HistoryIcon />,
-    //     href: "/doctor/history",
-    // },
-    {
-        label: "Chambers",
-        icon: <DoorOpenIcon />,
-        href: "/doctor/chambers",
-    },
-    {
-        label: "Profile",
-        icon: <UserIcon />,
-        href: "/doctor/profile",
-    },
-    // {
-    //     label: "Settings",
-    //     icon: <SettingsIcon />,
-    //     href: "/doctor/settings",
-    // },
-    {
-        label: "Membership",
-        icon: <HandCoinsIcon />,
-        href: "/doctor/billing",
-    },
-    {
-        label: "Logout",
-        icon: <LogOutIcon />,
-        buttonType: "logout",
-    },
-
-
-]
-
-const TOTAL_MENU_TO_SHOW = 4;
-
 export default function DashboardNavbar() {
-
-    const { logout } = useAuthStore();
-    const [mobileOpen, setMobileOpen] = useState(false);
-
-    const menuToShowCount = MENU_ITEMS.length > TOTAL_MENU_TO_SHOW ? TOTAL_MENU_TO_SHOW - 1 : MENU_ITEMS.length;
-
-    const handleMenuClick = (menu: MenuItemType) => {
-        switch (menu.buttonType) {
-            case "logout":
-                logout();
-                break;
-            default:
-                break;
-        }
-    }
-
-    const renderMenuShowButton = (menu: MenuItemType) => {
-        return (
-            <Tooltip>
-                <TooltipTrigger asChild>
-                    {menu.href ? (
-                        <Button asChild variant="nav-icon" aria-label={menu.label}>
-                            <Link to={menu.href}>
-                                {menu.icon}
-                            </Link>
-                        </Button>
-                    ) : (
-                        <Button variant="nav-icon" aria-label={menu.label} onClick={() => handleMenuClick(menu)}>
-                            {menu.icon}
-                        </Button>
-                    )}
-                </TooltipTrigger>
-                <TooltipContent>
-                    <p>{menu.label}</p>
-                </TooltipContent>
-            </Tooltip>
-        )
-    }
-
-    const renderDropdownMenuItem = (menu: MenuItemType) => {
-        if (menu.href) {
-            return (
-                <Link to={menu.href} className="flex items-center gap-2 w-full cursor-pointer">
-                    {menu.icon}
-                    {menu.label}
-                </Link>
-            )
-        }
-
-        return (
-            <button type="button" className="flex items-center gap-2 cursor-pointer w-full text-left" onClick={() => handleMenuClick(menu)}>
-                {menu.icon}
-                {menu.label}
+  const { logout, clinician, accounts } = useAuthStore()
+  const name = clinician?.name || accounts.clinicianName || ''
+  const displayName = name ? withDoctorPrefix(name) : 'Your account'
+  const initials = name.replace(/^dr\.?\s*/i, '').trim().split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join('') || 'Dr'
+  return (
+    <header className="fixed inset-x-0 top-0 z-50 border-b border-slate-200/70 bg-white/95 backdrop-blur-lg print:hidden" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+      <div className="mx-auto flex h-[72px] w-full max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
+        <NavbarLogo />
+        <ClinicalLinks />
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button type="button" aria-label="Open your account menu" className="flex min-h-11 shrink-0 cursor-pointer items-center gap-2.5 rounded-full p-1.5 pr-3 text-slate-600 transition-colors hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-emerald-600 data-[state=open]:bg-slate-50">
+              <span className="flex size-8 items-center justify-center rounded-full bg-emerald-50 text-xs font-semibold uppercase text-emerald-800">{initials}</span>
+              <span className="hidden max-w-36 truncate text-sm font-medium sm:block">{withDoctorFirstName(name)}</span>
+              <ChevronDown className="size-3.5 text-slate-400" />
             </button>
-        )
-    }
-
-
-    const renderMobileMenuItem = (menu: MenuItemType) => {
-        const closeMenu = () => setMobileOpen(false);
-        return (
-            <>
-                {menu.href && (
-                    <Link
-                        to={menu.href}
-                        onClick={closeMenu}
-                        className="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 font-medium hover:bg-emerald-50 hover:text-emerald-600 transition-colors"
-                    >
-                        {menu.icon}
-                        {menu.label}
-                    </Link>
-                )}
-
-                {menu.buttonType && (
-                    <button
-                        type="button"
-                        className="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 font-medium hover:bg-emerald-50 hover:text-emerald-600 transition-colors cursor-pointer w-full text-left"
-                        onClick={() => { handleMenuClick(menu); closeMenu(); }}
-                    >
-                        {menu.icon}
-                        {menu.label}
-                    </button>
-                )}
-            </>
-        )
-    }
-
-    return (
-        <>
-            <NavbarContainer className="border-none print:hidden">
-
-                <div className="md:flex items-center hidden gap-4">
-
-                    <SubscriptionStatusPill />
-
-                    {MENU_ITEMS.slice(0, menuToShowCount).map((menu, index) => (
-                        <div key={index}>
-                            {renderMenuShowButton(menu)}
-                        </div>
-                    ))}
-
-                    {MENU_ITEMS.length > TOTAL_MENU_TO_SHOW && (
-                        <DropdownMenu>
-
-                            <DropdownMenuTrigger asChild>
-                                <Button variant="nav-icon" aria-label="More items">
-                                    <EllipsisIcon />
-                                </Button>
-                            </DropdownMenuTrigger>
-
-                            <DropdownMenuContent>
-                                {MENU_ITEMS.slice(menuToShowCount).map((menu, index) => (
-                                    <DropdownMenuItem asChild key={index}>
-                                        {renderDropdownMenuItem(menu)}
-                                    </DropdownMenuItem>
-                                ))}
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                    )}
-
-                </div>
-
-                {/* Mobile hamburger */}
-                <button
-                    className="md:hidden flex items-center justify-center p-2 rounded-lg text-slate-600 hover:text-emerald-600 hover:bg-emerald-50 transition-colors"
-                    onClick={() => setMobileOpen((v) => !v)}
-                    aria-label={mobileOpen ? "Close menu" : "Open menu"}
-                >
-                    {mobileOpen ? <XIcon className="size-5" /> : <MenuIcon className="size-5" />}
-                </button>
-            </NavbarContainer>
-
-            {/* Mobile dropdown menu */}
-            {mobileOpen && (
-                <div className="md:hidden fixed top-[57px] left-0 w-full bg-white/95 backdrop-blur-lg border-b border-primary/10 z-40 shadow-md print:hidden">
-                    <div className="flex flex-col px-4 py-4 gap-1">
-                        {MENU_ITEMS.map((menu, index) => (
-                            <div key={index}>
-                                {renderMobileMenuItem(menu)}
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            )}
-        </>
-    )
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" sideOffset={10} className="w-64 rounded-2xl border-slate-200/80 p-2 shadow-lg shadow-slate-900/5">
+            <DropdownMenuLabel className="px-3 py-3">
+              <span className="block break-words text-sm text-slate-900">{displayName}</span>
+              <SubscriptionStatusPill />
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator className="mx-1" />
+            <DropdownMenuItem asChild className="min-h-11 cursor-pointer rounded-xl px-3"><Link to="/doctor/account"><Settings2 />Practice &amp; account</Link></DropdownMenuItem>
+            <DropdownMenuItem asChild className="min-h-11 cursor-pointer rounded-xl px-3"><Link to="/doctor/billing"><CreditCard />Membership</Link></DropdownMenuItem>
+            <DropdownMenuSeparator className="mx-1" />
+            <DropdownMenuItem onSelect={logout} className="min-h-11 cursor-pointer rounded-xl px-3 text-slate-500"><LogOut />Sign out</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+      <ClinicalLinks mobile />
+    </header>
+  )
 }

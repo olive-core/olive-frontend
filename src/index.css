@@ -242,3 +242,10 @@ html::-webkit-scrollbar {
   50%      { transform: scale(1.9); opacity: 0.06; }
 }
 .rec-dot-pulse { animation: rec-dot-pulse 3.4s ease-in-out infinite; }
+/* The doctor header includes visible clinical links on smaller screens. */
+.doctor-portal {
+  --doctor-header-height: calc(124px + env(safe-area-inset-top));
+}
+@media (min-width: 1024px) {
+  .doctor-portal { --doctor-header-height: calc(72px + env(safe-area-inset-top)); }
+}

@@ -45,9 +45,9 @@ function DashboardLayout() {
   // capturing while the doctor moves between dashboard pages mid-consultation.
   return (
     <RecordingSessionProvider>
-      <div className="">
+      <div className="doctor-portal">
 
-        <main className="w-full min-h-svh pt-[calc(4.5rem+env(safe-area-inset-top))] flex flex-col">
+        <main className="w-full min-h-svh pt-[var(--doctor-header-height)] flex flex-col">
           <DashboardNavbar />
           <DashboardNotices />
           <div className="w-full h-full flex-1 flex flex-col">
