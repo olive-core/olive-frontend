@@ -20,12 +20,12 @@ function CopyableRow({ label, value }: { label: string; value: string }) {
     };
 
     return (
-        <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-3">
-            <div>
+        <div className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3">
+            <div className="min-w-0">
                 <p className="text-xs font-medium uppercase tracking-wide text-slate-400">{label}</p>
-                <p className="font-semibold text-slate-800">{value}</p>
+                <p className="break-words font-semibold text-slate-800">{value}</p>
             </div>
-            <Button variant="ghost" size="icon-sm" aria-label={`Copy ${label}`} onClick={copy}>
+            <Button variant="ghost" size="icon-sm" className="size-11" aria-label={`Copy ${label}`} onClick={copy}>
                 {copied ? <CheckIcon className="text-emerald-600" /> : <CopyIcon />}
             </Button>
         </div>
@@ -36,7 +36,7 @@ export default function PaymentInstructions({ bkashNumber, amount, onPaid }: Pay
     return (
         <div className="space-y-4">
             <div>
-                <h3 className="font-semibold text-slate-800">Send payment via bKash</h3>
+                <h3 className="break-words font-semibold text-slate-800">Send payment via bKash</h3>
                 <p className="text-sm text-slate-500">
                     Use <span className="font-semibold text-slate-700">Send Money</span> to the number below, then confirm.
                 </p>
@@ -47,7 +47,7 @@ export default function PaymentInstructions({ bkashNumber, amount, onPaid }: Pay
                 <CopyableRow label="Amount" value={formatTaka(amount)} />
             </div>
 
-            <Button className="w-full" size="lg" onClick={onPaid}>
+            <Button className="min-h-11 w-full" size="lg" onClick={onPaid}>
                 I&apos;ve paid
             </Button>
         </div>

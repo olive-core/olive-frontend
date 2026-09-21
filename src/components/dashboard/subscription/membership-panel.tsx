@@ -20,12 +20,14 @@ function StatusSummary({ label, value }: { label: string; value: string }) {
 }
 
 export default function MembershipPanel() {
-    const { data: status, isLoading } = useSubscriptionStatus();
+    const { data: status, isLoading, isError, refetch } = useSubscriptionStatus();
 
     const [step, setStep] = useState<Step>("overview");
     const [months, setMonths] = useState(1);
 
     const goBack = () => setStep(step === "claim" ? "instructions" : "overview");
+
+    if (isError) return <div role="alert" className="rounded-2xl border border-slate-200 p-5 text-sm text-slate-600">Your membership couldn’t load.<Button variant="outline" className="mt-3 min-h-11" onClick={() => refetch()}>Try again</Button></div>;
 
     if (isLoading || !status) {
         return <div className="h-40 animate-pulse rounded-3xl bg-slate-100" />;
@@ -55,12 +57,12 @@ export default function MembershipPanel() {
 
             <StatusSummary label="Your membership" value={summaryValue} />
 
-            <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
                 {!pending && (step === "instructions" || step === "claim") && (
                     <button
                         type="button"
                         onClick={goBack}
-                        className="mb-4 inline-flex cursor-pointer items-center gap-1 text-sm text-slate-500 transition hover:text-slate-700"
+                        className="mb-4 inline-flex min-h-11 cursor-pointer items-center gap-1 text-sm text-slate-500 transition hover:text-slate-700"
                     >
                         <ArrowLeftIcon className="size-4" /> Back
                     </button>
@@ -88,12 +90,13 @@ export default function MembershipPanel() {
 
                         <div>
                             <p className="mb-2 text-sm font-medium text-slate-600">Choose duration</p>
-                            <div className="grid grid-cols-4 gap-2">
+                            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                                 {status.prepay_months.map((option) => (
                                     <button
                                         key={option}
                                         type="button"
                                         onClick={() => setMonths(option)}
+                                        aria-pressed={months === option}
                                         className={`cursor-pointer rounded-xl border-2 py-3 text-center transition ${
                                             months === option
                                                 ? "border-emerald-500 bg-emerald-50 text-emerald-700"
@@ -107,12 +110,12 @@ export default function MembershipPanel() {
                             </div>
                         </div>
 
-                        <div className="flex items-center justify-between border-t border-slate-100 pt-4">
+                        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-4">
                             <span className="text-sm text-slate-500">Total</span>
                             <span className="text-xl font-bold text-slate-900">{formatTaka(amount)}</span>
                         </div>
 
-                        <Button className="w-full" size="lg" onClick={() => setStep("instructions")}>
+                        <Button className="min-h-11 w-full" size="lg" onClick={() => setStep("instructions")}>
                             Continue to payment
                         </Button>
                     </div>
