@@ -47,7 +47,7 @@ export default function RefinePanel({ filters, chambers, onChange }: RefinePanel
                 </Button>
             </PopoverTrigger>
 
-            <PopoverContent align="end" className="w-[min(20rem,calc(100vw-2rem))] space-y-5 rounded-xl">
+            <PopoverContent align="end" className="w-[min(20rem,calc(100vw-2rem))] max-h-[var(--radix-popover-content-available-height)] overflow-y-auto space-y-5 rounded-xl">
                 <div className="space-y-2">
                     <Label className="text-xs font-medium text-slate-500">Age</Label>
                     <div className="flex items-center gap-2">
@@ -74,7 +74,7 @@ export default function RefinePanel({ filters, chambers, onChange }: RefinePanel
                                 type="button"
                                 onClick={() => onChange({ sex: sex.key })}
                                 className={cn(
-                                    "flex-1 rounded-lg border px-3 py-1.5 text-sm transition-colors",
+                                    "min-h-11 flex-1 rounded-lg border px-3 py-1.5 text-sm transition-colors",
                                     filters.sex === sex.key
                                         ? "border-emerald-300 bg-emerald-50 text-emerald-700"
                                         : "border-slate-200 text-slate-600 hover:bg-slate-50",
@@ -96,7 +96,7 @@ export default function RefinePanel({ filters, chambers, onChange }: RefinePanel
                                     type="button"
                                     onClick={() => onChange({ chamberId: chamber.chamber_id || undefined })}
                                     className={cn(
-                                        "w-full truncate rounded-lg px-3 py-1.5 text-left text-sm transition-colors",
+                                        "min-h-11 w-full break-words rounded-lg px-3 py-1.5 text-left text-sm transition-colors",
                                         (filters.chamberId ?? "") === chamber.chamber_id
                                             ? "bg-emerald-50 text-emerald-700"
                                             : "text-slate-600 hover:bg-slate-50",

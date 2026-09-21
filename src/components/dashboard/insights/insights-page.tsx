@@ -50,6 +50,11 @@ export default function InsightsPage() {
 
                 <FilterBar filters={filters} onChange={setFilters} options={options} />
 
+                <div className="mt-6">
+                    <QuestionRail value={question} onChange={setQuestion} />
+                </div>
+
+                <div className="mt-4 pb-4">{answers[question]}</div>
                 {/* The follow-up card carries its own copy, so it would read twice there. */}
                 {question !== "returning" && (
                     <div className="mt-3">
@@ -57,11 +62,7 @@ export default function InsightsPage() {
                     </div>
                 )}
 
-                <div className="mt-6">
-                    <QuestionRail value={question} onChange={setQuestion} />
-                </div>
 
-                <div className="mt-4 pb-4">{answers[question]}</div>
             </div>
         </div>
     );

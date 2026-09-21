@@ -24,10 +24,8 @@ export default function ConsultationsToolbar({
 }: ConsultationsToolbarProps) {
     return (
         <div className="mb-6 flex flex-col gap-3">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                <ConsultationSearch value={searchTerm} onChange={onSearchChange} />
-                <DateRangePicker value={dateRange} onChange={onDateChange} />
-            </div>
+            <ConsultationSearch value={searchTerm} onChange={onSearchChange} />
+            <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex gap-2" aria-label="Consultation ownership">
                 {(["all", "owned", "shared"] as const).map((value) => (
                     <Button
@@ -36,11 +34,14 @@ export default function ConsultationsToolbar({
                         size="sm"
                         variant={accessFilter === value ? "default" : "outline"}
                         onClick={() => onAccessChange(value)}
-                        className={accessFilter === value ? "bg-emerald-600 hover:bg-emerald-700" : ""}
+                        aria-pressed={accessFilter === value}
+                        className={`min-h-11 px-4 ${accessFilter === value ? "bg-emerald-600 hover:bg-emerald-700" : ""}`}
                     >
                         {value === "all" ? "All" : value === "owned" ? "Mine" : "Shared"}
                     </Button>
                 ))}
+            </div>
+            <DateRangePicker value={dateRange} onChange={onDateChange} />
             </div>
         </div>
     );

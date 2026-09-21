@@ -47,7 +47,7 @@ export default function DateRangePicker({ value, onChange }: DateRangePickerProp
                     variant="outline"
                     size="sm"
                     className={cn(
-                        "h-11 w-full gap-2 font-normal sm:h-9 sm:w-auto",
+                        "min-h-11 max-w-full gap-2 whitespace-normal text-left font-normal",
                         isActive ? "border-emerald-300 text-emerald-700" : "text-slate-600",
                     )}
                 >
@@ -56,7 +56,7 @@ export default function DateRangePicker({ value, onChange }: DateRangePickerProp
                 </Button>
             </PopoverTrigger>
 
-            <PopoverContent align="end" className="w-72 space-y-4">
+            <PopoverContent align="end" className="w-[min(18rem,calc(100vw-2rem))] space-y-4">
                 <div className="space-y-2">
                     <Label htmlFor="filter-from-date" className="text-xs text-slate-500">From</Label>
                     <Input

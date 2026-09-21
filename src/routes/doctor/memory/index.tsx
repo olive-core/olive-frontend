@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
 import { format } from 'date-fns'
 import { AlertTriangleIcon, BookMarkedIcon, ClockIcon, PinIcon, PlusIcon, SearchIcon, Trash2Icon } from 'lucide-react'
@@ -31,29 +31,41 @@ function MemoryCard({
   onDelete: (memory: MemorySummary) => void
   onTogglePin: (memory: MemorySummary) => void
 }) {
-  const navigate = useNavigate()
-
   return (
     <div
-      onClick={() => navigate({ to: '/doctor/memory/manage/$memoryId', params: { memoryId: memory.template_id } })}
-      className="group relative bg-white border border-slate-100 rounded-2xl p-5 cursor-pointer transition-all duration-200 hover:shadow-lg hover:border-emerald-200 hover:-translate-y-0.5 flex flex-col gap-3"
+      className="group relative bg-white border border-slate-100 rounded-2xl p-5 cursor-pointer transition-colors duration-200 hover:border-emerald-200 flex flex-col gap-3"
     >
-      <div className="flex items-start justify-between gap-3">
+      <div className="flex items-start gap-3">
         <div className="flex items-center gap-3 min-w-0">
           <div className="shrink-0 w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
             <BookMarkedIcon className="w-5 h-5 text-emerald-600" />
           </div>
-          <h3 className="font-semibold text-slate-800 text-sm leading-snug line-clamp-2 group-hover:text-emerald-700 transition-colors">
-            {memory.template_name}
+          <h3 className="font-semibold text-slate-800 text-sm leading-snug break-words group-hover:text-emerald-700 transition-colors">
+            <Link to="/doctor/memory/manage/$memoryId" params={{ memoryId: memory.template_id }} className="after:absolute after:inset-0 after:rounded-2xl focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-emerald-600">{memory.template_name}</Link>
           </h3>
         </div>
 
-        <div className="flex items-center gap-1 shrink-0">
+
+      </div>
+
+      <MemoryChips sections={memory.sections} />
+
+      <div className="mt-auto flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-2">
+        <div className="space-y-1 text-xs text-slate-500">
+        <span className="flex items-center gap-1.5">
+          <ClockIcon className="w-3 h-3" />
+          {format(new Date(memory.created_at), 'MMM d, yyyy')}
+        </span>
+        {memory.use_count > 0 && (
+          <span>Used {memory.use_count} {memory.use_count === 1 ? 'time' : 'times'}</span>
+        )}
+        </div>
+        <div className="relative z-10 flex items-center gap-1 shrink-0">
           <button
             onClick={(e) => { e.stopPropagation(); onTogglePin(memory) }}
             aria-label={memory.is_pinned ? 'Unpin memory' : 'Pin memory'}
             className={cn(
-              'w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 cursor-pointer',
+              'w-11 h-11 rounded-lg flex items-center justify-center transition-colors duration-200 cursor-pointer',
               memory.is_pinned
                 ? 'bg-emerald-50 text-emerald-600'
                 : 'bg-slate-50 text-slate-400 hover:bg-emerald-50 hover:text-emerald-600',
@@ -64,23 +76,11 @@ function MemoryCard({
           <button
             onClick={(e) => { e.stopPropagation(); onDelete(memory) }}
             aria-label="Delete memory"
-            className="w-8 h-8 rounded-lg flex items-center justify-center bg-slate-50 text-slate-400 hover:bg-red-50 hover:text-red-500 transition-all duration-200 cursor-pointer"
+            className="w-11 h-11 rounded-lg flex items-center justify-center bg-slate-50 text-slate-400 hover:bg-red-50 hover:text-red-500 transition-colors duration-200 cursor-pointer"
           >
             <Trash2Icon className="w-4 h-4" />
           </button>
         </div>
-      </div>
-
-      <MemoryChips sections={memory.sections} />
-
-      <div className="flex items-center justify-between text-xs text-slate-400">
-        <span className="flex items-center gap-1.5">
-          <ClockIcon className="w-3 h-3" />
-          {format(new Date(memory.created_at), 'MMM d, yyyy')}
-        </span>
-        {memory.use_count > 0 && (
-          <span>Used {memory.use_count} {memory.use_count === 1 ? 'time' : 'times'}</span>
-        )}
       </div>
     </div>
   )
@@ -103,22 +103,28 @@ function RouteComponent() {
     setMemoryToDelete(null)
   }
 
-  const isSearching = debouncedQuery.length > 0
+  const isSearching = debouncedQuery.trim().length > 0
+  const pinnedMemories = memories.filter((memory) => memory.is_pinned)
+  const otherMemories = memories.filter((memory) => !memory.is_pinned)
+  const groups = isSearching
+    ? [{ title: 'Search results', items: memories }]
+    : pinnedMemories.length > 0
+      ? [{ title: 'Pinned', items: pinnedMemories }, { title: 'Other memories', items: otherMemories }]
+      : [{ title: 'Your memories', items: memories }]
 
   return (
     <div className="container py-8 px-4 mx-auto max-w-5xl">
-      <div className="flex items-center justify-between mb-6 gap-4">
+      <div className="flex flex-wrap items-start justify-between mb-6 gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Memory</h1>
           <p className="text-sm text-slate-500 mt-1">Your saved prescriptions for the cases you see often</p>
         </div>
         <Button
           onClick={() => navigate({ to: '/doctor/memory/manage' })}
-          className="shrink-0 font-semibold shadow-sm"
+          className="min-h-11 shrink-0 font-semibold shadow-sm"
         >
           <PlusIcon className="w-4 h-4" />
-          <span className="hidden sm:inline">New memory</span>
-          <span className="sm:hidden">New</span>
+          New memory
         </Button>
       </div>
 
@@ -128,7 +134,8 @@ function RouteComponent() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search by name, medicine, condition..."
-          className="pl-9"
+          className="h-11 pl-9"
+          aria-label="Search memories"
         />
       </div>
 
@@ -188,20 +195,20 @@ function RouteComponent() {
       )}
 
       {!isLoading && !isError && memories.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {memories.map((memory) => (
-            <MemoryCard
-              key={memory.template_id}
-              memory={memory}
-              onDelete={setMemoryToDelete}
-              onTogglePin={togglePin.mutate}
-            />
+        <div className="space-y-8">
+          {groups.filter((group) => group.items.length > 0).map((group) => (
+            <section key={group.title} aria-label={group.title}>
+              <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-700">{group.title}<span className="text-xs font-normal text-slate-400">{group.items.length}</span></h2>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {group.items.map((memory) => <MemoryCard key={memory.template_id} memory={memory} onDelete={setMemoryToDelete} onTogglePin={togglePin.mutate} />)}
+              </div>
+            </section>
           ))}
         </div>
       )}
 
       <Dialog open={!!memoryToDelete} onOpenChange={(open) => !open && setMemoryToDelete(null)}>
-        <DialogContent className="sm:max-w-[400px]">
+        <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-[400px]">
           <DialogHeader>
             <div className="flex items-center gap-2 mb-2 text-left">
               <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center shrink-0">
