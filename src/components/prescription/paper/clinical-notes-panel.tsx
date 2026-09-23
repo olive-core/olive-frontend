@@ -8,6 +8,7 @@ import {
     type NoteSection,
 } from "@/lib/soap-notes";
 import NoteImageGallery from "./note-image-gallery";
+import ReviewActionBar from "./review-action-bar";
 import type { NoteImageType } from "@/types/prescription";
 
 interface ClinicalNotesPanelProps {
@@ -22,6 +23,8 @@ interface ClinicalNotesPanelProps {
     onAddImages?:    (files: File[]) => void;
     onRemoveImage?:  (image: NoteImageType) => void;
     uploadingImages?: number;
+    /** Sticky action bar (the session's Save & Print); never printed. */
+    footer?:          ReactNode;
 }
 
 function AutoGrowTextarea({
@@ -201,6 +204,7 @@ export default function ClinicalNotesPanel({
     onAddImages,
     onRemoveImage,
     uploadingImages,
+    footer,
 }: ClinicalNotesPanelProps) {
     const isEditable = onChange !== undefined;
     const noteText = notes ?? "";
@@ -261,6 +265,13 @@ export default function ClinicalNotesPanel({
                 onRemove={onRemoveImage}
                 uploadingCount={uploadingImages}
             />
+
+            {/* Says what prints, since a doctor on this tab could expect the notes to. */}
+            {footer && (
+                <ReviewActionBar hint="Only the prescription is printed." className="mt-2 rounded-xl border">
+                    {footer}
+                </ReviewActionBar>
+            )}
         </div>
     );
 }

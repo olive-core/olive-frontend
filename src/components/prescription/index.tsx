@@ -120,6 +120,18 @@ export default function Prescription({ onGenerate, onCancel, hasBeenGenerated }:
         },
     });
 
+    // One button for both tabs: saving always prints the prescription, never the notes,
+    // whichever tab it was pressed on (see confirmMutation.onSuccess).
+    const saveAndPrintButton = (
+        <Button
+            onClick={() => confirmMutation.mutate()}
+            isLoading={confirmMutation.isPending}
+            className="h-12 w-full px-8 font-bold shadow-md sm:h-9 sm:w-auto"
+        >
+            Save &amp; Print
+        </Button>
+    );
+
     const prescriptionPaper = (
         <PrescriptionPaper
             header={<DoctorInfo sessionId={consultationId} />}
@@ -180,15 +192,7 @@ export default function Prescription({ onGenerate, onCancel, hasBeenGenerated }:
                     </div>
                 </>
             }
-            footer={
-                <Button
-                    onClick={() => confirmMutation.mutate()}
-                    isLoading={confirmMutation.isPending}
-                    className="h-12 w-full px-8 font-bold shadow-md sm:h-9 sm:w-auto"
-                >
-                    Save &amp; Print
-                </Button>
-            }
+            footer={saveAndPrintButton}
         />
     );
 
@@ -203,6 +207,8 @@ export default function Prescription({ onGenerate, onCancel, hasBeenGenerated }:
             onAddImages={noteImageUpload.addImages}
             onRemoveImage={noteImageUpload.removeImage}
             uploadingImages={noteImageUpload.uploadingCount}
+            // A note-only consultation saves with its own button below the notes instead.
+            footer={prescriptionEnabled ? saveAndPrintButton : undefined}
         />
     );
 

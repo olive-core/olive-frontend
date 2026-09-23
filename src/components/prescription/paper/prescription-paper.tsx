@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 
+import ReviewActionBar from "./review-action-bar";
+
 interface PrescriptionPaperProps {
     header:       ReactNode;
     patientStrip: ReactNode;
@@ -41,12 +43,9 @@ export default function PrescriptionPaper({ header, patientStrip, vitalsBar, lef
             </div>
 
             {footer && (
-                <div className="sticky bottom-0 z-20 flex items-center justify-end gap-4 rounded-b-xl border-t bg-white/85 px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] backdrop-blur sm:justify-between print:hidden">
-                    <span className="hidden text-xs text-slate-400 sm:block">
-                        Review everything, then save &amp; print.
-                    </span>
-                    <div className="flex w-full flex-wrap items-center justify-end gap-3 sm:w-auto">{footer}</div>
-                </div>
+                <ReviewActionBar hint="Review everything, then save & print." className="rounded-b-xl border-t">
+                    {footer}
+                </ReviewActionBar>
             )}
         </div>
     );

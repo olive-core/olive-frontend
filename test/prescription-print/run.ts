@@ -2,6 +2,7 @@ import {
     LOOSEST_SHEET_FIT,
     PRINT_FIT_LEVELS,
     printFitOf,
+    reservedBodyHeight,
     tightenSheetFit,
     type SheetFit,
 } from "@/components/prescription/paper/print-fit";
@@ -184,6 +185,51 @@ section("11. A complaint prints its details, not just its label");
     const densest = printBodyMarkup(PRINT_FIT_LEVELS.length - 1);
     check("the detail line shrinks on the densest step", densest.includes("text-[10px]"), "no dense detail class");
     check("and is roomier on the loosest", markup.includes("text-[11px]"), "no loose detail class");
+}
+
+section("12. The body's reservation never outgrows the page the browser prints on");
+{
+    // The browser resolves the CSS; here `100vh` is swapped for the page area it would use.
+    const resolve = (css: string, pageAreaPx: number) =>
+        Function(`return ${css
+            .replace(/100vh/g, String(pageAreaPx))
+            .replace(/px/g, "")
+            .replace(/calc/g, "")
+            .replace(/max\(/g, "Math.max(")
+            .replace(/min\(/g, "Math.min(")};`)() as number;
+
+    const A4_PX = 297 * PX_PER_MM;
+    const SAFETY_PX = 6 * PX_PER_MM;
+    const CHROME_PX = 360;
+    const usable = A4_PX - SAFETY_PX - CHROME_PX;
+    const one = reservedBodyHeight(1, usable, CHROME_PX + SAFETY_PX);
+
+    check("on the exact page, a whole page is reserved as before",
+        Math.abs(resolve(one, A4_PX) - usable) < 0.01, `${resolve(one, A4_PX)} vs ${usable}`);
+
+    // Chrome's "Minimum" margins, a printer's insets, AirPrint: all take a few millimetres.
+    for (const marginMm of [3, 5, 10]) {
+        const pageArea = A4_PX - 2 * marginMm * PX_PER_MM;
+        const sheet = CHROME_PX + resolve(one, pageArea);
+        check(`${marginMm}mm print margins keep a one-page prescription on one page`,
+            sheet <= pageArea, `sheet ${sheet.toFixed(1)} > page ${pageArea.toFixed(1)}`);
+        check(`and the footer still sits just above the bottom edge (${marginMm}mm)`,
+            Math.abs(pageArea - sheet - SAFETY_PX) < 0.01, `gap ${(pageArea - sheet).toFixed(1)}`);
+    }
+
+    const two = reservedBodyHeight(2, usable, CHROME_PX + SAFETY_PX);
+    check("two pages reserve two pages' body on the exact page",
+        Math.abs(resolve(two, A4_PX) - 2 * usable) < 0.01);
+    check("and two smaller pages' body on a smaller one",
+        resolve(two, A4_PX - 40) < 2 * usable && resolve(two, A4_PX - 40) > 2 * (usable - 40.01));
+
+    // A drawn-down body is out of flow; the reservation must hold its whole height open,
+    // or it would run into the footer.
+    const drawn = reservedBodyHeight(1, usable, CHROME_PX + SAFETY_PX, usable + 1.5);
+    check("a drawn-down body keeps its own height", resolve(drawn, A4_PX) === usable + 1.5);
+
+    // On screen `100vh` is the phone's viewport, which can be shorter than the letterhead.
+    check("never negative on a short screen", resolve(one, 300) === 0);
 }
 
 console.log(failures === 0 ? "\nALL CHECKS PASSED" : `\n${failures} CHECK(S) FAILED`);

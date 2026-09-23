@@ -69,6 +69,28 @@ export function tightenSheetFit(fit: SheetFit, overflowRatio: number): SheetFit 
     return scale < fit.scale - SCALE_EPSILON ? { ...fit, scale } : null;
 }
 
+/**
+ * The CSS min-height that reserves `pageCount` pages for the body, so the footer pins to
+ * the bottom of the last page.
+ *
+ * `usablePerPagePx` assumes the browser prints on the exact page the sheet is laid out
+ * for. It often doesn't: the print dialog's margins, a custom scale or a printer's own
+ * insets take a few millimetres, and a reservation sized for the full page then pushes the
+ * footer onto a second, empty sheet. In print, `100vh` is the page area the browser really
+ * uses, so the smaller of the two keeps the footer on the page either way. On the exact
+ * page both are the same. `floorPx` holds room for a drawn-down body, which is out of flow
+ * and cannot keep its own space open.
+ */
+export function reservedBodyHeight(
+    pageCount: number,
+    usablePerPagePx: number,
+    chromePx: number,
+    floorPx = 0,
+): string {
+    const assumed = pageCount * usablePerPagePx;
+    return `max(${floorPx}px, min(${assumed}px, calc(${pageCount} * (100vh - ${chromePx}px))))`;
+}
+
 export const PrintFitContext = createContext<PrintFit>(LOOSEST_PRINT_FIT);
 
 export function usePrintFit(): PrintFit {

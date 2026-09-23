@@ -5,6 +5,7 @@ import {
     LOOSEST_SHEET_FIT,
     PrintFitContext,
     printFitOf,
+    reservedBodyHeight,
     tightenSheetFit,
     type SheetFit,
 } from "./print-fit";
@@ -18,8 +19,11 @@ import PageSizeStyle from "./page-size-style";
 // page 1, two pages once the content spills over, and so on — otherwise the last page's
 // footer would float directly under the content. Page size and edge offsets come from
 // the chamber's paper setup — a pre-printed pad reserves its printed bands the same way
-// a letterhead reserves its own height. The .rx-print-mount wrapper keeps this laid out
-// (height 0) on screen so the measurements are real before the print dialog opens.
+// a letterhead reserves its own height. The reservation never exceeds the page area the
+// browser actually prints on (see reservedBodyHeight), so print-dialog margins can't push
+// a one-page prescription's footer onto a second sheet. The .rx-print-mount wrapper keeps
+// this laid out (height 0) on screen so the measurements are real before the print
+// dialog opens.
 
 const PIN_SAFETY_MM = 6;
 
@@ -64,7 +68,7 @@ export default function PrintSheet({
     const headerRef = useRef<HTMLTableCellElement>(null);
     const footerRef = useRef<HTMLTableCellElement>(null);
     const contentRef = useRef<HTMLDivElement>(null);
-    const [bodyMinHeight, setBodyMinHeight] = useState<number | null>(null);
+    const [bodyMinHeight, setBodyMinHeight] = useState<string | null>(null);
     const [fit, setFit] = useState<SheetFit>(LOOSEST_SHEET_FIT);
 
     const { pageWidthMm, pageHeightMm, insets, chromeGap } = printSheetGeometry(paper);
@@ -75,14 +79,16 @@ export default function PrintSheet({
         const measure = () => {
             const chromeHeight =
                 (headerRef.current?.offsetHeight ?? 0) + (footerRef.current?.offsetHeight ?? 0);
-            const usablePerPage = (pageHeightMm - PIN_SAFETY_MM) * PX_PER_MM - chromeHeight;
+            const pinSafety = PIN_SAFETY_MM * PX_PER_MM;
+            const usablePerPage = pageHeightMm * PX_PER_MM - pinSafety - chromeHeight;
             if (usablePerPage <= 0) {
                 setBodyMinHeight(null);
                 return;
             }
             // offsetHeight ignores the scale transform, so this is the body's full-size
             // layout height; what lands on paper is that height drawn down.
-            const printedHeight = (contentRef.current?.offsetHeight ?? 0) * fit.scale - MEASURE_TOLERANCE_PX;
+            const drawnHeight = (contentRef.current?.offsetHeight ?? 0) * fit.scale;
+            const printedHeight = drawnHeight - MEASURE_TOLERANCE_PX;
 
             // One step per measurement: the tighter body re-renders, this runs again on
             // the new height, and the climb stops at the first step that fits (or once
@@ -96,7 +102,12 @@ export default function PrintSheet({
             }
 
             const pageCount = Math.max(1, Math.ceil(printedHeight / usablePerPage));
-            setBodyMinHeight(pageCount * usablePerPage);
+            setBodyMinHeight(reservedBodyHeight(
+                pageCount,
+                usablePerPage,
+                chromeHeight + pinSafety,
+                fit.scale < 1 ? drawnHeight : 0,
+            ));
         };
         measure();
         const observer = new ResizeObserver(measure);
