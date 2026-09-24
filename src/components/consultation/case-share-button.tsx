@@ -76,7 +76,8 @@ export default function CaseShareDialog({
                 <DialogHeader>
                     <DialogTitle>Share this Case</DialogTitle>
                     <DialogDescription>
-                        Any doctor signed in to Olive can open this Case and its future follow-ups.
+                        Doctors who open this link can view the whole Case and start follow-ups.
+                        Each doctor can edit only their own consultation; after saving, only their clinical notes can change.
                     </DialogDescription>
                 </DialogHeader>
 

@@ -39,6 +39,8 @@ function ConsultationsPage() {
     mutationFn: (rootSessionId: string) => api.delete(`/case/shared/${rootSessionId}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clinician-consultations'] })
+      queryClient.invalidateQueries({ queryKey: ["patient-consultations"] });
+      queryClient.invalidateQueries({ queryKey: ["consultation-detail"] });
       toast.success('Shared case removed')
     },
     onError: () => toast.error('Could not remove shared case'),

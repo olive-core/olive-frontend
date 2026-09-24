@@ -12,7 +12,11 @@ export function mergeClinicianConsultations(
     owned: ClinicianConsultationItem[],
     shared: ClinicianConsultationItem[],
 ): ClinicianConsultationItem[] {
-    return [...owned, ...shared]
+    const sharedRoots = new Set(shared.map((item) => item.case_root_session_id).filter(Boolean));
+    const sharedIds = new Set(shared.map((item) => item.prescription_id));
+    const personal = owned.filter((item) => !sharedIds.has(item.prescription_id)
+        && (!item.case_root_session_id || !sharedRoots.has(item.case_root_session_id)));
+    return [...personal, ...shared]
         .sort((left, right) => Date.parse(right.created_at) - Date.parse(left.created_at));
 }
 

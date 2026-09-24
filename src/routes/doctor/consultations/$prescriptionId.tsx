@@ -369,7 +369,9 @@ function ConsultationDetailContent({ prescriptionId }: { prescriptionId: string 
   const hasPrescription = consultation.includes_prescription !== false
   // Only the author may write. Every other clinician reads: an accepted Case link, or
   // any past consultation opened from the patient's history.
-  const canEdit = consultation.access_type === 'owned'
+  const canEdit = consultation.can_edit_notes ?? consultation.access_type === 'owned'
+  const canShare = consultation.can_share_case ?? consultation.access_type === 'owned'
+  const canFollowUp = consultation.can_follow_up ?? consultation.access_type === 'owned'
   const accessBadge = canEdit
     ? undefined
     : consultation.access_type === 'shared' ? 'shared' as const : 'read-only' as const
@@ -426,8 +428,8 @@ function ConsultationDetailContent({ prescriptionId }: { prescriptionId: string 
         <DetailToolbar
           onPrint={() => requestPrint(hasPrescription ? 'prescription' : 'note')}
           access={accessBadge}
-          onShare={canEdit ? () => setShareDialogOpen(true) : undefined}
-          followUpAction={canEdit && consultation.session_id && !consultation.has_follow_up ? (
+          onShare={canShare ? () => setShareDialogOpen(true) : undefined}
+          followUpAction={canFollowUp && consultation.session_id && !consultation.has_follow_up ? (
             <Button
               className="gap-2 bg-emerald-600 text-white hover:bg-emerald-700"
               isLoading={startingSourceSessionId === consultation.session_id}
@@ -461,7 +463,7 @@ function ConsultationDetailContent({ prescriptionId }: { prescriptionId: string 
           clinicalNotesTab
         )}
       </div>
-      {canEdit && (
+      {canShare && (
         <CaseShareDialog
           prescriptionId={prescriptionId}
           open={shareDialogOpen}

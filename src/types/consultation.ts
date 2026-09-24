@@ -13,6 +13,10 @@ export type ClinicianConsultationItem = {
     follow_up_of_session_id?: string | null;
     previous_prescription_id?: string | null;
     next_prescription_id?: string | null;
+    can_follow_up?: boolean;
+    can_edit_notes?: boolean;
+    can_share_case?: boolean;
+    case_owner_clinician_id?: string | null;
     has_follow_up?:         boolean;
     patient_id:             string;
     patient_name?:          string | null;
@@ -73,6 +77,10 @@ export type ConsultationDetail = {
     follow_up_of_session_id?: string | null;
     previous_prescription_id?: string | null;
     next_prescription_id?: string | null;
+    can_follow_up?: boolean;
+    can_edit_notes?: boolean;
+    can_share_case?: boolean;
+    case_owner_clinician_id?: string | null;
     has_follow_up?:         boolean;
     access_type?:           "owned" | "shared" | "patient" | "clinician";
     // Letterhead: render_config is the snapshot frozen at save time; the

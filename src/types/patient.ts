@@ -35,6 +35,10 @@ export type HistoryType = {
     follow_up_of_session_id?: string | null;
     previous_prescription_id?: string | null;
     next_prescription_id?: string | null;
+    can_follow_up?: boolean;
+    can_edit_notes?: boolean;
+    can_share_case?: boolean;
+    case_owner_clinician_id?: string | null;
     has_follow_up?: boolean;
 }
 

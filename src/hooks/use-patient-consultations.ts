@@ -16,8 +16,8 @@ export function usePatientConsultations(patientId?: string) {
     });
 }
 
-// The history covers every doctor who has seen this patient, but a follow-up continues a
-// care series: the backend only accepts a source consultation the signed-in doctor wrote.
+// General history access does not grant permission to continue a case.
+// The author fallback supports deployment against the previous API.
 export function eligibleFollowUpSources(
     consultations: PatientPrescriptionListItem[],
     clinicianId: string | undefined,
@@ -26,6 +26,6 @@ export function eligibleFollowUpSources(
         (consultation) =>
             !!consultation.session_id &&
             !consultation.has_follow_up &&
-            consultation.clinician_id === clinicianId,
+            (consultation.can_follow_up ?? (!!clinicianId && consultation.clinician_id === clinicianId)),
     ) as FollowUpSource[];
 }

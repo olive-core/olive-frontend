@@ -235,8 +235,14 @@ async function run() {
             consultation("dermatology-latest", false, "dermatology-root"),
             consultation("orthopedic-standalone", false),
             { ...consultation("another-doctor", false), clinician_id: "clinician-2" },
+            { ...consultation("shared-source", false), clinician_id: "clinician-2", can_follow_up: true },
+            { ...consultation("removed-share", false), can_follow_up: false },
+            { ...consultation("shared-intermediate", true), can_follow_up: true },
         ], "clinician-1");
 
+        check("an accepted shared case can be continued", eligible.some((item) => item.session_id === "shared-source"));
+        check("explicit denial overrides authorship", !eligible.some((item) => item.session_id === "removed-share"));
+        check("shared intermediate visits cannot branch", !eligible.some((item) => item.session_id === "shared-intermediate"));
         check("another doctor's consultation cannot start this doctor's follow-up",
             !eligible.some((item) => item.session_id === "another-doctor"));
         check("an intermediate consultation is hidden",

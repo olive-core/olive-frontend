@@ -44,7 +44,7 @@ export default function ConsultationCard({
     const phone = matchedPhone(consultation, tokens);
 
     const isShared = consultation.access_type === "shared";
-    const canFollowUp = !isShared && !!consultation.session_id && !consultation.has_follow_up;
+    const canFollowUp = (consultation.can_follow_up ?? !isShared) && !!consultation.session_id && !consultation.has_follow_up;
 
     return (
         <div className="group w-full bg-white border border-slate-100 rounded-2xl px-4 py-4 transition-all duration-200 hover:shadow-md hover:border-emerald-200 flex flex-col md:flex-row md:items-center gap-3 md:gap-4">
@@ -68,6 +68,11 @@ export default function ConsultationCard({
                         <span className="mt-1 inline-flex items-center gap-1 text-xs font-medium text-emerald-700">
                             <Share2Icon className="size-3" />
                             Shared{consultation.shared_by_name ? ` by ${consultation.shared_by_name}` : " with you"}
+                        </span>
+                    )}
+                    {consultation.clinician_name && (
+                        <span className="mt-1 block text-xs text-slate-500">
+                            Consultation by {consultation.clinician_name}
                         </span>
                     )}
                     <SexAgeMeta
@@ -103,18 +108,8 @@ export default function ConsultationCard({
             </div>
             </button>
 
-            {isShared ? (
-                <Button
-                    type="button"
-                    variant="ghost"
-                    className="h-11 w-full shrink-0 gap-2 text-slate-500 hover:bg-slate-100 hover:text-slate-700 md:w-auto"
-                    onClick={onRemoveShared}
-                    isLoading={isRemovingShared}
-                    disabled={isRemovingShared}
-                >
-                    <XIcon className="size-4" /> Remove
-                </Button>
-            ) : canFollowUp ? (
+            <div className="flex w-full flex-col gap-2 md:w-auto md:shrink-0">
+            {canFollowUp ? (
                 <Button
                     type="button"
                     variant="outline"
@@ -131,6 +126,19 @@ export default function ConsultationCard({
                     <CheckIcon className="size-3.5" /> Continued
                 </span>
             ) : null}
+            {isShared && (
+                <Button
+                    type="button"
+                    variant="ghost"
+                    className="h-11 w-full gap-2 text-slate-500 hover:bg-slate-100 hover:text-slate-700 md:w-auto"
+                    onClick={onRemoveShared}
+                    isLoading={isRemovingShared}
+                    disabled={isRemovingShared}
+                >
+                    <XIcon className="size-4" /> Remove
+                </Button>
+            )}
+            </div>
         </div>
     );
 }

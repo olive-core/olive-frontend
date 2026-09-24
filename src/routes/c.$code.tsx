@@ -50,6 +50,8 @@ function CaseLinkAccess() {
             .then((response) => {
                 if (cancelled) return;
                 queryClient.invalidateQueries({ queryKey: ["clinician-consultations"] });
+                queryClient.invalidateQueries({ queryKey: ["patient-consultations"] });
+                queryClient.invalidateQueries({ queryKey: ["consultation-detail"] });
                 navigate({
                     to: "/doctor/consultations/$prescriptionId",
                     params: { prescriptionId: response.data.prescription_id },
