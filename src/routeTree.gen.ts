@@ -21,6 +21,7 @@ import { Route as PatientIndexRouteImport } from './routes/patient/index'
 import { Route as DoctorIndexRouteImport } from './routes/doctor/index'
 import { Route as AttendantIndexRouteImport } from './routes/attendant/index'
 import { Route as PCodeRouteImport } from './routes/p.$code'
+import { Route as CaseCodeRouteImport } from './routes/case.$code'
 import { Route as CCodeRouteImport } from './routes/c.$code'
 import { Route as authSignInRouteImport } from './routes/(auth)/sign-in'
 import { Route as authEnterOtpRouteImport } from './routes/(auth)/enter-otp'
@@ -38,6 +39,7 @@ import { Route as PatientProfileEditRouteImport } from './routes/patient/profile
 import { Route as PatientPrescriptionsPrescriptionIdRouteImport } from './routes/patient/prescriptions.$prescriptionId'
 import { Route as DoctorPrescribeConsultationIdRouteImport } from './routes/doctor/prescribe.$consultationId'
 import { Route as DoctorConsultationsPrescriptionIdRouteImport } from './routes/doctor/consultations/$prescriptionId'
+import { Route as DoctorCasesCaseIdRouteImport } from './routes/doctor/cases/$caseId'
 import { Route as DoctorAccountPrescriptionPadRouteImport } from './routes/doctor/account/prescription-pad'
 import { Route as DoctorAccountPreferencesRouteImport } from './routes/doctor/account/preferences'
 import { Route as DoctorMemoryManageIndexRouteImport } from './routes/doctor/memory/manage.index'
@@ -101,6 +103,11 @@ const AttendantIndexRoute = AttendantIndexRouteImport.update({
 const PCodeRoute = PCodeRouteImport.update({
   id: '/p/$code',
   path: '/p/$code',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CaseCodeRoute = CaseCodeRouteImport.update({
+  id: '/case/$code',
+  path: '/case/$code',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CCodeRoute = CCodeRouteImport.update({
@@ -193,6 +200,11 @@ const DoctorConsultationsPrescriptionIdRoute =
     path: '/consultations/$prescriptionId',
     getParentRoute: () => DoctorRouteRoute,
   } as any)
+const DoctorCasesCaseIdRoute = DoctorCasesCaseIdRouteImport.update({
+  id: '/cases/$caseId',
+  path: '/cases/$caseId',
+  getParentRoute: () => DoctorRouteRoute,
+} as any)
 const DoctorAccountPrescriptionPadRoute =
   DoctorAccountPrescriptionPadRouteImport.update({
     id: '/account/prescription-pad',
@@ -234,12 +246,14 @@ export interface FileRoutesByFullPath {
   '/enter-otp': typeof authEnterOtpRoute
   '/sign-in': typeof authSignInRoute
   '/c/$code': typeof CCodeRoute
+  '/case/$code': typeof CaseCodeRoute
   '/p/$code': typeof PCodeRoute
   '/attendant/': typeof AttendantIndexRoute
   '/doctor/': typeof DoctorIndexRoute
   '/patient/': typeof PatientIndexRoute
   '/doctor/account/preferences': typeof DoctorAccountPreferencesRoute
   '/doctor/account/prescription-pad': typeof DoctorAccountPrescriptionPadRoute
+  '/doctor/cases/$caseId': typeof DoctorCasesCaseIdRoute
   '/doctor/consultations/$prescriptionId': typeof DoctorConsultationsPrescriptionIdRoute
   '/doctor/prescribe/$consultationId': typeof DoctorPrescribeConsultationIdRoute
   '/patient/prescriptions/$prescriptionId': typeof PatientPrescriptionsPrescriptionIdRoute
@@ -266,12 +280,14 @@ export interface FileRoutesByTo {
   '/enter-otp': typeof authEnterOtpRoute
   '/sign-in': typeof authSignInRoute
   '/c/$code': typeof CCodeRoute
+  '/case/$code': typeof CaseCodeRoute
   '/p/$code': typeof PCodeRoute
   '/attendant': typeof AttendantIndexRoute
   '/doctor': typeof DoctorIndexRoute
   '/patient': typeof PatientIndexRoute
   '/doctor/account/preferences': typeof DoctorAccountPreferencesRoute
   '/doctor/account/prescription-pad': typeof DoctorAccountPrescriptionPadRoute
+  '/doctor/cases/$caseId': typeof DoctorCasesCaseIdRoute
   '/doctor/consultations/$prescriptionId': typeof DoctorConsultationsPrescriptionIdRoute
   '/doctor/prescribe/$consultationId': typeof DoctorPrescribeConsultationIdRoute
   '/patient/prescriptions/$prescriptionId': typeof PatientPrescriptionsPrescriptionIdRoute
@@ -303,12 +319,14 @@ export interface FileRoutesById {
   '/(auth)/enter-otp': typeof authEnterOtpRoute
   '/(auth)/sign-in': typeof authSignInRoute
   '/c/$code': typeof CCodeRoute
+  '/case/$code': typeof CaseCodeRoute
   '/p/$code': typeof PCodeRoute
   '/attendant/': typeof AttendantIndexRoute
   '/doctor/': typeof DoctorIndexRoute
   '/patient/': typeof PatientIndexRoute
   '/doctor/account/preferences': typeof DoctorAccountPreferencesRoute
   '/doctor/account/prescription-pad': typeof DoctorAccountPrescriptionPadRoute
+  '/doctor/cases/$caseId': typeof DoctorCasesCaseIdRoute
   '/doctor/consultations/$prescriptionId': typeof DoctorConsultationsPrescriptionIdRoute
   '/doctor/prescribe/$consultationId': typeof DoctorPrescribeConsultationIdRoute
   '/patient/prescriptions/$prescriptionId': typeof PatientPrescriptionsPrescriptionIdRoute
@@ -340,12 +358,14 @@ export interface FileRouteTypes {
     | '/enter-otp'
     | '/sign-in'
     | '/c/$code'
+    | '/case/$code'
     | '/p/$code'
     | '/attendant/'
     | '/doctor/'
     | '/patient/'
     | '/doctor/account/preferences'
     | '/doctor/account/prescription-pad'
+    | '/doctor/cases/$caseId'
     | '/doctor/consultations/$prescriptionId'
     | '/doctor/prescribe/$consultationId'
     | '/patient/prescriptions/$prescriptionId'
@@ -372,12 +392,14 @@ export interface FileRouteTypes {
     | '/enter-otp'
     | '/sign-in'
     | '/c/$code'
+    | '/case/$code'
     | '/p/$code'
     | '/attendant'
     | '/doctor'
     | '/patient'
     | '/doctor/account/preferences'
     | '/doctor/account/prescription-pad'
+    | '/doctor/cases/$caseId'
     | '/doctor/consultations/$prescriptionId'
     | '/doctor/prescribe/$consultationId'
     | '/patient/prescriptions/$prescriptionId'
@@ -408,12 +430,14 @@ export interface FileRouteTypes {
     | '/(auth)/enter-otp'
     | '/(auth)/sign-in'
     | '/c/$code'
+    | '/case/$code'
     | '/p/$code'
     | '/attendant/'
     | '/doctor/'
     | '/patient/'
     | '/doctor/account/preferences'
     | '/doctor/account/prescription-pad'
+    | '/doctor/cases/$caseId'
     | '/doctor/consultations/$prescriptionId'
     | '/doctor/prescribe/$consultationId'
     | '/patient/prescriptions/$prescriptionId'
@@ -443,6 +467,7 @@ export interface RootRouteChildren {
   ComingSoonRoute: typeof ComingSoonRoute
   NotFoundRoute: typeof NotFoundRoute
   CCodeRoute: typeof CCodeRoute
+  CaseCodeRoute: typeof CaseCodeRoute
   PCodeRoute: typeof PCodeRoute
 }
 
@@ -530,6 +555,13 @@ declare module '@tanstack/react-router' {
       path: '/p/$code'
       fullPath: '/p/$code'
       preLoaderRoute: typeof PCodeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/case/$code': {
+      id: '/case/$code'
+      path: '/case/$code'
+      fullPath: '/case/$code'
+      preLoaderRoute: typeof CaseCodeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/c/$code': {
@@ -651,6 +683,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DoctorConsultationsPrescriptionIdRouteImport
       parentRoute: typeof DoctorRouteRoute
     }
+    '/doctor/cases/$caseId': {
+      id: '/doctor/cases/$caseId'
+      path: '/cases/$caseId'
+      fullPath: '/doctor/cases/$caseId'
+      preLoaderRoute: typeof DoctorCasesCaseIdRouteImport
+      parentRoute: typeof DoctorRouteRoute
+    }
     '/doctor/account/prescription-pad': {
       id: '/doctor/account/prescription-pad'
       path: '/account/prescription-pad'
@@ -719,6 +758,7 @@ interface DoctorRouteRouteChildren {
   DoctorIndexRoute: typeof DoctorIndexRoute
   DoctorAccountPreferencesRoute: typeof DoctorAccountPreferencesRoute
   DoctorAccountPrescriptionPadRoute: typeof DoctorAccountPrescriptionPadRoute
+  DoctorCasesCaseIdRoute: typeof DoctorCasesCaseIdRoute
   DoctorConsultationsPrescriptionIdRoute: typeof DoctorConsultationsPrescriptionIdRoute
   DoctorPrescribeConsultationIdRoute: typeof DoctorPrescribeConsultationIdRoute
   DoctorAccountIndexRoute: typeof DoctorAccountIndexRoute
@@ -739,6 +779,7 @@ const DoctorRouteRouteChildren: DoctorRouteRouteChildren = {
   DoctorIndexRoute: DoctorIndexRoute,
   DoctorAccountPreferencesRoute: DoctorAccountPreferencesRoute,
   DoctorAccountPrescriptionPadRoute: DoctorAccountPrescriptionPadRoute,
+  DoctorCasesCaseIdRoute: DoctorCasesCaseIdRoute,
   DoctorConsultationsPrescriptionIdRoute:
     DoctorConsultationsPrescriptionIdRoute,
   DoctorPrescribeConsultationIdRoute: DoctorPrescribeConsultationIdRoute,
@@ -790,6 +831,7 @@ const rootRouteChildren: RootRouteChildren = {
   ComingSoonRoute: ComingSoonRoute,
   NotFoundRoute: NotFoundRoute,
   CCodeRoute: CCodeRoute,
+  CaseCodeRoute: CaseCodeRoute,
   PCodeRoute: PCodeRoute,
 }
 export const routeTree = rootRouteImport

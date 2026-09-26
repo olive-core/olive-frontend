@@ -26,7 +26,7 @@ export default function ConsultationsToolbar({
         <div className="mb-6 flex flex-col gap-3">
             <ConsultationSearch value={searchTerm} onChange={onSearchChange} />
             <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex gap-2" aria-label="Consultation ownership">
+            <div className="flex gap-2" aria-label="Doctors involved in the case">
                 {(["all", "owned", "shared"] as const).map((value) => (
                     <Button
                         key={value}
@@ -37,7 +37,7 @@ export default function ConsultationsToolbar({
                         aria-pressed={accessFilter === value}
                         className={`min-h-11 px-4 ${accessFilter === value ? "bg-emerald-600 hover:bg-emerald-700" : ""}`}
                     >
-                        {value === "all" ? "All" : value === "owned" ? "Mine" : "Shared"}
+                        {value === "all" ? "All" : value === "owned" ? "Only me" : "With others"}
                     </Button>
                 ))}
             </div>

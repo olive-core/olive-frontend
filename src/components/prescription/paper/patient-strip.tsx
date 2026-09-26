@@ -3,7 +3,7 @@ import { format } from "date-fns";
 const SEX_LABELS: Record<string, string> = {
     male: "Male",
     female: "Female",
-    non_binary: "Non-binary",
+    non_binary: "Others",
 };
 
 interface PatientStripProps {

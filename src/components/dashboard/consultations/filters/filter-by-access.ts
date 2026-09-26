@@ -7,10 +7,10 @@ export function filterConsultationsByAccess(
     accessFilter: CaseAccessFilter,
 ): ClinicianConsultationItem[] {
     if (accessFilter === "shared") {
-        return consultations.filter((consultation) => consultation.access_type === "shared");
+        return consultations.filter((consultation) => consultation.is_only_me === false || (consultation.is_only_me === undefined && consultation.access_type === "shared"));
     }
     if (accessFilter === "owned") {
-        return consultations.filter((consultation) => consultation.access_type !== "shared");
+        return consultations.filter((consultation) => consultation.is_only_me === true || (consultation.is_only_me === undefined && consultation.access_type !== "shared"));
     }
     return consultations;
 }

@@ -32,11 +32,8 @@ export function useClinicianConsultations({ clinicianId, dateRange }: UseClinici
         queryKey: ['clinician-consultations', clinicianId, dateRange.fromDate, dateRange.toDate],
         queryFn:  async () => {
             const params = buildQueryParams(dateRange);
-            const [owned, shared] = await Promise.all([
-                api.get<ClinicianConsultationItem[]>(`/prescription/clinician/${clinicianId}`, { params }),
-                api.get<ClinicianConsultationItem[]>("/case/shared", { params }),
-            ]);
-            return mergeClinicianConsultations(owned.data, shared.data);
+            const response = await api.get<ClinicianConsultationItem[]>("/case/list", { params });
+            return response.data;
         },
         enabled: !!clinicianId,
     });

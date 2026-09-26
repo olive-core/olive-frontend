@@ -11,7 +11,7 @@ import type { PatientInfoType } from "@/types/patient";
 const SEX_LABELS: Record<NonNullable<PatientInfoType["sex"]>, string> = {
     male: "Male",
     female: "Female",
-    non_binary: "Non-binary",
+    non_binary: "Others",
 };
 
 function DetailRow({

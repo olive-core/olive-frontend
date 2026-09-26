@@ -13,6 +13,7 @@ import { format } from "date-fns";
 import api from "@/lib/axios";
 import type { PatientInfoType, ShowContentStatus } from "@/types/patient";
 import { getAgeFromDOB } from "@/lib/utils";
+import { sexLabel } from "@/lib/patient";
 import { useStartConsultation } from "@/hooks/use-start-consultation";
 import { useAuthStore } from "@/stores/auth-store";
 import {
@@ -106,7 +107,7 @@ export default function PatientInfo({ userId: patientId, phone, setShowContent }
                             </div>
                             <div className="flex items-center">
                                 {renderSexIcon()}
-                                <span className="capitalize">{patientData.sex}</span>
+                                <span>{sexLabel(patientData.sex)}</span>
                             </div>
                         </div>
                     </ItemDescription>

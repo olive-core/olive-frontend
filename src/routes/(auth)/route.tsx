@@ -17,7 +17,8 @@ function AuthLayout() {
     if (isLoggedIn) {
       const pendingCaseCode = sessionStorage.getItem("pendingCaseCode");
       if (activeView === "doctor" && pendingCaseCode) {
-        navigate({ to: "/c/$code", params: { code: pendingCaseCode } });
+        const readable = sessionStorage.getItem("pendingCaseKind") === "readable";
+        navigate({ to: readable ? "/case/$code" : "/c/$code", params: { code: pendingCaseCode } });
         return;
       }
       const target = activeView === "patient" ? "/patient" : activeView === "attendant" ? "/attendant" : "/doctor";

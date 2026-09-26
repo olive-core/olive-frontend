@@ -14,11 +14,12 @@
     "test:print": "node test/prescription-print/build.mjs && node test/prescription-print/build/run.cjs",
     "test:memory": "node test/memory/build.mjs && node test/memory/build/run.cjs",
     "test:mobile": "node test/mobile-editor/build.mjs && node test/mobile-editor/build/run.cjs",
-    "test": "npm run test:queue && npm run test:recording && npm run test:arise && npm run test:print && npm run test:memory && npm run test:mobile && npm run test:pad-setup && npm run test:account",
+    "test": "npm run test:queue && npm run test:recording && npm run test:arise && npm run test:print && npm run test:memory && npm run test:mobile && npm run test:pad-setup && npm run test:account && npm run test:cases",
     "test:pad-setup": "node test/pad-setup/build.mjs && node test/pad-setup/build/run.cjs",
     "probe:build": "vite build --config vite.probe.config.ts",
     "probe:phone": "npm run probe:build && node probe/measure-phone.mjs",
-    "test:account": "node test/account-navigation/build.mjs && node test/account-navigation/build/run.cjs"
+    "test:account": "node test/account-navigation/build.mjs && node test/account-navigation/build/run.cjs",
+    "test:cases": "node test/case-sharing/build.mjs && node test/case-sharing/build/run.cjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

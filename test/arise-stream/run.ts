@@ -145,6 +145,24 @@ async function testTransportFailureRetries() {
     check("returns the recovered response", outcome.status === "completed", JSON.stringify(outcome));
 }
 
+async function testExpiredLoginIsRenewed() {
+    const tokens: (string | null)[] = [];
+    globalThis.fetch = async (_url, init) => {
+        const header = (init?.headers as Record<string, string>)["Authorization"] ?? null;
+        tokens.push(header);
+        return header === "Bearer fresh" ? responseFor([completed]) : new Response("expired", { status: 401 });
+    };
+    const outcome = await generateAriseDraft({
+        ...request(new AbortController().signal),
+        accessToken: "stale",
+        renewAccessToken: async () => "fresh",
+    });
+
+    console.log("\nexpired login");
+    check("renews the login and completes", outcome.status === "completed", JSON.stringify(outcome));
+    check("retries once with the renewed token", tokens.join(",") === "Bearer stale,Bearer fresh", tokens.join(","));
+}
+
 async function testAbortDoesNotRetry() {
     let fetchCalls = 0;
     const controller = new AbortController();
@@ -212,6 +230,7 @@ async function run() {
     await testUnexpectedEofStops();
     await testIdleStreamStops();
     await testTransportFailureRetries();
+    await testExpiredLoginIsRenewed();
     await testAbortDoesNotRetry();
     await testFinalRecordingWait();
 

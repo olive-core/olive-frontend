@@ -2,6 +2,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { CheckIcon, ChevronRightIcon, HistoryIcon, PhoneIcon, Share2Icon, XIcon } from "lucide-react";
 import type { ClinicianConsultationItem } from "@/types/consultation";
 import { Button } from "@/components/ui/button";
+import CaseCodeButton from "@/components/case/case-code-button";
 import PatientAvatar from "./patient-avatar";
 import SexAgeMeta from "./sex-age-meta";
 import DiagnosisPills from "./diagnosis-pills";
@@ -30,6 +31,10 @@ export default function ConsultationCard({
     const navigate = useNavigate();
 
     const handleOpen = () => {
+        if (consultation.case_root_session_id) {
+            navigate({ to: "/doctor/cases/$caseId", params: { caseId: consultation.case_root_session_id } });
+            return;
+        }
         navigate({
             to:     "/doctor/consultations/$prescriptionId",
             params: { prescriptionId: consultation.prescription_id },
@@ -64,6 +69,9 @@ export default function ConsultationCard({
                     <h3 className="font-semibold text-slate-800 text-sm truncate group-hover:text-emerald-700 transition-colors">
                         <SearchHighlight text={fullName} tokens={tokens} />
                     </h3>
+                    {consultation.consultation_count && (
+                        <span className="mt-1 block text-xs text-slate-500">{consultation.consultation_count} {consultation.consultation_count === 1 ? "consultation" : "consultations"}</span>
+                    )}
                     {isShared && (
                         <span className="mt-1 inline-flex items-center gap-1 text-xs font-medium text-emerald-700">
                             <Share2Icon className="size-3" />
@@ -109,6 +117,7 @@ export default function ConsultationCard({
             </button>
 
             <div className="flex w-full flex-col gap-2 md:w-auto md:shrink-0">
+            {consultation.case_code && <CaseCodeButton code={consultation.case_code} />}
             {canFollowUp ? (
                 <Button
                     type="button"

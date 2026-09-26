@@ -47,7 +47,7 @@ const FORM_STEPS: MultiStepFormSteps<PatientFormValues> = [
         options: [
             { value: "male", label: "Male", icon: <MarsIcon className="size-4 text-blue-500" /> },
             { value: "female", label: "Female", icon: <VenusIcon className="size-4 text-pink-500" /> },
-            { value: "non_binary", label: "Non-binary", icon: <TransgenderIcon className="size-4 text-purple-500" /> },
+            { value: "non_binary", label: "Others", icon: <TransgenderIcon className="size-4 text-purple-500" /> },
         ],
     },
 ];

@@ -22,6 +22,11 @@ export type PatientNumber = {
     phone?: string;
 };
 
+// The stored value stays "non_binary"; only the label people see is "Others".
+const SEX_LABELS: Record<string, string> = { male: "Male", female: "Female", non_binary: "Others" };
+
+export const sexLabel = (sex?: string | null) => (sex ? SEX_LABELS[sex] ?? sex : "");
+
 // Age in whole years -> an approximate date of birth (Jan 1 of the birth year).
 // Age is collected instead of an exact date to keep entry fast at the desk and sign-up.
 // Built as a plain string, not via Date/toISOString, which would shift to the previous

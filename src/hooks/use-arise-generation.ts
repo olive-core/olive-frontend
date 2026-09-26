@@ -5,6 +5,7 @@ import { useAudioDeliveryGate } from '@/hooks/use-audio-delivery-gate';
 import { useAuthStore } from '@/stores/auth-store';
 import { usePrescriptionStore } from '@/stores/prescription-store';
 import { useStableCallback } from '@/hooks/use-stable-callback';
+import { renewAccessToken } from '@/lib/axios';
 
 /**
  * Drives one consultation's AI draft and keeps the screen honest about it: a run always
@@ -46,6 +47,7 @@ export function useAriseGeneration(sessionId: string) {
             const outcome = await generateAriseDraft({
                 sessionId,
                 accessToken: accessToken ?? null,
+                renewAccessToken,
                 signal,
                 handlers: {
                     onPartial: store.setPartialData,

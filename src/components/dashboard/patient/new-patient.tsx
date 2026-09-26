@@ -15,7 +15,7 @@ import { useSubscriptionGate } from '@/stores/subscription-gate-store'
 import { useGraceGuard } from '@/hooks/use-grace-guard'
 import { useNavigate } from '@tanstack/react-router'
 import api from '@/lib/axios'
-import { createPatient, dobFromAge, findSimilar, linkPhone, type SimilarMatch } from '@/lib/patient'
+import { createPatient, dobFromAge, findSimilar, linkPhone, sexLabel, type SimilarMatch } from '@/lib/patient'
 import { useAuthStore } from '@/stores/auth-store'
 import { useDefaultChamberId } from '@/stores/active-chamber-store'
 import { useQueryClient } from '@tanstack/react-query'
@@ -180,7 +180,7 @@ export default function NewPatient({ phone, name, age, sex, userId, onExistingPa
             options: [
                 { value: "male", label: "Male", icon: <MarsIcon className="size-4 text-blue-500" /> },
                 { value: "female", label: "Female", icon: <VenusIcon className="size-4 text-pink-500" /> },
-                { value: "non_binary", label: "Non-binary", icon: <TransgenderIcon className="size-4 text-purple-500" /> },
+                { value: "non_binary", label: "Others", icon: <TransgenderIcon className="size-4 text-purple-500" /> },
             ],
         }
     ]
@@ -211,7 +211,7 @@ export default function NewPatient({ phone, name, age, sex, userId, onExistingPa
                         <ItemContent>
                             <ItemTitle className="text-lg">{values.name}</ItemTitle>
                             <ItemDescription>
-                                <span className="text-sm text-slate-600 capitalize">{values.age}y · {values.sex}</span>
+                                <span className="text-sm text-slate-600">{values.age}y · {sexLabel(values.sex)}</span>
                             </ItemDescription>
                         </ItemContent>
                         <Button autoFocus className="w-full" onClick={proceed} isLoading={starting} disabled={starting}>

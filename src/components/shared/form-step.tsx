@@ -168,23 +168,28 @@ export function RadioField<T extends FieldValues>({ id, label, control, options,
                             value={field.value}
                             onValueChange={field.onChange}
                             aria-invalid={fieldState.invalid}
-                            className={cn("flex", orientation === "horizontal" ? "flex-row gap-4" : "flex-col gap-3")}
+                            // Equal columns that may shrink, so every option stays on a narrow phone screen.
+                            className={cn(orientation === "horizontal" ? "grid grid-flow-col auto-cols-fr gap-2 sm:gap-4" : "flex flex-col gap-3")}
                         >
                             {options.map((option) => (
                                 <FieldLabel
                                     key={option.value}
                                     htmlFor={`radiogroup-${option.value}`}
+                                    className="min-w-0"
                                 >
                                     <Field
                                         orientation={"horizontal"}
                                         data-invalid={fieldState.invalid}
+                                        className="justify-center gap-2 p-3! sm:p-4!"
                                     >
-                                        <FieldContent className="flex flex-row items-center">
+                                        <FieldContent className="min-w-0 flex-none flex-row items-center justify-center gap-1.5">
                                             {option.icon && option.icon}
                                             <FieldTitle>{option.label}</FieldTitle>
 
                                         </FieldContent>
+                                        {/* On phones the highlighted box shows the choice; the dot would crowd the label. */}
                                         <RadioGroupItem
+                                            className="max-sm:sr-only"
                                             autoFocus={field.value === option.value}
                                             value={option.value}
                                             id={`radiogroup-${option.value}`}

@@ -15,7 +15,7 @@ export default function ConsultationSearch({ value, onChange }: ConsultationSear
     return (
         <div role="search" className="relative w-full sm:w-80">
             <label htmlFor={INPUT_ID} className="sr-only">
-                Search consultations by patient name, diagnosis or phone number
+                Search cases by patient name, diagnosis or phone number
             </label>
             <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-400 pointer-events-none" />
             <Input

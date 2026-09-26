@@ -124,7 +124,7 @@ export function PatientProfileForm({ patientData }: PatientProfileFormProps) {
                                             <SelectContent>
                                                 <SelectItem value="male">Male</SelectItem>
                                                 <SelectItem value="female">Female</SelectItem>
-                                                <SelectItem value="non_binary">Non-binary</SelectItem>
+                                                <SelectItem value="non_binary">Others</SelectItem>
                                             </SelectContent>
                                         </Select>
                                     </Field>

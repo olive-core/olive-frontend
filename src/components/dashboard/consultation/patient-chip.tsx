@@ -7,7 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 const SEX_LABEL: Record<NonNullable<PatientInfoType["sex"]>, string> = {
     male: "Male",
     female: "Female",
-    non_binary: "Non-binary",
+    non_binary: "Others",
 };
 
 // Quiet "who am I treating" anchor for the consultation screen — a premium touch and a safety

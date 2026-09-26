@@ -5,7 +5,7 @@ import ListInfo from "./list-info";
 import PatientInfo from "./patient-info";
 import { MedicineContainer } from "./medicine-container";
 import api from "@/lib/axios";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate, useParams } from "@tanstack/react-router";
 import { useState } from "react";
 import AdviceList from "./advice-list";
@@ -33,6 +33,7 @@ interface PrescriptionProps {
 export default function Prescription({ onGenerate, onCancel, hasBeenGenerated }: PrescriptionProps) {
     const store = usePrescriptionStore();
     const navigate = useNavigate();
+    const queryClient = useQueryClient();
     const { consultationId } = useParams({ from: "/doctor/prescribe/$consultationId" });
 
     const [activeDocument, setActiveDocument] = useState<PrescriptionDocument>("prescription");
@@ -109,6 +110,9 @@ export default function Prescription({ onGenerate, onCancel, hasBeenGenerated }:
             await api.post("/prescription", { ...payload, includes_prescription: prescriptionEnabled });
         },
         onSuccess: () => {
+            for (const key of ["clinician-consultations", "case-detail", "consultation-detail", "patient-consultations"]) {
+                void queryClient.invalidateQueries({ queryKey: [key] });
+            }
             // The consultation is saved, so its upload receipts have nothing left to prove.
             // Audio the server never confirmed is deliberately left alone.
             void clearSyncedSessionChunks(consultationId);

@@ -1,6 +1,6 @@
 import { PhoneIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import type { SimilarMatch } from "@/lib/patient";
+import { sexLabel, type SimilarMatch } from "@/lib/patient";
 
 interface DuplicateGateProps {
     matches: SimilarMatch[];
@@ -30,9 +30,9 @@ export default function DuplicateGate({ matches, busy, onLink, onCreateNew }: Du
                     >
                         <span className="flex items-baseline justify-between gap-3">
                             <span className="font-semibold">{match.name}</span>
-                            <span className="text-sm text-muted-foreground capitalize">
+                            <span className="text-sm text-muted-foreground">
                                 {match.age != null ? `${match.age}y` : ""}
-                                {match.sex ? ` · ${match.sex}` : ""}
+                                {match.sex ? ` · ${sexLabel(match.sex)}` : ""}
                             </span>
                         </span>
                         {match.masked_numbers.length > 0 ? (

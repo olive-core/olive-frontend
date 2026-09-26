@@ -48,6 +48,7 @@ export function useStartConsultation() {
                 queryClient.invalidateQueries({ queryKey: ["subscription"] });
                 queryClient.invalidateQueries({ queryKey: ["patient-consultations", patientId] });
                 queryClient.invalidateQueries({ queryKey: ["clinician-consultations"] });
+                queryClient.invalidateQueries({ queryKey: ["case-detail"] });
                 navigate({
                     to: "/doctor/consultation/$userId/$consultationId",
                     params: { userId: patientId, consultationId: response.data.session_id },
@@ -56,6 +57,7 @@ export function useStartConsultation() {
                 if (followUpOfSessionId) {
                     queryClient.invalidateQueries({ queryKey: ["patient-consultations", patientId] });
                     queryClient.invalidateQueries({ queryKey: ["clinician-consultations"] });
+                    queryClient.invalidateQueries({ queryKey: ["case-detail"] });
                 }
                 if (isSubscriptionBlocked(error)) {
                     showSubscriptionGate(getSubscriptionStatusFromError(error));

@@ -7,9 +7,9 @@ export default function EmptyState() {
                 <ClipboardListIcon className="w-8 h-8 text-emerald-400" />
             </div>
             <div>
-                <p className="text-slate-700 font-semibold text-lg">No consultations yet</p>
+                <p className="text-slate-700 font-semibold text-lg">No cases yet</p>
                 <p className="text-slate-400 text-sm mt-1">
-                    Saved consultations will appear here, grouped by day.
+                    Save a consultation or open a case with its code to get started.
                 </p>
             </div>
         </div>

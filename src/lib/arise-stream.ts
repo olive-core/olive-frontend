@@ -57,6 +57,8 @@ export type AriseStreamHandlers = {
 export type AriseGenerationRequest = {
     sessionId: string;
     accessToken: string | null;
+    // fetch has no axios interceptor, so an expired login is renewed through this.
+    renewAccessToken?: (expiredAccessToken: string | null) => Promise<string | null>;
     signal: AbortSignal;
     handlers: AriseStreamHandlers;
 };
@@ -93,22 +95,17 @@ export async function generateAriseDraft(
 async function runGenerationAttempt({
     sessionId,
     accessToken,
+    renewAccessToken,
     signal,
     handlers,
 }: AriseGenerationRequest): Promise<AriseStreamOutcome> {
     let response: Response;
     try {
-        response = await fetch(GENERATE_ENDPOINT, {
-            method: 'POST',
-            headers: buildHeaders(accessToken),
-            body: JSON.stringify({
-                session_id: sessionId,
-                dialogue: '',
-                force_variant: 'one',
-                persist_draft: true,
-            }),
-            signal,
-        });
+        response = await postGeneration(sessionId, accessToken, signal);
+        if (response.status === 401 && renewAccessToken) {
+            const renewedAccessToken = await renewAccessToken(accessToken);
+            if (renewedAccessToken) response = await postGeneration(sessionId, renewedAccessToken, signal);
+        }
     } catch (error) {
         if (isAbort(error)) throw error;
         return { status: 'failed', reason: errorMessage(error) };
@@ -119,6 +116,20 @@ async function runGenerationAttempt({
     }
 
     return readEventStream(response.body, handlers, signal);
+}
+
+function postGeneration(sessionId: string, accessToken: string | null, signal: AbortSignal): Promise<Response> {
+    return fetch(GENERATE_ENDPOINT, {
+        method: 'POST',
+        headers: buildHeaders(accessToken),
+        body: JSON.stringify({
+            session_id: sessionId,
+            dialogue: '',
+            force_variant: 'one',
+            persist_draft: true,
+        }),
+        signal,
+    });
 }
 
 function buildHeaders(accessToken: string | null): Record<string, string> {

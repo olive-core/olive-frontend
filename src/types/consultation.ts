@@ -13,6 +13,9 @@ export type ClinicianConsultationItem = {
     follow_up_of_session_id?: string | null;
     previous_prescription_id?: string | null;
     next_prescription_id?: string | null;
+    case_code?: string | null;
+    consultation_count?: number;
+    is_only_me?: boolean;
     can_follow_up?: boolean;
     can_edit_notes?: boolean;
     can_share_case?: boolean;
@@ -77,11 +80,15 @@ export type ConsultationDetail = {
     follow_up_of_session_id?: string | null;
     previous_prescription_id?: string | null;
     next_prescription_id?: string | null;
+    case_code?: string | null;
+    consultation_count?: number;
+    is_only_me?: boolean;
     can_follow_up?: boolean;
     can_edit_notes?: boolean;
     can_share_case?: boolean;
     case_owner_clinician_id?: string | null;
     has_follow_up?:         boolean;
+    case_root_session_id?: string | null;
     access_type?:           "owned" | "shared" | "patient" | "clinician";
     // Letterhead: render_config is the snapshot frozen at save time; the
     // clinician_* fields back-fill legacy prescriptions saved before snapshots.

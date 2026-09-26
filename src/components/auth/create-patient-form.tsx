@@ -18,7 +18,7 @@ import { dobFromAge } from "@/lib/patient";
 const SEX_OPTIONS = [
     { value: "male", label: "Male", icon: MarsIcon, iconClassName: "text-blue-500" },
     { value: "female", label: "Female", icon: VenusIcon, iconClassName: "text-pink-500" },
-    { value: "non_binary", label: "Non-binary", icon: TransgenderIcon, iconClassName: "text-purple-500" },
+    { value: "non_binary", label: "Others", icon: TransgenderIcon, iconClassName: "text-purple-500" },
 ] as const;
 
 const patientSchema = z.object({

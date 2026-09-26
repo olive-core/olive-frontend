@@ -3,6 +3,8 @@ import { CheckIcon, CopyIcon, Share2Icon } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
+import CaseCodeButton from "@/components/case/case-code-button";
+import { formatCaseCode } from "@/lib/case-code";
 import api from "@/lib/axios";
 import { Button } from "@/components/ui/button";
 import {
@@ -58,7 +60,7 @@ export default function CaseShareDialog({
     const nativeShare = async () => {
         if (!link || !navigator.share) return;
         try {
-            await navigator.share({ title: "Olive Case", text: "A doctor shared a Case with you in Olive.", url: link.url });
+            await navigator.share({ title: "Olive Case", text: `Olive case: ${formatCaseCode(link.code)}`, url: link.url });
         } catch (error) {
             if ((error as { name?: string }).name !== "AbortError") {
                 toast.error("Could not open sharing options");
@@ -67,7 +69,7 @@ export default function CaseShareDialog({
     };
 
     const whatsappUrl = link
-        ? `https://wa.me/?text=${encodeURIComponent(`A doctor shared a Case with you in Olive.\n${link.url}`)}`
+        ? `https://wa.me/?text=${encodeURIComponent(`Olive case: ${formatCaseCode(link.code)}\n${link.url}`)}`
         : "#";
 
     return (
@@ -87,6 +89,10 @@ export default function CaseShareDialog({
                     </div>
                 ) : link ? (
                     <>
+                        <div className="flex flex-col items-center gap-2 py-2">
+                            <span className="text-xs font-medium text-slate-500">Tap to copy the case code</span>
+                            <CaseCodeButton code={link.code} className="min-h-14 px-5" />
+                        </div>
                         <div className="break-all rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 font-mono text-sm text-slate-700">
                             {link.url}
                         </div>
@@ -98,7 +104,7 @@ export default function CaseShareDialog({
                             )}
                             <Button type="button" variant="outline" onClick={copyLink} className="min-h-11 flex-1">
                                 {copied ? <CheckIcon className="size-4 text-emerald-600" /> : <CopyIcon className="size-4" />}
-                                {copied ? "Copied" : "Copy link"}
+                                {copied ? "Link copied" : "Copy link"}
                             </Button>
                             <Button asChild variant="outline" className="min-h-11 flex-1">
                                 <a href={whatsappUrl} target="_blank" rel="noreferrer">WhatsApp</a>

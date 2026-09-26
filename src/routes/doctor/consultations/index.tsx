@@ -20,6 +20,8 @@ import {
 import { filterConsultationsByAccess } from '@/components/dashboard/consultations/filters/filter-by-access'
 import { EMPTY_DATE_RANGE, isDateRangeActive, type DateRange } from '@/components/dashboard/consultations/filters/date-range'
 import { useStartConsultation } from '@/hooks/use-start-consultation'
+import { Button } from '@/components/ui/button'
+import OpenCaseDialog from '@/components/case/open-case-dialog'
 import { cn } from '@/lib/utils'
 
 export const Route = createFileRoute('/doctor/consultations/')({
@@ -30,6 +32,7 @@ function ConsultationsPage() {
   const clinicianId = useAuthStore((state) => state.userId)
   const { start, startingSourceSessionId, graceDialog } = useStartConsultation()
 
+  const [openCase, setOpenCase] = useState(false)
   const [dateRange, setDateRange] = useState<DateRange>(EMPTY_DATE_RANGE)
   const [searchTerm, setSearchTerm] = useState("")
   const [accessFilter, setAccessFilter] = useState<CaseAccessFilter>("all")
@@ -41,6 +44,7 @@ function ConsultationsPage() {
       queryClient.invalidateQueries({ queryKey: ['clinician-consultations'] })
       queryClient.invalidateQueries({ queryKey: ["patient-consultations"] });
       queryClient.invalidateQueries({ queryKey: ["consultation-detail"] });
+      queryClient.invalidateQueries({ queryKey: ["case-detail"] });
       toast.success('Shared case removed')
     },
     onError: () => toast.error('Could not remove shared case'),
@@ -82,9 +86,11 @@ function ConsultationsPage() {
       <header className="mb-6">
         <h1 className="text-2xl font-bold text-slate-900">Consultations</h1>
         <p className="text-sm text-slate-500 mt-1">
-          Your consultations and Cases shared with you, grouped by day.
+          Patient cases, ordered by their latest consultation.
         </p>
+        <Button variant="outline" className="mt-4 min-h-11" onClick={() => setOpenCase(true)}>Open case with code</Button>
       </header>
+      <OpenCaseDialog open={openCase} onOpenChange={setOpenCase} />
 
       <ConsultationsToolbar
         dateRange={dateRange}
@@ -102,7 +108,7 @@ function ConsultationsPage() {
         className={cn('mb-4 text-xs text-slate-500', !hasActiveFilters && 'sr-only')}
       >
         {hasActiveFilters && isReady
-          ? `${filteredConsultations.length} of ${consultations.length} consultations`
+          ? `${filteredConsultations.length} of ${consultations.length} cases`
           : ''}
       </p>
 

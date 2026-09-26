@@ -82,6 +82,12 @@ function renewSessionOnce(expiredAccessToken?: string): Promise<SessionRenewal> 
     return renewalInFlight.finally(() => { renewalInFlight = null; });
 }
 
+/** A renewed access token for requests made outside this axios instance (the Arise stream). */
+export async function renewAccessToken(expiredAccessToken: string | null): Promise<string | null> {
+    const { accessToken } = await renewSessionOnce(expiredAccessToken ?? undefined);
+    return accessToken;
+}
+
 api.interceptors.response.use(
     (response) => response,
     async (error: AxiosError) => {
