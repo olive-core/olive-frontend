@@ -10,6 +10,9 @@ import PaymentInstructions from "./payment-instructions";
 
 type Step = "overview" | "instructions" | "claim" | "done";
 
+const SELF_SERVICE_SUBSCRIPTIONS_ENABLED =
+    import.meta.env.VITE_SUBSCRIPTION_SELF_SERVICE_ENABLED === "true";
+
 function StatusSummary({ label, value }: { label: string; value: string }) {
     return (
         <div className="rounded-2xl border border-emerald-100 bg-emerald-50/60 px-5 py-4">
@@ -43,7 +46,7 @@ export default function MembershipPanel() {
             : status.state === "trial"
                 ? `${status.consultations_remaining} of ${status.trial_limit} free consultations left`
                 : status.state === "grace"
-                    ? `Expired — renew to keep your founding rate`
+                    ? `Expired — contact us to renew`
                     : status.subscription_until
                         ? `Membership expired. Renew to continue`
                         : `Trial ended. Activate to continue.`;
@@ -58,7 +61,7 @@ export default function MembershipPanel() {
             <StatusSummary label="Your membership" value={summaryValue} />
 
             <div className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
-                {!pending && (step === "instructions" || step === "claim") && (
+                {SELF_SERVICE_SUBSCRIPTIONS_ENABLED && !pending && (step === "instructions" || step === "claim") && (
                     <button
                         type="button"
                         onClick={goBack}
@@ -73,12 +76,30 @@ export default function MembershipPanel() {
                         <ClockIcon className="size-12 text-emerald-500" />
                         <h3 className="text-lg font-semibold text-slate-800">Payment under review</h3>
                         <p className="max-w-sm text-sm text-slate-500">
-                            We&apos;ve received your payment of {formatTaka(pending.amount)} for {pending.months} month{pending.months === 1 ? "" : "s"}, submitted on {formatUntilDate(pending.created_at)}. You&apos;ll get a confirmation SMS once it&apos;s activated.
+                            We&apos;ve received your payment for {pending.months} month{pending.months === 1 ? "" : "s"}, submitted on {formatUntilDate(pending.created_at)}. You&apos;ll get a confirmation SMS once it&apos;s activated.
                         </p>
                     </div>
                 )}
 
-                {!pending && step === "overview" && (
+                {!pending && !SELF_SERVICE_SUBSCRIPTIONS_ENABLED && (
+                    <div className="flex flex-col items-center gap-4 py-6 text-center">
+                        <div>
+                            <h3 className="text-lg font-semibold text-slate-800">Purchase or renew your membership</h3>
+                            <p className="mt-2 max-w-sm text-sm leading-6 text-slate-500">
+                                Please contact Asif Azad at{" "}
+                                <a className="font-medium text-emerald-700 underline-offset-4 hover:underline" href="mailto:asifazad@oliveai.life">
+                                    asifazad@oliveai.life
+                                </a>
+                                .
+                            </p>
+                        </div>
+                        <Button asChild className="min-h-11 w-full" size="lg">
+                            <a href="mailto:asifazad@oliveai.life?subject=Olive%20membership">Contact Asif Azad</a>
+                        </Button>
+                    </div>
+                )}
+
+                {SELF_SERVICE_SUBSCRIPTIONS_ENABLED && !pending && step === "overview" && (
                     <div className="space-y-5">
                         <div>
                             <p className="text-3xl font-bold text-slate-900">
@@ -121,7 +142,7 @@ export default function MembershipPanel() {
                     </div>
                 )}
 
-                {!pending && step === "instructions" && (
+                {SELF_SERVICE_SUBSCRIPTIONS_ENABLED && !pending && step === "instructions" && (
                     <PaymentInstructions
                         bkashNumber={status.bkash_number}
                         amount={amount}
@@ -129,11 +150,11 @@ export default function MembershipPanel() {
                     />
                 )}
 
-                {!pending && step === "claim" && (
+                {SELF_SERVICE_SUBSCRIPTIONS_ENABLED && !pending && step === "claim" && (
                     <PaidClaimForm amount={amount} months={months} onSubmitted={() => setStep("done")} />
                 )}
 
-                {!pending && step === "done" && (
+                {SELF_SERVICE_SUBSCRIPTIONS_ENABLED && !pending && step === "done" && (
                     <div className="flex flex-col items-center gap-3 py-6 text-center">
                         <CheckCircle2Icon className="size-12 text-emerald-500" />
                         <h3 className="text-lg font-semibold text-slate-800">We&apos;re reviewing your payment</h3>
