@@ -1,0 +1,124 @@
+[
+  {
+    "template_id": "demo-dengue",
+    "template_name": "Dengue Fever",
+    "sections": [
+      "chief_complaint",
+      "investigation",
+      "medicine",
+      "follow_up"
+    ],
+    "prescription_data": {
+      "chief_complaints": [
+        {
+          "notes": "",
+          "ccn_id": null,
+          "duration": "",
+          "name_text": "Fever"
+        }
+      ],
+      "histories": [],
+      "diagnoses": [],
+      "investigations": [
+        {
+          "reason": "",
+          "priority": "routine",
+          "name_text": "IgG",
+          "investigation_name_id": null
+        },
+        {
+          "reason": "",
+          "priority": "routine",
+          "name_text": "IgM",
+          "investigation_name_id": null
+        },
+        {
+          "reason": "",
+          "priority": "routine",
+          "name_text": "Hemogram/CBC",
+          "investigation_name_id": null
+        }
+      ],
+      "rx_list": [
+        {
+          "dose": null,
+          "site": null,
+          "type": "tablet",
+          "route": "P/O",
+          "dosage": "",
+          "routine": {
+            "gap_hour": 0,
+            "after_lunch": false,
+            "after_dinner": false,
+            "before_lunch": false,
+            "before_dinner": false,
+            "after_breakfast": false,
+            "before_breakfast": false
+          },
+          "duration": "7 Days",
+          "schedule": {
+            "code": null,
+            "noon": null,
+            "night": null,
+            "timing": "after",
+            "morning": null,
+            "gap_hours": null
+          },
+          "trade_name": "Paracetamol",
+          "dosage_form": "Tablet",
+          "meal_timing": null,
+          "medicine_id": null,
+          "generic_name": "Paracetamol 500mg",
+          "instructions": "",
+          "duration_unit": "Days",
+          "duration_value": 7,
+          "frequency_code": null,
+          "duration_preset": null
+        },
+        {
+          "dose": null,
+          "site": null,
+          "type": "tablet",
+          "route": "P/O",
+          "dosage": "",
+          "routine": {
+            "gap_hour": 0,
+            "after_lunch": false,
+            "after_dinner": false,
+            "before_lunch": true,
+            "before_dinner": true,
+            "after_breakfast": false,
+            "before_breakfast": true
+          },
+          "duration": "7 Days",
+          "schedule": {
+            "code": null,
+            "noon": 1.0,
+            "night": 1.0,
+            "timing": "before",
+            "morning": 1.0,
+            "gap_hours": null
+          },
+          "trade_name": "Omidon",
+          "dosage_form": "Tablet",
+          "meal_timing": null,
+          "medicine_id": null,
+          "generic_name": "Domperidone 10mg",
+          "instructions": "",
+          "duration_unit": "Days",
+          "duration_value": 7,
+          "frequency_code": null,
+          "duration_preset": null
+        }
+      ],
+      "advice_list": [],
+      "follow_up_days": 7,
+      "follow_up_notes": null
+    },
+    "use_count": 0,
+    "is_pinned": false,
+    "last_used_at": null,
+    "created_at": "",
+    "updated_at": ""
+  }
+]

@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TryRouteImport } from './routes/try'
 import { Route as NotFoundRouteImport } from './routes/not-found'
 import { Route as ComingSoonRouteImport } from './routes/coming-soon'
 import { Route as AboutRouteImport } from './routes/about'
@@ -46,6 +47,11 @@ import { Route as DoctorMemoryManageIndexRouteImport } from './routes/doctor/mem
 import { Route as DoctorMemoryManageMemoryIdRouteImport } from './routes/doctor/memory/manage.$memoryId'
 import { Route as DoctorConsultationUserIdConsultationIdRouteImport } from './routes/doctor/consultation.$userId.$consultationId'
 
+const TryRoute = TryRouteImport.update({
+  id: '/try',
+  path: '/try',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const NotFoundRoute = NotFoundRouteImport.update({
   id: '/not-found',
   path: '/not-found',
@@ -243,6 +249,7 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/coming-soon': typeof ComingSoonRoute
   '/not-found': typeof NotFoundRoute
+  '/try': typeof TryRoute
   '/enter-otp': typeof authEnterOtpRoute
   '/sign-in': typeof authSignInRoute
   '/c/$code': typeof CCodeRoute
@@ -277,6 +284,7 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/coming-soon': typeof ComingSoonRoute
   '/not-found': typeof NotFoundRoute
+  '/try': typeof TryRoute
   '/enter-otp': typeof authEnterOtpRoute
   '/sign-in': typeof authSignInRoute
   '/c/$code': typeof CCodeRoute
@@ -316,6 +324,7 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/coming-soon': typeof ComingSoonRoute
   '/not-found': typeof NotFoundRoute
+  '/try': typeof TryRoute
   '/(auth)/enter-otp': typeof authEnterOtpRoute
   '/(auth)/sign-in': typeof authSignInRoute
   '/c/$code': typeof CCodeRoute
@@ -355,6 +364,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/coming-soon'
     | '/not-found'
+    | '/try'
     | '/enter-otp'
     | '/sign-in'
     | '/c/$code'
@@ -389,6 +399,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/coming-soon'
     | '/not-found'
+    | '/try'
     | '/enter-otp'
     | '/sign-in'
     | '/c/$code'
@@ -427,6 +438,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/coming-soon'
     | '/not-found'
+    | '/try'
     | '/(auth)/enter-otp'
     | '/(auth)/sign-in'
     | '/c/$code'
@@ -466,6 +478,7 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   ComingSoonRoute: typeof ComingSoonRoute
   NotFoundRoute: typeof NotFoundRoute
+  TryRoute: typeof TryRoute
   CCodeRoute: typeof CCodeRoute
   CaseCodeRoute: typeof CaseCodeRoute
   PCodeRoute: typeof PCodeRoute
@@ -473,6 +486,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/try': {
+      id: '/try'
+      path: '/try'
+      fullPath: '/try'
+      preLoaderRoute: typeof TryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/not-found': {
       id: '/not-found'
       path: '/not-found'
@@ -830,6 +850,7 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   ComingSoonRoute: ComingSoonRoute,
   NotFoundRoute: NotFoundRoute,
+  TryRoute: TryRoute,
   CCodeRoute: CCodeRoute,
   CaseCodeRoute: CaseCodeRoute,
   PCodeRoute: PCodeRoute,

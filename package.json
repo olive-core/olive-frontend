@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "test:try": "node test/try-olive/build.mjs && node test/try-olive/build/run.cjs && node test/try-olive/build/ui.cjs",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "test:recording": "node test/recording-session/build.mjs && node test/recording-session/build/run.cjs",

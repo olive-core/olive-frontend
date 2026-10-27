@@ -1,0 +1,10 @@
+/* Short phones keep the editable fields and recording controls on the first screen.
+   The header already identifies Try Olive; the prominent unsaved notice remains. */
+@media (max-width: 767px) and (max-height: 650px) {
+    .try-recorder-main { padding-top: 8px; padding-bottom: 8px; }
+    .try-recorder-heading { margin-bottom: 8px; }
+    .try-recorder-heading h1, .try-patient-description { display: none; }
+    .try-recorder-heading p { margin-top: 0; }
+    .try-recorder-grid { gap: 8px; }
+    .try-patient-card, .try-recorder-card { padding: 10px; }
+}
