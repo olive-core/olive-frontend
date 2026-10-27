@@ -16,6 +16,7 @@ import {
     type MemorySectionValues,
 } from "@/lib/memory";
 import { create } from "zustand";
+import { createContext, useContext } from "react";
 import { parseSoapSections } from "@/lib/soap-notes";
 
 function routineForGenerated(routine?: { gap_hours?: number; meal_times?: string[] }) {
@@ -193,7 +194,7 @@ export interface PrescriptionStoreType {
     resetStore: () => void;
 }
 
-export const usePrescriptionStore = create<PrescriptionStoreType>(
+export const createPrescriptionStore = () => create<PrescriptionStoreType>(
     (set, get) => {
         return ({
             patientId: null,
@@ -508,6 +509,19 @@ export const usePrescriptionStore = create<PrescriptionStoreType>(
         })
     }
 )
+
+const defaultPrescriptionStore = createPrescriptionStore();
+
+// A demo owns its own in-memory store. Existing doctor screens and imperative
+// getState() callers continue to use the original default store.
+export const PrescriptionStoreContext = createContext<ReturnType<typeof createPrescriptionStore> | null>(null);
+function useScopedPrescriptionStore<T = PrescriptionStoreType>(
+    selector: (state: PrescriptionStoreType) => T = ((state) => state as unknown as T),
+): T {
+    const scoped = useContext(PrescriptionStoreContext);
+    return (scoped ?? defaultPrescriptionStore)(selector);
+}
+export const usePrescriptionStore = Object.assign(useScopedPrescriptionStore, defaultPrescriptionStore);
 
 // The undo a section should offer. It appears only where the memory actually replaced
 // something, and only until the doctor edits past it — every edit builds a new value, so

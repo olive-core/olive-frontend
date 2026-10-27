@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
+import { SampleMemoryContext } from "./sample-memory-context";
 import { PinIcon } from "lucide-react";
 
 import { Command, CommandEmpty, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
@@ -17,6 +18,7 @@ interface MemoryPickerProps {
 }
 
 export default function MemoryPicker({ open, onOpenChange, section, onSelect }: MemoryPickerProps) {
+    const samples = useContext(SampleMemoryContext);
     const [query, setQuery] = useState("");
     const debouncedQuery = useDebouncedValue(query, 200);
     const { data: memories = [], isLoading } = useMemoryLibrary(debouncedQuery, section, open);
@@ -34,8 +36,9 @@ export default function MemoryPicker({ open, onOpenChange, section, onSelect }: 
             <DialogContent className="overflow-hidden p-0 sm:max-w-lg">
                 <DialogHeader className="sr-only">
                     <DialogTitle>{title}</DialogTitle>
-                    <DialogDescription>Search your saved memories by name or by what is inside them.</DialogDescription>
+                    <DialogDescription>{samples ? "Try a sample Memory. It replaces the sections it fills; use Undo to restore them." : "Search your saved memories by name or by what is inside them."}</DialogDescription>
                 </DialogHeader>
+                {samples && <p className="px-4 pt-4 text-sm text-slate-600">Sample Memories · Replace a section, then try Undo.</p>}
 
                 {/* The database ranks and matches, so cmdk must not filter or reorder on top of it. */}
                 <Command shouldFilter={false}>

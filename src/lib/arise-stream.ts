@@ -141,7 +141,7 @@ function buildHeaders(accessToken: string | null): Record<string, string> {
     return headers;
 }
 
-async function readEventStream(
+export async function readEventStream(
     body: ReadableStream<Uint8Array>,
     handlers: AriseStreamHandlers,
     signal: AbortSignal,

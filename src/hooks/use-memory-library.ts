@@ -1,4 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useContext } from "react";
+import { SampleMemoryContext } from "@/components/memory/sample-memory-context";
 
 import api from "@/lib/axios";
 import { useAuthStore } from "@/stores/auth-store";
@@ -29,30 +31,41 @@ const MEMORY_LIBRARY_KEY = "memory-library";
 // however large a doctor's library grows. `isEnabled` keeps the seven section pickers on a
 // prescription screen from each fetching a library nobody has opened yet.
 export function useMemoryLibrary(query: string, section?: MemorySectionKey, isEnabled = true) {
+    const samples = useContext(SampleMemoryContext);
     const { userId } = useAuthStore();
     const sectionKey = section && memorySectionApiKey(section);
 
     return useQuery<MemorySummary[]>({
-        queryKey: [MEMORY_LIBRARY_KEY, userId, query, sectionKey ?? null],
+        queryKey: [MEMORY_LIBRARY_KEY, samples ? "demo" : userId, query, sectionKey ?? null],
         queryFn: async () => {
+            if (samples) return samples.filter((memory) =>
+                (!sectionKey || memory.sections.includes(sectionKey)) &&
+                `${memory.template_name} ${JSON.stringify(memory.prescription_data)}`.toLowerCase().includes(query.toLowerCase())
+            );
             const response = await api.get("/prescription-template/my", {
                 params: { clinician_id: userId, q: query || undefined, section: sectionKey },
             });
             return response.data;
         },
-        enabled: isEnabled && !!userId,
+        enabled: isEnabled && (!!samples || !!userId),
         placeholderData: (previous) => previous,
     });
 }
 
 /** Applies a memory onto the prescription being written, and records the use that ranks it. */
 export function useApplyMemory(section?: MemorySectionKey) {
+    const samples = useContext(SampleMemoryContext);
     const { userId } = useAuthStore();
     const queryClient = useQueryClient();
     const applyMemory = usePrescriptionStore((state) => state.applyMemory);
 
     return useMutation({
         mutationFn: async (memory: MemorySummary) => {
+            if (samples) {
+                const sample = samples.find((item) => item.template_id === memory.template_id);
+                if (sample) applyMemory(sample.template_name, sample.prescription_data, section && [section]);
+                return;
+            }
             const response = await api.get<MemoryDetail>(`/prescription-template/${memory.template_id}`);
             applyMemory(memory.template_name, response.data.prescription_data, section && [section]);
             // Ranking is a convenience — a use that fails to record must not fail the apply.

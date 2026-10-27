@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { SparklesIcon, LockIcon } from "lucide-react";
 import DoctorInfo from "./doctor-info";
 import PrescriptionActions from "./prescription-actions";
@@ -248,7 +248,7 @@ export default function PrescriptionSkeleton({ onCancel, sessionId }: SkeletonPr
   return <FullPrescriptionSkeleton onCancel={onCancel} sessionId={sessionId} />;
 }
 
-function FullPrescriptionSkeleton({ onCancel, sessionId }: SkeletonProps) {
+export function FullPrescriptionSkeleton({ onCancel, sessionId, header, patientStrip }: SkeletonProps & { header?: ReactNode; patientStrip?: ReactNode }) {
 
   const store = usePrescriptionStore();
   const {
@@ -297,8 +297,8 @@ function FullPrescriptionSkeleton({ onCancel, sessionId }: SkeletonProps) {
     <div className="container rounded-xl border flex flex-col mt-4 mb-12 overflow-hidden">
       <div className="m-4">
         {/* ── Real Doctor & Patient info ─────────────────────────── */}
-        <DoctorInfo sessionId={sessionId} />
-        <PatientInfo sessionId={sessionId} />
+        {header ?? <DoctorInfo sessionId={sessionId} />}
+        {patientStrip ?? <PatientInfo sessionId={sessionId} />}
 
         {/* ── Vitals (real once streamed, skeleton until then) ───── */}
         {hasAnyVital(vitals)

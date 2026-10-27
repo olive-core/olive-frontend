@@ -1,21 +1,15 @@
+import { usePrescriptionDocuments } from "./prescription-documents";
 import { usePrescriptionStore } from "@/stores/prescription-store";
 import DoctorInfo from "./doctor-info";
 import PrescriptionActions from "./prescription-actions";
-import ListInfo from "./list-info";
 import PatientInfo from "./patient-info";
-import { MedicineContainer } from "./medicine-container";
 import api from "@/lib/axios";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate, useParams } from "@tanstack/react-router";
 import { useState } from "react";
-import AdviceList from "./advice-list";
 import { PrescriptionView } from "./view";
 import { ClinicalNoteView } from "./note-view";
-import PrescriptionPaper from "./paper/prescription-paper";
-import ClinicalNotesPanel from "./paper/clinical-notes-panel";
 import DocumentSwitcher, { type PrescriptionDocument } from "./document-switcher";
-import VitalsBar from "./paper/vitals-bar";
-import FollowUpBlock from "./paper/follow-up-block";
 import { Button } from "@/components/ui/button";
 import { useTargetedPrint } from "@/hooks/use-targeted-print";
 import { useClinicianProfile } from "@/hooks/use-clinician-profile";
@@ -42,45 +36,7 @@ export default function Prescription({ onGenerate, onCancel, hasBeenGenerated }:
     const { data: clinicianProfile } = useClinicianProfile();
     const prescriptionEnabled = clinicianProfile?.prescription_enabled !== false;
 
-    const {
-        chiefComplaint,
-        addEmptyChiefComplaint,
-        updateChiefComplaint,
-        removeChiefComplaint,
-
-        history,
-        addEmptyHistory,
-        updateHistory,
-        removeHistory,
-
-        diagnosis,
-        addEmptyDiagnosis,
-        updateDiagnosis,
-        removeDiagnosis,
-
-        investigation,
-        addEmptyInvestigation,
-        updateInvestigation,
-        removeInvestigation,
-
-        advice,
-        setAdvice,
-
-        summary,
-        setSummary,
-        safetyNet,
-
-        noteImages,
-        addNoteImages,
-        removeNoteImage,
-
-        vitals,
-        vitalSources,
-        setVitals,
-
-        followUp,
-        setFollowUp,
-    } = store;
+    const { summary, safetyNet, noteImages, addNoteImages, removeNoteImage } = store;
 
     // Photos upload as soon as they are picked; the note carries only their blob names,
     // which ride along with the rest of the prescription on save.
@@ -136,85 +92,14 @@ export default function Prescription({ onGenerate, onCancel, hasBeenGenerated }:
         </Button>
     );
 
-    const prescriptionPaper = (
-        <PrescriptionPaper
-            header={<DoctorInfo sessionId={consultationId} />}
-            patientStrip={<PatientInfo sessionId={consultationId} />}
-            vitalsBar={
-                <VitalsBar
-                    vitals={vitals}
-                    sources={vitalSources}
-                    currentSessionId={consultationId}
-                    onChange={setVitals}
-                />
-            }
-            leftColumn={
-                <>
-                    <ListInfo
-                        title="Chief Complaints"
-                        info={chiefComplaint}
-                        fieldName="chief-complaint"
-                        addEmptyItem={addEmptyChiefComplaint}
-                        updateItem={updateChiefComplaint}
-                        removeItem={removeChiefComplaint}
-                    />
-
-                    <ListInfo
-                        title="History"
-                        info={history}
-                        fieldName="history"
-                        addEmptyItem={addEmptyHistory}
-                        updateItem={updateHistory}
-                        removeItem={removeHistory}
-                    />
-
-                    <ListInfo
-                        title="Diagnosis"
-                        info={diagnosis}
-                        fieldName="diagnosis"
-                        addEmptyItem={addEmptyDiagnosis}
-                        updateItem={updateDiagnosis}
-                        removeItem={removeDiagnosis}
-                    />
-
-                    <ListInfo
-                        title="Investigation"
-                        info={investigation}
-                        fieldName="investigation"
-                        addEmptyItem={addEmptyInvestigation}
-                        updateItem={updateInvestigation}
-                        removeItem={removeInvestigation}
-                    />
-                </>
-            }
-            rightColumn={
-                <>
-                    <MedicineContainer />
-                    <div className="mt-auto flex flex-col gap-3">
-                        <AdviceList value={advice} onChange={setAdvice} />
-                        <FollowUpBlock value={followUp} onChange={setFollowUp} />
-                    </div>
-                </>
-            }
-            footer={saveAndPrintButton}
-        />
-    );
-
-    const clinicalNotes = (
-        <ClinicalNotesPanel
-            notes={summary}
-            safetyNet={safetyNet}
-            onChange={setSummary}
-            patientSlot={<PatientInfo sessionId={consultationId} />}
-            onPrint={() => requestPrint("note")}
-            images={noteImages}
-            onAddImages={noteImageUpload.addImages}
-            onRemoveImage={noteImageUpload.removeImage}
-            uploadingImages={noteImageUpload.uploadingCount}
-            // A note-only consultation saves with its own button below the notes instead.
-            footer={prescriptionEnabled ? saveAndPrintButton : undefined}
-        />
-    );
+    const { prescriptionPaper, clinicalNotes } = usePrescriptionDocuments({
+        header: <DoctorInfo sessionId={consultationId} />,
+        patientStrip: <PatientInfo sessionId={consultationId} />,
+        sessionId: consultationId, saveAndPrintButton, prescriptionEnabled,
+        onPrintNotes: () => requestPrint("note"),
+        onAddImages: noteImageUpload.addImages, onRemoveImage: noteImageUpload.removeImage,
+        uploadingImages: noteImageUpload.uploadingCount,
+    });
 
     const sessionActions = (
         <PrescriptionActions
