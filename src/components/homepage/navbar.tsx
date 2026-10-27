@@ -19,7 +19,7 @@ export default function HomeNavbar() {
             <NavbarContainer>
                 <>
                     {/* Desktop nav links */}
-                    <div className="md:flex items-center hidden gap-8">
+                    <div className="xl:flex items-center hidden gap-6">
                         {NAV_LINKS.map((link) => (
                             <a
                                 key={link.href}
@@ -33,14 +33,16 @@ export default function HomeNavbar() {
 
                     {/* Right side */}
                     <div className="flex items-center gap-2">
-                        {/* Get Started button — always visible */}
-                        <Button asChild className="hidden sm:inline-flex">
-                            <Link to="/sign-in">Get Started</Link>
+                        <Button asChild className="h-11 text-sm">
+                            <Link to="/sign-in">Register or sign in</Link>
+                        </Button>
+                        <Button asChild variant="outline" className="hidden h-11 border-emerald-600 bg-white text-emerald-800 sm:inline-flex">
+                            <Link to="/try">Try without an account</Link>
                         </Button>
 
                         {/* Mobile hamburger */}
                         <button
-                            className="md:hidden flex items-center justify-center p-2 rounded-lg text-slate-600 hover:text-emerald-600 hover:bg-emerald-50 transition-colors"
+                            className="xl:hidden flex h-11 w-11 items-center justify-center rounded-lg text-slate-600 hover:text-emerald-600 hover:bg-emerald-50 transition-colors"
                             onClick={() => setMobileOpen((v) => !v)}
                             aria-label={mobileOpen ? "Close menu" : "Open menu"}
                         >
@@ -52,7 +54,7 @@ export default function HomeNavbar() {
 
             {/* Mobile dropdown menu */}
             {mobileOpen && (
-                <div className="md:hidden fixed top-[57px] left-0 w-full bg-white/95 backdrop-blur-lg border-b border-primary/10 z-40 shadow-md">
+                <div style={{ top: "calc(78px + env(safe-area-inset-top))" }} className="xl:hidden fixed left-0 w-full bg-white/95 backdrop-blur-lg border-b border-primary/10 z-40 shadow-md">
                     <div className="flex flex-col px-4 py-4 gap-1">
                         {NAV_LINKS.map((link) => (
                             <a
@@ -64,10 +66,11 @@ export default function HomeNavbar() {
                                 {link.label}
                             </a>
                         ))}
-                        <div className="pt-2 border-t border-slate-100 mt-1">
-                            <Button asChild className="w-full">
-                                <Link to="/sign-in" onClick={() => setMobileOpen(false)}>
-                                    Get Started
+                        <div className="grid gap-2 pt-2 border-t border-slate-100 mt-1">
+                            <Button asChild className="h-11 w-full"><Link to="/sign-in" onClick={() => setMobileOpen(false)}>Register or sign in</Link></Button>
+                            <Button asChild variant="outline" className="h-11 w-full border-emerald-600 text-emerald-800">
+                                <Link to="/try" onClick={() => setMobileOpen(false)}>
+                                    Try without an account
                                 </Link>
                             </Button>
                         </div>
