@@ -7,6 +7,7 @@ import path from "node:path";
 // headless browser can measure what actually overflows a phone screen.
 export default defineConfig({
     root: path.resolve(import.meta.dirname, "probe"),
+    publicDir: path.resolve(import.meta.dirname, "public"),
     plugins: [react(), tailwindcss()],
     resolve: {
         alias: {
