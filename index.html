@@ -2,7 +2,15 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" href="data:," />
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon-180x180.png" />
+    <!-- The manifest sets display "browser", not the logo package's "standalone": iOS
+         home-screen apps have been unreliable at opening the print dialog, and doctors
+         print every prescription. -->
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="theme-color" content="#268229" />
+    <meta name="description" content="Olive listens to the consultation and drafts the prescription and clinical notes. The doctor reviews, edits and prints." />
     <!-- interactive-widget: the on-screen keyboard shrinks the page instead of sliding it,
          so a pinned action bar in the prescription editor stays above the keyboard. -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />

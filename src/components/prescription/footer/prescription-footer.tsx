@@ -6,7 +6,6 @@ import {
     type FooterChamber,
     type FooterModel,
     type HeaderConfig,
-    type HeaderPalette,
 } from "@/lib/header-config";
 import { cn } from "@/lib/utils";
 import HeaderAccentRule from "../header/parts/header-accent-rule";
@@ -34,23 +33,22 @@ function FooterChamberEntry({ chamber }: { chamber: FooterChamber }) {
     );
 }
 
-// The other chambers get 80% of the width, the brand mark the remaining 20%.
-function FullFooter({ footer, palette }: { footer: FooterModel; palette: HeaderPalette }) {
+// The brand mark keeps its full 35mm; the other chambers wrap in whatever width is left.
+// A fixed share would starve the mark on A5, where a fifth of the page is only ~27mm.
+function FullFooter({ footer }: { footer: FooterModel }) {
     return (
         <div className="flex items-end gap-4">
-            <div className="flex min-w-0 basis-4/5 flex-wrap gap-x-6 gap-y-1">
+            <div className="flex min-w-0 flex-1 flex-wrap gap-x-6 gap-y-1">
                 {footer.chambers.map((chamber) => (
                     <FooterChamberEntry key={chamber.id} chamber={chamber} />
                 ))}
             </div>
-            <div className="flex basis-1/5 justify-end">
-                <OliveBrandMark isMono={palette.isMono} className="pb-px" />
-            </div>
+            <OliveBrandMark className="mb-px" />
         </div>
     );
 }
 
-function CollapsedFooter({ footer, palette }: { footer: FooterModel; palette: HeaderPalette }) {
+function CollapsedFooter({ footer }: { footer: FooterModel }) {
     const [open, setOpen] = useState(false);
     const count = footer.chambers.length;
 
@@ -79,7 +77,7 @@ function CollapsedFooter({ footer, palette }: { footer: FooterModel; palette: He
                 ) : (
                     <div />
                 )}
-                <OliveBrandMark isMono={palette.isMono} className="shrink-0" />
+                <OliveBrandMark />
             </div>
             {count > 0 && (
                 <div
@@ -114,14 +112,14 @@ export default function PrescriptionFooter({ footer, config, className, collapsi
             {collapsible ? (
                 <>
                     <div className="hidden sm:block print:block">
-                        <FullFooter footer={footer} palette={palette} />
+                        <FullFooter footer={footer} />
                     </div>
                     <div className="sm:hidden print:hidden">
-                        <CollapsedFooter footer={footer} palette={palette} />
+                        <CollapsedFooter footer={footer} />
                     </div>
                 </>
             ) : (
-                <FullFooter footer={footer} palette={palette} />
+                <FullFooter footer={footer} />
             )}
         </div>
     );

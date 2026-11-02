@@ -93,7 +93,7 @@ function ClinicalNoteFooter({ letterhead }: { letterhead: ResolvedLetterhead | n
             {palette && <HeaderAccentRule accent={palette.accent} variant="hairline" className="mb-1.5" />}
             <div className="flex items-end justify-between">
                 <p className="text-[10px] text-slate-900">Confidential &mdash; clinician record</p>
-                <OliveBrandMark isMono={palette?.isMono ?? true} />
+                <OliveBrandMark />
             </div>
         </div>
     );
