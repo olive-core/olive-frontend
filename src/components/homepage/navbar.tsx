@@ -6,45 +6,44 @@ import { MenuIcon, XIcon } from "lucide-react";
 
 const NAV_LINKS = [
     { href: "/#how-it-works", label: "How it works" },
-    { href: "/#features", label: "Features" },
-    { href: "/#values", label: "Values we bring" },
+    { href: "/#try-olive", label: "Try it" },
     { href: "/about", label: "About" },
 ];
 
+// Registering lives here and in the closing section; trying Olive lives in the hero and its
+// own section. Keeping them apart stops the two buttons competing on one screen.
 export default function HomeNavbar() {
     const [mobileOpen, setMobileOpen] = useState(false);
 
     return (
         <>
-            <NavbarContainer>
+            <NavbarContainer className="border-b border-slate-200/70 bg-white/85">
                 <>
-                    {/* Desktop nav links */}
-                    <div className="xl:flex items-center hidden gap-6">
+                    <div className="hidden items-center gap-8 md:flex">
                         {NAV_LINKS.map((link) => (
                             <a
                                 key={link.href}
                                 href={link.href}
-                                className="text-slate-600 hover:text-emerald-600 transition duration-300"
+                                className="text-sm font-medium text-slate-600 transition-colors hover:text-brand"
                             >
                                 {link.label}
                             </a>
                         ))}
                     </div>
 
-                    {/* Right side */}
-                    <div className="flex items-center gap-2">
-                        <Button asChild className="h-11 text-sm">
-                            <Link to="/sign-in">Register or sign in</Link>
-                        </Button>
-                        <Button asChild variant="outline" className="hidden h-11 border-emerald-600 bg-white text-emerald-800 sm:inline-flex">
-                            <Link to="/try">Try without an account</Link>
+                    <div className="flex items-center gap-1">
+                        <Button asChild className="h-11 bg-brand px-5 text-sm font-semibold text-white hover:bg-brand-deep">
+                            <Link to="/sign-in">
+                                <span className="min-[380px]:hidden">Sign in</span>
+                                <span className="hidden min-[380px]:inline">Register or sign in</span>
+                            </Link>
                         </Button>
 
-                        {/* Mobile hamburger */}
                         <button
-                            className="xl:hidden flex h-11 w-11 items-center justify-center rounded-lg text-slate-600 hover:text-emerald-600 hover:bg-emerald-50 transition-colors"
+                            className="flex h-11 w-11 items-center justify-center rounded-full text-slate-600 transition-colors hover:bg-slate-100 md:hidden"
                             onClick={() => setMobileOpen((v) => !v)}
                             aria-label={mobileOpen ? "Close menu" : "Open menu"}
+                            aria-expanded={mobileOpen}
                         >
                             {mobileOpen ? <XIcon className="size-5" /> : <MenuIcon className="size-5" />}
                         </button>
@@ -52,28 +51,19 @@ export default function HomeNavbar() {
                 </>
             </NavbarContainer>
 
-            {/* Mobile dropdown menu */}
             {mobileOpen && (
-                <div style={{ top: "calc(78px + env(safe-area-inset-top))" }} className="xl:hidden fixed left-0 w-full bg-white/95 backdrop-blur-lg border-b border-primary/10 z-40 shadow-md">
-                    <div className="flex flex-col px-4 py-4 gap-1">
+                <div style={{ top: "calc(78px + env(safe-area-inset-top))" }} className="fixed left-0 z-40 w-full border-b border-slate-200 bg-white/95 shadow-md backdrop-blur-lg md:hidden">
+                    <div className="flex flex-col gap-1 px-4 py-3">
                         {NAV_LINKS.map((link) => (
                             <a
                                 key={link.href}
                                 href={link.href}
-                                className="px-4 py-3 rounded-lg text-slate-700 font-medium hover:bg-emerald-50 hover:text-emerald-600 transition-colors"
+                                className="rounded-lg px-4 py-3 font-medium text-slate-700 transition-colors hover:bg-brand-mist hover:text-brand"
                                 onClick={() => setMobileOpen(false)}
                             >
                                 {link.label}
                             </a>
                         ))}
-                        <div className="grid gap-2 pt-2 border-t border-slate-100 mt-1">
-                            <Button asChild className="h-11 w-full"><Link to="/sign-in" onClick={() => setMobileOpen(false)}>Register or sign in</Link></Button>
-                            <Button asChild variant="outline" className="h-11 w-full border-emerald-600 text-emerald-800">
-                                <Link to="/try" onClick={() => setMobileOpen(false)}>
-                                    Try without an account
-                                </Link>
-                            </Button>
-                        </div>
                     </div>
                 </div>
             )}

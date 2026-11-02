@@ -1,10 +1,11 @@
 import { createFileRoute } from '@tanstack/react-router'
-import FeaturesSection from "@/components/homepage/features";
-import AppFooter from "@/components/shared/app-footer";
+import GetStartedSection from "@/components/homepage/get-started";
 import HeroSection from "@/components/homepage/hero";
+import InControlSection from "@/components/homepage/in-control";
+import LandingFooter from "@/components/homepage/landing-footer";
 import HomeNavbar from "@/components/homepage/navbar";
 import StepsSection from "@/components/homepage/steps";
-import ValuesSection from "@/components/homepage/values";
+import TryOliveSection from "@/components/homepage/try-olive";
 import { useAuthStore } from "@/stores/auth-store";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
@@ -30,9 +31,10 @@ function HomePage() {
             <HomeNavbar />
             <HeroSection />
             <StepsSection />
-            <FeaturesSection />
-            <ValuesSection />
-            <AppFooter />
+            <TryOliveSection />
+            <InControlSection />
+            <GetStartedSection />
+            <LandingFooter />
         </>
     )
 }
