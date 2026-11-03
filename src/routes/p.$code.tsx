@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 
 import api from "@/lib/axios";
+import OliveLogo from "@/components/shared/olive-logo";
 import { useAuthStore } from "@/stores/auth-store";
 
 type PortalAccessResponse = {
@@ -64,6 +65,7 @@ function PrescriptionLinkRedeem() {
     if (errorMessage) {
         return (
             <div className="flex min-h-screen flex-col items-center justify-center gap-4 px-6 text-center">
+                <OliveLogo className="mb-4" />
                 <p className="text-rose-600">{errorMessage}</p>
                 <button
                     type="button"
@@ -77,7 +79,9 @@ function PrescriptionLinkRedeem() {
     }
 
     return (
-        <div className="flex min-h-screen items-center justify-center">
+        // Patients arrive here from an SMS link; the logo tells them who sent it.
+        <div className="flex min-h-screen flex-col items-center justify-center gap-8">
+            <OliveLogo />
             <p className="text-gray-600">Opening your prescription…</p>
         </div>
     );

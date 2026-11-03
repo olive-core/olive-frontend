@@ -13,6 +13,7 @@ import DemoEditor, { DemoDoctorInfo, DemoPatientInfo } from "./demo-editor";
 import { FullPrescriptionSkeleton } from "@/components/prescription/prescription-skeleton";
 import DeveloperPass from "./developer-pass";
 import SampleConversation from "./sample-conversation";
+import OliveLogo from "@/components/shared/olive-logo";
 
 export default function TryOlivePage() {
     const [store] = useState(createPrescriptionStore);
@@ -93,7 +94,7 @@ export default function TryOlivePage() {
     if (stage !== "record") return <PrescriptionStoreContext value={store}>
         <div className="doctor-portal min-h-svh bg-white print:hidden">
             <header className="flex flex-wrap items-center justify-between gap-2 border-b px-4 py-3">
-                <Link to="/" className="text-emerald-700 font-semibold">Olive</Link>
+                <Link to="/" aria-label="Olive home"><OliveLogo /></Link>
                 <span className="text-xs text-slate-500">Fictional practice · Not saved</span>
                 <Button variant="ghost" size="sm" onClick={restart}>Start another practice session</Button>
             </header>
@@ -105,11 +106,11 @@ export default function TryOlivePage() {
     </PrescriptionStoreContext>;
 
     return <PrescriptionStoreContext value={store}>
-        <div className="try-recorder-page min-h-svh bg-gradient-to-b from-emerald-50/60 via-white to-white print:hidden">
-            <header className="border-b border-emerald-100 bg-white/90">
+        <div className="try-recorder-page min-h-svh bg-gradient-to-b from-brand-50/60 via-white to-white print:hidden">
+            <header className="border-b border-brand-100 bg-white/90">
                 <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-2">
-                    <Link to="/" className="flex items-center gap-2 text-sm text-slate-600"><ArrowLeftIcon className="size-4" /> Olive</Link>
-                    <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800">Try Olive · No account needed</span>
+                    <Link to="/" className="flex items-center gap-2 text-slate-600" aria-label="Back to Olive home"><ArrowLeftIcon className="size-4" /><OliveLogo /></Link>
+                    <span className="rounded-full bg-brand-100 px-3 py-1 text-xs font-semibold text-brand-800">Try Olive · No account needed</span>
                 </div>
             </header>
             <main className="try-recorder-main mx-auto w-full max-w-6xl px-3 py-3 sm:px-4">
@@ -131,7 +132,7 @@ export default function TryOlivePage() {
                     </Item>
                     <div className="try-recorder-card flex min-w-0 flex-col justify-center rounded-2xl border bg-white p-3 text-center shadow-sm md:col-start-1 md:row-start-2 md:overflow-y-auto sm:p-4">
                         <>
-                            <div className="mx-auto mb-2 hidden size-10 md:flex items-center justify-center rounded-full bg-emerald-50 text-emerald-700">{recorder.status === "ready" ? <CheckIcon /> : <MicIcon className={recorder.status === "recording" ? "animate-pulse" : ""} />}</div>
+                            <div className="mx-auto mb-2 hidden size-10 md:flex items-center justify-center rounded-full bg-brand-50 text-brand-700">{recorder.status === "ready" ? <CheckIcon /> : <MicIcon className={recorder.status === "recording" ? "animate-pulse" : ""} />}</div>
                             <p className="text-3xl tabular-nums">{Math.floor(recorder.seconds / 60)}:{String(recorder.seconds % 60).padStart(2, "0")} <span className="text-sm text-slate-400">/ {DEMO_MAX_SECONDS / 60}:00</span></p>
                             <p role="status" className="my-2 text-xs leading-relaxed text-slate-600">{recorder.status === "recording" ? "Listening to your fictional consultation" : recorder.status === "paused" ? "Recording paused" : recorder.status === "ready" ? "Recording ready. Let Arise take it from here." : recorder.status === "preparing" ? "Preparing your recording…" : recorder.status === "starting" ? "Getting ready — allow microphone access when asked" : "Use a fictional case for this practice session."}</p>
                             {recordingButtons}
