@@ -50,7 +50,9 @@ export interface EditableIdentity {
     bmdcNo:        string;
 }
 
-export const DEFAULT_ACCENT_COLOR = "#10b981";
+// Olive's Forest Green (brand-600 in index.css). A hex, not a CSS variable: it is saved
+// with the doctor's pad and printed, so it must stay a plain colour value.
+export const DEFAULT_ACCENT_COLOR = "#268229";
 export const MIN_LOGO_SIZE = 32;
 export const MAX_LOGO_SIZE = 128;
 export const MIN_SYMBOL_SIZE = 20;
@@ -62,7 +64,7 @@ export const HEADER_PRESETS: { value: HeaderPreset; label: string; description: 
 ];
 
 // Familiar prescription letterhead colors offered as one-tap swatches.
-export const ACCENT_SWATCHES = ["#10b981", "#0f766e", "#1d4ed8", "#0f172a", "#7c2d12", "#9d174d"];
+export const ACCENT_SWATCHES = [DEFAULT_ACCENT_COLOR, "#0f766e", "#1d4ed8", "#0f172a", "#7c2d12", "#9d174d"];
 
 export const CONTACT_LINE_KIND_META: Record<ContactLineKind, { label: string; placeholder: string }> = {
     address: { label: "Address",        placeholder: "House 12, Road 5, Dhanmondi, Dhaka" },
