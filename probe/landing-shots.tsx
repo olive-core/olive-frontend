@@ -7,6 +7,7 @@ import DashboardNavbar from "@/components/dashboard/navbar";
 import PatientChip from "@/components/dashboard/consultation/patient-chip";
 import RecorderCard from "@/components/dashboard/consultation/recorder-card";
 import ConsultationCardMemo from "@/components/dashboard/consultation/consultation-card";
+import ConsultationModeBanner from "@/components/consultation-start/consultation-mode-banner";
 import DocumentSwitcher, { type PrescriptionDocument } from "@/components/prescription/document-switcher";
 import PrescriptionActions from "@/components/prescription/prescription-actions";
 import { usePrescriptionDocuments } from "@/components/prescription/prescription-documents";
@@ -34,20 +35,22 @@ const DATE_OF_BIRTH = "1994-06-12";
 
 useAuthStore.setState({
     userId: "doctor-demo", isLoggedIn: true, activeView: "doctor",
-    clinician: { name: "Farhan Ahmed" },
+    clinician: { name: "Ashraful Alam" },
 } as never);
 
+// No BMDC number: an invented one could belong to a real doctor. The accent is left to
+// the default, so the letterhead shows what a new doctor gets.
 const LETTERHEAD = resolveLetterhead({
-    clinician_name: "Dr. Farhan Ahmed",
-    qualification: "MBBS (Dhaka Medical College)\nFCPS (Medicine)",
-    bmdc_no: "DEMO-0000",
+    clinician_name: "Dr. Ashraful Alam",
+    qualification: "MBBS, FCPS (Medicine)",
     clinician_header_config: {
-        preset: "classic-split", accent_color: "#0f766e", show_medical_symbol: true,
+        preset: "classic-split", show_medical_symbol: true,
         designation: "Consultant, Internal Medicine",
-        chamber_name: "Olive Demo Medical Centre",
+        chamber_name: "Evening Chamber, Dhanmondi",
         contact_lines: [
-            { id: "demo-address", kind: "address", value: "Suite 201, Example Road, Dhaka" },
+            { id: "demo-address", kind: "address", value: "Dhanmondi, Dhaka" },
             { id: "demo-hours", kind: "hours", value: "Saturday–Thursday · 5:00–9:00 PM" },
+            { id: "demo-serial", kind: "serial", value: "Serial: 01XXX-XXXXXX" },
         ],
     },
 });
@@ -63,6 +66,7 @@ const DRAFT = {
         { complaint_name: "Nausea", clinical_note: "Vomited once; tolerating oral fluids." },
     ],
     history: [
+        { history_name: "Iron deficiency anaemia", clinical_note: "Diagnosed Aug 2026; on iron and folic acid." },
         { history_name: "Family history of diabetes", clinical_note: "Father." },
         { history_name: "No known drug allergy", clinical_note: "" },
     ],
@@ -95,20 +99,29 @@ const DRAFT = {
     safety_net: ["Return immediately for bleeding, severe abdominal pain, repeated vomiting or breathing difficulty."],
 } as unknown as PrescriptionResponseType;
 
+const routine = (meals: string[]) => Object.fromEntries(
+    ["before_breakfast", "after_breakfast", "before_lunch", "after_lunch", "before_dinner", "after_dinner"]
+        .map((meal) => [meal, meals.includes(meal)]).concat([["gap_hour", 0]]),
+);
+
 const PREVIOUS_VISIT: PrescriptionType = {
     prescription_id: "rx-previous", session_id: "session-previous", clinician_id: "doctor-demo",
-    clinician_name: "Dr. Farhan Ahmed", patient_id: PATIENT_ID, patient_name: PATIENT.name,
+    clinician_name: "Dr. Ashraful Alam", patient_id: PATIENT_ID, patient_name: PATIENT.name,
     created_at: "2026-08-14T19:05:00+06:00", updated_at: "2026-08-14T19:05:00+06:00",
     prescription_data: {
-        chief_complaints: [{ name_text: "Sneezing and blocked nose", notes: "", ccn_id: null, duration: "2 weeks" }],
-        diagnoses: [{ name_text: "Allergic rhinitis", dn_id: null }],
-        rx_list: [{
-            trade_name: "Fexo", generic_name: "Fexofenadine 120 mg", medicine_id: null, dosage: "1 tablet", duration: "14 days",
-            routine: { before_breakfast: false, after_breakfast: false, before_lunch: false, after_lunch: false, before_dinner: false, after_dinner: true, gap_hour: 0 },
-        }],
+        chief_complaints: [
+            { name_text: "Tiredness and dizziness", notes: "", ccn_id: null, duration: "1 month" },
+            { name_text: "Sneezing and blocked nose", notes: "", ccn_id: null, duration: "2 weeks" },
+        ],
+        diagnoses: [{ name_text: "Iron deficiency anaemia", dn_id: null }, { name_text: "Allergic rhinitis", dn_id: null }],
+        rx_list: [
+            { trade_name: "Ferrous fumarate + Folic acid", generic_name: "Iron with folic acid", medicine_id: null, dosage: "1 capsule", duration: "3 months", routine: routine(["after_breakfast"]) },
+            { trade_name: "Fexo", generic_name: "Fexofenadine 120 mg", medicine_id: null, dosage: "1 tablet", duration: "14 days", routine: routine(["after_dinner"]) },
+            { trade_name: "Mometasone nasal spray", generic_name: "Mometasone furoate", medicine_id: null, dosage: "2 puffs", duration: "1 month", routine: routine(["after_breakfast"]) },
+        ],
         histories: [], advice_list: [], investigations: [], on_examinations: [],
-        follow_up_days: null, follow_up_notes: null,
-        summary: "Seasonal allergic rhinitis. Avoid dust; review if symptoms persist.",
+        follow_up_days: 90, follow_up_notes: null,
+        summary: "Iron deficiency anaemia (Hb 9.8 g/dL) and seasonal allergic rhinitis. Iron and folic acid for 3 months; recheck CBC at review.",
     },
 } as unknown as PrescriptionType;
 
@@ -141,7 +154,10 @@ function RecordScreen() {
         <DoctorScreen>
             <RecordingSessionContext value={RECORDING}>
                 <div className="container flex flex-col py-6 md:h-[calc(100svh-136px)]">
-                    <div className="mb-5"><PatientChip userId={PATIENT_ID} /></div>
+                    <div className="mb-5 flex flex-col gap-3">
+                        <PatientChip userId={PATIENT_ID} />
+                        <ConsultationModeBanner isFollowUp={false} />
+                    </div>
                     <div className="grid w-full grid-cols-1 gap-6 md:min-h-0 md:flex-1 md:grid-cols-2 md:grid-rows-[auto_minmax(0,1fr)] md:gap-8">
                         <div className="flex-none md:col-start-1 md:row-start-1"><RecorderCard /></div>
                         <div className="md:col-start-2 md:row-span-2 md:row-start-1 md:min-h-0">
@@ -162,6 +178,7 @@ function ReviewScreen() {
     const { prescriptionPaper, clinicalNotes } = usePrescriptionDocuments({
         header: <ResolvedPrescriptionHeader letterhead={LETTERHEAD} responsive />,
         patientStrip,
+        sessionId: DRAFT.session_id,
         saveAndPrintButton: <Button className="h-12 w-full px-8 font-bold shadow-md sm:h-9 sm:w-auto">Save &amp; Print</Button>,
         onPrintNotes: () => {},
     });
@@ -187,7 +204,13 @@ function PrintScreen({ store }: { store: ReturnType<typeof createPrescriptionSto
 function Page() {
     const [store] = useState(createPrescriptionStore);
     const [ready, setReady] = useState(false);
-    useEffect(() => { void store.getState().getInitialPrescription(DRAFT).then(() => setReady(true)); }, [store]);
+    useEffect(() => {
+        void store.getState().getInitialPrescription(DRAFT).then(() => {
+            // Vitals are typed in by the doctor during the visit, not drafted.
+            store.getState().setVitals({ bp_systolic: 110, bp_diastolic: 70, pulse: 98, temperature: 101.2, spo2: 98, weight: 56 });
+            setReady(true);
+        });
+    }, [store]);
     if (!ready) return null;
 
     const screen = window.location.hash.slice(1);

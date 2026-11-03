@@ -25,9 +25,11 @@ const OUT = path.join(ROOT, "public", "landing");
 const PORT = 5198;
 
 const SHOTS = [
-    { name: "record-desktop", screen: "record", width: 1280, height: 800, scale: 1.5 },
+    // Desktop shots use the narrowest desktop layout, so the text stays readable once
+    // the image is scaled into the landing page's column.
+    { name: "record-desktop", screen: "record", width: 1024, height: 800, scale: 2 },
     { name: "record-phone",   screen: "record", width: 390,  height: 844, scale: 2 },
-    { name: "review-desktop", screen: "review", width: 1280, height: 800, scale: 1.5 },
+    { name: "review-desktop", screen: "review", width: 1024, height: 800, scale: 2 },
     { name: "review-phone",   screen: "review", width: 390,  height: 844, scale: 2 },
     // The printed page is the same on every screen, so one capture of the sheet serves both.
     { name: "print",          screen: "print",  width: 900,  height: 1200, scale: 2, selector: "#print-shot" },
