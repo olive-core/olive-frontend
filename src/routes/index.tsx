@@ -5,6 +5,7 @@ import InControlSection from "@/components/homepage/in-control";
 import LandingFooter from "@/components/homepage/landing-footer";
 import HomeNavbar from "@/components/homepage/navbar";
 import StepsSection from "@/components/homepage/steps";
+import StickyTryBar from "@/components/homepage/sticky-try-bar";
 import TryOliveSection from "@/components/homepage/try-olive";
 import { useAuthStore } from "@/stores/auth-store";
 import { useNavigate } from "@tanstack/react-router";
@@ -35,6 +36,7 @@ function HomePage() {
             <InControlSection />
             <GetStartedSection />
             <LandingFooter />
+            <StickyTryBar />
         </>
     )
 }
