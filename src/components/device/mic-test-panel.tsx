@@ -10,7 +10,7 @@ import type { AudioInput } from "@/lib/mic-meter";
 import MicLevelBar from "./mic-level-bar";
 
 const VERDICT_STYLE: Record<MicVerdict, { icon: typeof MicIcon; tone: string }> = {
-    clear: { icon: CheckCircle2Icon,  tone: "border-emerald-200 bg-emerald-50 text-emerald-900" },
+    clear: { icon: CheckCircle2Icon,  tone: "border-brand-200 bg-brand-50 text-brand-900" },
     faint: { icon: TriangleAlertIcon, tone: "border-amber-200 bg-amber-50 text-amber-900" },
     muted: { icon: MicOffIcon,        tone: "border-rose-200 bg-rose-50 text-rose-900" },
 };
@@ -127,7 +127,7 @@ export default function MicTestPanel() {
                                 Record 5 seconds
                             </Button>
                         ) : (
-                            <p className="text-sm font-semibold text-emerald-700">
+                            <p className="text-sm font-semibold text-brand-700">
                                 Recording — say a sentence out loud… {secondsLeft}s
                             </p>
                         )}

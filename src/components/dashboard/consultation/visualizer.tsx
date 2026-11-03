@@ -10,6 +10,7 @@ function AudioVisualizer({ stream }: { stream: MediaStream | null }) {
         if (!canvas) return;
         const ctx = canvas.getContext("2d");
         if (!ctx) return;
+        const barColor = getComputedStyle(canvas).getPropertyValue("--color-brand-600");
 
         const draw = () => {
             const { width, height } = canvas;
@@ -20,7 +21,7 @@ function AudioVisualizer({ stream }: { stream: MediaStream | null }) {
 
             history.forEach((v, i) => {
                 const barHeight = v * height;
-                ctx.fillStyle = "#059669";
+                ctx.fillStyle = barColor;
                 ctx.fillRect(i * barWidth, height - barHeight, barWidth - 1, barHeight);
             });
 
@@ -35,7 +36,7 @@ function AudioVisualizer({ stream }: { stream: MediaStream | null }) {
             ref={canvasRef}
             width={800}
             height={150}
-            className="w-full h-20 bg-emerald-500/10 block rounded-md"
+            className="w-full h-20 bg-brand-500/10 block rounded-md"
         />
     );
 }

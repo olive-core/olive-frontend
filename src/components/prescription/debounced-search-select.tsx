@@ -234,7 +234,7 @@ export default function DebouncedSearchSelect({
                                         {option.generic_name && <span className="text-gray-500 text-xs ml-1">({option.generic_name})</span>}
                                     </div>
                                     {option.dosage_form && (
-                                        <span className="shrink-0 text-[10px] font-medium px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-600 border border-emerald-100">
+                                        <span className="shrink-0 text-[10px] font-medium px-1.5 py-0.5 rounded bg-brand-50 text-brand-600 border border-brand-100">
                                             {option.dosage_form}
                                         </span>
                                     )}
@@ -242,7 +242,7 @@ export default function DebouncedSearchSelect({
                             ) : option.icd_code ? (
                                 <div className="flex items-start justify-between gap-2">
                                     <span>{option.label}</span>
-                                    <span className="shrink-0 text-[10px] font-medium px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-100">
+                                    <span className="shrink-0 text-[10px] font-medium px-1.5 py-0.5 rounded bg-brand-50 text-brand-700 border border-brand-100">
                                         {option.icd_code}
                                     </span>
                                 </div>

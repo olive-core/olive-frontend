@@ -73,7 +73,7 @@ function ReturnRateByDiagnosis({ rows, onOpen }: { rows: DiagnosisReturnRate[]; 
                             <span className="flex items-baseline justify-between gap-3">
                                 <span className="flex min-w-0 items-center gap-1 text-sm text-slate-700">
                                     <span className="truncate">{row.label}</span>
-                                    <ChevronRightIcon className="size-3.5 shrink-0 text-slate-400 group-hover:text-emerald-600" />
+                                    <ChevronRightIcon className="size-3.5 shrink-0 text-slate-400 group-hover:text-brand-600" />
                                 </span>
                                 <span className="whitespace-nowrap text-sm tabular-nums text-slate-900">
                                     <span className="font-semibold">{percent(row.returned / row.count)}</span>

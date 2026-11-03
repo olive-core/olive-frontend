@@ -15,9 +15,9 @@ const SELF_SERVICE_SUBSCRIPTIONS_ENABLED =
 
 function StatusSummary({ label, value }: { label: string; value: string }) {
     return (
-        <div className="rounded-2xl border border-emerald-100 bg-emerald-50/60 px-5 py-4">
-            <p className="text-xs font-medium uppercase tracking-wide text-emerald-700/70">{label}</p>
-            <p className="mt-1 text-lg font-semibold text-emerald-800">{value}</p>
+        <div className="rounded-2xl border border-brand-100 bg-brand-50/60 px-5 py-4">
+            <p className="text-xs font-medium uppercase tracking-wide text-brand-700/70">{label}</p>
+            <p className="mt-1 text-lg font-semibold text-brand-800">{value}</p>
         </div>
     );
 }
@@ -53,7 +53,7 @@ export default function MembershipPanel() {
 
     return (
         <div className="mx-auto w-full max-w-xl space-y-6">
-            <div className="flex items-center gap-2 text-emerald-700">
+            <div className="flex items-center gap-2 text-brand-700">
                 <CrownIcon className="size-5" />
                 <span className="text-sm font-semibold uppercase tracking-wide">Founding Member</span>
             </div>
@@ -73,7 +73,7 @@ export default function MembershipPanel() {
 
                 {pending && (
                     <div className="flex flex-col items-center gap-3 py-6 text-center">
-                        <ClockIcon className="size-12 text-emerald-500" />
+                        <ClockIcon className="size-12 text-brand-500" />
                         <h3 className="text-lg font-semibold text-slate-800">Payment under review</h3>
                         <p className="max-w-sm text-sm text-slate-500">
                             We&apos;ve received your payment for {pending.months} month{pending.months === 1 ? "" : "s"}, submitted on {formatUntilDate(pending.created_at)}. You&apos;ll get a confirmation SMS once it&apos;s activated.
@@ -87,7 +87,7 @@ export default function MembershipPanel() {
                             <h3 className="text-lg font-semibold text-slate-800">Purchase or renew your membership</h3>
                             <p className="mt-2 max-w-sm text-sm leading-6 text-slate-500">
                                 Please contact Asif Azad at{" "}
-                                <a className="font-medium text-emerald-700 underline-offset-4 hover:underline" href="mailto:asifazad@oliveai.life">
+                                <a className="font-medium text-brand-700 underline-offset-4 hover:underline" href="mailto:asifazad@oliveai.life">
                                     asifazad@oliveai.life
                                 </a>
                                 .
@@ -120,7 +120,7 @@ export default function MembershipPanel() {
                                         aria-pressed={months === option}
                                         className={`cursor-pointer rounded-xl border-2 py-3 text-center transition ${
                                             months === option
-                                                ? "border-emerald-500 bg-emerald-50 text-emerald-700"
+                                                ? "border-brand-500 bg-brand-50 text-brand-700"
                                                 : "border-slate-200 text-slate-600 hover:border-slate-300"
                                         }`}
                                     >
@@ -156,7 +156,7 @@ export default function MembershipPanel() {
 
                 {SELF_SERVICE_SUBSCRIPTIONS_ENABLED && !pending && step === "done" && (
                     <div className="flex flex-col items-center gap-3 py-6 text-center">
-                        <CheckCircle2Icon className="size-12 text-emerald-500" />
+                        <CheckCircle2Icon className="size-12 text-brand-500" />
                         <h3 className="text-lg font-semibold text-slate-800">We&apos;re reviewing your payment</h3>
                         <p className="max-w-sm text-sm text-slate-500">
                             You&apos;ll get a confirmation SMS as soon as your membership is activated. This usually takes a short while.

@@ -36,13 +36,13 @@ export default function RefinePanel({ filters, chambers, onChange }: RefinePanel
                     variant="outline"
                     className={cn(
                         "h-11 shrink-0 gap-2 rounded-xl border-slate-200 font-normal",
-                        active ? "text-emerald-700 ring-1 ring-emerald-200" : "text-slate-600",
+                        active ? "text-brand-700 ring-1 ring-brand-200" : "text-slate-600",
                     )}
                 >
                     <SlidersHorizontalIcon className="size-4" />
                     Refine
                     {active > 0 && (
-                        <span className="rounded-full bg-emerald-600 px-1.5 text-xs font-semibold text-white">{active}</span>
+                        <span className="rounded-full bg-brand-600 px-1.5 text-xs font-semibold text-white">{active}</span>
                     )}
                 </Button>
             </PopoverTrigger>
@@ -76,7 +76,7 @@ export default function RefinePanel({ filters, chambers, onChange }: RefinePanel
                                 className={cn(
                                     "min-h-11 flex-1 rounded-lg border px-3 py-1.5 text-sm transition-colors",
                                     filters.sex === sex.key
-                                        ? "border-emerald-300 bg-emerald-50 text-emerald-700"
+                                        ? "border-brand-300 bg-brand-50 text-brand-700"
                                         : "border-slate-200 text-slate-600 hover:bg-slate-50",
                                 )}
                             >
@@ -98,7 +98,7 @@ export default function RefinePanel({ filters, chambers, onChange }: RefinePanel
                                     className={cn(
                                         "min-h-11 w-full break-words rounded-lg px-3 py-1.5 text-left text-sm transition-colors",
                                         (filters.chamberId ?? "") === chamber.chamber_id
-                                            ? "bg-emerald-50 text-emerald-700"
+                                            ? "bg-brand-50 text-brand-700"
                                             : "text-slate-600 hover:bg-slate-50",
                                     )}
                                 >

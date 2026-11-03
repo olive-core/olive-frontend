@@ -35,7 +35,7 @@ export default function ConsultationsToolbar({
                         variant={accessFilter === value ? "default" : "outline"}
                         onClick={() => onAccessChange(value)}
                         aria-pressed={accessFilter === value}
-                        className={`min-h-11 px-4 ${accessFilter === value ? "bg-emerald-600 hover:bg-emerald-700" : ""}`}
+                        className={`min-h-11 px-4 ${accessFilter === value ? "bg-brand-600 hover:bg-brand-700" : ""}`}
                     >
                         {value === "all" ? "All" : value === "owned" ? "Only me" : "With others"}
                     </Button>

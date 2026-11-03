@@ -9,8 +9,8 @@ import type { LabelCount } from "@/types/insights";
 import type { InsightFilters } from "./filters/insight-filters";
 import { useOverview } from "./use-insights";
 
-// Distinct hues, not a ramp: sex has no order, and the emerald ramp already means age.
-const SEX_TONES = ["bg-emerald-600", "bg-sky-500", "bg-slate-300"];
+// Distinct hues, not a ramp: sex has no order, and the brand ramp already means age.
+const SEX_TONES = ["bg-brand-600", "bg-sky-500", "bg-slate-300"];
 
 function SexSplit({ rows }: { rows: LabelCount[] }) {
     const total = rows.reduce((sum, row) => sum + row.count, 0);

@@ -20,7 +20,7 @@ export default function ConsultationModeActions({
 }: ConsultationModeActionsProps) {
     const actionClass = cn(
         "group flex min-h-32 flex-1 cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-2 px-4 py-5 text-center transition-all",
-        "border-slate-200 bg-white text-slate-800 hover:border-emerald-300 hover:bg-emerald-50/50",
+        "border-slate-200 bg-white text-slate-800 hover:border-brand-300 hover:bg-brand-50/50",
         "disabled:cursor-not-allowed disabled:opacity-50",
     );
 
@@ -33,7 +33,7 @@ export default function ConsultationModeActions({
                 disabled={disabled}
                 className={actionClass}
             >
-                <span className="flex size-11 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
+                <span className="flex size-11 items-center justify-center rounded-full bg-brand-100 text-brand-700">
                     <PlusIcon className="size-6" strokeWidth={2.25} />
                 </span>
                 <span className="font-semibold">{startingNew ? "Starting…" : "New consultation"}</span>
@@ -47,7 +47,7 @@ export default function ConsultationModeActions({
                     disabled={disabled}
                     className={actionClass}
                 >
-                    <span className="flex size-11 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
+                    <span className="flex size-11 items-center justify-center rounded-full bg-brand-100 text-brand-700">
                         <HistoryIcon className="size-5.5" strokeWidth={2.25} />
                     </span>
                     <span className="font-semibold">Follow-up</span>

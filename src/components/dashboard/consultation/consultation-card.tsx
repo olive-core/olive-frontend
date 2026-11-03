@@ -152,8 +152,8 @@ function CardNotesView({ summary, safetyNet }: { summary: string; safetyNet: str
 
             {hasNotes && sections !== null && sections.filter(s => s.text.trim() !== "").map((section) => (
                 <div key={section.key} className="space-y-1.5">
-                    <h3 className="flex items-center gap-2 font-bold text-xs uppercase tracking-widest text-emerald-700">
-                        <span className="h-3 w-1 rounded-full bg-emerald-500" />
+                    <h3 className="flex items-center gap-2 font-bold text-xs uppercase tracking-widest text-brand-700">
+                        <span className="h-3 w-1 rounded-full bg-brand-500" />
                         {SECTION_LABELS[section.key]}
                     </h3>
                     <p className="text-sm leading-relaxed text-muted-foreground whitespace-pre-wrap">{section.text}</p>
@@ -203,8 +203,8 @@ function ConsultationCard({
         const firstVisit = totalHistories === 0;
         return (
             <Card className="w-full h-full rounded-2xl shadow-md flex flex-col items-center justify-center min-h-[300px] gap-3 text-center p-8">
-                <div className="w-12 h-12 rounded-full bg-emerald-50 flex items-center justify-center">
-                    <ClipboardList className="w-6 h-6 text-emerald-400" />
+                <div className="w-12 h-12 rounded-full bg-brand-50 flex items-center justify-center">
+                    <ClipboardList className="w-6 h-6 text-brand-400" />
                 </div>
                 <div>
                     <p className="text-sm font-medium text-slate-700">
@@ -252,7 +252,7 @@ function ConsultationCard({
                 {chief_complaints.length > 0 && (
                     <div className="space-y-2">
                         <h3 className="font-medium text-sm flex items-center gap-2 text-slate-700">
-                            <StethoscopeIcon className="w-4 h-4 text-emerald-500" />
+                            <StethoscopeIcon className="w-4 h-4 text-brand-500" />
                             Chief Complaints
                         </h3>
                         <ul className="space-y-1.5">
@@ -270,7 +270,7 @@ function ConsultationCard({
                 {diagnoses.length > 0 && (
                     <div className="space-y-2">
                         <h3 className="font-medium text-sm flex items-center gap-2 text-slate-700">
-                            <MicroscopeIcon className="w-4 h-4 text-emerald-500" />
+                            <MicroscopeIcon className="w-4 h-4 text-brand-500" />
                             Diagnosis
                         </h3>
                         <ul className="space-y-1 list-disc list-inside">
@@ -285,7 +285,7 @@ function ConsultationCard({
                 {rx_list.length > 0 && (
                     <div className="space-y-2">
                         <h3 className="font-medium text-sm flex items-center gap-2 text-slate-700">
-                            <PillIcon className="w-4 h-4 text-emerald-500" />
+                            <PillIcon className="w-4 h-4 text-brand-500" />
                             Medicines
                         </h3>
                         <ul className="space-y-2">

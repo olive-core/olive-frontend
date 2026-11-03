@@ -33,15 +33,15 @@ function MemoryCard({
 }) {
   return (
     <div
-      className="group relative bg-white border border-slate-100 rounded-2xl p-5 cursor-pointer transition-colors duration-200 hover:border-emerald-200 flex flex-col gap-3"
+      className="group relative bg-white border border-slate-100 rounded-2xl p-5 cursor-pointer transition-colors duration-200 hover:border-brand-200 flex flex-col gap-3"
     >
       <div className="flex items-start gap-3">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="shrink-0 w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
-            <BookMarkedIcon className="w-5 h-5 text-emerald-600" />
+          <div className="shrink-0 w-10 h-10 rounded-xl bg-brand-50 flex items-center justify-center">
+            <BookMarkedIcon className="w-5 h-5 text-brand-600" />
           </div>
-          <h3 className="font-semibold text-slate-800 text-sm leading-snug break-words group-hover:text-emerald-700 transition-colors">
-            <Link to="/doctor/memory/manage/$memoryId" params={{ memoryId: memory.template_id }} className="after:absolute after:inset-0 after:rounded-2xl focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-emerald-600">{memory.template_name}</Link>
+          <h3 className="font-semibold text-slate-800 text-sm leading-snug break-words group-hover:text-brand-700 transition-colors">
+            <Link to="/doctor/memory/manage/$memoryId" params={{ memoryId: memory.template_id }} className="after:absolute after:inset-0 after:rounded-2xl focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-brand-600">{memory.template_name}</Link>
           </h3>
         </div>
 
@@ -67,8 +67,8 @@ function MemoryCard({
             className={cn(
               'w-11 h-11 rounded-lg flex items-center justify-center transition-colors duration-200 cursor-pointer',
               memory.is_pinned
-                ? 'bg-emerald-50 text-emerald-600'
-                : 'bg-slate-50 text-slate-400 hover:bg-emerald-50 hover:text-emerald-600',
+                ? 'bg-brand-50 text-brand-600'
+                : 'bg-slate-50 text-slate-400 hover:bg-brand-50 hover:text-brand-600',
             )}
           >
             <PinIcon className="w-4 h-4" />
@@ -172,8 +172,8 @@ function RouteComponent() {
 
       {!isLoading && !isError && memories.length === 0 && (
         <div className="flex flex-col items-center justify-center py-20 gap-4 text-center">
-          <div className="w-16 h-16 rounded-2xl bg-emerald-50 flex items-center justify-center">
-            <BookMarkedIcon className="w-8 h-8 text-emerald-400" />
+          <div className="w-16 h-16 rounded-2xl bg-brand-50 flex items-center justify-center">
+            <BookMarkedIcon className="w-8 h-8 text-brand-400" />
           </div>
           <div>
             <p className="text-slate-700 font-semibold text-lg">

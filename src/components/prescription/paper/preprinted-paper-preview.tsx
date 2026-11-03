@@ -23,7 +23,7 @@ export default function PrePrintedPaperPreview({ paper, heightPx = 190 }: PrePri
                 style={{ width: widthMm * scale, height: heightPx }}
             >
                 <div
-                    className="absolute flex items-center justify-center border border-dashed border-emerald-400 bg-white"
+                    className="absolute flex items-center justify-center border border-dashed border-brand-400 bg-white"
                     style={{
                         top:    percent(paper.topMm, heightMm),
                         bottom: percent(paper.bottomMm, heightMm),
@@ -31,7 +31,7 @@ export default function PrePrintedPaperPreview({ paper, heightPx = 190 }: PrePri
                         right:  percent(paper.rightMm, widthMm),
                     }}
                 >
-                    <span className="px-1 text-center text-[9px] font-medium leading-tight text-emerald-600">
+                    <span className="px-1 text-center text-[9px] font-medium leading-tight text-brand-600">
                         Prescription
                     </span>
                 </div>

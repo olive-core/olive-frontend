@@ -73,7 +73,7 @@ function ChamberPills() {
                         className={cn(
                             "min-h-9 max-w-[180px] truncate rounded-full border px-3 text-xs font-medium transition-colors sm:min-h-0 sm:py-1",
                             isActive
-                                ? "border-emerald-500 bg-emerald-50 text-emerald-700"
+                                ? "border-brand-500 bg-brand-50 text-brand-700"
                                 : "border-slate-200 bg-white text-slate-500 hover:border-slate-300 hover:text-slate-700",
                         )}
                     >
@@ -185,7 +185,7 @@ export default function HeaderLivePreview({ onEditRequest }: { onEditRequest?: (
                     ref={paperRef}
                     onClick={handleClick}
                     style={{ width: PAPER_PX, transform: `scale(${scale})`, transformOrigin: "top left" }}
-                    className="flex flex-col bg-white p-6 pb-4 shadow-[0_1px_4px_rgba(15,23,42,0.12)] ring-1 ring-black/5 [&_[data-focus]]:cursor-pointer [&_[data-focus]]:rounded-sm [&_[data-focus]:hover]:outline-2 [&_[data-focus]:hover]:outline-offset-2 [&_[data-focus]:hover]:outline-emerald-300"
+                    className="flex flex-col bg-white p-6 pb-4 shadow-[0_1px_4px_rgba(15,23,42,0.12)] ring-1 ring-black/5 [&_[data-focus]]:cursor-pointer [&_[data-focus]]:rounded-sm [&_[data-focus]:hover]:outline-2 [&_[data-focus]:hover]:outline-offset-2 [&_[data-focus]:hover]:outline-brand-300"
                 >
                     <PrescriptionHeader identity={identity} config={previewConfig} />
 

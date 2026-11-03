@@ -48,7 +48,7 @@ export default function DateRangePicker({ value, onChange }: DateRangePickerProp
                     size="sm"
                     className={cn(
                         "min-h-11 max-w-full gap-2 whitespace-normal text-left font-normal",
-                        isActive ? "border-emerald-300 text-emerald-700" : "text-slate-600",
+                        isActive ? "border-brand-300 text-brand-700" : "text-slate-600",
                     )}
                 >
                     <CalendarIcon className="size-4" />

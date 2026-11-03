@@ -31,7 +31,7 @@ export default function SubscriptionBlockedDialog() {
         <Dialog open={Boolean(blocked)} onOpenChange={(open) => !open && clear()}>
             <DialogContent>
                 <DialogHeader>
-                    <div className="mx-auto mb-2 flex size-12 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
+                    <div className="mx-auto mb-2 flex size-12 items-center justify-center rounded-full bg-brand-50 text-brand-600">
                         <LockIcon className="size-6" />
                     </div>
                     <DialogTitle className="text-center">{title}</DialogTitle>

@@ -66,7 +66,7 @@ function CasePage() {
                                     </Button>
                                 </div>
                             ) : patientCase.can_follow_up && patientCase.session_id && (
-                                <Button className="mt-4 min-h-11 w-full bg-emerald-600 hover:bg-emerald-700 sm:w-auto"
+                                <Button className="mt-4 min-h-11 w-full bg-brand-600 hover:bg-brand-700 sm:w-auto"
                                     isLoading={!!startingSourceSessionId} disabled={!!startingSourceSessionId}
                                     onClick={() => start(patientCase.patient_id, undefined, patientCase.session_id)}>
                                     <HistoryIcon className="size-4" /> Add follow-up
@@ -79,16 +79,16 @@ function CasePage() {
                                 {patientCase.consultations.map((consultation, index) => (
                                     <Link key={consultation.prescription_id} to="/doctor/consultations/$prescriptionId"
                                         params={{ prescriptionId: consultation.prescription_id }} search={{ document: undefined }}
-                                        className="group flex min-h-24 items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4 transition-colors hover:border-emerald-200 hover:bg-emerald-50/30 focus-visible:outline-2 focus-visible:outline-emerald-600">
+                                        className="group flex min-h-24 items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4 transition-colors hover:border-brand-200 hover:bg-brand-50/30 focus-visible:outline-2 focus-visible:outline-brand-600">
                                         <div className="min-w-0 flex-1 space-y-2">
                                             <div className="flex flex-wrap items-center gap-2 text-sm font-medium text-slate-800">
                                                 <time dateTime={consultation.created_at}>{new Date(consultation.created_at).toLocaleString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</time>
-                                                {index === 0 && <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-xs text-emerald-700">Latest</span>}
+                                                {index === 0 && <span className="rounded-full bg-brand-50 px-2 py-0.5 text-xs text-brand-700">Latest</span>}
                                             </div>
                                             <p className="break-words text-sm text-slate-500">{consultation.clinician_name || 'Doctor'}</p>
                                             <DiagnosisPills diagnoses={consultation.diagnoses_summary} complaints={consultation.chief_complaints_summary} />
                                         </div>
-                                        <ChevronRightIcon className="size-4 shrink-0 text-slate-400 group-hover:text-emerald-600" />
+                                        <ChevronRightIcon className="size-4 shrink-0 text-slate-400 group-hover:text-brand-600" />
                                     </Link>
                                 ))}
                             </section>

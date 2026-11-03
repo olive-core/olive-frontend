@@ -149,7 +149,7 @@ export function ProfileForm({ clinicianData }: ProfileFormProps) {
                             ))}
                             <FieldDescription>
                                 These details also appear on new prescription pads. Existing finalized prescriptions keep their original details.{' '}
-                                <Link to="/doctor/prescription-header" search={{ section: 'doctor' }} className="font-medium text-emerald-700 underline underline-offset-4">View prescription pad</Link>
+                                <Link to="/doctor/prescription-header" search={{ section: 'doctor' }} className="font-medium text-brand-700 underline underline-offset-4">View prescription pad</Link>
                             </FieldDescription>
                         </div>
                     </FieldGroup>

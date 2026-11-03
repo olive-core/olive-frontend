@@ -24,7 +24,7 @@ export default function CaseCodeButton({ code, className }: { code: string; clas
     return (
         <button type="button" onClick={(event) => { event.stopPropagation(); void copy(); }}
             aria-label={`Copy case code ${formatCaseCode(code)}`}
-            className={cn('inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl border border-emerald-100 bg-emerald-50/70 px-3 text-emerald-800 transition-colors hover:bg-emerald-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600', className)}>
+            className={cn('inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl border border-brand-100 bg-brand-50/70 px-3 text-brand-800 transition-colors hover:bg-brand-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600', className)}>
             <span className="select-text font-mono text-sm font-semibold tracking-wider">{formatCaseCode(code)}</span>
             {copied ? <CheckIcon className="size-3.5" /> : <CopyIcon className="size-3.5" />}
         </button>

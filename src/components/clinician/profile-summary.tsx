@@ -26,7 +26,7 @@ export function ProfileSummary({
     return (
         <Card className="md:sticky md:top-24">
             <CardContent className="flex flex-col items-center gap-4 text-center">
-                <div className="flex size-20 items-center justify-center rounded-full bg-emerald-50 text-2xl font-semibold uppercase text-emerald-700">
+                <div className="flex size-20 items-center justify-center rounded-full bg-brand-50 text-2xl font-semibold uppercase text-brand-700">
                     {initials || "Dr"}
                 </div>
 
@@ -44,7 +44,7 @@ export function ProfileSummary({
                         {tags.map((s) => (
                             <span
                                 key={s}
-                                className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-700"
+                                className="rounded-full bg-brand-100 px-2.5 py-0.5 text-xs font-medium text-brand-700"
                             >
                                 {s}
                             </span>

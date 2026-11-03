@@ -17,13 +17,13 @@ function OliveLetterheadThumb() {
     return (
         <PaperSheet>
             <span className="flex items-center gap-1.5">
-                <span className="size-4 shrink-0 rounded-full bg-emerald-100" />
+                <span className="size-4 shrink-0 rounded-full bg-brand-100" />
                 <span className="flex flex-1 flex-col gap-0.5">
                     <span className="h-1 w-3/5 rounded bg-slate-300" />
                     <span className="h-1 w-2/5 rounded bg-slate-200" />
                 </span>
             </span>
-            <span className="h-0.5 w-full rounded bg-emerald-400" />
+            <span className="h-0.5 w-full rounded bg-brand-400" />
             <span className="flex flex-1 flex-col justify-center gap-1">
                 <span className="h-1 w-4/5 rounded bg-slate-100" />
                 <span className="h-1 w-3/5 rounded bg-slate-100" />
@@ -36,7 +36,7 @@ function PrePrintedThumb() {
     return (
         <PaperSheet>
             <span className="h-4 w-full shrink-0 rounded-sm bg-slate-200" />
-            <span className="flex flex-1 flex-col justify-center gap-1 rounded-sm border border-dashed border-emerald-300 px-1.5">
+            <span className="flex flex-1 flex-col justify-center gap-1 rounded-sm border border-dashed border-brand-300 px-1.5">
                 <span className="h-1 w-4/5 rounded bg-slate-100" />
                 <span className="h-1 w-3/5 rounded bg-slate-100" />
             </span>
@@ -85,12 +85,12 @@ export default function PaperModeChoice({ value, onChange }: {
                         className={cn(
                             "relative flex flex-col gap-2.5 rounded-xl border p-3 text-left transition-colors",
                             isSelected
-                                ? "border-emerald-500 bg-emerald-50/50 ring-1 ring-emerald-500/30"
+                                ? "border-brand-500 bg-brand-50/50 ring-1 ring-brand-500/30"
                                 : "border-slate-200 bg-white hover:border-slate-300",
                         )}
                     >
                         {isSelected && (
-                            <span className="absolute right-2.5 top-2.5 flex size-5 items-center justify-center rounded-full bg-emerald-500 text-white">
+                            <span className="absolute right-2.5 top-2.5 flex size-5 items-center justify-center rounded-full bg-brand-600 text-white">
                                 <CheckIcon className="size-3" />
                             </span>
                         )}

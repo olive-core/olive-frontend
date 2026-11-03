@@ -36,7 +36,7 @@ function DiagnosisChooser({ onPick }: { onPick: (key: string) => void }) {
                         <button
                             type="button"
                             onClick={() => onPick(diagnosis.key)}
-                            className="flex items-center gap-2 rounded-full bg-slate-50 py-2 pl-3.5 pr-2.5 text-sm text-slate-700 ring-1 ring-slate-200 transition-colors hover:bg-emerald-50 hover:text-emerald-700 hover:ring-emerald-200"
+                            className="flex items-center gap-2 rounded-full bg-slate-50 py-2 pl-3.5 pr-2.5 text-sm text-slate-700 ring-1 ring-slate-200 transition-colors hover:bg-brand-50 hover:text-brand-700 hover:ring-brand-200"
                         >
                             <span className="max-w-[14rem] truncate">{diagnosis.label}</span>
                             <span className="text-xs tabular-nums text-slate-500">{diagnosis.count}</span>

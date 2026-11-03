@@ -9,7 +9,7 @@ export default function GetStartedSection() {
                 <p className="mx-auto mt-4 max-w-md text-lg leading-relaxed text-white/85">
                     Register with your phone number. Already registered? Sign in the same way.
                 </p>
-                <Button asChild size="lg" className="mt-8 h-14 bg-white px-8 text-base font-semibold text-brand-deep hover:bg-brand-mist">
+                <Button asChild size="lg" className="mt-8 h-14 bg-white px-8 text-base font-semibold text-brand-700 hover:bg-brand-mist">
                     <Link to="/sign-in">Register or sign in</Link>
                 </Button>
             </div>

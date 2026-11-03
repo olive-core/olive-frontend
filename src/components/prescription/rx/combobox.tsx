@@ -77,7 +77,7 @@ export default function Combobox({
                                     value={`${option.label} ${option.hint ?? ""} ${option.value}`}
                                     onSelect={() => commit(option.value)}
                                 >
-                                    <Check className={cn("size-4", option.value === value ? "text-emerald-600 opacity-100" : "opacity-0")} />
+                                    <Check className={cn("size-4", option.value === value ? "text-brand-600 opacity-100" : "opacity-0")} />
                                     <span className="font-medium">{option.label}</span>
                                     {option.hint && option.hint.toLowerCase() !== option.label.toLowerCase() && (
                                         <span className="text-muted-foreground text-xs">{option.hint}</span>

@@ -27,7 +27,7 @@ export default function PadSection({ id, icon: Icon, title, summary, needsAttent
                     <span
                         className={cn(
                             "flex size-9 shrink-0 items-center justify-center rounded-lg",
-                            needsAttention ? "bg-amber-50 text-amber-600" : "bg-emerald-50 text-emerald-600",
+                            needsAttention ? "bg-amber-50 text-amber-600" : "bg-brand-50 text-brand-600",
                         )}
                     >
                         <Icon className="size-4" />

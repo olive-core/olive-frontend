@@ -87,7 +87,7 @@ export function ToggleRow({ id, label, description, checked, onChange }: {
                     "relative flex h-6 w-11 shrink-0 items-center rounded-full p-1 transition",
                     // The visible track stays 24px; the tap area reaches 44 on a phone.
                     "before:absolute before:inset-x-0 before:-inset-y-2.5 before:content-[''] sm:before:content-none",
-                    checked ? "bg-emerald-500" : "bg-slate-300",
+                    checked ? "bg-brand-500" : "bg-slate-300",
                 )}
             >
                 <div className={cn("size-4 rounded-full bg-white shadow-md transition", checked ? "translate-x-5" : "translate-x-0")} />

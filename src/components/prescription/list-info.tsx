@@ -55,11 +55,11 @@ export default function ListInfo({ title, info, fieldName, addEmptyItem, updateI
     return (
         <div
             className={`flex flex-col gap-2 p-2 rounded-xl transition-colors duration-300 
-            ${isDiagnosis ? "bg-emerald-50/40 border border-emerald-300 pl-3" : ""}`}
+            ${isDiagnosis ? "bg-brand-50/40 border border-brand-300 pl-3" : ""}`}
         >
             {/* Header */}
             <div className="flex items-center justify-between px-1">
-                <h3 className={`font-bold text-xs uppercase tracking-widest ${isDiagnosis ? "text-emerald-700" : "text-slate-500"}`}>
+                <h3 className={`font-bold text-xs uppercase tracking-widest ${isDiagnosis ? "text-brand-700" : "text-slate-500"}`}>
                     {title}
                 </h3>
                 <div className="flex items-center">
@@ -67,7 +67,7 @@ export default function ListInfo({ title, info, fieldName, addEmptyItem, updateI
                     <Button
                         variant="ghost"
                         size="sm"
-                        className="h-11 text-xs font-bold text-emerald-600 hover:bg-emerald-100/50 sm:h-7"
+                        className="h-11 text-xs font-bold text-brand-600 hover:bg-brand-100/50 sm:h-7"
                         onClick={handleAdd}
                     >
                         <PlusCircle className="size-3 mr-1" /> Add
@@ -148,7 +148,7 @@ const InfoItem = ({ item, index, title, isDiagnosis, onUpdate, onRemove, editing
         <div
             className={`group relative transition-all duration-200 rounded-lg border py-1 px-2 cursor-pointer
                 ${isDiagnosis
-                    ? "bg-white/80 border-emerald-100 hover:border-emerald-300"
+                    ? "bg-white/80 border-brand-100 hover:border-brand-300"
                     : "bg-muted hover:bg-accent border-border"
                 }`}
             onClick={() => setIsEditing(true)}
@@ -237,7 +237,7 @@ const EditingItem = ({ item, index, title, setIsEditing, onUpdate, onRemove, edi
         <EditSurface
             title={title}
             onCommit={handleSave}
-            className="relative z-10 rounded-lg border border-emerald-500 bg-white shadow-lg transition-all duration-200"
+            className="relative z-10 rounded-lg border border-brand-500 bg-white shadow-lg transition-all duration-200"
             footer={
                 <EditingItemActions
                     onRemove={() => { onRemove(index); setIsEditing(false); }}

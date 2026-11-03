@@ -34,7 +34,7 @@ function SymbolSizeSlider({ id, label, value, onChange }: {
                 step={2}
                 value={value}
                 onChange={(event) => onChange(clampSymbolSize(Number(event.target.value)))}
-                className="h-2.5 flex-1 cursor-pointer appearance-none rounded-full bg-slate-200 accent-emerald-500 sm:h-1.5"
+                className="h-2.5 flex-1 cursor-pointer appearance-none rounded-full bg-slate-200 accent-brand-500 sm:h-1.5"
             />
             <span className="w-12 text-right text-xs tabular-nums text-slate-400">{value}px</span>
         </label>
@@ -65,7 +65,7 @@ function LogoShapePicker({ value, onChange }: { value: LogoShape; onChange: (sha
                     className={cn(
                         "flex size-11 items-center justify-center rounded-lg border transition-colors sm:size-9",
                         value === shape.value
-                            ? "border-emerald-500 bg-emerald-50/60 ring-1 ring-emerald-500/30"
+                            ? "border-brand-500 bg-brand-50/60 ring-1 ring-brand-500/30"
                             : "border-slate-200 hover:border-slate-300",
                     )}
                 >
@@ -135,7 +135,7 @@ export default function LayoutStyleControls() {
                         className={cn(
                             "flex flex-col gap-2 rounded-lg border p-2.5 text-left transition-all",
                             config.preset === preset.value
-                                ? "border-emerald-500 bg-emerald-50/60 ring-1 ring-emerald-500/30"
+                                ? "border-brand-500 bg-brand-50/60 ring-1 ring-brand-500/30"
                                 : "border-slate-200 hover:border-slate-300 hover:shadow-sm",
                         )}
                     >
@@ -191,7 +191,7 @@ export default function LayoutStyleControls() {
                                 step={2}
                                 value={config.logoSize}
                                 onChange={(event) => patch({ logoSize: clampLogoSize(Number(event.target.value)) })}
-                                className="h-2.5 flex-1 cursor-pointer appearance-none rounded-full bg-slate-200 accent-emerald-500 sm:h-1.5"
+                                className="h-2.5 flex-1 cursor-pointer appearance-none rounded-full bg-slate-200 accent-brand-500 sm:h-1.5"
                             />
                             <span className="w-12 text-right text-xs tabular-nums text-slate-400">{config.logoSize}px</span>
                         </span>

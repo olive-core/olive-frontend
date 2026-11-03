@@ -19,7 +19,7 @@ function ComplaintRow({ complaint, fill, onOpen }: { complaint: ComplaintBreakdo
                 <div className="flex items-baseline justify-between gap-3">
                     <span className="flex min-w-0 items-center gap-1 text-sm font-medium text-slate-800">
                         <span className="truncate">{complaint.label}</span>
-                        <ChevronRightIcon className="size-3.5 shrink-0 text-slate-400 group-hover:text-emerald-600" />
+                        <ChevronRightIcon className="size-3.5 shrink-0 text-slate-400 group-hover:text-brand-600" />
                     </span>
                     <span className="text-sm font-semibold tabular-nums text-slate-900">{complaint.count}</span>
                 </div>

@@ -17,7 +17,7 @@ export default function InsightCard({ title, lead, example, action, note, childr
         <section className="rounded-2xl bg-white p-5 ring-1 ring-slate-200 sm:p-6">
             <header className="space-y-2">
                 <div className="flex items-start justify-between gap-3">
-                    <h2 className="min-w-0 text-xs font-semibold uppercase tracking-wide text-emerald-700">{title}</h2>
+                    <h2 className="min-w-0 text-xs font-semibold uppercase tracking-wide text-brand-700">{title}</h2>
                     {action}
                 </div>
                 {lead && <p className="text-base leading-snug text-slate-700">{lead}</p>}

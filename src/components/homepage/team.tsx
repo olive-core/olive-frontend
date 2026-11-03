@@ -54,13 +54,13 @@ export default function TeamSection() {
 
 function TeamMemberCard({ member }: { member: TeamMember }) {
     const photoSize = member.isFounder ? "size-40" : "size-32";
-    const outlineColor = member.isFounder ? "outline-emerald-300" : "outline-emerald-200";
+    const outlineColor = member.isFounder ? "outline-brand-300" : "outline-brand-200";
 
     return (
         <div className={cn("flex flex-col items-center text-center", member.desktopOrder)}>
             <div
                 className={cn(
-                    "relative rounded-full overflow-hidden bg-emerald-100 outline-2 outline-offset-4 outline-dashed",
+                    "relative rounded-full overflow-hidden bg-brand-100 outline-2 outline-offset-4 outline-dashed",
                     photoSize,
                     outlineColor
                 )}
@@ -80,7 +80,7 @@ function TeamMemberCard({ member }: { member: TeamMember }) {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={`${member.name} on LinkedIn`}
-                className="mt-3 inline-flex items-center justify-center size-9 rounded-full text-emerald-700 hover:text-white hover:bg-emerald-600 transition-colors"
+                className="mt-3 inline-flex items-center justify-center size-9 rounded-full text-brand-700 hover:text-white hover:bg-brand-600 transition-colors"
             >
                 <LinkedinIcon className="size-5" />
             </a>

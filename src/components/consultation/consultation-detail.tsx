@@ -192,7 +192,7 @@ function ConsultationSeriesNavigation({
           <ChevronLeftIcon className="size-4 sm:mr-1" />
           <span className="hidden sm:inline">Earlier</span>
         </Button>
-        <span className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-700">
+        <span className="inline-flex items-center gap-1.5 text-xs font-medium text-brand-700">
           <HistoryIcon className="size-3.5" /> Follow-up series
         </span>
         <Button variant="ghost" size="sm" aria-label="Next consultation" disabled={!nextPrescriptionId} onClick={() => nextPrescriptionId && openConsultation(nextPrescriptionId)}>
@@ -248,7 +248,7 @@ function DetailToolbar({
             className={cn(
               'inline-flex h-8 items-center rounded-full px-3 text-xs font-semibold',
               access === 'shared'
-                ? 'bg-emerald-50 text-emerald-700'
+                ? 'bg-brand-50 text-brand-700'
                 : 'bg-slate-100 text-slate-600',
             )}
           >
@@ -427,7 +427,7 @@ export default function ConsultationDetailContent({ prescriptionId, initialDocum
           onShare={!embedded && canShare ? () => setShareDialogOpen(true) : undefined}
           followUpAction={!embedded && canFollowUp && consultation.session_id && !consultation.has_follow_up ? (
             <Button
-              className="gap-2 bg-emerald-600 text-white hover:bg-emerald-700"
+              className="gap-2 bg-brand-600 text-white hover:bg-brand-700"
               isLoading={startingSourceSessionId === consultation.session_id}
               disabled={!!startingSourceSessionId}
               onClick={() => start(consultation.patient_id, undefined, consultation.session_id!)}

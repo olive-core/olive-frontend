@@ -21,8 +21,8 @@ const ROLES = [
         value: 'patient' as const,
         label: "I'm a Patient",
         icon: UserIcon,
-        className: "border-emerald-200 hover:border-emerald-400 hover:bg-emerald-50",
-        iconClassName: "text-emerald-600",
+        className: "border-brand-200 hover:border-brand-400 hover:bg-brand-50",
+        iconClassName: "text-brand-600",
     },
     {
         value: 'attendant' as const,

@@ -141,7 +141,7 @@ export default function Prescription({ onGenerate, onCancel, hasBeenGenerated }:
                             missing, so the dashboard never has to carry that reminder. */}
                         <p className="mx-auto w-full max-w-3xl px-4 pt-4 text-xs text-slate-700">
                             Note-only consultation &middot; prescriptions are off in your{" "}
-                            <Link to="/doctor/profile" className="font-medium text-emerald-700 underline-offset-2 hover:underline">
+                            <Link to="/doctor/profile" className="font-medium text-brand-700 underline-offset-2 hover:underline">
                                 profile settings
                             </Link>
                             .

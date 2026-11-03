@@ -192,7 +192,7 @@ export default function DoctorQueuePanel({ onStateChange }: DoctorQueuePanelProp
                                         <span
                                             className={cn(
                                                 "text-[10px] leading-none px-1.5 py-0.5 rounded-full font-medium shrink-0",
-                                                selected ? "bg-primary text-white" : "bg-emerald-100 text-emerald-700",
+                                                selected ? "bg-primary text-white" : "bg-brand-100 text-brand-700",
                                             )}
                                         >
                                             {count}
@@ -211,7 +211,7 @@ export default function DoctorQueuePanel({ onStateChange }: DoctorQueuePanelProp
             )}
 
             {inside && (
-                <p className="text-sm text-emerald-600 mb-2">
+                <p className="text-sm text-brand-600 mb-2">
                     ● {inside.name} inside
                 </p>
             )}

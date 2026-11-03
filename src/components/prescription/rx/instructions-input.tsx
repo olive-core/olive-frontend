@@ -38,7 +38,7 @@ export default function InstructionsInput({ value, onChange, suggestions = [] }:
             {items.length > 0 && (
                 <div className="flex flex-wrap gap-1.5">
                     {items.map((item, index) => (
-                        <span key={`${item}-${index}`} className="inline-flex items-center gap-1 pl-2 py-0.5 text-[11px] rounded-md bg-emerald-50 border border-emerald-200 text-emerald-700">
+                        <span key={`${item}-${index}`} className="inline-flex items-center gap-1 pl-2 py-0.5 text-[11px] rounded-md bg-brand-50 border border-brand-200 text-brand-700">
                             {item}
                             {/* Padding, not a bigger icon: the 12px cross reads right beside the
                                 text but needs a finger-sized area around it to be tappable. */}
@@ -46,7 +46,7 @@ export default function InstructionsInput({ value, onChange, suggestions = [] }:
                                 type="button"
                                 onClick={() => remove(index)}
                                 aria-label={`Remove ${item}`}
-                                className="flex min-h-9 min-w-9 sm:min-h-0 sm:min-w-0 items-center justify-center px-1 text-emerald-500 hover:text-emerald-700 cursor-pointer"
+                                className="flex min-h-9 min-w-9 sm:min-h-0 sm:min-w-0 items-center justify-center px-1 text-brand-500 hover:text-brand-700 cursor-pointer"
                             >
                                 <X className="size-3" />
                             </button>

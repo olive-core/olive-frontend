@@ -42,7 +42,7 @@ export default function PatientChip({ userId }: { userId: string }) {
 
     return (
         <div className="flex items-center gap-3">
-            <div className="flex size-9 items-center justify-center rounded-full bg-emerald-50 text-xs font-semibold uppercase text-emerald-700">
+            <div className="flex size-9 items-center justify-center rounded-full bg-brand-50 text-xs font-semibold uppercase text-brand-700">
                 {initials}
             </div>
             <div className="leading-tight">

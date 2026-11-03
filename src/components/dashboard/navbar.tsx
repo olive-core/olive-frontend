@@ -24,9 +24,9 @@ function ClinicalLinks({ mobile = false }: { mobile?: boolean }) {
           : pathname === to || pathname.startsWith(`${to}/`)
         return (
           <Link key={to} to={to} aria-current={active ? 'page' : undefined}
-            className={cn('flex min-h-11 items-center justify-center gap-2 rounded-xl font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600',
+            className={cn('flex min-h-11 items-center justify-center gap-2 rounded-xl font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600',
               mobile ? 'min-w-0 px-1 text-xs sm:text-sm' : 'px-4 text-sm',
-              active ? 'bg-emerald-50 text-emerald-800' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900')}>
+              active ? 'bg-brand-50 text-brand-800' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900')}>
             <Icon className={cn('size-4 shrink-0', mobile && 'hidden sm:block')} strokeWidth={1.7} />{label}
           </Link>
         )
@@ -47,8 +47,8 @@ export default function DashboardNavbar() {
         <ClinicalLinks />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button type="button" aria-label="Open your account menu" className="flex min-h-11 shrink-0 cursor-pointer items-center gap-2.5 rounded-full p-1.5 pr-3 text-slate-600 transition-colors hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-emerald-600 data-[state=open]:bg-slate-50">
-              <span className="flex size-8 items-center justify-center rounded-full bg-emerald-50 text-xs font-semibold uppercase text-emerald-800">{initials}</span>
+            <button type="button" aria-label="Open your account menu" className="flex min-h-11 shrink-0 cursor-pointer items-center gap-2.5 rounded-full p-1.5 pr-3 text-slate-600 transition-colors hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-brand-600 data-[state=open]:bg-slate-50">
+              <span className="flex size-8 items-center justify-center rounded-full bg-brand-50 text-xs font-semibold uppercase text-brand-800">{initials}</span>
               <span className="hidden max-w-36 truncate text-sm font-medium sm:block">{withDoctorFirstName(name)}</span>
               <ChevronDown className="size-3.5 text-slate-400" />
             </button>

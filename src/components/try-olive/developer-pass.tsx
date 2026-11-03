@@ -35,7 +35,7 @@ export default function DeveloperPass() {
         finally { setPending(false); }
     };
     if (!token || active) return null;
-    return <div className="mx-auto mb-3 max-w-4xl rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm" role="status">
+    return <div className="mx-auto mb-3 max-w-4xl rounded-xl border border-brand-200 bg-brand-50 p-3 text-sm" role="status">
         <p className="font-semibold">Activate your developer pass</p><p className="my-2">This private, single-use link enables 90 days of testing without daily demo limits in this browser.</p>
         <Button disabled={pending} onClick={() => void activate()}>{pending ? "Activating…" : "Activate on this browser"}</Button>
         {error && <p className="mt-2 text-rose-700" role="alert">{error}</p>}

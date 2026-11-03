@@ -51,7 +51,7 @@ export function PatientProfileCard({ patient, phone }: PatientProfileCardProps) 
     return (
         <Card>
             <CardContent className="flex flex-col items-center gap-6 text-center">
-                <div className="flex size-24 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 text-3xl font-semibold text-white shadow-sm">
+                <div className="flex size-24 items-center justify-center rounded-full bg-gradient-to-br from-brand-400 to-brand-700 text-3xl font-semibold text-white shadow-sm">
                     {initials || <UserRoundIcon className="size-10" />}
                 </div>
 

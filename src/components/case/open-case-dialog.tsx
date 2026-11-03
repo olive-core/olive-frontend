@@ -43,7 +43,7 @@ export default function OpenCaseDialog({ open, onOpenChange }: { open: boolean; 
                     </div>
                     {error && <p role="alert" className="text-sm text-rose-600">{error.response?.data?.detail ?? 'Could not open the case. Please try again.'}</p>}
                     <Button type="submit" disabled={mutation.isPending || code.replace(/[\s-]/g, '').length !== 8}
-                        isLoading={mutation.isPending} className="min-h-11 w-full bg-emerald-600 hover:bg-emerald-700">
+                        isLoading={mutation.isPending} className="min-h-11 w-full bg-brand-600 hover:bg-brand-700">
                         Open case <ArrowRightIcon className="size-4" />
                     </Button>
                 </form>

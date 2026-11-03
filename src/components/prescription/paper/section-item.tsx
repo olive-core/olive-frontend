@@ -26,14 +26,14 @@ function getPriorityStyle(priority?: string | null): PriorityStyle | null {
         case "routine":
             return { label: "Routine", badge: "bg-amber-50 text-amber-600",     border: "border-amber-400" };
         case "low":
-            return { label: "Low",     badge: "bg-emerald-50 text-emerald-600", border: "border-emerald-400" };
+            return { label: "Low",     badge: "bg-brand-50 text-brand-600", border: "border-brand-400" };
         default:
             return null;
     }
 }
 
 function getConfidenceColor(confidence: number): string {
-    if (confidence >= 85) return "bg-emerald-500";
+    if (confidence >= 85) return "bg-brand-500";
     if (confidence >= 60) return "bg-amber-400";
     return "bg-rose-500";
 }
@@ -58,7 +58,7 @@ const REASONING_BODY = "max-w-[250px] bg-slate-800 text-white p-2 rounded shadow
 function ReasoningBody({ text }: { text: string }) {
     return (
         <p>
-            <span className="text-emerald-400 font-semibold mr-1">Reasoning:</span>
+            <span className="text-brand-400 font-semibold mr-1">Reasoning:</span>
             {text}
         </p>
     );
@@ -69,7 +69,7 @@ function ReasoningTrigger({ touch }: { touch?: boolean }) {
         <button
             type="button"
             aria-label="Why this was suggested"
-            className={`text-slate-400 hover:text-emerald-600 transition-colors flex items-center justify-center ${touch ? "size-9 cursor-pointer" : "cursor-help"}`}
+            className={`text-slate-400 hover:text-brand-600 transition-colors flex items-center justify-center ${touch ? "size-9 cursor-pointer" : "cursor-help"}`}
         >
             <InfoIcon className="h-3.5 w-3.5" />
         </button>
@@ -128,7 +128,7 @@ export default function SectionItem({
                     {name || <span className="text-slate-300 italic">Untitled</span>}
                 </span>
                 {duration && (
-                    <span className="text-[11px] text-emerald-600 uppercase tracking-tight">
+                    <span className="text-[11px] text-brand-600 uppercase tracking-tight">
                         — {duration}
                     </span>
                 )}
@@ -141,10 +141,10 @@ export default function SectionItem({
             )}
 
             {hasMeta && (
-                <div className="flex flex-col gap-1.5 mt-1.5 border-l-2 border-emerald-400 pl-2">
+                <div className="flex flex-col gap-1.5 mt-1.5 border-l-2 border-brand-400 pl-2">
                     <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
                         {icdCode && (
-                            <span className="text-[10px] font-mono font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">
+                            <span className="text-[10px] font-mono font-bold text-brand-700 bg-brand-50 px-1.5 py-0.5 rounded">
                                 {icdCode}
                             </span>
                         )}

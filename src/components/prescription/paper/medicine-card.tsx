@@ -20,7 +20,7 @@ function MedicineName({ typeLabel, tradeName, genericName, fallbackName }: Pick<
     // wraps away and gives it the whole card.
     return (
         <div className="flex min-w-0 flex-1 basis-48 flex-col">
-            {typeLabel && <span className="text-[11px] font-semibold uppercase tracking-wide text-emerald-600">{typeLabel}</span>}
+            {typeLabel && <span className="text-[11px] font-semibold uppercase tracking-wide text-brand-600">{typeLabel}</span>}
             <h3 className="text-slate-900 leading-tight break-words">
                 {tradeName ? (
                     <span className="font-bold text-base">{tradeName}</span>
@@ -37,7 +37,7 @@ export default function MedicineCard({ typeLabel, tradeName, genericName, fallba
     const detail = [dosage, durationText].filter(Boolean).join(" · ");
 
     return (
-        <div className={cn("group relative rounded-lg border p-3 bg-muted border-border w-full max-w-lg transition-colors hover:bg-emerald-50/50 hover:border-emerald-200", className)}>
+        <div className={cn("group relative rounded-lg border p-3 bg-muted border-border w-full max-w-lg transition-colors hover:bg-brand-50/50 hover:border-brand-200", className)}>
             {/* The frequency keeps its place on the right while both fit. A long one — "1+0+1
                 (after meal)" on a phone column — takes its own line underneath instead of
                 squeezing the medicine name into a two-character-wide ribbon. */}
@@ -51,8 +51,8 @@ export default function MedicineCard({ typeLabel, tradeName, genericName, fallba
             {detail && <div className="text-sm text-slate-900 mt-1">{detail}</div>}
 
             {reasoning && (
-                <div className="mt-2 p-2 rounded-lg bg-emerald-50/50 border border-emerald-100 flex items-start gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5 text-emerald-500 mt-0.5 shrink-0" />
+                <div className="mt-2 p-2 rounded-lg bg-brand-50/50 border border-brand-100 flex items-start gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-brand-500 mt-0.5 shrink-0" />
                     <p className="text-xs text-slate-800 italic leading-tight">{reasoning}</p>
                 </div>
             )}

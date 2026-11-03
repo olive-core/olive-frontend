@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils";
 import type { LabelCount } from "@/types/insights";
 
 /** A sequential ramp, because age bands are ordered — darkest is youngest. */
-const BAND_SHADES = ["bg-emerald-700", "bg-emerald-600", "bg-emerald-500", "bg-emerald-400", "bg-emerald-300"];
+const BAND_SHADES = ["bg-brand-700", "bg-brand-600", "bg-brand-500", "bg-brand-400", "bg-brand-300"];
 
 function bandShade(index: number): string {
     return BAND_SHADES[index % BAND_SHADES.length];

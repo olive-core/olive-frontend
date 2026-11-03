@@ -94,7 +94,7 @@ export const MedicineContainer = () => {
         <div className="mb-4">
             <div className="pt-2">
                 <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-semibold text-md text-emerald-600">Medicine (Rx)</h3>
+                    <h3 className="font-semibold text-md text-brand-600">Medicine (Rx)</h3>
                     <SectionMemoryButton section="medicine" />
                 </div>
                 <MemoryUndoBar section="medicine" />
@@ -115,7 +115,7 @@ export const MedicineContainer = () => {
                 and a thumb reaches the middle of the screen more easily than its left edge. */}
             <Button
                 variant={"outline"}
-                className="mt-4 flex h-11 w-full items-center gap-2 cursor-pointer text-emerald-600 hover:text-emerald-700 sm:h-9 sm:w-auto"
+                className="mt-4 flex h-11 w-full items-center gap-2 cursor-pointer text-brand-600 hover:text-brand-700 sm:h-9 sm:w-auto"
                 onClick={handleAdd}
             >
                 <PlusCircleIcon /> Add Medicine

@@ -50,8 +50,8 @@ export default function FollowUpSourcePicker({
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="flex max-h-[90svh] flex-col overflow-hidden p-0 sm:max-w-lg">
                 <DialogHeader className="border-b px-5 pb-4 pt-5 text-left">
-                    <div className="mb-2 flex items-center gap-3 text-emerald-700">
-                        <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-emerald-100">
+                    <div className="mb-2 flex items-center gap-3 text-brand-700">
+                        <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-brand-100">
                             <HistoryIcon className="size-5" />
                         </span>
                         <DialogTitle>Choose the care to continue</DialogTitle>
@@ -72,13 +72,13 @@ export default function FollowUpSourcePicker({
                                 className={cn(
                                     "relative flex w-full cursor-pointer items-start gap-3 rounded-2xl border-2 p-4 text-left transition-colors",
                                     selectedSource
-                                        ? "border-emerald-500 bg-emerald-50"
-                                        : "border-slate-200 bg-white hover:border-emerald-300",
+                                        ? "border-brand-500 bg-brand-50"
+                                        : "border-slate-200 bg-white hover:border-brand-300",
                                 )}
                             >
                                 <span className={cn(
                                     "mt-0.5 flex size-10 shrink-0 items-center justify-center rounded-full",
-                                    selectedSource ? "bg-emerald-600 text-white" : "bg-slate-100 text-slate-500",
+                                    selectedSource ? "bg-brand-600 text-white" : "bg-slate-100 text-slate-500",
                                 )}>
                                     {selectedSource
                                         ? <CheckIcon className="size-5" strokeWidth={3} />
@@ -101,7 +101,7 @@ export default function FollowUpSourcePicker({
                                         {withDoctorPrefix(source.clinician_name)}
                                     </span>
                                     {source.follow_up_of_session_id && (
-                                        <span className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-2 py-1 text-[11px] font-medium text-emerald-700">
+                                        <span className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-brand-100 px-2 py-1 text-[11px] font-medium text-brand-700">
                                             <HistoryIcon className="size-3" />
                                             Continuing series
                                         </span>

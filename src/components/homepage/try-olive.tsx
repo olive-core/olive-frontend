@@ -11,7 +11,7 @@ export default function TryOliveSection() {
                     Read a sample consultation aloud and watch Olive draft the prescription.
                     No account needed, and nothing is saved.
                 </p>
-                <Button asChild size="lg" className="mt-8 h-14 bg-brand px-8 text-base font-semibold text-white hover:bg-brand-deep">
+                <Button asChild size="lg" className="mt-8 h-14 bg-brand px-8 text-base font-semibold text-white hover:bg-brand-700">
                     <Link to="/try">
                         Try Olive
                         <ArrowRightIcon className="size-5" />

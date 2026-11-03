@@ -132,7 +132,7 @@ export default function MemoryEditor({
             value={memoryName}
             onChange={(e) => { setMemoryName(e.target.value); setValidationError(null) }}
             placeholder="e.g. Type 2 diabetes — follow-up visit"
-            className="w-full h-10 px-3 text-sm border border-slate-200 rounded-xl shadow-sm outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all"
+            className="w-full h-10 px-3 text-sm border border-slate-200 rounded-xl shadow-sm outline-none focus:ring-2 focus:ring-brand-500/20 transition-all"
           />
         </div>
 
@@ -209,13 +209,13 @@ export default function MemoryEditor({
 // later when they apply the memory.
 function FilledSectionsLine({ sections }: { sections: ReturnType<typeof filledMemorySections> }) {
   return (
-    <div className="px-4 py-2.5 border-b bg-emerald-50/50 text-xs text-slate-600">
+    <div className="px-4 py-2.5 border-b bg-brand-50/50 text-xs text-slate-600">
       {sections.length === 0 ? (
         'This memory is empty. Fill a section to save it.'
       ) : (
         <>
           This memory fills:{' '}
-          <span className="font-semibold text-emerald-800">
+          <span className="font-semibold text-brand-800">
             {sections.map(memorySectionLabel).join(' · ')}
           </span>
         </>

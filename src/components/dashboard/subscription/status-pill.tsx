@@ -23,7 +23,7 @@ export default function SubscriptionStatusPill() {
 
 function describe(state: string, remaining: number | null, until: string | null) {
     if (state === "active") {
-        return { label: `Active · until ${formatUntilDate(until)}`, tone: "bg-emerald-50 text-emerald-700" };
+        return { label: `Active · until ${formatUntilDate(until)}`, tone: "bg-brand-50 text-brand-700" };
     }
     if (state === "trial") {
         return { label: `Trial · ${remaining ?? 0} left`, tone: "bg-slate-100 text-slate-600" };

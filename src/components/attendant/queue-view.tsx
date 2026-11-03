@@ -135,7 +135,7 @@ function QueueRow({ entry, position, inside, onUp, onDown, onRemove }: QueueRowP
                 </p>
                 <p className="text-xs text-muted-foreground capitalize">
                     {inside ? (
-                        <span className="text-emerald-600 font-medium">In room</span>
+                        <span className="text-brand-600 font-medium">In room</span>
                     ) : (
                         <span className="text-amber-600 font-medium">Waiting</span>
                     )}
@@ -143,7 +143,7 @@ function QueueRow({ entry, position, inside, onUp, onDown, onRemove }: QueueRowP
                 </p>
             </div>
             {inside ? (
-                <span className="text-xs text-emerald-600 font-medium">inside</span>
+                <span className="text-xs text-brand-600 font-medium">inside</span>
             ) : (
                 <div className="flex items-center gap-0.5">
                     <Button variant="ghost" size="icon" disabled={!onUp} onClick={onUp} aria-label="Move up">

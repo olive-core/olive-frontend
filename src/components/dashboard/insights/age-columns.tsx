@@ -15,7 +15,7 @@ export default function AgeColumns({ bands }: { bands: LabelCount[] }) {
                     <span className={`flex w-full flex-col justify-end ${CHART_HEIGHT}`}>
                         <span className="text-center text-xs font-semibold tabular-nums text-slate-900">{band.count}</span>
                         <span
-                            className="mt-1 w-full rounded-t-md bg-emerald-500 transition-[height] duration-500 ease-out"
+                            className="mt-1 w-full rounded-t-md bg-brand-500 transition-[height] duration-500 ease-out"
                             style={{ height: `${Math.max((band.count / tallest) * 82, band.count > 0 ? 3 : 1)}%` }}
                         />
                     </span>

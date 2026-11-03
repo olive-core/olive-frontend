@@ -47,7 +47,7 @@ export default function FrequencyPicker({ schedule, mode, onChange }: FrequencyP
                     ))}
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
-                    <Clock size={15} className="text-emerald-500" />
+                    <Clock size={15} className="text-brand-500" />
                     <span className="text-sm text-slate-600">or every</span>
                     <Input
                         value={schedule.gapHours ?? ""}
@@ -140,7 +140,7 @@ function TimingButton({ label, active, onClick }: { label: string; active: boole
             onClick={onClick}
             className={cn(
                 "min-h-10 sm:min-h-0 px-3 py-1.5 text-[11px] font-bold rounded-md transition-all cursor-pointer select-none",
-                active ? "bg-white text-emerald-600 shadow-sm" : "text-slate-400 hover:text-slate-600",
+                active ? "bg-white text-brand-600 shadow-sm" : "text-slate-400 hover:text-slate-600",
             )}
         >
             {label}
@@ -157,11 +157,11 @@ function MealCell({ label, value, onClick }: { label: string; value?: number; on
             aria-label={`${label} dose: ${formatCount(value)}`}
             className={cn(
                 "flex flex-col items-center justify-center gap-0.5 py-3 sm:py-2 rounded-lg border transition-colors cursor-pointer select-none",
-                active ? "bg-white border-emerald-300 shadow-sm" : "bg-slate-100/60 border-slate-200 hover:bg-white",
+                active ? "bg-white border-brand-300 shadow-sm" : "bg-slate-100/60 border-slate-200 hover:bg-white",
             )}
         >
             <span className="text-[10px] font-bold uppercase tracking-tighter text-slate-400">{label}</span>
-            <span className={cn("text-xl font-bold leading-none", active ? "text-emerald-600" : "text-slate-300")}>{formatCount(value)}</span>
+            <span className={cn("text-xl font-bold leading-none", active ? "text-brand-600" : "text-slate-300")}>{formatCount(value)}</span>
         </button>
     );
 }

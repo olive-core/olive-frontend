@@ -24,7 +24,7 @@ export default function PatientProfileSwitcher() {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger className="flex max-w-[60vw] cursor-pointer items-center gap-2 rounded-full border-2 border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition-colors hover:border-slate-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 sm:max-w-[16rem]">
-                <UserIcon className="size-4 shrink-0 text-emerald-600" />
+                <UserIcon className="size-4 shrink-0 text-brand-600" />
                 <span className="min-w-0 flex-1 truncate">{displayName(active.name)}</span>
                 <ChevronDownIcon className="size-4 shrink-0 text-slate-400" />
             </DropdownMenuTrigger>
@@ -37,7 +37,7 @@ export default function PatientProfileSwitcher() {
                         className="flex cursor-pointer items-center justify-between gap-3"
                     >
                         <span className="truncate">{displayName(patient.name)}</span>
-                        {patient.patientId === active.patientId && <CheckIcon className="size-4 text-emerald-600" />}
+                        {patient.patientId === active.patientId && <CheckIcon className="size-4 text-brand-600" />}
                     </DropdownMenuItem>
                 ))}
             </DropdownMenuContent>

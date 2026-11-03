@@ -39,8 +39,8 @@ export function focusField(focusKey: string): void {
     window.setTimeout(() => input.focus({ preventScroll: true }), 250);
 
     const ringTarget = input.closest("[data-contact-row]") ?? input;
-    ringTarget.classList.add("ring-2", "ring-emerald-400");
-    window.setTimeout(() => ringTarget.classList.remove("ring-2", "ring-emerald-400"), 1200);
+    ringTarget.classList.add("ring-2", "ring-brand-400");
+    window.setTimeout(() => ringTarget.classList.remove("ring-2", "ring-brand-400"), 1200);
 }
 
 // The editor registers a resolver that knows which section hosts each key; it opens that

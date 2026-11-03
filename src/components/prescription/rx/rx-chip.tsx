@@ -18,11 +18,11 @@ const CHIP_SIZE = "min-h-11 px-3 py-2 text-sm sm:min-h-0 sm:px-2.5 sm:py-1 sm:te
 
 const TONE_STYLES: Record<RxChipTone, { active: string; idle: string }> = {
     solid: {
-        active: "bg-emerald-600 border-emerald-600 text-white font-semibold",
+        active: "bg-brand-600 border-brand-600 text-white font-semibold",
         idle:   "border-slate-200 text-slate-500 hover:bg-slate-50",
     },
     soft: {
-        active: "bg-emerald-50 border-emerald-200 text-emerald-700 font-semibold",
+        active: "bg-brand-50 border-brand-200 text-brand-700 font-semibold",
         idle:   "border-slate-200 text-slate-500 hover:bg-slate-50",
     },
     muted: {

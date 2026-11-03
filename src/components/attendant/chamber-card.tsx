@@ -57,7 +57,7 @@ export default function ChamberCard({ chamber, onOpen, onAdd }: ChamberCardProps
                 <div className="flex items-center gap-2 text-sm">
                     <span
                         className={`size-2.5 rounded-full shrink-0 ${
-                            inside ? "bg-emerald-500" : "bg-slate-200"
+                            inside ? "bg-brand-500" : "bg-slate-200"
                         }`}
                     />
                     {inside ? (

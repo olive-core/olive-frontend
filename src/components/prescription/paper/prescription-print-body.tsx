@@ -78,7 +78,7 @@ function PrintSection({
 }) {
     return (
         <div>
-            <h3 className="font-semibold text-emerald-900">{title}</h3>
+            <h3 className="font-semibold text-brand-900">{title}</h3>
             {items.length === 0 ? (
                 <EmptySectionNote>{emptyText}</EmptySectionNote>
             ) : (
@@ -106,7 +106,7 @@ function RxEntry({ medicine, index, classes, showCategory }: {
             <div className="flex justify-between items-start gap-2">
                 <div className={cn("min-w-0 flex-1", WRAPPING_TEXT)}>
                     {showCategory && category && (
-                        <p className="text-[10px] font-semibold uppercase tracking-wide text-emerald-900">
+                        <p className="text-[10px] font-semibold uppercase tracking-wide text-brand-900">
                             {category}
                         </p>
                     )}
@@ -122,7 +122,7 @@ function RxEntry({ medicine, index, classes, showCategory }: {
                 </div>
             </div>
             {instructions && (
-                <p className={cn("mt-1.5 border-l-2 border-emerald-200 pl-2 italic text-gray-800", WRAPPING_TEXT, classes.medicineMeta)}>
+                <p className={cn("mt-1.5 border-l-2 border-brand-200 pl-2 italic text-gray-800", WRAPPING_TEXT, classes.medicineMeta)}>
                     {instructions}
                 </p>
             )}
@@ -133,7 +133,7 @@ function RxEntry({ medicine, index, classes, showCategory }: {
 function AdviceSection({ items, classes }: { items: string[]; classes: PrintFitClasses }) {
     return (
         <div>
-            <h3 className="mb-1 font-semibold text-emerald-900">Advice</h3>
+            <h3 className="mb-1 font-semibold text-brand-900">Advice</h3>
             {items.length === 0 ? (
                 <EmptySectionNote>No specific advice</EmptySectionNote>
             ) : (
@@ -184,7 +184,7 @@ export default function PrescriptionPrintBody({ data, followUpBaseDate }: Prescr
                 </div>
 
                 <div className="col-span-2 min-w-0">
-                    <h3 className="mb-2 font-semibold text-emerald-900">Rx</h3>
+                    <h3 className="mb-2 font-semibold text-brand-900">Rx</h3>
                     {medicines.length === 0 ? (
                         <EmptySectionNote>No medicine prescribed</EmptySectionNote>
                     ) : (

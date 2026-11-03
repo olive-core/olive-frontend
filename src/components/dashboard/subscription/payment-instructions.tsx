@@ -26,7 +26,7 @@ function CopyableRow({ label, value }: { label: string; value: string }) {
                 <p className="break-words font-semibold text-slate-800">{value}</p>
             </div>
             <Button variant="ghost" size="icon-sm" className="size-11" aria-label={`Copy ${label}`} onClick={copy}>
-                {copied ? <CheckIcon className="text-emerald-600" /> : <CopyIcon />}
+                {copied ? <CheckIcon className="text-brand-600" /> : <CopyIcon />}
             </Button>
         </div>
     );

@@ -80,13 +80,13 @@ export function TagInputField<T extends FieldValues>({ id, control, label, place
                         <FieldLabel htmlFor={id} className={fieldLabelClasses}>{label}</FieldLabel>
                         <div className="flex flex-wrap gap-2 border rounded-xl px-2 py-2 focus-within:ring-1 focus-within:ring-ring min-h-[36px]">
                             {field.value?.map((tag: string) => (
-                                <div key={tag} className="flex items-center gap-1 px-2 py-1 text-xs bg-emerald-100 text-emerald-700 rounded-lg">
+                                <div key={tag} className="flex items-center gap-1 px-2 py-1 text-xs bg-brand-100 text-brand-700 rounded-lg">
                                     {tag}
                                     <button
                                         type="button"
                                         onClick={() => removeTag(tag)}
                                         aria-label={`Remove ${tag}`}
-                                        className="px-1 text-emerald-500 hover:text-emerald-700"
+                                        className="px-1 text-brand-500 hover:text-brand-700"
                                     >
                                         ×
                                     </button>

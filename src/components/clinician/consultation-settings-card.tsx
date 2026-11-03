@@ -19,9 +19,9 @@ function SettingSwitch({ checked, onToggle, label, disabled }: { checked: boolea
             aria-label={label}
             disabled={disabled}
             onClick={onToggle}
-            className="flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-lg disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600"
+            className="flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-lg disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
         >
-            <span className={`flex h-6 w-11 items-center rounded-full p-1 transition-colors ${checked ? "bg-emerald-500" : "bg-slate-300"}`}><span className={`size-4 rounded-full bg-white shadow-sm transition-transform motion-reduce:transition-none ${checked ? "translate-x-5" : "translate-x-0"}`} /></span>
+            <span className={`flex h-6 w-11 items-center rounded-full p-1 transition-colors ${checked ? "bg-brand-500" : "bg-slate-300"}`}><span className={`size-4 rounded-full bg-white shadow-sm transition-transform motion-reduce:transition-none ${checked ? "translate-x-5" : "translate-x-0"}`} /></span>
         </button>
     );
 }

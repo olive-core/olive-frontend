@@ -55,7 +55,7 @@ function AiStatusText({ phrases }: { phrases: string[] }) {
 
   return (
     <span
-      className="text-emerald-600 text-sm font-semibold tracking-wide transition-all duration-400"
+      className="text-brand-600 text-sm font-semibold tracking-wide transition-all duration-400"
       style={{ opacity: visible ? 1 : 0, transform: visible ? "translateY(0)" : "translateY(6px)" }}
     >
       {phrases[phraseIndex]}
@@ -65,14 +65,14 @@ function AiStatusText({ phrases }: { phrases: string[] }) {
 
 function AiStatusBlock({ phrases }: { phrases: string[] }) {
   return (
-    <div className="flex items-center gap-3 py-3 px-4 my-3 rounded-xl bg-gradient-to-r from-emerald-50 to-slate-50 border border-emerald-100">
-      <SparklesIcon className="w-4 h-4 text-emerald-500 animate-pulse shrink-0" />
+    <div className="flex items-center gap-3 py-3 px-4 my-3 rounded-xl bg-gradient-to-r from-brand-50 to-slate-50 border border-brand-100">
+      <SparklesIcon className="w-4 h-4 text-brand-500 animate-pulse shrink-0" />
       <AiStatusText phrases={phrases} />
       <span className="flex gap-1 ml-auto">
         {[0, 1, 2].map((i) => (
           <span
             key={i}
-            className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-bounce"
+            className="w-1.5 h-1.5 rounded-full bg-brand-400 animate-bounce"
             style={{ animationDelay: `${i * 0.18}s` }}
           />
         ))}
@@ -98,12 +98,12 @@ function SectionHeader({ label, highlight = false }: { label: string; highlight?
   return (
     <div className="flex items-center justify-between px-1 mb-2">
       <h3
-        className={`font-bold text-xs uppercase tracking-widest ${highlight ? "text-emerald-400" : "text-slate-300"
+        className={`font-bold text-xs uppercase tracking-widest ${highlight ? "text-brand-400" : "text-slate-300"
           }`}
       >
         {label}
       </h3>
-      <SparklesIcon className="w-3 h-3 text-emerald-300 animate-pulse" />
+      <SparklesIcon className="w-3 h-3 text-brand-300 animate-pulse" />
     </div>
   );
 }
@@ -120,7 +120,7 @@ function SkeletonListSection({
 }) {
   return (
     <div
-      className={`flex flex-col gap-2 p-2 rounded-xl ${highlight ? "bg-emerald-50/30 border-2 border-emerald-200/60" : ""
+      className={`flex flex-col gap-2 p-2 rounded-xl ${highlight ? "bg-brand-50/30 border-2 border-brand-200/60" : ""
         }`}
     >
       <SectionHeader label={label} highlight={highlight} />
@@ -145,7 +145,7 @@ function SkeletonVitals() {
     <div className="flex flex-col gap-2.5 border-y py-4">
       <div className="flex items-center justify-between">
         <h3 className="font-bold text-[11px] uppercase tracking-widest text-slate-300">On Examination</h3>
-        <SparklesIcon className="w-3 h-3 text-emerald-300 animate-pulse" />
+        <SparklesIcon className="w-3 h-3 text-brand-300 animate-pulse" />
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5">
         {Array.from({ length: 8 }).map((_, i) => (
@@ -168,7 +168,7 @@ function SkeletonNotes() {
           <LockIcon className="size-4 text-slate-300" />
           <h3 className="font-bold text-sm uppercase tracking-widest text-slate-300">Clinical Notes</h3>
         </div>
-        <SparklesIcon className="w-3 h-3 text-emerald-300 animate-pulse" />
+        <SparklesIcon className="w-3 h-3 text-brand-300 animate-pulse" />
       </div>
       <p className="text-xs text-slate-700">
         Private &middot; only you can see this. Never shared with the patient.
@@ -193,7 +193,7 @@ function SkeletonMedicineCard({ index }: { index: number }) {
           <ShimmerLine width={widths[index % widths.length]} />
           <ShimmerLine width="40%" thin />
         </div>
-        <div className="h-5 w-16 rounded-full bg-emerald-50 border border-emerald-100 animate-pulse" />
+        <div className="h-5 w-16 rounded-full bg-brand-50 border border-brand-100 animate-pulse" />
       </div>
       <div className="flex gap-2 pt-1 border-t border-slate-50">
         <ShimmerLine width="45%" thin />
@@ -375,8 +375,8 @@ export function FullPrescriptionSkeleton({ onCancel, sessionId, header, patientS
           <div className="md:col-span-2 py-4 px-4 md:px-8">
             <div className="pt-2">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold text-md text-emerald-300">Medicine (Rx)</h3>
-                <SparklesIcon className="w-3.5 h-3.5 text-emerald-300 animate-pulse" />
+                <h3 className="font-semibold text-md text-brand-300">Medicine (Rx)</h3>
+                <SparklesIcon className="w-3.5 h-3.5 text-brand-300 animate-pulse" />
               </div>
               <div className="flex flex-col gap-2">
                 {[0, 1, 2, 3].map((i) => (

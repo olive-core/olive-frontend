@@ -75,12 +75,12 @@ function ChamberPadLink({ chamber }: { chamber: Chamber }) {
             search={{ section: chamberSectionId(chamber.chamber_id) }}
             className="flex items-center gap-2 rounded-lg border px-3 py-2.5 transition-colors hover:bg-slate-50"
         >
-            <Building2Icon className="size-4 shrink-0 text-emerald-600" />
+            <Building2Icon className="size-4 shrink-0 text-brand-600" />
             <span className="flex min-w-0 flex-1 flex-col gap-0.5">
                 <span className="flex items-center gap-2 text-sm font-medium">
                     Prescription pad
                     {padIsConfigured(chamber.pad_config) && (
-                        <span className="size-1.5 rounded-full bg-emerald-500" title="Configured" />
+                        <span className="size-1.5 rounded-full bg-brand-500" title="Configured" />
                     )}
                 </span>
                 <span className="text-xs text-muted-foreground">
@@ -155,7 +155,7 @@ function ChamberRow({ chamber }: { chamber: Chamber }) {
             <ChamberPadLink chamber={chamber} />
 
             <div className="border-t border-slate-100 pt-2">
-                <button type="button" aria-expanded={attendantsOpen} aria-controls={attendantsId} onClick={() => setAttendantsOpen(!attendantsOpen)} className="flex min-h-12 w-full items-center gap-3 rounded-lg text-left text-sm text-slate-600 transition-colors hover:text-emerald-700 focus-visible:outline-2 focus-visible:outline-emerald-600">
+                <button type="button" aria-expanded={attendantsOpen} aria-controls={attendantsId} onClick={() => setAttendantsOpen(!attendantsOpen)} className="flex min-h-12 w-full items-center gap-3 rounded-lg text-left text-sm text-slate-600 transition-colors hover:text-brand-700 focus-visible:outline-2 focus-visible:outline-brand-600">
                     <UsersIcon className="size-4 shrink-0" />
                     <span className="min-w-0 flex-1">{attendantsLoading ? 'Loading attendants…' : attendantsError ? 'Attendants unavailable' : `${attendants.length} ${attendants.length === 1 ? 'attendant' : 'attendants'}`}</span>
                     <span className="text-xs font-medium">{attendantsOpen ? 'Close' : 'Manage'}</span>

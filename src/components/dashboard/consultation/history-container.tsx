@@ -69,8 +69,8 @@ export default function HistoryContainer({
         if (!histories || histories.length === 0) {
             return (
                 <div className="flex flex-col items-center justify-center h-full min-h-[180px] gap-3 text-center px-4">
-                    <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center">
-                        <ClipboardList className="w-5 h-5 text-emerald-400" />
+                    <div className="w-10 h-10 rounded-full bg-brand-50 flex items-center justify-center">
+                        <ClipboardList className="w-5 h-5 text-brand-400" />
                     </div>
                     <div>
                         <p className="text-sm font-medium text-slate-700">No consultations yet</p>
@@ -107,7 +107,7 @@ export default function HistoryContainer({
                             <div className="absolute top-0 bottom-0 w-0.5 bg-slate-200/80 left-[30%]" />
                             <div className={cn(
                                 "absolute w-4 h-4 left-[calc(30%-8px)] top-1/2 -translate-y-1/2 rounded-full transition-colors",
-                                isActive ? "bg-emerald-500" : "bg-slate-300"
+                                isActive ? "bg-brand-500" : "bg-slate-300"
                             )} />
 
                             <div className="w-[70%] min-w-0 pl-4 md:pl-8">

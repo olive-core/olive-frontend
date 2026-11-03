@@ -46,8 +46,8 @@ function EditableFollowUp({ value, onChange }: Required<Omit<FollowUpBlockProps,
                                 "cursor-pointer select-none rounded-full border font-semibold transition-colors",
                                 "min-h-11 px-4 py-2 text-sm sm:min-h-0 sm:px-3 sm:py-1 sm:text-xs",
                                 isActive
-                                    ? "border-emerald-500 bg-emerald-500 text-white shadow-sm"
-                                    : "border-slate-200 bg-white text-slate-600 hover:border-emerald-300 hover:text-emerald-700"
+                                    ? "border-brand-600 bg-brand-600 text-white shadow-sm"
+                                    : "border-slate-200 bg-white text-slate-600 hover:border-brand-300 hover:text-brand-700"
                             )}
                         >
                             {preset.label}
@@ -64,7 +64,7 @@ function EditableFollowUp({ value, onChange }: Required<Omit<FollowUpBlockProps,
                         aria-label="Follow up in days"
                         value={customDays}
                         onChange={(e) => onChange({ follow_up_days: parseDays(e.target.value) })}
-                        className="h-11 w-16 rounded-md border border-slate-200 bg-white px-1 text-center text-base font-semibold text-slate-700 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-400 sm:h-7 sm:w-12 sm:text-xs"
+                        className="h-11 w-16 rounded-md border border-slate-200 bg-white px-1 text-center text-base font-semibold text-slate-700 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-400 sm:h-7 sm:w-12 sm:text-xs"
                     />
                     <span>days</span>
                 </div>
@@ -75,7 +75,7 @@ function EditableFollowUp({ value, onChange }: Required<Omit<FollowUpBlockProps,
                 placeholder="Add a follow-up note (optional)"
                 value={follow_up_notes ?? ""}
                 onChange={(e) => onChange({ follow_up_notes: e.target.value })}
-                className="h-11 w-full rounded-md border border-slate-200 bg-white px-2 text-base text-slate-700 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-400 sm:h-8 sm:text-xs"
+                className="h-11 w-full rounded-md border border-slate-200 bg-white px-2 text-base text-slate-700 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-400 sm:h-8 sm:text-xs"
             />
         </div>
     );

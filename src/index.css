@@ -35,16 +35,38 @@ html {
 
 @custom-variant dark (&:is(.dark *));
 
+/* Olive brand colours (logo package v3.1): Forest Green, Black and White Smoke.
+   Use brand-* classes (never a Tailwind palette such as emerald-*) for anything that
+   carries the brand colour. To change the brand green, replace #268229 throughout this
+   block; every shade, --primary, the charts and the tap highlight follow.
+
+   600 is Forest Green itself. Lighter steps mix it with white in OKLab; darker ones
+   mix with black in sRGB, because the build's OKLab mix with black came out
+   oversaturated and out of gamut. The mixes use the literal colour, not a variable,
+   so the build resolves each to a fixed colour and browsers without color-mix() still
+   get real fallbacks. Text on white needs brand-600 or darker. "static" emits every
+   variable even when no class uses it, because --primary and scripts read them. */
+@theme static {
+  --color-brand: #268229;
+  --color-brand-50: color-mix(in oklab, #268229 5%, white);
+  --color-brand-100: color-mix(in oklab, #268229 12%, white);
+  --color-brand-200: color-mix(in oklab, #268229 24%, white);
+  --color-brand-300: color-mix(in oklab, #268229 40%, white);
+  --color-brand-400: color-mix(in oklab, #268229 60%, white);
+  --color-brand-500: color-mix(in oklab, #268229 80%, white);
+  --color-brand-600: #268229;
+  --color-brand-700: color-mix(in srgb, #268229 84%, black);
+  --color-brand-800: color-mix(in srgb, #268229 68%, black);
+  --color-brand-900: color-mix(in srgb, #268229 52%, black);
+  --color-brand-950: color-mix(in srgb, #268229 36%, black);
+  --color-brand-ink: #1c1c1a;
+  --color-brand-mist: #f5f7fa;
+}
+
 @theme inline {
   --font-display: "Momo Trust Display", sans-serif;
   --font-sans: "Momo Trust Sans", sans-serif;
   --font-mono: "Azeret Mono", monospace;
-  /* Logo package v3.1 colours. Only the landing page uses them for now; the app's
-     --primary is still the older emerald. */
-  --color-brand: #268229;
-  --color-brand-deep: #1e6a21;
-  --color-brand-ink: #1c1c1a;
-  --color-brand-mist: #f5f7fa;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -86,15 +108,13 @@ html {
 :root {
   --radius: 0.625rem;
   --background: oklch(1 0 0);
-  --foreground: oklch(0.129 0.042 264.695);
+  --foreground: var(--color-brand-ink);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.129 0.042 264.695);
+  --card-foreground: var(--color-brand-ink);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.129 0.042 264.695);
-  --primary: #10b981;
-  /* customized */
-  --primary-foreground: oklch(97.9% 0.021 166.113);
-  /* customized */
+  --popover-foreground: var(--color-brand-ink);
+  --primary: var(--color-brand-600);
+  --primary-foreground: white;
   --secondary: oklch(0.968 0.007 247.896);
   --secondary-foreground: oklch(0.208 0.042 265.755);
   --muted: oklch(0.968 0.007 247.896);
@@ -108,7 +128,7 @@ html {
   --input: oklch(0.929 0.013 255.508);
   --ring: oklch(0.704 0.04 256.788);
   --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: #10b981;
+  --chart-2: var(--color-brand-600);
   --chart-3: oklch(0.398 0.07 227.392);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
@@ -176,7 +196,7 @@ html {
 
   /* The default black flash reads as an error on a green UI, but dropping it entirely
      makes taps feel dead. A brand tint still confirms the tap landed. */
-  -webkit-tap-highlight-color: rgba(16, 185, 129, 0.15);
+  -webkit-tap-highlight-color: color-mix(in oklab, var(--color-brand-600) 15%, transparent);
 }
 
 /* A prescription is written by tapping small chips in quick succession, and the browser

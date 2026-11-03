@@ -60,9 +60,9 @@ function buildCards(accounts: Accounts): AccountCard[] {
             title: name || "Patient",
             chip: "Patient",
             icon: UserIcon,
-            className: "border-emerald-200 hover:border-emerald-400 hover:bg-emerald-50",
-            iconClassName: "text-emerald-600",
-            chipClassName: "bg-emerald-50 text-emerald-700",
+            className: "border-brand-200 hover:border-brand-400 hover:bg-brand-50",
+            iconClassName: "text-brand-600",
+            chipClassName: "bg-brand-50 text-brand-700",
         });
     }
 

@@ -28,7 +28,7 @@ function SegmentLabel({ icon, title, subtitle, showBadge }: SegmentLabelProps) {
             <span className="flex items-center gap-1.5 font-semibold">
                 {icon}
                 {title}
-                {showBadge && <span className="size-1.5 rounded-full bg-emerald-500" />}
+                {showBadge && <span className="size-1.5 rounded-full bg-brand-500" />}
             </span>
             <span className="text-[11px] font-normal text-slate-400">{subtitle}</span>
         </div>

@@ -37,7 +37,7 @@ function ConfidentialBand() {
 function NoteRow({ label, children }: { label: string; children: ReactNode }) {
     return (
         <div className="grid grid-cols-[30mm_1fr] gap-x-6">
-            <h3 className="pt-0.5 text-[10px] font-bold uppercase tracking-widest text-emerald-900">
+            <h3 className="pt-0.5 text-[10px] font-bold uppercase tracking-widest text-brand-900">
                 {label}
             </h3>
             <div className="text-sm leading-relaxed whitespace-pre-wrap">{children}</div>

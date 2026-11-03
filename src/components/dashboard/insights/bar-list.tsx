@@ -17,18 +17,18 @@ interface BarListProps {
     /** The denominator to draw against, when the card names one. Without it the bars
      *  scale to the largest row and read as a ranking, not as a share. */
     scaleTo?:   number;
-    tone?:      "emerald" | "blue";
+    tone?:      "brand" | "blue";
     emptyText?: string;
 }
 
 const TONES = {
-    emerald: "bg-emerald-500",
+    brand:   "bg-brand-500",
     blue:    "bg-blue-600",
 };
 
 /** Name and count on one line, bar beneath. A medical name is too long to survive a
  *  label column on a phone, and this is the same shape as the complaint rows. */
-export default function BarList({ rows, onPick, scaleTo, tone = "emerald", emptyText = "Nothing recorded yet" }: BarListProps) {
+export default function BarList({ rows, onPick, scaleTo, tone = "brand", emptyText = "Nothing recorded yet" }: BarListProps) {
     if (rows.length === 0) return <p className="text-sm text-slate-500">{emptyText}</p>;
 
     const full = Math.max(scaleTo ?? 0, ...rows.map((row) => row.count), 1);
@@ -42,7 +42,7 @@ export default function BarList({ rows, onPick, scaleTo, tone = "emerald", empty
                         <span className="flex items-baseline justify-between gap-3">
                             <span className="flex min-w-0 items-center gap-1 text-sm text-slate-700">
                                 <span className="truncate">{row.label}</span>
-                                {canPick && <ChevronRightIcon className="size-3.5 shrink-0 text-slate-400 group-hover:text-emerald-600" />}
+                                {canPick && <ChevronRightIcon className="size-3.5 shrink-0 text-slate-400 group-hover:text-brand-600" />}
                             </span>
                             <span className="whitespace-nowrap text-sm tabular-nums text-slate-900">
                                 <span className="font-semibold">{row.count}</span>

@@ -88,7 +88,7 @@ export default function DemoEditor({ patient, onGenerate, onCancel }: { patient:
             <div className="flex justify-center pb-6"><Button variant="ghost" onClick={() => showStep(0)}><BookOpenIcon /> Show quick guide</Button></div>
             <Dialog open={guideStep !== null} onOpenChange={open => { if (!open) setGuideStep(null); }}>
                 <DialogContent>
-                    <DialogHeader><p className="text-xs font-semibold text-emerald-700">QUICK GUIDE · {(guideStep ?? 0) + 1} / {GUIDE.length}</p>
+                    <DialogHeader><p className="text-xs font-semibold text-brand-700">QUICK GUIDE · {(guideStep ?? 0) + 1} / {GUIDE.length}</p>
                         <DialogTitle>{GUIDE[guideStep ?? 0].title}</DialogTitle><DialogDescription>{GUIDE[guideStep ?? 0].text}</DialogDescription>
                     </DialogHeader>
                     <DialogFooter><Button variant="ghost" onClick={() => setGuideStep(null)}>Skip guide</Button>

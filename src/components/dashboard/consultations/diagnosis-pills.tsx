@@ -38,7 +38,7 @@ export default function DiagnosisPills({ diagnoses, complaints = [], tokens = []
                     key={index}
                     className={
                         pill.kind === "diagnosis"
-                            ? "inline-block max-w-[160px] truncate px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-xs font-medium"
+                            ? "inline-block max-w-[160px] truncate px-2 py-0.5 rounded-full bg-brand-50 text-brand-700 text-xs font-medium"
                             : "inline-block max-w-[160px] truncate px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-xs font-medium"
                     }
                     title={pill.kind === "diagnosis" ? pill.text : `Complaint: ${pill.text}`}

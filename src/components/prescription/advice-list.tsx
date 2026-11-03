@@ -72,7 +72,7 @@ export default function AdviceList({ value, onChange }: AdviceListProps) {
                     <Button
                         variant="ghost"
                         size="sm"
-                        className="h-11 text-xs font-bold text-emerald-600 hover:bg-emerald-100/50 sm:h-7"
+                        className="h-11 text-xs font-bold text-brand-600 hover:bg-brand-100/50 sm:h-7"
                         onClick={handleAdd}
                     >
                         <PlusCircle className="size-3 mr-1" /> Add
@@ -106,7 +106,7 @@ export default function AdviceList({ value, onChange }: AdviceListProps) {
                                         <textarea
                                             value={tempValue}
                                             onChange={(e) => setTempValue(e.target.value)}
-                                            className="w-full text-base sm:text-sm border rounded-md p-2 outline-none focus:ring-2 focus:ring-emerald-500"
+                                            className="w-full text-base sm:text-sm border rounded-md p-2 outline-none focus:ring-2 focus:ring-brand-500"
                                             rows={2}
                                             autoFocus
                                         />

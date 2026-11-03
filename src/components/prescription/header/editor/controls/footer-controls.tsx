@@ -61,7 +61,7 @@ function FooterChamberRow({ chamber }: { chamber: Chamber }) {
                 className={cn(
                     "relative flex h-6 w-11 shrink-0 items-center rounded-full p-1 transition",
                     "before:absolute before:inset-x-0 before:-inset-y-2.5 before:content-[''] sm:before:content-none",
-                    pad.showInFooter ? "bg-emerald-500" : "bg-slate-300",
+                    pad.showInFooter ? "bg-brand-500" : "bg-slate-300",
                 )}
             >
                 <div className={cn("size-4 rounded-full bg-white shadow-md transition", pad.showInFooter ? "translate-x-5" : "translate-x-0")} />

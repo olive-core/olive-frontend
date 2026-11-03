@@ -53,7 +53,7 @@ function AutoGrowTextarea({
         <textarea
             ref={ref}
             autoFocus={autoFocus}
-            className={`w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-base sm:text-sm leading-relaxed resize-none overflow-hidden ${minHeightClass} transition-colors hover:border-emerald-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500`}
+            className={`w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-base sm:text-sm leading-relaxed resize-none overflow-hidden ${minHeightClass} transition-colors hover:border-brand-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500`}
             value={value}
             placeholder={placeholder}
             onChange={(e) => onChange(e.target.value)}
@@ -99,7 +99,7 @@ function CopyNotesButton({ notes }: { notes: string }) {
             title="Copy clinical notes"
         >
             {copied
-                ? <><CheckIcon className="size-3.5 text-emerald-600" /> Copied</>
+                ? <><CheckIcon className="size-3.5 text-brand-600" /> Copied</>
                 : <><CopyIcon className="size-3.5" /> Copy</>
             }
         </button>
@@ -121,8 +121,8 @@ function PrintNotesButton({ onPrint }: { onPrint: () => void }) {
 
 function SectionHeader({ label, editable }: { label: string; editable?: boolean }) {
     return (
-        <h4 className="flex items-center gap-2 font-bold text-xs uppercase tracking-widest text-emerald-700">
-            <span className="h-3.5 w-1 rounded-full bg-emerald-500" />
+        <h4 className="flex items-center gap-2 font-bold text-xs uppercase tracking-widest text-brand-700">
+            <span className="h-3.5 w-1 rounded-full bg-brand-500" />
             {label}
             {editable && <PencilLineIcon className="size-3 text-slate-400" />}
         </h4>
@@ -169,7 +169,7 @@ function SectionedNotesEditor({
                             key={section.key}
                             type="button"
                             onClick={() => setOpenedKeys((keys) => [...keys, section.key])}
-                            className="flex min-h-11 sm:min-h-0 items-center gap-1.5 rounded-lg border border-dashed border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 hover:border-emerald-400 hover:text-emerald-700 transition-colors"
+                            className="flex min-h-11 sm:min-h-0 items-center gap-1.5 rounded-lg border border-dashed border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 hover:border-brand-400 hover:text-brand-700 transition-colors"
                         >
                             <PlusIcon className="size-3.5" />
                             {SECTION_LABELS[section.key]}

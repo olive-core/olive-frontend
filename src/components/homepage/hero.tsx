@@ -18,7 +18,7 @@ export default function HeroSection() {
                     You review, edit and print. In Bangla, English, or both.
                 </p>
 
-                <Button asChild size="lg" className="mt-10 h-14 bg-brand px-8 text-base font-semibold text-white shadow-lg shadow-brand/20 hover:bg-brand-deep">
+                <Button asChild size="lg" className="mt-10 h-14 bg-brand px-8 text-base font-semibold text-white shadow-lg shadow-brand/20 hover:bg-brand-700">
                     <Link to="/try">
                         Try Olive, no account needed
                         <ArrowRightIcon className="size-5" />

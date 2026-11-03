@@ -32,7 +32,7 @@ export default function HomeNavbar() {
                     </div>
 
                     <div className="flex items-center gap-1">
-                        <Button asChild className="h-11 bg-brand px-5 text-sm font-semibold text-white hover:bg-brand-deep">
+                        <Button asChild className="h-11 bg-brand px-5 text-sm font-semibold text-white hover:bg-brand-700">
                             <Link to="/sign-in">
                                 <span className="min-[380px]:hidden">Sign in</span>
                                 <span className="hidden min-[380px]:inline">Register or sign in</span>

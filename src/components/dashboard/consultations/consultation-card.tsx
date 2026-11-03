@@ -52,7 +52,7 @@ export default function ConsultationCard({
     const canFollowUp = (consultation.can_follow_up ?? !isShared) && !!consultation.session_id && !consultation.has_follow_up;
 
     return (
-        <div className="group w-full bg-white border border-slate-100 rounded-2xl px-4 py-4 transition-all duration-200 hover:shadow-md hover:border-emerald-200 flex flex-col md:flex-row md:items-center gap-3 md:gap-4">
+        <div className="group w-full bg-white border border-slate-100 rounded-2xl px-4 py-4 transition-all duration-200 hover:shadow-md hover:border-brand-200 flex flex-col md:flex-row md:items-center gap-3 md:gap-4">
             <button
                 type="button"
                 onClick={handleOpen}
@@ -66,14 +66,14 @@ export default function ConsultationCard({
                 />
 
                 <div className="flex-1 min-w-0 md:flex-none md:w-56 md:shrink-0">
-                    <h3 className="font-semibold text-slate-800 text-sm truncate group-hover:text-emerald-700 transition-colors">
+                    <h3 className="font-semibold text-slate-800 text-sm truncate group-hover:text-brand-700 transition-colors">
                         <SearchHighlight text={fullName} tokens={tokens} />
                     </h3>
                     {consultation.consultation_count && (
                         <span className="mt-1 block text-xs text-slate-500">{consultation.consultation_count} {consultation.consultation_count === 1 ? "consultation" : "consultations"}</span>
                     )}
                     {isShared && (
-                        <span className="mt-1 inline-flex items-center gap-1 text-xs font-medium text-emerald-700">
+                        <span className="mt-1 inline-flex items-center gap-1 text-xs font-medium text-brand-700">
                             <Share2Icon className="size-3" />
                             Shared{consultation.shared_by_name ? ` by ${consultation.shared_by_name}` : " with you"}
                         </span>
@@ -112,7 +112,7 @@ export default function ConsultationCard({
 
             <div className="hidden md:flex items-center gap-2 shrink-0 ml-auto">
                 <span className="text-xs text-slate-400 font-mono">{timeOfDay}</span>
-                <ChevronRightIcon className="size-4 text-slate-300 group-hover:text-emerald-500 transition-colors" />
+                <ChevronRightIcon className="size-4 text-slate-300 group-hover:text-brand-500 transition-colors" />
             </div>
             </button>
 
@@ -122,7 +122,7 @@ export default function ConsultationCard({
                 <Button
                     type="button"
                     variant="outline"
-                    className="h-11 w-full shrink-0 gap-2 border-emerald-200 text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800 md:w-auto"
+                    className="h-11 w-full shrink-0 gap-2 border-brand-200 text-brand-700 hover:bg-brand-50 hover:text-brand-800 md:w-auto"
                     onClick={onFollowUp}
                     isLoading={isStartingFollowUp}
                     disabled={isStartingFollowUp}

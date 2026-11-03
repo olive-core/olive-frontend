@@ -98,12 +98,12 @@ export default function CaseShareDialog({
                         </div>
                         <div className="flex flex-col gap-2 sm:flex-row">
                             {typeof navigator !== "undefined" && typeof navigator.share === "function" && (
-                                <Button type="button" onClick={nativeShare} className="min-h-11 flex-1 bg-emerald-600 hover:bg-emerald-700">
+                                <Button type="button" onClick={nativeShare} className="min-h-11 flex-1 bg-brand-600 hover:bg-brand-700">
                                     <Share2Icon className="size-4" /> Share
                                 </Button>
                             )}
                             <Button type="button" variant="outline" onClick={copyLink} className="min-h-11 flex-1">
-                                {copied ? <CheckIcon className="size-4 text-emerald-600" /> : <CopyIcon className="size-4" />}
+                                {copied ? <CheckIcon className="size-4 text-brand-600" /> : <CopyIcon className="size-4" />}
                                 {copied ? "Link copied" : "Copy link"}
                             </Button>
                             <Button asChild variant="outline" className="min-h-11 flex-1">

@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { sampleScript, SAMPLE_HIGHLIGHTS, type SampleHighlight } from "./sample-content";
 
 const HIGHLIGHT_STYLES: Record<SampleHighlight, { label: string; color: string }> = {
-    medicine: { label: "Medicine", color: "bg-emerald-100 text-emerald-950" },
+    medicine: { label: "Medicine", color: "bg-brand-100 text-brand-950" },
     instruction: { label: "Dose & instructions", color: "bg-amber-100 text-amber-950" },
     investigation: { label: "Investigation", color: "bg-sky-100 text-sky-950" },
     clinical: { label: "Symptoms, history & advice", color: "bg-violet-100 text-violet-950" },
@@ -39,25 +39,25 @@ export default function SampleConversation({ review = false, recorderControls }:
             <p className="mb-2 text-xs text-slate-600">{review ? "If you read this sample, compare the highlighted details with your prescription and notes." : "Have your own fictional case? Try it with someone. No case in mind? Use this sample—read both roles alone, or take a role each."}</p>
             <div className="flex flex-wrap gap-1.5" aria-label="Highlight key">{Object.entries(HIGHLIGHT_STYLES).map(([kind, style]) => <span key={kind} className={`rounded px-2 py-0.5 text-[11px] ${style.color}`}>{style.label}</span>)}</div>
         </div>
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-4 focus-visible:outline-emerald-500" tabIndex={0} role="region" aria-label="Sample conversation text" lang={language}>
-            <div className="space-y-4">{sampleScript(language).map(([speaker, line], index) => <div key={index} className={index % 2 ? "border-l-2 border-slate-200 pl-3" : "border-l-2 border-emerald-300 pl-3"}>
-                <p className="text-xs font-semibold text-emerald-700">{speaker}</p><p className="mt-1 text-sm leading-relaxed text-slate-700"><HighlightedLine text={line} language={language} /></p>
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-4 focus-visible:outline-brand-500" tabIndex={0} role="region" aria-label="Sample conversation text" lang={language}>
+            <div className="space-y-4">{sampleScript(language).map(([speaker, line], index) => <div key={index} className={index % 2 ? "border-l-2 border-slate-200 pl-3" : "border-l-2 border-brand-300 pl-3"}>
+                <p className="text-xs font-semibold text-brand-700">{speaker}</p><p className="mt-1 text-sm leading-relaxed text-slate-700"><HighlightedLine text={line} language={language} /></p>
             </div>)}</div>
             <p className="mt-4 text-xs text-slate-500">Fictional practice script · About 3 minutes. Medicine details are provided for trying Olive.</p>
         </div>
     </div>;
-    if (review) return <details className="group mx-auto my-4 w-full max-w-4xl overflow-hidden rounded-xl border border-emerald-200 bg-white">
+    if (review) return <details className="group mx-auto my-4 w-full max-w-4xl overflow-hidden rounded-xl border border-brand-200 bg-white">
         <summary className="flex cursor-pointer list-none items-center gap-3 px-4 py-3 [&::-webkit-details-marker]:hidden">
-            <BookOpenIcon className="size-5 shrink-0 text-emerald-700" />
-            <div className="min-w-0 flex-1"><p className="text-sm font-semibold text-emerald-900">View sample conversation · Highlighted details</p><p className="mt-1 text-xs text-slate-600">Open to compare medicines, instructions, tests and clinical details with Arise’s output.</p></div>
+            <BookOpenIcon className="size-5 shrink-0 text-brand-700" />
+            <div className="min-w-0 flex-1"><p className="text-sm font-semibold text-brand-900">View sample conversation · Highlighted details</p><p className="mt-1 text-xs text-slate-600">Open to compare medicines, instructions, tests and clinical details with Arise’s output.</p></div>
             <ChevronDownIcon className="size-4 shrink-0 transition-transform group-open:rotate-180" />
         </summary>
         <div className="h-[28rem] border-t">{content}</div>
     </details>;
     return <>
-        <section className="hidden min-h-0 min-w-0 overflow-hidden rounded-2xl border border-emerald-200 bg-white md:col-start-2 md:row-span-2 md:row-start-1 md:block" aria-label="Optional sample conversation">{content}</section>
-        <Button variant="outline" className="h-auto min-h-14 w-full justify-start gap-3 whitespace-normal border-emerald-200 bg-emerald-50 p-3 text-left md:hidden" onClick={() => setPhoneOpen(true)}>
-            <BookOpenIcon className="size-5 shrink-0 text-emerald-700" />
+        <section className="hidden min-h-0 min-w-0 overflow-hidden rounded-2xl border border-brand-200 bg-white md:col-start-2 md:row-span-2 md:row-start-1 md:block" aria-label="Optional sample conversation">{content}</section>
+        <Button variant="outline" className="h-auto min-h-14 w-full justify-start gap-3 whitespace-normal border-brand-200 bg-brand-50 p-3 text-left md:hidden" onClick={() => setPhoneOpen(true)}>
+            <BookOpenIcon className="size-5 shrink-0 text-brand-700" />
             <span><span className="block font-semibold">Need a case? Open the sample</span><span className="block text-xs font-normal text-slate-600">Highlighted script · Read along & record</span></span>
         </Button>
         <Dialog open={phoneOpen} onOpenChange={setPhoneOpen}>

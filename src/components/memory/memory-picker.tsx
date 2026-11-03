@@ -56,7 +56,7 @@ export default function MemoryPicker({ open, onOpenChange, section, onSelect }: 
                                 onSelect={() => handleSelect(memory)}
                                 className="cursor-pointer gap-3"
                             >
-                                {memory.is_pinned && <PinIcon className="size-3.5 text-emerald-600" />}
+                                {memory.is_pinned && <PinIcon className="size-3.5 text-brand-600" />}
                                 <span className="min-w-0 flex-1 truncate font-medium">{memory.template_name}</span>
                                 <MemoryChips sections={memory.sections} />
                             </CommandItem>

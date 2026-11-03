@@ -12,7 +12,7 @@ export default function MicLevelBar({ level }: { level: number }) {
                 <div
                     className={cn(
                         "h-full rounded-full transition-[width] duration-100",
-                        filled >= 100 ? "bg-emerald-500" : filled > 20 ? "bg-emerald-400" : "bg-amber-400",
+                        filled >= 100 ? "bg-brand-500" : filled > 20 ? "bg-brand-400" : "bg-amber-400",
                     )}
                     style={{ width: `${filled}%` }}
                 />

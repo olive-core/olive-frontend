@@ -25,8 +25,8 @@ export default function DraftingPreference({ enabled, prescriptionsEnabled, embe
         </div>
         <button type="button" role="switch" aria-labelledby="drafting-label" aria-describedby="drafting-description" aria-checked={enabled}
           disabled={mutation.isPending || !prescriptionsEnabled} onClick={() => mutation.mutate(!enabled)}
-          className="flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-lg focus-visible:outline-2 focus-visible:outline-emerald-600 disabled:opacity-50">
-          <span className={`flex h-6 w-11 items-center rounded-full p-1 transition-colors ${enabled ? 'bg-emerald-500' : 'bg-slate-300'}`}><span className={`size-4 rounded-full bg-white shadow-sm transition-transform motion-reduce:transition-none ${enabled ? 'translate-x-5' : ''}`} /></span>
+          className="flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-lg focus-visible:outline-2 focus-visible:outline-brand-600 disabled:opacity-50">
+          <span className={`flex h-6 w-11 items-center rounded-full p-1 transition-colors ${enabled ? 'bg-brand-500' : 'bg-slate-300'}`}><span className={`size-4 rounded-full bg-white shadow-sm transition-transform motion-reduce:transition-none ${enabled ? 'translate-x-5' : ''}`} /></span>
         </button>
       </div>
   )

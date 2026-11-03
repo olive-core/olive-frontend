@@ -57,7 +57,7 @@ export default function ActiveFilters({ filters, options, onChange, onClear }: A
                     key={chip.id}
                     type="button"
                     onClick={() => onChange(chip.clear)}
-                    className="group inline-flex min-h-11 max-w-full items-center gap-1.5 rounded-full bg-emerald-700 py-1.5 pl-3.5 pr-2.5 text-sm font-medium text-white transition-colors hover:bg-emerald-800"
+                    className="group inline-flex min-h-11 max-w-full items-center gap-1.5 rounded-full bg-brand-700 py-1.5 pl-3.5 pr-2.5 text-sm font-medium text-white transition-colors hover:bg-brand-800"
                 >
                     <span className="truncate">{chip.label}</span>
                     <XIcon className="size-4 shrink-0 opacity-70 group-hover:opacity-100" />

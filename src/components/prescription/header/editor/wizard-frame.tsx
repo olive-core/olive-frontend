@@ -23,7 +23,7 @@ function StepDots({ stepNumber, stepCount }: { stepNumber: number; stepCount: nu
                     key={index}
                     className={cn(
                         "h-1.5 rounded-full transition-all",
-                        index < stepNumber ? "w-5 bg-emerald-500" : "w-1.5 bg-slate-200",
+                        index < stepNumber ? "w-5 bg-brand-500" : "w-1.5 bg-slate-200",
                     )}
                 />
             ))}

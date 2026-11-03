@@ -68,8 +68,8 @@ function CellCard({ label, accent, children }: { label: string; accent?: boolean
     return (
         <div
             className={cn(
-                "flex flex-col gap-0.5 rounded-md border px-2 py-1.5 transition-all focus-within:border-emerald-400 focus-within:shadow-sm",
-                accent ? "border-emerald-200 bg-emerald-50/40" : "border-slate-200 bg-white"
+                "flex flex-col gap-0.5 rounded-md border px-2 py-1.5 transition-all focus-within:border-brand-400 focus-within:shadow-sm",
+                accent ? "border-brand-200 bg-brand-50/40" : "border-slate-200 bg-white"
             )}
         >
             <span className="text-[10px] font-bold uppercase tracking-wider text-slate-900">{label}</span>
@@ -174,7 +174,7 @@ function EditableVitals({ vitals, onChange }: Pick<Required<VitalsBarProps>, "vi
             <HeightCell cm={vitals.height} onChange={(cm) => onChange({ height: cm })} />
 
             <CellCard label="BMI" accent>
-                <span className="text-sm font-bold text-emerald-700">{bmi ?? "—"}</span>
+                <span className="text-sm font-bold text-brand-700">{bmi ?? "—"}</span>
                 {bmi !== null && <Unit>kg/m²</Unit>}
             </CellCard>
         </div>
@@ -200,7 +200,7 @@ function EditableVitalsSection({ vitals, onChange, sources, currentSessionId }: 
                     type="button"
                     aria-expanded={isOpenOnPhone}
                     onClick={() => setIsOpenOnPhone((open) => !open)}
-                    className="flex min-h-9 items-center gap-1 rounded-md px-2 text-xs font-bold text-emerald-600 sm:hidden"
+                    className="flex min-h-9 items-center gap-1 rounded-md px-2 text-xs font-bold text-brand-600 sm:hidden"
                 >
                     {isOpenOnPhone ? "Done" : isFilled ? "Edit" : "Add vitals"}
                     <ChevronDownIcon aria-hidden className={cn("size-3.5 transition-transform", isOpenOnPhone && "rotate-180")} />
@@ -251,7 +251,7 @@ function ReadOnlyVitals({ vitals }: { vitals: VitalsType }) {
             {chips.map((chip, i) => (
                 <span key={i} className="inline-flex items-baseline gap-1">
                     <span className="text-[10px] font-bold uppercase tracking-wider text-slate-900">{chip.label}</span>
-                    <span className={cn("text-xs font-semibold", chip.accent ? "text-emerald-700" : "text-slate-900")}>
+                    <span className={cn("text-xs font-semibold", chip.accent ? "text-brand-700" : "text-slate-900")}>
                         {chip.value}
                     </span>
                     {chip.unit && <span className="text-[10px] text-slate-900">{chip.unit}</span>}

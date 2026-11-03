@@ -11,7 +11,7 @@ export default function MemoryChips({ sections }: { sections: string[] }) {
             {chips.map((chip) => (
                 <span
                     key={chip}
-                    className="rounded bg-emerald-50 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-700"
+                    className="rounded bg-brand-50 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-brand-700"
                 >
                     {chip}
                 </span>

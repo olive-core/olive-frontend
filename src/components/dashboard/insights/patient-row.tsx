@@ -27,7 +27,7 @@ export default function PatientRow({ prescriptionId, name, detail, trailing, ton
         >
             <span className="flex items-baseline justify-between gap-2">
                 <span className="truncate text-sm font-medium text-slate-800">{name ?? "Unknown patient"}</span>
-                <ChevronRightIcon className="size-3.5 shrink-0 text-slate-400 group-hover:text-emerald-600" />
+                <ChevronRightIcon className="size-3.5 shrink-0 text-slate-400 group-hover:text-brand-600" />
             </span>
             <span className="mt-0.5 flex items-baseline justify-between gap-2 text-xs">
                 <span className="truncate text-slate-500">{detail}</span>
