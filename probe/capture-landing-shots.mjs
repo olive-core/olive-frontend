@@ -27,7 +27,7 @@ const PORT = 5198;
 const SHOTS = [
     // Desktop shots use the narrowest desktop layout, so the text stays readable once
     // the image is scaled into the landing page's column.
-    { name: "record-desktop", screen: "record", width: 1024, height: 800, scale: 2 },
+    { name: "record-desktop", screen: "record", width: 1024, height: 1000, scale: 2 },
     { name: "record-phone",   screen: "record", width: 390,  height: 844, scale: 2 },
     { name: "review-desktop", screen: "review", width: 1024, height: 800, scale: 2 },
     { name: "review-phone",   screen: "review", width: 390,  height: 844, scale: 2 },

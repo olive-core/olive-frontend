@@ -8,6 +8,7 @@ import PatientChip from "@/components/dashboard/consultation/patient-chip";
 import RecorderCard from "@/components/dashboard/consultation/recorder-card";
 import ConsultationCardMemo from "@/components/dashboard/consultation/consultation-card";
 import ConsultationModeBanner from "@/components/consultation-start/consultation-mode-banner";
+import HistoryContainer from "@/components/dashboard/consultation/history-container";
 import DocumentSwitcher, { type PrescriptionDocument } from "@/components/prescription/document-switcher";
 import PrescriptionActions from "@/components/prescription/prescription-actions";
 import { usePrescriptionDocuments } from "@/components/prescription/prescription-documents";
@@ -20,18 +21,20 @@ import { RecordingSessionContext, type RecordingSession } from "@/hooks/use-reco
 import { resolveLetterhead } from "@/lib/header-config";
 import { createPrescriptionStore, PrescriptionStoreContext } from "@/stores/prescription-store";
 import { useAuthStore } from "@/stores/auth-store";
-import type { PrescriptionType } from "@/types/patient";
+import type { HistoryType, PrescriptionType } from "@/types/patient";
 import type { PrescriptionResponseType } from "@/types/prescription";
 
 // Renders the real consultation, editor and printed-prescription screens with a fictional
-// patient, so the landing page can show the product as it is. Every name, number and
-// clinical detail below is invented and matches the Try Olive sample conversation.
+// patient, so the landing page can show the product as it is. Every name, date and
+// clinical detail below is invented. One follow-up visit runs through all three screens:
+// a man with diabetes and high blood pressure, back with burning feet.
 // Captured by probe/capture-landing-shots.mjs.
 
 const PATIENT_ID = "patient-demo";
-const PATIENT = { name: "Samira Rahman", age: 32, sex: "female" as const };
+const PATIENT = { name: "Rafiqul Islam", age: 56, sex: "male" as const };
 const VISIT_DATE = new Date("2026-11-03T18:40:00+06:00");
-const DATE_OF_BIRTH = "1994-06-12";
+const DATE_OF_BIRTH = "1970-04-20";
+const DOCTOR = "Dr. Ashraful Alam";
 
 useAuthStore.setState({
     userId: "doctor-demo", isLoggedIn: true, activeView: "doctor",
@@ -41,7 +44,7 @@ useAuthStore.setState({
 // No BMDC number: an invented one could belong to a real doctor. The accent is left to
 // the default, so the letterhead shows what a new doctor gets.
 const LETTERHEAD = resolveLetterhead({
-    clinician_name: "Dr. Ashraful Alam",
+    clinician_name: DOCTOR,
     qualification: "MBBS, FCPS (Medicine)",
     clinician_header_config: {
         preset: "classic-split", show_medical_symbol: true,
@@ -55,48 +58,49 @@ const LETTERHEAD = resolveLetterhead({
     },
 });
 
-const tablet = (amount: string) => ({ type: "tablet" as const, dosage_form: "Tablet", route: "P/O", dose: { amount, unit: "tab" } });
+const tablet = (strength: string, trade_name: string, generic_name: string, purpose: string,
+    schedule: { morning: number; noon: number; night: number }, duration_value: number, duration_unit: string) => ({
+    type: "tablet", dosage_form: "Tablet", route: "P/O", dose: { amount: "1", unit: "tab" },
+    trade_name, generic_name: `${generic_name} ${strength}`, purpose, dosage: "", duration: "",
+    routine: { gap_hours: 0, meal_times: [] }, schedule: { timing: "after", ...schedule }, duration_value, duration_unit,
+});
 
 const DRAFT = {
     session_id: "demo-session",
     chief_complaints: [
-        { complaint_name: "Fever", clinical_note: "3–4 days, worse at night and towards dawn; up to 102°F." },
-        { complaint_name: "Headache and body ache", clinical_note: "" },
-        { complaint_name: "Dry cough and runny nose", clinical_note: "Mild." },
-        { complaint_name: "Nausea", clinical_note: "Vomited once; tolerating oral fluids." },
+        { complaint_name: "Burning and tingling in both feet", clinical_note: "2 months; worse at night." },
+        { complaint_name: "Blood sugar not well controlled", clinical_note: "Home fasting readings 9–10 mmol/L." },
     ],
     history: [
-        { history_name: "Iron deficiency anaemia", clinical_note: "Diagnosed Aug 2026; on iron and folic acid." },
-        { history_name: "Family history of diabetes", clinical_note: "Father." },
+        { history_name: "Type 2 diabetes mellitus", clinical_note: "6 years; on metformin and linagliptin." },
+        { history_name: "Hypertension", clinical_note: "On amlodipine 5 mg." },
         { history_name: "No known drug allergy", clinical_note: "" },
     ],
     diagnoses: [
-        { diagnosis_name: "Dengue fever (suspected)", icd_code: "A97.9", confidence: 0.7, clinical_reasoning: "Fever in dengue season with myalgia and nausea; confirm with NS1 and CBC." },
-        { diagnosis_name: "Viral upper respiratory tract infection", icd_code: "J06.9", confidence: 0.3, clinical_reasoning: "Cough and rhinorrhoea." },
+        { diagnosis_name: "Type 2 diabetes with peripheral neuropathy (suspected)", icd_code: "E11.42", confidence: 0.75, clinical_reasoning: "Burning, tingling feet worse at night in long-standing diabetes with poor control." },
+        { diagnosis_name: "Essential hypertension", icd_code: "I10", confidence: 0.9, clinical_reasoning: "Known hypertension, on treatment." },
     ],
     medicines: [
-        { ...tablet("1"), trade_name: "Napa", generic_name: "Paracetamol 500 mg", dosage: "", duration: "", purpose: "Fever and body ache",
-            routine: { gap_hours: 0, meal_times: [] }, schedule: { timing: "after", morning: 1, noon: 1, night: 1 }, duration_value: 5, duration_unit: "Days" },
-        { ...tablet("1"), trade_name: "Montelukast", generic_name: "Montelukast 10 mg", dosage: "", duration: "", purpose: "Runny nose",
-            routine: { gap_hours: 0, meal_times: [] }, schedule: { timing: "after", morning: 0, noon: 0, night: 1 }, duration_value: 7, duration_unit: "Days" },
-        { ...tablet("1"), trade_name: "Fexo", generic_name: "Fexofenadine 180 mg", dosage: "", duration: "", purpose: "Runny nose",
-            routine: { gap_hours: 0, meal_times: [] }, schedule: { timing: "after", morning: 1, noon: 0, night: 0 }, duration_value: 7, duration_unit: "Days" },
-        { type: "powder", dosage_form: "Oral Saline", route: "P/O", trade_name: "ORS", generic_name: "Oral rehydration salts", dosage: "", duration: "",
-            purpose: "Hydration", routine: { gap_hours: 0, meal_times: [] }, instructions: "Mix as directed on the packet; sip through the day.",
-            duration_value: 3, duration_unit: "Days" },
+        tablet("500 mg", "Metformin", "Metformin", "Diabetes", { morning: 1, noon: 0, night: 1 }, 3, "Months"),
+        tablet("5 mg", "Linagliptin", "Linagliptin", "Diabetes", { morning: 1, noon: 0, night: 0 }, 3, "Months"),
+        tablet("5 mg", "Amlodipine", "Amlodipine", "Blood pressure", { morning: 1, noon: 0, night: 0 }, 3, "Months"),
+        tablet("10 mg", "Atorvastatin", "Atorvastatin", "Cholesterol", { morning: 0, noon: 0, night: 1 }, 3, "Months"),
+        tablet("75 mg", "Pregabalin", "Pregabalin", "Nerve pain in the feet", { morning: 0, noon: 0, night: 1 }, 1, "Months"),
     ],
     investigations: [
-        { investigation_name: "CBC", reason: "Platelet count and haematocrit.", priority: "routine" },
-        { investigation_name: "Dengue NS1 antigen", reason: "", priority: "routine" },
+        { investigation_name: "HbA1c", reason: "Diabetes control over 3 months.", priority: "routine" },
+        { investigation_name: "Serum creatinine", reason: "", priority: "routine" },
+        { investigation_name: "Urine for microalbumin", reason: "", priority: "routine" },
+        { investigation_name: "Fasting lipid profile", reason: "", priority: "routine" },
     ],
     advice: [
-        "Drink plenty of water and fluids.",
-        "Rest for two to three days.",
-        "Go to hospital without waiting for severe abdominal pain, repeated vomiting, bleeding or breathing difficulty.",
+        "Check both feet every day; wear soft, closed shoes.",
+        "Walk for 30 minutes a day.",
+        "Less rice and no sweets or sugary drinks.",
     ],
-    follow_up: { follow_up_days: 1, follow_up_notes: "Bring the test results." },
-    summary: "S: Fever for 3–4 days, worse at night, up to 102°F, with headache, body ache, mild dry cough, runny nose and nausea (vomited once). No bleeding, abdominal pain or breathing difficulty.\nO: Vitals to be recorded at the visit.\nA: Suspected dengue fever; viral URTI also possible.\nP: CBC and dengue NS1 today; symptomatic treatment, fluids and rest; review tomorrow with results.",
-    safety_net: ["Return immediately for bleeding, severe abdominal pain, repeated vomiting or breathing difficulty."],
+    follow_up: { follow_up_days: 30, follow_up_notes: "Bring the test reports." },
+    summary: "S: Burning and tingling in both feet for 2 months, worse at night. Home fasting glucose 9–10 mmol/L.\nO: BP 138/86 mmHg, weight 74 kg.\nA: Type 2 diabetes, suboptimally controlled, with suspected peripheral neuropathy. Hypertension.\nP: Continue current medicines; add pregabalin at night. HbA1c, creatinine, urine microalbumin and lipids. Review in 1 month.",
+    safety_net: ["Return early for a foot wound, blister or colour change."],
 } as unknown as PrescriptionResponseType;
 
 const routine = (meals: string[]) => Object.fromEntries(
@@ -104,24 +108,36 @@ const routine = (meals: string[]) => Object.fromEntries(
         .map((meal) => [meal, meals.includes(meal)]).concat([["gap_hour", 0]]),
 );
 
+const VISITS = [
+    { id: "rx-aug", date: "2026-08-14T19:05:00+06:00", diagnoses: ["Type 2 diabetes mellitus", "Hypertension"], complaints: ["Diabetes and BP review"] },
+    { id: "rx-may", date: "2026-05-12T18:20:00+06:00", diagnoses: ["Type 2 diabetes mellitus", "Hypertension"], complaints: ["High sugar readings"] },
+    { id: "rx-feb", date: "2026-02-03T19:40:00+06:00", diagnoses: ["Hypertension"], complaints: ["Headache", "High BP at pharmacy check"] },
+    { id: "rx-nov", date: "2025-11-21T18:10:00+06:00", diagnoses: ["Type 2 diabetes mellitus"], complaints: ["Diabetes review"] },
+];
+
+const HISTORIES: HistoryType[] = VISITS.map((visit) => ({
+    prescription_id: visit.id, session_id: `session-${visit.id}`, created_at: visit.date,
+    diagnoses_summary: visit.diagnoses, chief_complaints_summary: visit.complaints,
+    clinician_id: "doctor-demo", clinician_name: DOCTOR,
+}));
+
+// The most recent visit, which the consultation screen opens on for a follow-up.
 const PREVIOUS_VISIT: PrescriptionType = {
-    prescription_id: "rx-previous", session_id: "session-previous", clinician_id: "doctor-demo",
-    clinician_name: "Dr. Ashraful Alam", patient_id: PATIENT_ID, patient_name: PATIENT.name,
-    created_at: "2026-08-14T19:05:00+06:00", updated_at: "2026-08-14T19:05:00+06:00",
+    prescription_id: "rx-aug", session_id: "session-rx-aug", clinician_id: "doctor-demo",
+    clinician_name: DOCTOR, patient_id: PATIENT_ID, patient_name: PATIENT.name,
+    created_at: VISITS[0].date, updated_at: VISITS[0].date,
     prescription_data: {
-        chief_complaints: [
-            { name_text: "Tiredness and dizziness", notes: "", ccn_id: null, duration: "1 month" },
-            { name_text: "Sneezing and blocked nose", notes: "", ccn_id: null, duration: "2 weeks" },
-        ],
-        diagnoses: [{ name_text: "Iron deficiency anaemia", dn_id: null }, { name_text: "Allergic rhinitis", dn_id: null }],
+        chief_complaints: [{ name_text: "Diabetes and BP review", notes: "", ccn_id: null, duration: "" }],
+        diagnoses: [{ name_text: "Type 2 diabetes mellitus", dn_id: null }, { name_text: "Hypertension", dn_id: null }],
         rx_list: [
-            { trade_name: "Ferrous fumarate + Folic acid", generic_name: "Iron with folic acid", medicine_id: null, dosage: "1 capsule", duration: "3 months", routine: routine(["after_breakfast"]) },
-            { trade_name: "Fexo", generic_name: "Fexofenadine 120 mg", medicine_id: null, dosage: "1 tablet", duration: "14 days", routine: routine(["after_dinner"]) },
-            { trade_name: "Mometasone nasal spray", generic_name: "Mometasone furoate", medicine_id: null, dosage: "2 puffs", duration: "1 month", routine: routine(["after_breakfast"]) },
+            { trade_name: "Metformin 500 mg", generic_name: "Metformin", medicine_id: null, dosage: "1 tablet", duration: "3 months", routine: routine(["after_breakfast", "after_dinner"]) },
+            { trade_name: "Linagliptin 5 mg", generic_name: "Linagliptin", medicine_id: null, dosage: "1 tablet", duration: "3 months", routine: routine(["after_breakfast"]) },
+            { trade_name: "Amlodipine 5 mg", generic_name: "Amlodipine", medicine_id: null, dosage: "1 tablet", duration: "3 months", routine: routine(["after_breakfast"]) },
+            { trade_name: "Atorvastatin 10 mg", generic_name: "Atorvastatin", medicine_id: null, dosage: "1 tablet", duration: "3 months", routine: routine(["after_dinner"]) },
         ],
         histories: [], advice_list: [], investigations: [], on_examinations: [],
         follow_up_days: 90, follow_up_notes: null,
-        summary: "Iron deficiency anaemia (Hb 9.8 g/dL) and seasonal allergic rhinitis. Iron and folic acid for 3 months; recheck CBC at review.",
+        summary: "HbA1c 7.9%. BP 142/88 mmHg. Linagliptin added in May; continue. Recheck HbA1c in 3 months.",
     },
 } as unknown as PrescriptionType;
 
@@ -149,20 +165,25 @@ function DoctorScreen({ children }: { children: ReactNode }) {
     );
 }
 
+// The consultation screen as the route lays it out: recorder, then the open visit, then
+// the visit history (the DOM order is the phone order).
 function RecordScreen() {
     return (
         <DoctorScreen>
             <RecordingSessionContext value={RECORDING}>
                 <div className="container flex flex-col py-6 md:h-[calc(100svh-136px)]">
-                    <div className="mb-5 flex flex-col gap-3">
+                    <div className="mb-5 flex flex-none flex-col gap-3">
                         <PatientChip userId={PATIENT_ID} />
-                        <ConsultationModeBanner isFollowUp={false} />
+                        <ConsultationModeBanner isFollowUp followUpSource={HISTORIES[0]} onViewSource={() => {}} />
                     </div>
                     <div className="grid w-full grid-cols-1 gap-6 md:min-h-0 md:flex-1 md:grid-cols-2 md:grid-rows-[auto_minmax(0,1fr)] md:gap-8">
                         <div className="flex-none md:col-start-1 md:row-start-1"><RecorderCard /></div>
                         <div className="md:col-start-2 md:row-span-2 md:row-start-1 md:min-h-0">
-                            <ConsultationCardMemo prescription={PREVIOUS_VISIT} totalHistories={1} currentHistoryIndex={1}
-                                handleNext={() => {}} handlePrevious={() => {}} isFirst isLast hasSelection />
+                            <ConsultationCardMemo prescription={PREVIOUS_VISIT} totalHistories={HISTORIES.length} currentHistoryIndex={1}
+                                handleNext={() => {}} handlePrevious={() => {}} isFirst isLast={false} hasSelection />
+                        </div>
+                        <div className="h-[60svh] md:col-start-1 md:row-start-2 md:h-auto md:min-h-0">
+                            <HistoryContainer histories={HISTORIES} activeHistoryId={PREVIOUS_VISIT.prescription_id} setActiveHistoryId={() => {}} />
                         </div>
                     </div>
                 </div>
@@ -207,7 +228,7 @@ function Page() {
     useEffect(() => {
         void store.getState().getInitialPrescription(DRAFT).then(() => {
             // Vitals are typed in by the doctor during the visit, not drafted.
-            store.getState().setVitals({ bp_systolic: 110, bp_diastolic: 70, pulse: 98, temperature: 101.2, spo2: 98, weight: 56 });
+            store.getState().setVitals({ bp_systolic: 138, bp_diastolic: 86, pulse: 78, temperature: 98.4, spo2: 98, weight: 74 });
             setReady(true);
         });
     }, [store]);

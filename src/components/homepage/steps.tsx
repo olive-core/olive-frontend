@@ -21,8 +21,8 @@ const STEPS: Step[] = [
         tab: "Record",
         title: "Record the consultation",
         description: "Press record and talk to your patient as you always do. Olive listens in Bangla, English, or both.",
-        alt: "Olive recording a consultation, with the patient's previous visit beside it",
-        desktop: { src: "/landing/record-desktop.webp", width: 2048, height: 1600 },
+        alt: "Olive recording a follow-up consultation, with the patient's last prescription and past visits beside it",
+        desktop: { src: "/landing/record-desktop.webp", width: 2048, height: 2000 },
         phone: { src: "/landing/record-phone.webp", width: 780, height: 1688 },
     },
     {
@@ -136,18 +136,24 @@ function PhoneSteps() {
                     <li
                         key={step.title}
                         aria-label={`Step ${index + 1} of ${STEPS.length}`}
-                        className="flex w-[84%] shrink-0 snap-start flex-col rounded-3xl bg-brand-mist px-5 pb-6 pt-6"
+                        className="flex w-[84%] shrink-0 snap-start flex-col overflow-hidden rounded-3xl bg-brand-mist"
                     >
-                        {step.phone ? (
-                            <PhoneFrame src={step.phone.src} alt={step.alt} />
-                        ) : (
-                            // Paper is wider than a phone screen: a page-shaped box keeps the whole width.
-                            <div className="mx-auto aspect-[3/4] w-full max-w-[17rem] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl shadow-slate-900/10">
-                                <img src={step.desktop.src} alt={step.alt} width={step.desktop.width} height={step.desktop.height} loading="lazy" decoding="async" className="h-full w-full object-cover object-top" />
-                            </div>
-                        )}
-                        <h3 className="mt-6 font-display text-xl text-brand-ink">{step.title}</h3>
-                        <p className="mt-2 leading-relaxed text-slate-600">{step.description}</p>
+                        {/* Words first, then the screen rising from the card's bottom edge: the
+                            top of the screen carries the point, and the card fits on one screen. */}
+                        <div className="min-h-[8.5rem] px-5 pt-6">
+                            <h3 className="font-display text-xl text-brand-ink">{step.title}</h3>
+                            <p className="mt-2 leading-relaxed text-slate-600">{step.description}</p>
+                        </div>
+                        <div className="mt-5 h-72 overflow-hidden px-5">
+                            {step.phone ? (
+                                <PhoneFrame src={step.phone.src} alt={step.alt} />
+                            ) : (
+                                // Paper is wider than a phone screen: a page-shaped box keeps the whole width.
+                                <div className="mx-auto aspect-[3/4] w-full max-w-[17rem] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl shadow-slate-900/10">
+                                    <img src={step.desktop.src} alt={step.alt} width={step.desktop.width} height={step.desktop.height} loading="lazy" decoding="async" className="h-full w-full object-cover object-top" />
+                                </div>
+                            )}
+                        </div>
                     </li>
                 ))}
             </ol>
