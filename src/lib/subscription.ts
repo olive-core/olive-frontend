@@ -2,6 +2,11 @@ import { AxiosError } from "axios";
 
 import type { SubscriptionStatus } from "@/types/subscription";
 
+// Free consultations before a membership is needed, for pages shown before sign-in (the
+// signed-in app reads trial_limit from the server). Must match the backend's
+// TRIAL_CONSULTATION_LIMIT; change both together.
+export const FREE_TRIAL_CONSULTATIONS = 10;
+
 export function isSubscriptionBlocked(error: unknown): boolean {
     return error instanceof AxiosError && error.response?.status === 402;
 }

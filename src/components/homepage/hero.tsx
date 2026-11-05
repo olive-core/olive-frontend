@@ -2,6 +2,9 @@ import { Link } from "@tanstack/react-router";
 import { ArrowRightIcon, ChevronDownIcon } from "lucide-react";
 import { Button } from "../ui/button";
 
+// Doctors here switch languages mid-sentence; saying so up front is the point.
+const LANGUAGES = ["বাংলা", "English", "Both, mixed"];
+
 // One sentence, one line of support, one button. Most visitors are new — signed-in doctors
 // never see this page — so the hero offers the zero-commitment step: trying Olive.
 // On a phone it fills the screen like an app's first screen, button in thumb reach.
@@ -19,8 +22,17 @@ export default function HeroSection() {
                     </h1>
 
                     <p className="mt-5 max-w-xl text-lg text-slate-600 sm:text-xl md:mt-6">
-                        You review, edit and print. In Bangla, English, or both.
+                        <span className="font-semibold text-brand-ink">No manual writing.</span> You review, edit and print.
                     </p>
+
+                    <div className="mt-5 flex flex-wrap items-center justify-center gap-2 text-sm">
+                        <span className="text-slate-500">Understands</span>
+                        {LANGUAGES.map((language) => (
+                            <span key={language} className="rounded-full border border-brand-200 bg-white/80 px-3 py-1 font-medium text-brand-700">
+                                {language}
+                            </span>
+                        ))}
+                    </div>
 
                     <Button asChild size="lg" data-landing-cta className="mt-10 h-14 w-full max-w-sm bg-brand px-8 text-base font-semibold text-white shadow-lg shadow-brand/20 hover:bg-brand-700 md:w-auto">
                         <Link to="/try">
