@@ -1,7 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import OliveLogo from "../shared/olive-logo";
-
-const CONTACT_EMAIL = "asifazad@oliveai.life";
+import { CONTACT_EMAIL, whatsappContactUrl } from "@/lib/contact";
 
 export default function LandingFooter() {
     return (
@@ -13,7 +12,8 @@ export default function LandingFooter() {
                     <a href="/#how-it-works" className="hover:text-brand">How it works</a>
                     <Link to="/try" className="hover:text-brand">Try Olive</Link>
                     <Link to="/about" className="hover:text-brand">About</Link>
-                    <a href={`mailto:${CONTACT_EMAIL}`} className="hover:text-brand">Contact</a>
+                    <a href={whatsappContactUrl("Hello, I have a question about Olive.")} target="_blank" rel="noreferrer" className="hover:text-brand">WhatsApp</a>
+                    <a href={`mailto:${CONTACT_EMAIL}`} className="hover:text-brand">Email</a>
                 </nav>
                 <p>&copy; {new Date().getFullYear()} Olive</p>
             </div>

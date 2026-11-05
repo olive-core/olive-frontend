@@ -19,7 +19,7 @@ export default function SubscriptionBlockedDialog() {
     const expired = Boolean(blocked?.subscription_until);
     const title = expired ? "Your membership has expired" : "Your free trial has ended";
     const description = expired
-        ? "Renew your membership to start a new consultation — your founding rate is still locked in."
+        ? "Renew your membership to start a new consultation."
         : "Activate your Olive membership to start a new consultation.";
 
     const goToBilling = () => {

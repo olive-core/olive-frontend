@@ -1,8 +1,9 @@
-import { ArrowLeftIcon, CheckCircle2Icon, ClockIcon, CrownIcon } from "lucide-react";
+import { ArrowLeftIcon, CheckCircle2Icon, ClockIcon, MailIcon, MessageCircleIcon } from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { useSubscriptionStatus } from "@/hooks/use-subscription";
+import { CONTACT_EMAIL, CONTACT_WHATSAPP_DISPLAY, whatsappContactUrl } from "@/lib/contact";
 import { formatTaka, formatUntilDate } from "@/lib/subscription";
 
 import PaidClaimForm from "./paid-claim-form";
@@ -53,11 +54,6 @@ export default function MembershipPanel() {
 
     return (
         <div className="mx-auto w-full max-w-xl space-y-6">
-            <div className="flex items-center gap-2 text-brand-700">
-                <CrownIcon className="size-5" />
-                <span className="text-sm font-semibold uppercase tracking-wide">Founding Member</span>
-            </div>
-
             <StatusSummary label="Your membership" value={summaryValue} />
 
             <div className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
@@ -84,18 +80,24 @@ export default function MembershipPanel() {
                 {!pending && !SELF_SERVICE_SUBSCRIPTIONS_ENABLED && (
                     <div className="flex flex-col items-center gap-4 py-6 text-center">
                         <div>
-                            <h3 className="text-lg font-semibold text-slate-800">Purchase or renew your membership</h3>
+                            <h3 className="text-lg font-semibold text-slate-800">Start or renew your membership</h3>
                             <p className="mt-2 max-w-sm text-sm leading-6 text-slate-500">
-                                Please contact Asif Azad at{" "}
-                                <a className="font-medium text-brand-700 underline-offset-4 hover:underline" href="mailto:asifazad@oliveai.life">
-                                    asifazad@oliveai.life
-                                </a>
-                                .
+                                Contact us on WhatsApp at{" "}
+                                <span className="font-medium text-slate-700">{CONTACT_WHATSAPP_DISPLAY}</span>{" "}
+                                and we&apos;ll set it up for you.
                             </p>
                         </div>
                         <Button asChild className="min-h-11 w-full" size="lg">
-                            <a href="mailto:asifazad@oliveai.life?subject=Olive%20membership">Contact Asif Azad</a>
+                            <a href={whatsappContactUrl("Hello, I'd like to start or renew my Olive membership.")} target="_blank" rel="noreferrer">
+                                <MessageCircleIcon /> Contact us on WhatsApp
+                            </a>
                         </Button>
+                        <a
+                            href={`mailto:${CONTACT_EMAIL}?subject=Olive%20membership`}
+                            className="inline-flex min-h-11 items-center gap-1.5 text-sm text-slate-500 underline-offset-4 hover:text-slate-700 hover:underline"
+                        >
+                            <MailIcon className="size-4" /> Prefer email? {CONTACT_EMAIL}
+                        </a>
                     </div>
                 )}
 

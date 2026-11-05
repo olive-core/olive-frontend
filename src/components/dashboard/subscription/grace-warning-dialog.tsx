@@ -23,7 +23,7 @@ export default function GraceWarningDialog({ open, remaining, onContinue, onRene
     const title = isLast ? "This is your last grace consultation" : "Your membership has expired";
     const description = isLast
         ? "After this consultation you'll need an active membership to continue. Renew now to avoid interruption."
-        : `${remaining} consultations left in your grace period. Renew to keep your founding rate.`;
+        : `${remaining} consultations left in your grace period. Renew to keep using Olive without a break.`;
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>

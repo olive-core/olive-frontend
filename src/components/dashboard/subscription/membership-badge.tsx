@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { CrownIcon } from "lucide-react";
+import { BadgeCheckIcon } from "lucide-react";
 
 import { useSubscriptionStatus } from "@/hooks/use-subscription";
 import { formatUntilDate } from "@/lib/subscription";
@@ -23,8 +23,8 @@ export default function MembershipBadge() {
             className="mb-6 flex items-center justify-between rounded-2xl border border-brand-100 bg-brand-50/60 px-5 py-4 transition hover:bg-brand-50"
         >
             <div className="flex items-center gap-3">
-                <CrownIcon className="size-5 text-brand-600" />
-                <span className="font-semibold text-brand-800">Founding Member</span>
+                <BadgeCheckIcon className="size-5 text-brand-600" />
+                <span className="font-semibold text-brand-800">Olive membership</span>
             </div>
             <span className="text-sm font-medium text-brand-700">{detail}</span>
         </Link>
